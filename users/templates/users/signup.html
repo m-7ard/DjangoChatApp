@@ -1,0 +1,61 @@
+{% extends "core/header.html" %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'users/signup.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="signup">
+	<form action="" method="POST" class="signup__content">
+		<ul class="signup__header">
+			<li><a href="{% url 'frontpage' %}" class="signup__header-element">⇦ Go back</a></li>
+			<li class="signup__header-element">Create New Account</li>
+		</ul>
+		{% csrf_token %}
+		<div class="signup__form-field">
+			<div class="signup__label">
+				{{ UserAttributes_SignupForm.email.label }}
+			</div>
+			<div class="signup__input">
+				{{ UserAttributes_SignupForm.email }}
+			</div>
+		</div>
+		<div class="signup__form-field">
+			<div class="signup__label">
+				{{ UserAttributes_SignupForm.username.label }}
+			</div>
+			<div class="signup__input">
+				{{ UserAttributes_SignupForm.username }}
+			</div>
+		</div>
+		<div class="signup__form-field">
+			<div class="signup__label">
+				{{ UserAttributes_SignupForm.password1.label }}
+			</div>
+			<div class="signup__input">
+				{{ UserAttributes_SignupForm.password1 }}
+			</div>
+		</div>
+		<div class="signup__form-field">
+			<div class="signup__label">
+				{{ UserAttributes_SignupForm.password2.label }}
+			</div>
+			<div class="signup__input">
+				{{ UserAttributes_SignupForm.password2 }}
+			</div>
+		</div>
+		<div class="signup__form-field">
+			<div class="signup__label">
+				{{ ProfileAttributes_SignupForm.birthday.label }}
+			</div>
+			<div class="signup__input">
+				{{ ProfileAttributes_SignupForm.birthday }}
+			</div>
+		</div>
+		
+		<button class="signup__submit" type="submit">Create New Account</button>
+	</form>
+</div>
+
+{% endblock %}

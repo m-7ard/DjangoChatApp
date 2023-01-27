@@ -1,0 +1,118 @@
+.right {
+  margin-left: auto;
+}
+
+.frontpage {
+  background-color: #080808;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.frontpage__header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e0dbd1;
+  max-width: 960px;
+  width: 100%;
+}
+.frontpage__header-section {
+  display: flex;
+  gap: 1rem;
+}
+.frontpage__header-button {
+  border-radius: 2px;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  color: #e0dbd1;
+  border: 1px solid #e0dbd1;
+}
+.frontpage__logo {
+  color: #e0dbd1;
+  font-size: 1.4rem;
+}
+.frontpage__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 960px;
+}
+.frontpage__showcase {
+  display: flex;
+  max-width: 1440px;
+}
+.frontpage__title {
+  color: #e0dbd1;
+  text-align: center;
+  font-size: 3rem;
+  font-weight: bold;
+}
+.frontpage__description {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0 3rem;
+  font-size: 1.5rem;
+}
+.frontpage__description-element {
+  padding: 0.2rem 0.4rem;
+}
+.frontpage__description-element--highlight {
+  color: #c66b27;
+  background-color: #252321;
+}
+.frontpage__description-element--normal {
+  color: #e0dbd1;
+  background-color: #001440;
+}
+.frontpage__join {
+  display: flex;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: bold;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.frontpage__join-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  border-radius: 2px;
+  min-width: 18rem;
+  transition: background-color 0.5s;
+}
+.frontpage__join-button--signup {
+  color: #080808;
+  background-color: #d6d018;
+  border: 1px solid #b76e79;
+  box-shadow: 0px 0px 4px 1px #d6d018;
+}
+.frontpage__join-button--signup:hover {
+  /* 25% lighter saturated-titanium-yellow */
+  background-color: #eae440;
+}
+.frontpage__join-button--signin {
+  color: #e0dbd1;
+  border: 1px solid #d6d018;
+}
+.frontpage__join-button--signin:hover {
+  /* 25% lighter vampire-black */
+  background-color: #0a0a0a;
+}
+.frontpage__join-button--enter {
+  color: #080808;
+  background-color: #e0dbd1;
+  box-shadow: 0px 0px 4px 1px #e0dbd1;
+}
+.frontpage__join-button--enter:hover {
+  /* 25% lighter chalk white */
+  background-color: #ffffff;
+}
+.frontpage__join-button:hover {
+  cursor: pointer;
+}/*# sourceMappingURL=frontpage.css.map */

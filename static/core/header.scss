@@ -1,0 +1,28 @@
+html { height:100%; }
+body {
+	position:absolute; 
+	top:0; 
+	bottom:0; 
+	right:0; 
+	left:0; 
+	padding: 0;
+	margin: 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+input { margin:0; padding:0; border:solid 0px #888; vertical-align:middle; height:30px; }
+input[type="submit"] { height:32px; }
+input:focus { outline:none!important; }
+
+ul, li {
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+}
+
+html * {
+	font-family: 'Consolas', monospace;
+}

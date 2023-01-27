@@ -1,0 +1,138 @@
+@use '../core/global';
+
+.frontpage {
+	background-color: global.$vampire-black;
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	
+
+	&__header {
+		display: flex;
+		align-items: center;
+		padding: 1rem 0;
+		border-bottom: 1px solid global.$chalk-white;
+		max-width: 960px;
+		width: 100%;
+
+		&-section {
+			display: flex;
+			gap: 1rem;
+		}
+
+		&-button {
+			border-radius: 2px;
+			font-size: 1rem;
+			padding: 0.2rem 0.4rem;
+			color: global.$chalk-white;
+			border: 1px solid global.$chalk-white;
+		}
+	}
+
+	&__logo {
+		color: global.$chalk-white;
+		font-size: 1.4rem;
+	}
+
+	&__info {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		max-width: 960px;
+	}
+
+	&__showcase {
+		display: flex;
+		max-width: 1440px;
+	}
+
+	&__title {
+		color: global.$chalk-white;
+		text-align: center;
+		font-size: 3rem;
+		font-weight: bold;
+	}
+
+	&__description {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 1rem;
+		padding: 0 3rem;
+		font-size: 1.5rem;
+
+		&-element {
+			padding: 0.2rem 0.4rem;
+
+			&--highlight {
+				color: global.$golden-brown;
+				background-color: global.$black-chestnut-oak;
+			}
+
+			&--normal {
+				color: global.$chalk-white;
+				background-color: global.$cetacean-blue;
+			}
+		}
+	}
+	
+	&__join {
+		display: flex;
+		justify-content: center;
+		font-size: 1.6rem;
+		font-weight: bold;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	&__join-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem 0;
+		border-radius: 2px;
+		min-width: 18rem;
+		transition: background-color 0.5s;
+		
+		
+		&--signup {
+			color: global.$vampire-black;
+			background-color: global.$saturated-titanium-yellow;
+			border: 1px solid global.$rose-gold;
+			box-shadow: 0px 0px 4px 1px global.$saturated-titanium-yellow;
+
+			&:hover {
+				/* 25% lighter saturated-titanium-yellow */
+				background-color: #eae440;
+			}
+		}
+
+		&--signin {
+			color: global.$chalk-white;
+			border: 1px solid global.$saturated-titanium-yellow;
+			
+			&:hover {
+				/* 25% lighter vampire-black */
+				background-color: #0a0a0a;
+			}
+		}
+
+		&--enter {
+			color: global.$vampire-black;
+			background-color: global.$chalk-white;
+			box-shadow: 0px 0px 4px 1px global.$chalk-white;
+			
+			&:hover {
+				/* 25% lighter chalk white */
+				background-color: #ffffff;
+			}
+		}
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+}

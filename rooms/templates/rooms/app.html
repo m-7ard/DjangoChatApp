@@ -1,0 +1,20 @@
+{% extends "core/header.html" %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'rooms/app.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app">
+	<div class="app-section--primary-sidebar">
+		{% block app-primary-sidebar %}{% endblock %}
+	</div>
+	<div class="app-section--main">
+		{% block app-main %}{% endblock %}
+	</div>
+	<div class="app-section--secondary-sidebar">
+		{% block app-secondary-sidebar %}{% endblock %}
+	</div>
+</div>
+{% endblock %}

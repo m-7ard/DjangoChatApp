@@ -1,0 +1,37 @@
+{% extends "core/header.html" %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static 'users/signin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="signin">
+	<form action="" method="POST" class="signin__content">
+		<ul class="signin__header">
+			<li><a href="{% url 'frontpage' %}" class="signin__header-element">⇦ Go back</a></li>
+			<li class="signin__header-element">Sign into your account</li>
+		</ul>
+		{% csrf_token %}
+		<div class="signin__form-field">
+			<div class="signin__label">
+				{{ form.username.label }}
+			</div>
+			<div class="signin__input">
+				{{ form.username }}
+			</div>
+		</div>
+		<div class="signin__form-field">
+			<div class="signin__label">
+				{{ form.password.label }}
+			</div>
+			<div class="signin__input">
+				{{ form.password }}
+			</div>
+		</div>
+		
+		<button class="signin__submit" type="submit">Sign In</button>
+	</form>
+</div>
+
+{% endblock %}

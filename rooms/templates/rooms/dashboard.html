@@ -1,0 +1,204 @@
+{% extends "rooms/app.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'rooms/dashboard.css' %}">
+{% endblock %}
+
+{% block app-primary-sidebar %}
+<div class="app-section--primary-sidebar__element app-section--primary-sidebar__element--friendlist">
+	<div class="app-section--primary-sidebar__header">
+		Friends
+	</div>
+	<div class="app-section--primary-sidebar__wrapper">
+		<ul class="app-section--primary-sidebar__content app-section--primary-sidebar__content--friendlist">
+			<li class="app-section--primary-sidebar__label">Online</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--online">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--online">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--online">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--online">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--online">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--online">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__label">Offline</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--offline">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--offline">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--offline">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--offline">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--offline">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--offline">
+						Online
+					</li>
+				</ul>
+			</li>
+			<li class="app-section--primary-sidebar__friend">
+				<div class="app-section--primary-sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--primary-sidebar__friend-info">
+					<div class="app-section--primary-sidebar__wrapper">
+						<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--offline">
+							User name User name User name
+						</li>
+					</div>
+					<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--offline">
+						Online
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</div>
+<div class="app-section--primary-sidebar__element app-section--primary-sidebar__element--events">
+	<div class="app-section--primary-sidebar__header">
+		Events
+	</div>
+	<div class="app-section--primary-sidebar__wrapper">
+		<div class="app-section--primary-sidebar__content">
+			
+		</div>
+	</div>
+</div>
+<div class="app-section--primary-sidebar__element app-section--primary-sidebar__element--serverlist">
+	<div class="app-section--primary-sidebar__header">
+		Chatrooms
+	</div>
+	<div class="app-section--primary-sidebar__wrapper">
+		<div class="app-section--primary-sidebar__content">
+			
+		</div>
+	</div>
+
+</div>
+<div class="app-section--primary-sidebar__user">
+	<div class="app-section--primary-sidebar__big-avatar">
+		<div style="width: 3rem; height: 3rem; background-color: brown;"></div>
+	</div>
+	<ul class="app-section--primary-sidebar__friend-info">
+		<div class="app-section--primary-sidebar__wrapper">
+			<li class="app-section--primary-sidebar__username app-section--primary-sidebar__username--online">
+				User name User name User name
+			</li>
+		</div>
+		<li class="app-section--primary-sidebar__status app-section--primary-sidebar__status--online">
+			Online
+		</li>
+	</ul>
+</div>
+{% endblock %}
+
+{% block app-main %}
+<div class="app-section--main">
+	<div class="app-section--main__header">
+		<div class="app-section--main__title">
+			Dashboard
+		</div>
+	</div>
+	<div class="app-section--main__subheader">
+		News, Announcements, Activity...
+	</div>
+	<div class="app-section--main__wrapper">
+		<div class="app-section--main__dashboard">
+			
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block app-secondary-sidebar %}
+<div class="app-section--secondary-sidebar__element app-section--secondary-sidebar__element--friendlist">
+	<div class="app-section--secondary-sidebar__header">
+		News & Updates
+	</div>
+	<div class="app-section--secondary-sidebar__wrapper">
+		<ul class="app-section--secondary-sidebar__content app-section--secondary-sidebar__content--friendlist">
+			{% for news in site_news %}
+			<li class="app-section--secondary-sidebar__news">
+				<div class="app-section--secondary-sidebar__news-date">
+					{{ news.day_month_year }}
+				</div>
+				<div class="app-section--secondary-sidebar__wrapper">
+					<div class="app-section--secondary-sidebar__news-title">
+						{{ news.title }}
+					</div>
+				</div>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}
