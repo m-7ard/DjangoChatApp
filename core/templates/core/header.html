@@ -8,18 +8,19 @@
 
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet">
-		
+		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
 		<link rel="stylesheet" type="text/css" href="{% static 'core/header.css' %}">
 		<script src="https://kit.fontawesome.com/a10bcdf2a0.js" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		
 		<script src="https://kit.fontawesome.com/a10bcdf2a0.js" crossorigin="anonymous"></script>
+		<link href='https://css.gg/align-left.css' rel='stylesheet'>
+		<link href='https://css.gg/corner-down-left.css' rel='stylesheet'>
 		{% block extrahead %}{% endblock %}
 	</head>
 	<body>
 		{% block content %}{% endblock %}
 	</body>
+	{% block scripts %}{% endblock %}
 </html>

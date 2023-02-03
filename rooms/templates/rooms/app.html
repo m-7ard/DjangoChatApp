@@ -7,14 +7,182 @@
 
 {% block content %}
 <div class="app">
-	<div class="app-section--primary-sidebar">
-		{% block app-primary-sidebar %}{% endblock %}
+	<!--
+
+		PRIMARY SIDEBAR
+
+	-->	
+	<div class="app-section--sidebar primary">
+		<div class="app-section--sidebar__element">
+			<div class="app-section--sidebar__header">
+				Friends
+			</div>
+			<div class="wrapper--remaining-space">
+				<ul class="app-section--sidebar__content">
+					<li class="app-section--sidebar__label">Online</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--online">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--online">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--online">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--online">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--online">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--online">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__label">Offline</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
+								Online
+							</li>
+						</ul>
+					</li>
+					<li class="app-section--sidebar__friend">
+						<div class="app-section--sidebar__avatar">
+							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+						</div>
+						<ul class="app-section--sidebar__friend-info">
+							<div class="wrapper--remaining-space">
+								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
+									User name User name User name
+								</li>
+							</div>
+							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
+								Online
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="app-section--sidebar__element app-section--sidebar__element--events">
+			<div class="app-section--sidebar__header">
+				Events
+			</div>
+			<div class="wrapper--remaining-space">
+				<div class="app-section--sidebar__content">
+					
+				</div>
+			</div>
+		</div>
+		<div class="app-section--sidebar__element app-section--sidebar__element--serverlist">
+			<div class="app-section--sidebar__header">
+				Chatrooms
+			</div>
+			<div class="wrapper--remaining-space">
+				<div class="app-section--sidebar__content">
+					{% for room in room_list %}
+						<a href="{% url 'room' room.pk %}">{{ room }}</a>
+					{% endfor %}
+				</div>
+			</div>
+		
+		</div>
+		<div class="app-section--sidebar__user">
+			<div class="app-section--sidebar__big-avatar">
+				<div style="width: 3rem; height: 3rem; background-color: brown;"></div>
+			</div>
+			<ul class="app-section--sidebar__friend-info">
+				<div class="wrapper--remaining-space">
+					<li class="app-section--sidebar__username app-section--sidebar__username--online">
+						User name User name User name
+					</li>
+				</div>
+				<li class="app-section--sidebar__status app-section--sidebar__status--online">
+					Online
+				</li>
+			</ul>
+		</div>
 	</div>
+	<!--
+
+		MAIN
+
+	-->	
 	<div class="app-section--main">
-		{% block app-main %}{% endblock %}
+		{% block main %}{% endblock %}
 	</div>
-	<div class="app-section--secondary-sidebar">
-		{% block app-secondary-sidebar %}{% endblock %}
+	<!--
+
+		SECONDARY SIDEBAR
+
+	-->	
+	<div class="app-section--sidebar secondary">
+		{% block secondary-sidebar %}{% endblock %}
 	</div>
 </div>
 {% endblock %}

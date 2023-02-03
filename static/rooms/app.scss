@@ -3,17 +3,18 @@
 .app {
 	display: flex;
 	min-height: 100%;
-	
-	/*
-	-----------------------------------
-	PRIMARY SIDEBAR
-	-----------------------------------
-	*/
 
-	&-section--primary-sidebar {
+	&-section--sidebar {
 		display: flex;
 		flex-direction: column;
-		width: 10rem;
+
+		&.primary {
+			width: 10rem;
+		}
+
+		&.secondary {
+			width: 20rem;
+		}
 
 		* {
 			font-family: "Lato", monospace !important;
@@ -23,6 +24,11 @@
 			display: flex;
 			flex-direction: column;
 			flex: 1 1 0px;
+
+			&--room-card {
+				max-height: 20rem;
+				height: fit-content;
+			}
 		}
 
 		&__header {
@@ -60,18 +66,6 @@
 			display: flex;
 			flex-direction: column;
 			gap: 0.5rem;
-		}
-
-		&__content:hover::-webkit-scrollbar-thumb {
-			background-color: #768474;
-		}
-
-		&__content::-webkit-scrollbar {
-			background-color: none;
-			width: 5px;
-		}
-		&__content::-webkit-scrollbar-thumb {
-			border-radius: 10px;
 		}
 
 		&__label {
@@ -133,13 +127,93 @@
 				color: global.$blue-bayoux;
 			}
 		}
+
+		&__news {
+			display: flex;
+			align-items: baseline;
+			gap: 0.5rem;
+
+			&-title {
+				font-size: 0.9rem;
+				line-height: 0.9rem;
+				font-weight: bold;
+				word-wrap: break-word;
+
+				&:hover {
+					text-decoration: underline;
+					cursor: pointer;
+				}
+			}
+
+			&-date {
+				font-size: 0.8rem;
+				line-height: 0.8rem;
+			}
+		}
+
+		&__room {
+			display: flex;
+			gap: 0.5rem;
+	
+			&-info {
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+	
+			&-name {
+				font-size: 1.2rem;
+				font-weight: bold;
+				color: global.$premier-yellow;
+			}
+	
+			&-description {
+				position: absolute;
+				word-wrap: break-word;
+				overflow: auto;
+				width: 100%;
+				height: 100%;
+				font-size: 1.1rem;
+				color: global.$saturated-titanium-yellow;
+			}
+		}
+	
+		&__channel-list {
+			position: absolute;
+			display: flex;
+			flex-direction: column;
+			overflow: auto;
+	
+			height: 100%;
+			width: 100%;
+		}
+	
+		&__channel {
+			display: flex;
+			gap: 1rem;
+			box-sizing: border-box;
+			padding: 0.2rem;
+			
+			color: global.$acapulco-aqua;
+			align-items: baseline;
+			transition: all 0.2s;
+	
+			&-name {
+				font-size: 0.9rem;
+				font-weight: bold;
+			}
+	
+			&:hover {
+				background-color: global.$deep-burgundy;
+				color: global.$chalk-white;
+				cursor: pointer;
+			}
+		}
 	}
 
-	/*
-	-----------------------------------
-	MAIN SECTION
-	-----------------------------------
-	*/
 
 	&-section--main {
 		background-color: global.$rich-black;
@@ -153,11 +227,11 @@
 		}
 
 		&__header {
-			@extend .app-section--primary-sidebar__header;
+			@extend .app-section--sidebar__header;
 		}
 
 		&__subheader {
-			@extend .app-section--primary-sidebar__header;
+			@extend .app-section--sidebar__header;
 			background-color: #62777e;
 			font-size: 1rem;
 			height: 1.2rem;
@@ -169,113 +243,12 @@
 			width: 100%;
 			height: 100%;
 			overflow: auto;
-			white-space: normal;
+			white-space: bold;
 			color: white;
 			overflow-wrap: break-word;
 
 			display: flex;
 			flex-direction: column;
-		}
-	}
-
-	/*
-	-----------------------------------
-	SECONDARY SIDEBAR
-	-----------------------------------
-	*/
-
-	&-section--secondary-sidebar {
-		display: flex;
-		flex-direction: column;
-		width: 20rem;
-
-		* {
-			font-family: "Lato", monospace !important;
-		}
-
-		&__element {
-			display: flex;
-			flex-direction: column;
-			flex: 1 1 0px;
-		}
-
-		&__header {
-			font-size: 1.2rem;
-			font-weight: bold;
-			color: global.$premier-yellow;
-			background-color: global.$black-chestnut-oak;
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			height: 2rem;
-			width: auto;
-		}
-
-		&__wrapper {
-			position: relative;
-			flex: 1;
-		}
-		
-		&__content {
-			background-color: global.$vampire-black;
-			color: global.$chalk-white;
-			overflow-wrap: break-word;
-			overflow: auto;
-			padding: 0.5rem;
-			position: absolute;
-			
-			top: 0;
-			bottom: 0;
-			left: 0;
-			right: 0;
-
-			display: flex;
-			flex-direction: column;
-			gap: 0.5rem;
-		}
-
-		&__content:hover::-webkit-scrollbar-thumb {
-			background-color: #768474;
-		}
-
-		&__content::-webkit-scrollbar {
-			background-color: none;
-			width: 5px;
-		}
-		&__content::-webkit-scrollbar-thumb {
-			border-radius: 10px;
-		}
-
-		&__news {
-			display: flex;
-			background-color: none;
-			gap: 0.5rem;
-
-			&-title {
-				font-size: 0.9rem;
-				line-height: 0.9rem;
-				font-weight: bold;
-	
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				overflow: hidden;
-	
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-
-				&:hover {
-					text-decoration: underline;
-					cursor: pointer;
-				}
-			}
-
-			&-date {
-				font-size: 0.8rem;
-				line-height: 0.8rem;
-			}
 		}
 	}
 }

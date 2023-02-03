@@ -1,19 +1,42 @@
 // Colors
-$vampire-black: #080808;
-$chalk-white: #e0dbd1;
-$walnut-dyed: #9f7462;
-$golden-brown: #c66b27;
-$cetacean-blue: #001440;
-$rich-black: #010b13;
-$rose-gold: #b76e79;
-$saturated-titanium-yellow: #d6d018;
-$black-chestnut-oak: #252321;
-$amethyst: #9966cc;
-$premier-yellow: #fefb6c;
-$acapulco-aqua: #80a4a3;
-$blue-bayoux: #62777e;
+/* 01 */ $vampire-black: #080808;
+/* 02 */ $chalk-white: #e0dbd1;
+/* 03 */ $walnut-dyed: #9f7462;
+/* 04 */ $golden-brown: #c66b27;
+/* 05 */ $cetacean-blue: #001440;
+/* 06 */ $rich-black: #010b13;
+/* 07 */ $rose-gold: #b76e79;
+/* 08 */ $saturated-titanium-yellow: #d6d018;
+/* 09 */ $black-chestnut-oak: #252321;
+/* 10 */ $amethyst: #9966cc;
+/* 11 */ $premier-yellow: #fefb6c;
+/* 12 */ $acapulco-aqua: #80a4a3;
+/* 13 */ $blue-bayoux: #62777e;
+/* 14 */ $deep-burgundy: #3d2b3c;
+/* 15 */ $charcoal-grey: #181615;
 
 
 .right {
 	margin-left: auto;
+}
+
+* {
+	&:hover::-webkit-scrollbar-thumb {
+		background-color: #768474;
+	}
+
+	&::-webkit-scrollbar {
+		background-color: none;
+		width: 5px;
+	}
+	&::-webkit-scrollbar-thumb {
+		border-radius: 10px;
+	}
+}
+
+.wrapper {
+	&--remaining-space {
+		position: relative;
+		flex: 1;
+	}
 }

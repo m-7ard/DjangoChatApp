@@ -1,0 +1,215 @@
+{% extends "rooms/app.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'rooms/channel.css' %}">
+{% endblock %}
+
+{% block main %}
+<div class="app-section--main">
+	<div class="app-section--main__header">
+		<div class="app-section--main__title">
+			{{ channel.name }}
+		</div>
+	</div>
+	<div class="app-section--main__subheader">
+		{{ channel.description }}
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="app-section--main__channel">
+			{% for backlog in backlogs %}
+			{% if backlog.instance == 'message' %}
+			<li class="app-section--main__message">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__message-timestamp">{{ backlog.display_date }}</span>
+					<span class="app-section--main__message-user">{{ backlog.user }}</span>
+				</div>
+				<div class="app-section--main__message-body">
+					{{ backlog.content }}
+				</div>
+			</li>
+			{% elif backlog.instance == 'log' %}
+			<li class="app-section--main__log">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__log-user">{{ backlog.user }} </span>
+					<span class="app-section--main__log-action">{{ backlog.action }}</span>
+					<span class="app-section--main__log-timestamp">{{ backlog.display_date }}</span>
+				</div>
+			</li>
+			{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+	<div class="app-section--main__chatbar">
+		<div class="wrapper--remaining-space">
+			<textarea class="app-section--main__chatbar-input"></textarea>
+		</div>
+		<button class="app-section--main__chatbar-submit" type="submit">
+			<i class="gg-corner-down-left"></i>
+		</button>
+	</div>
+</div>
+{% endblock %}
+
+{% block secondary-sidebar %}
+<div class="app-section--sidebar__element app-section--sidebar__element--room-card">
+	<div class="app-section--sidebar__header">
+		Room
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="app-section--sidebar__content">
+			<li class="app-section--sidebar__room">
+				<a href="{% url 'room' room.pk %}">
+					<div class="app-section--sidebar__avatar">
+						<div style="width: 6rem; height: 6rem; background-color: brown;"></div>
+					</div>
+				</a>
+				<div class="wrapper--remaining-space">
+					<ul class="app-section--sidebar__room-info">
+						<a href="{% url 'room' room.pk %}">
+							<li class="app-section--sidebar__room-name">
+								{{ room.name }}
+							</li>
+						</a>
+						<li class="wrapper--remaining-space">
+							<div class="app-section--sidebar__room-description">
+								{{ room.description }}
+							</div>
+						</li>
+					</ul>
+				</div>
+			</li>
+			<li class="app-section--sidebar__label">
+				Channels
+			</li>
+			{% for channel in room.channels.all %}
+			<li class="wrapper--remaining-space">
+				<ul class="app-section--sidebar__channel-list">
+					<a href="{% url 'channel' room=room.pk channel=channel.pk %}">
+						<li class="app-section--sidebar__channel">
+							<i class="gg-align-left"></i>
+							<span class="app-section--sidebar__channel-name">{{ channel.name }}</span>
+						</li>
+					</a>
+				</ul>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+<div class="app-section--sidebar__element">
+	<div class="app-section--sidebar__header">
+		Members
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="app-section--sidebar__content app-section--sidebar__content--friendlist">
+			<li class="app-section--sidebar__label">Online</li>
+			{% for member in room.members.all %}
+			<li class="app-section--sidebar__friend">
+				<div class="app-section--sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--sidebar__friend-info">
+					<div class="wrapper--remaining-space">
+						<li class="app-section--sidebar__username app-section--sidebar__username--online">
+							{{ member }}
+						</li>
+					</div>
+					<li class="app-section--sidebar__status app-section--sidebar__status--online">
+						Online
+					</li>
+				</ul>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+{{ channel.id|json_script:"channel-id" }}
+{{ request.user.username|json_script:"username" }}
+<script>
+window.addEventListener("load", function() {
+	const messageSubmitButton = document.querySelector('.app-section--main__chatbar-submit');
+	const messageInput = document.querySelector('.app-section--main__chatbar-input')
+	const messageContainer = document.querySelector('.app-section--main__channel');
+	messageContainer.scrollTop = messageContainer.scrollHeight;
+
+
+	const channelID = JSON.parse(document.getElementById('channel-id').textContent);
+	const userName = JSON.parse(document.getElementById('username').textContent);
+
+	const ChatSocket = new WebSocket(
+		'ws://'
+		+ window.location.host
+		+ '/ws/chat/'
+		+ channelID
+		+ '/'
+	);
+
+	ChatSocket.onmessage = function(event) {
+		const data = JSON.parse(event.data);
+		console.log(event.data)
+		if (data['pattern'] == 'joined_channel') {
+			messageContainer.innerHTML += (
+			`
+			<li class="app-section--main__log">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__log-user">${data.username}</span>
+					<span class="app-section--main__log-action">Joined</span>
+					<span class="app-section--main__log-timestamp">${data.date}</span>
+				</div>
+			</li>
+			`
+			);
+			messageContainer.scrollTop = messageContainer.scrollHeight;
+		}
+		else if (data['pattern'] == 'sent_message') {
+			messageContainer.innerHTML += (
+			`
+			<li class="app-section--main__message">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__message-user">${data.username}</span>
+					<span class="app-section--main__message-timestamp">${data.date}</span>
+				</div>
+				<div class="app-section--main__message-body">
+					${data.content}
+				</div>
+			</li>
+			`
+			);
+			messageContainer.scrollTop = messageContainer.scrollHeight;
+		}
+		
+	};
+
+	ChatSocket.onclose = function(event) {
+		console.log('onclose');
+	};
+
+	function submitMessage() {
+		const content = messageInput.value;
+		ChatSocket.send(JSON.stringify({
+			'content': content,
+			'username': userName,
+			'channel': channelID,
+		}));
+		messageInput.value = '';
+	}
+
+	messageInput.addEventListener("keyup", function(event) {
+		if (event.key === "Enter" && !event.shiftKey) {
+			event.preventDefault();
+			submitMessage();
+		}
+	});
+	messageSubmitButton.addEventListener("click", function(event) {
+		event.preventDefault();
+		submitMessage();
+	});
+});
+</script>
+{% endblock %}

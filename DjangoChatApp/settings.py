@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+	'daphne',
 	'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -67,6 +68,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+				'rooms.context_processors.room_list',
             ],
         },
     },
@@ -136,3 +139,11 @@ MEDIA_URL = '/media/'
 
 LOGIN_URL = 'signin'
 LOGOUT_REDIRECT_URL = "frontpage"
+
+ASGI_APPLICATION = "DjangoChatApp.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layers.InMemoryChannelLayer"
+	}
+}

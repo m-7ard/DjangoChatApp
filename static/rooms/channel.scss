@@ -1,0 +1,104 @@
+@use '../core/global';
+
+.app-section--main {
+	* {
+		font-family: Lato !important;
+	}
+
+	&__channel {
+		position: absolute;
+		overflow: auto;
+		
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		
+		padding: 0.5rem;
+		color: global.$chalk-white;
+
+		width: 100%;
+		height: 100%;
+		box-sizing: border-box;
+	}
+
+	&__message {
+		display: flex;
+		flex-direction: column;
+
+		&-header {
+			display: flex;
+			align-items: baseline;
+			gap: 0.3rem;
+		}
+		&-timestamp {
+			color: global.$acapulco-aqua;
+			font-size: 0.7rem;
+		}
+		&-user {
+			color: global.$premier-yellow;
+			font-size: 1.1rem;
+		}
+		&-body {
+			font-size: 1rem;
+		}
+	}
+
+	&__log {
+		display: flex;
+		flex-direction: row-reverse;
+
+		&-timestamp {
+			color: global.$amethyst;
+			font-size: 0.7rem;
+		}
+		&-action {
+			color: global.$amethyst;
+			font-size: 0.8rem;
+		}
+		&-user {
+			color: global.$amethyst;
+			font-size: 0.8rem;
+			font-weight: bold;
+		}
+	}
+
+	&__chatbar {
+		box-sizing: border-box;
+		display: flex;
+		background-color: global.$rich-black;
+		gap: 0.5rem;
+
+		height: 4rem;
+		padding: 0.5rem;
+
+		&-input {
+			background-color: global.$charcoal-grey;
+			resize: none;
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			padding: 0.2rem;
+			box-sizing: border-box;
+			border: 2px solid global.$black-chestnut-oak;
+			font-size: 1rem;
+			color: global.$chalk-white;
+			outline: none;
+
+		}
+
+		&-submit {
+			border: 2px solid global.$black-chestnut-oak;
+			height: 3rem;
+			width: 3rem;
+			background-color: global.$charcoal-grey;
+			color: global.$chalk-white;
+			box-sizing: border-box;
+			font-size: 2rem;
+			font-weight: bold;
+
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+}
