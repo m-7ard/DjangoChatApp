@@ -14,6 +14,8 @@
 /* 13 */ $blue-bayoux: #62777e;
 /* 14 */ $deep-burgundy: #3d2b3c;
 /* 15 */ $charcoal-grey: #181615;
+/* 16 */ $apple-red: #E71D36;
+/* 17 */ $anthracite: #0E0D0C;
 
 
 .right {
@@ -26,7 +28,7 @@
 	}
 
 	&::-webkit-scrollbar {
-		background-color: none;
+		background-color: transparent;
 		width: 5px;
 	}
 	&::-webkit-scrollbar-thumb {

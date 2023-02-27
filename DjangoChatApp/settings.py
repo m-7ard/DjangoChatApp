@@ -71,6 +71,9 @@ TEMPLATES = [
 
 				'rooms.context_processors.room_list',
             ],
+			'libraries': {
+				'custom_tags': 'DjangoChatApp.templatetags.custom_tags'
+			}
         },
     },
 ]

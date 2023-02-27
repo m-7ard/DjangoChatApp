@@ -13,6 +13,8 @@
 /* 13 */
 /* 14 */
 /* 15 */
+/* 16 */
+/* 17 */
 .right {
   margin-left: auto;
 }
@@ -21,7 +23,7 @@
   background-color: #768474;
 }
 *::-webkit-scrollbar {
-  background-color: none;
+  background-color: transparent;
   width: 5px;
 }
 *::-webkit-scrollbar-thumb {
@@ -33,9 +35,6 @@
   flex: 1;
 }
 
-.app-section--main * {
-  font-family: Lato !important;
-}
 .app-section--main__channel {
   position: absolute;
   overflow: auto;
@@ -49,8 +48,10 @@
   box-sizing: border-box;
 }
 .app-section--main__message {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template: auto/auto 1fr;
+  align-items: baseline;
+  gap: 0rem 0.3rem;
 }
 .app-section--main__message-header {
   display: flex;
@@ -65,8 +66,148 @@
   color: #fefb6c;
   font-size: 1.1rem;
 }
+.app-section--main__message-blank {
+  min-width: -moz-min-content;
+  min-width: min-content;
+}
 .app-section--main__message-body {
+  display: grid;
+  grid-template: auto/auto 1fr;
+  position: relative;
   font-size: 1rem;
+  transition: background-color 0.2s;
+}
+.app-section--main__message-body:hover {
+  background-color: #3d2b3c;
+}
+.app-section--main__message-body:hover .app-section--main__message-actions {
+  display: flex;
+}
+.app-section--main__message-actions {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  display: none;
+  background-color: #010b13;
+  border: 1px solid #62777e;
+  border-radius: 4px;
+  padding: 0.5rem;
+  gap: 0.5rem;
+}
+.app-section--main__message-actions.has-open-action {
+  display: flex !important;
+}
+.app-section--main__message-actions span {
+  color: #62777e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: color 0.2s;
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+}
+.app-section--main__message-actions span i {
+  font-size: 1.333rem;
+}
+.app-section--main__message-actions span:hover {
+  color: #e0dbd1;
+  cursor: pointer;
+}
+.app-section--main__message-reactions {
+  display: flex;
+  gap: 0.5rem;
+}
+.app-section--main__message-reaction {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.25rem 0rem;
+  height: 1.25rem;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #80a4a3;
+  transition: all 0.2s;
+}
+.app-section--main__message-reaction img {
+  max-width: 100%;
+  max-width: 100%;
+}
+.app-section--main__message-reaction.inactive {
+  background-color: #181615;
+}
+.app-section--main__message-reaction.inactive:hover {
+  cursor: pointer;
+  color: #e0dbd1;
+  background-color: #252321;
+  border: 1px solid #62777e;
+}
+.app-section--main__message-reaction.active {
+  background-color: #3d2b3c;
+  border: 1px solid #9966cc;
+}
+.app-section--main__message-reaction.active:hover {
+  cursor: pointer;
+}
+.app-section--main__react {
+  display: none;
+  flex-direction: column;
+  width: 15rem;
+  color: #e0dbd1;
+  border-radius: 4px;
+  height: 10rem;
+  overflow: hidden;
+  z-index: 1;
+}
+.app-section--main__react-header {
+  padding: 0.5rem;
+  display: flex;
+  color: #80a4a3;
+  background-color: #252321;
+  box-shadow: 0px 0px 7px 3px #080808;
+  z-index: 1;
+}
+.app-section--main__react-body {
+  display: flex;
+  flex-grow: 1;
+}
+.app-section--main__react-servers {
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  width: 1rem;
+  background-color: #181615;
+  padding: 0.5rem;
+}
+.app-section--main__react-emotes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  flex-grow: 1;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  background-color: #252321;
+}
+.app-section--main__react-emote {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  transition: background-color 0.2s;
+}
+.app-section--main__react-emote:hover {
+  cursor: pointer;
+  background-color: #181615;
+}
+.app-section--main__react-emote img {
+  max-width: 100%;
+  max-height: 100%;
 }
 .app-section--main__log {
   display: flex;
@@ -88,7 +229,6 @@
 .app-section--main__chatbar {
   box-sizing: border-box;
   display: flex;
-  background-color: #010b13;
   gap: 0.5rem;
   height: 4rem;
   padding: 0.5rem;

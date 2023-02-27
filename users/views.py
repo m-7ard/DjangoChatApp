@@ -30,21 +30,7 @@ class SignupView(TemplateView):
             user.save()
 
         return HttpResponseRedirect(reverse_lazy('frontpage'))
-
-    """
-    def form_valid(self, form):
-        print('entering form_valid')
-        context = self.get_context_data()
-        profile_form = context['ProfileAttributes_SignupForm']
-
-        if form.is_valid() and profile_form.is_valid():
-            profile = profile_form.save(commit=False)
-            user = form.save()
-            profile.user = user
-            profile.save()
-        
-        return super().form_valid(form)
-    """
+		
 
 class SigninView(LoginView):
     template_name = 'users/signin.html'

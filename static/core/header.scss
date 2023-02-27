@@ -1,4 +1,7 @@
-html { height:100%; }
+html { 
+	height:100%; 
+	font-family: "Lato", monospace;
+}
 body {
 	position:absolute; 
 	top:0; 
@@ -21,8 +24,4 @@ ul, li {
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
-}
-
-html * {
-	font-family: 'Consolas', monospace;
 }

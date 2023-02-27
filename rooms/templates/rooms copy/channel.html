@@ -1,0 +1,208 @@
+{% extends "rooms/app.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'rooms/channel.css' %}">
+{% endblock %}
+
+{% block main %}
+<div class="app-section--main">
+	<div class="app-section--main__header">
+		<div class="app-section--main__title">
+			{{ channel.name }}
+		</div>
+	</div>
+	<div class="app-section--main__subheader">
+		{{ channel.description }}
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="app-section--main__channel">
+			{% for backlog in backlogs %}
+			{% if backlog.instance == 'message' %}
+			<li class="app-section--main__message">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__message-timestamp">{{ backlog.display_date }}</span>
+					<span class="app-section--main__message-user">{{ backlog.user }}</span>
+				</div>
+				<div class="app-section--main__message-body">
+					{{ backlog.content }}
+				</div>
+			</li>
+			{% elif backlog.instance == 'log' %}
+			<li class="app-section--main__log">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__log-user">{{ backlog.user }} </span>
+					<span class="app-section--main__log-action">{{ backlog.action_display_name }}</span>
+					<span class="app-section--main__log-timestamp">{{ backlog.display_date }}</span>
+				</div>
+			</li>
+			{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+	<div class="app-section--main__chatbar">
+		<div class="wrapper--remaining-space">
+			<textarea class="app-section--main__chatbar-input"></textarea>
+		</div>
+		<button class="app-section--main__chatbar-submit" type="submit">
+			<i class="gg-corner-down-left"></i>
+		</button>
+	</div>
+</div>
+{% endblock %}
+
+{% block secondary-sidebar %}
+<div class="app-section--sidebar__element">
+	<div class="app-section--sidebar__header">
+		Members
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
+			<li class="app-section--sidebar__label">Online</li>
+			{% for member in room.members.all %}
+			<li class="app-section--sidebar__friend">
+				<div class="app-section--sidebar__avatar">
+					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+				</div>
+				<ul class="app-section--sidebar__friend-info">
+					<div class="wrapper--remaining-space">
+						<li class="app-section--sidebar__username app-section--sidebar__username--online">
+							{{ member }}
+						</li>
+					</div>
+					<li class="app-section--sidebar__status app-section--sidebar__status--online">
+						Online
+					</li>
+				</ul>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+{{ room.id|json_script:"room-id" }}
+{{ channel.id|json_script:"channel-id" }}
+{{ request.user.id|json_script:"user-id" }}
+<script>
+window.addEventListener("load", function() {
+	console.log('channels')
+	// DOM elements
+	const messageSubmitButton = document.querySelector('.app-section--main__chatbar-submit');
+	const messageInput = document.querySelector('.app-section--main__chatbar-input');
+	const messageContainer = document.querySelector('.app-section--main__channel');
+	messageContainer.scrollTop = messageContainer.scrollHeight;
+	const joinButton = document.querySelector('.app-section--sidebar__button--join');
+	const leaveButton = document.querySelector('.app-section--sidebar__button--leave');
+
+	// JSON elements
+	const channelID = JSON.parse(document.getElementById('channel-id').textContent);
+	const roomID = JSON.parse(document.getElementById('room-id').textContent);
+	const userID = JSON.parse(document.getElementById('user-id').textContent);
+
+	const ChatSocket = new WebSocket(
+		'ws://'
+		+ window.location.host
+		+ '/ws/chat/'
+		+ roomID
+		+ '/'
+		+ channelID
+		+ '/'
+	);
+
+	ChatSocket.onmessage = function(event) {
+		const data = JSON.parse(event.data);
+
+		const channelActions = {{ channel.display_actions|safe }};
+		channelActions.push('send message');
+		const logActions = ['room leave', 'room join']
+
+		const action = data['action'];
+
+		console.log(action)
+		if (!channelActions.includes(action)) {
+			return
+		};
+		
+		if (logActions.includes(action)) {
+			messageContainer.innerHTML += (
+			`
+			<li class="app-section--main__log">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__log-user">${data.username}</span>
+					<span class="app-section--main__log-action">${data.action_display_name}</span>
+					<span class="app-section--main__log-timestamp">${data.date}</span>
+				</div>
+			</li>
+			`
+			);
+			messageContainer.scrollTop = messageContainer.scrollHeight;
+		}
+		else if (action == 'send message') {
+			messageContainer.innerHTML += (
+			`
+			<li class="app-section--main__message">
+				<div class="app-section--main__message-header">
+					<span class="app-section--main__message-timestamp">${data.date}</span>
+					<span class="app-section--main__message-user">${data.username}</span>
+				</div>
+				<div class="app-section--main__message-body">
+					${data.content}
+				</div>
+			</li>
+			`
+			);
+			messageContainer.scrollTop = messageContainer.scrollHeight;
+		};
+	};
+
+	ChatSocket.onclose = function(event) {
+		console.log('onclose');
+	};
+
+	const channelHandlers = {
+		"createChannel": null
+	}
+
+	const ChatSocketHandlers = {
+		"message": 
+			function(event) {
+				if (event.key === "Enter" && !event.shiftKey) {
+					event.preventDefault();
+					let content = messageInput.value;
+					ChatSocket.send(JSON.stringify({
+						'action': 'message',
+						'content': content,
+						'user': userID,
+						'channel': channelID,
+					}));
+					messageInput.value = '';
+				}
+			},
+		"join": 
+			function(event) {
+				ChatSocket.send(JSON.stringify({
+					'action': 'join'
+				}));
+			},
+		"leave":
+			function() {
+				ChatSocket.send(JSON.stringify({
+					'action': 'leave'
+				}));
+			},
+	}
+
+	
+
+
+
+	messageInput.addEventListener("keyup", ChatSocketHandlers["message"]);
+	joinButton && joinButton.addEventListener('click', ChatSocketHandlers["join"]);
+	leaveButton && leaveButton.addEventListener('click', ChatSocketHandlers["leave"]);
+});
+</script>
+{% endblock %}

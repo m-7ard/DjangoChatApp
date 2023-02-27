@@ -7,91 +7,79 @@
 {% endblock %}
 
 {% block main %}
-<div class="app-section--main">
-	<div class="app-section--main__header">
-		<div class="app-section--main__title">
-			{% firstof room.name %}
-		</div>
+<div class="app-section--main__header">
+	<div class="app-section--main__title">
+		{% firstof room.name %}
 	</div>
-	<div class="wrapper--remaining-space">
-		<div class="app-section--main__dashboard">
-			
-		</div>
+</div>
+<div class="wrapper--remaining-space">
+	<div class="app-section--main__dashboard">
+		
 	</div>
 </div>
 {% endblock %}
 
-{% block secondary-sidebar %}
-<div class="app-section--sidebar__element app-section--sidebar__element--room-card">
-	<div class="app-section--sidebar__header">
-		Room
-	</div>
-	<div class="wrapper--remaining-space">
-		<ul class="app-section--sidebar__content">
-			<li class="app-section--sidebar__room">
-				<a href="{% url 'room' room.pk %}">
-					<div class="app-section--sidebar__avatar">
-						<div style="width: 6rem; height: 6rem; background-color: brown;"></div>
-					</div>
-				</a>
-				<div class="wrapper--remaining-space">
-					<ul class="app-section--sidebar__room-info">
-						<a href="{% url 'room' room.pk %}">
-							<li class="app-section--sidebar__room-name">
-								{{ room.name }}
-							</li>
-						</a>
-						<li class="wrapper--remaining-space">
-							<div class="app-section--sidebar__room-description">
-								{{ room.description }}
-							</div>
-						</li>
-					</ul>
-				</div>
-			</li>
-			<li class="app-section--sidebar__label">
-				Channels
-			</li>
-			{% for channel in room.channels.all %}
-			<li class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__channel-list">
-					<a href="{% url 'channel' room=room.pk channel=channel.pk %}">
-						<li class="app-section--sidebar__channel">
-							<i class="gg-align-left"></i>
-							<span class="app-section--sidebar__channel-name">{{ channel.name }}</span>
-						</li>
-					</a>
-				</ul>
-			</li>
-			{% endfor %}
-		</ul>
-	</div>
-</div>
-<div class="app-section--sidebar__element">
-	<div class="app-section--sidebar__header">
-		Members
-	</div>
-	<div class="wrapper--remaining-space">
-		<ul class="app-section--sidebar__content app-section--sidebar__content--friendlist">
-			<li class="app-section--sidebar__label">Online</li>
-			{% for member in room.members.all %}
-			<li class="app-section--sidebar__friend">
-				<div class="app-section--sidebar__avatar">
-					<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
-				</div>
-				<ul class="app-section--sidebar__friend-info">
-					<div class="wrapper--remaining-space">
-						<li class="app-section--sidebar__username app-section--sidebar__username--online">
-							{{ member }}
-						</li>
-					</div>
-					<li class="app-section--sidebar__status app-section--sidebar__status--online">
-						Online
-					</li>
-				</ul>
-			</li>
-			{% endfor %}
-		</ul>
-	</div>
-</div>
+{% block secondary-sidebar %}{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+{{ room.id|json_script:"room-id" }}
+{{ request.user.id|json_script:"user-id" }}
+<script>
+window.addEventListener("load", function() {
+	// DOM elements
+	const joinButton = document.querySelector('.app-section--sidebar__button--join');
+	const leaveButton = document.querySelector('.app-section--sidebar__button--leave');
+
+	// JSON elements
+	const roomID = JSON.parse(document.getElementById('room-id').textContent);
+	const userID = JSON.parse(document.getElementById('user-id').textContent);
+
+	const ChatSocket = new WebSocket(
+		'ws://'
+		+ window.location.host
+		+ '/ws/chat/'
+		+ roomID
+		+ '/'
+	);
+
+	// ChatSocket.onmessage
+
+	ChatSocket.onclose = function(event) {
+		console.log('onclose');
+	};
+
+	const ChatSocketHandlers = {
+		"message": 
+			function(event) {
+				if (event.key === "Enter" && !event.shiftKey) {
+					event.preventDefault();
+					let content = messageInput.value;
+					ChatSocket.send(JSON.stringify({
+						'action': 'message',
+						'content': content,
+						'user': userID,
+						'channel': channelID,
+					}));
+					messageInput.value = '';
+				}
+			},
+		"join": 
+			function(event) {
+				ChatSocket.send(JSON.stringify({
+					'action': 'join'
+				}));
+			},
+		"leave":
+			function() {
+				ChatSocket.send(JSON.stringify({
+					'action': 'leave'
+				}));
+			},
+	};
+
+	joinButton && joinButton.addEventListener('click', ChatSocketHandlers["join"]);
+	leaveButton && leaveButton.addEventListener('click', ChatSocketHandlers["leave"]);
+});
+</script>
 {% endblock %}
