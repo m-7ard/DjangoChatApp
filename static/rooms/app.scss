@@ -2,587 +2,103 @@
 
 .app {
 	display: flex;
-	min-height: 100%;
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 
-	z-index: 0;
-
-	&-section--sidebar {
-		$sidebar: &;
+	&__main {
 		display: flex;
 		flex-direction: column;
-	
-		&.primary {
-			width: 10rem;
-		}
+		flex: 1;
+		background-color: global.$anthracite;
+		// min-width: 16.875rem;
+	}
 
-		&.secondary {
+	&__sidebar {
+		display: flex;
+		flex-direction: column;
+		background-color: global.$charcoal-grey;
+
+		&--primary {
 			width: 20rem;
 		}
 
-		&__element {
-			display: flex;
-			flex-direction: column;
-			flex: 1 1 0px;
-			// so that the shadows stay within the element
-			overflow: hidden;
-		}
-
-		&__header {
-			font-size: 1.2rem;
-			font-weight: bold;
-			color: global.$premier-yellow;
-			background-color: global.$black-chestnut-oak;
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			height: 2rem;
-			width: auto;
-
-			box-shadow: 0px 0px 7px 3px global.$vampire-black;
-			z-index: 2;
-		}
-
-		&__wrapper {
-			position: relative;
-			flex: 1;
-		}
-		
-		&__content {
-			background-color: global.$charcoal-grey;
-			color: global.$chalk-white;
-			overflow: auto;
-			position: absolute;
-			
-			top: 0;
-			bottom: 0;
-			left: 0;
-			right: 0;
-
-			display: flex;
-			flex-direction: column;
-
-			&--has-padding {
-				gap: 0.5rem;
-				padding: 0.5rem;
-			}
-
-			&--no-padding {
-				gap: 0rem;
-				padding: 0rem;
-			}
-		}
-
-		&__label {
-			width: 100%;
-			padding-bottom: 0.5rem;
-			font-size: 1rem;
-			line-height: 1rem;
-			border-bottom: 1px solid global.$chalk-white;
-		}
-
-		&__user {
-			display: flex;
-			gap: 0.5rem;
-			background-color: global.$black-chestnut-oak;
-			padding: 0.3rem;
-			border-bottom: 1px solid global.$chalk-white;
-			z-index: 2;
-
-			&-avatar {
-				width: 3rem; 
-				height: 3rem;
-
-				img {
-					max-height: 100%;
-					max-width: 100%;
-				}
-			}
-		}
-
-		&__friend {
-			display: flex;
-			gap: 0.5rem;
-
-			&-avatar {
-				width: 2rem; 
-				height: 2rem;
-				box-sizing: border-box;
-				box-shadow: 3px 3px 4px 1px global.$vampire-black;
-
-				img {
-					max-height: 100%;
-					max-width: 100%;
-				}
-			}
-		}
-
-		&__friend-info {
-			height: 2rem;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			flex-grow: 1;
-		}
-
-		&__username {
-			font-size: 0.9rem;
-			font-weight: bold;
-
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			overflow: hidden;
-
-			position: absolute;
-			width: 100%;
-
-			&--online {
-				color: global.$premier-yellow;
-			}
-
-			&--offline {
-				color: global.$acapulco-aqua;
-			}
-		}
-
-		&__status {
-			font-size: 0.8rem;
-
-			&--online {
-				color: global.$saturated-titanium-yellow;
-			}
-			&--offline {
-				color: global.$blue-bayoux;
-			}
-		}
-
-		&__news {
-			display: flex;
-			align-items: baseline;
-			gap: 0.5rem;
-
-			&-title {
-				font-size: 0.9rem;
-				line-height: 0.9rem;
-				font-weight: bold;
-				word-wrap: break-word;
-
-				&:hover {
-					text-decoration: underline;
-					cursor: pointer;
-				}
-			}
-
-			&-date {
-				font-size: 0.8rem;
-				line-height: 0.8rem;
-			}
-		}
-
-		&__room {
-			display: flex;
-			gap: 0.5rem;
-	
-			&-info {
-				position: absolute;
-				height: 100%;
-				width: 100%;
-				display: flex;
-				flex-direction: column;
-				gap: 0.5rem;
-			}
-	
-			&-name {
-				font-size: 1.2rem;
-				font-weight: bold;
-				color: global.$premier-yellow;
-			}
-	
-			&-description {
-				position: absolute;
-				word-wrap: break-word;
-				overflow: auto;
-				width: 100%;
-				height: 100%;
-				font-size: 1.1rem;
-				color: global.$saturated-titanium-yellow;
-			}
-
-			&-utility {
-				display: flex;
-				justify-content: space-between;
-				flex-wrap: wrap;
-			}
-
-			&-avatar {
-				width: 6rem; 
-				height: 6rem;
-				box-shadow: 0px 0px 4px 2px global.$amethyst;
-
-				img {
-					max-height: 100%;
-					max-width: 100%;
-				}
-			}
-		}
-
-		&__icon {
-			&-container {
-				display: flex;
-			}
-		}
-
-		&__button {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 6rem;
-			height: 2rem;
-			padding: 0.2rem 0rem;
-			box-sizing: border-box;
-			transition: background-color 0.5s;
-
-			&:hover {
-				cursor: pointer;
-			}
-
-			&--join {
-				color: global.$vampire-black;
-				background-color: global.$saturated-titanium-yellow;
-				border: 1px solid global.$rose-gold;
-				box-shadow: 0px 0px 4px 1px global.$saturated-titanium-yellow;
-				
-				&:hover {
-					background-color: #eae440;
-				}
-			}
-
-			&--leave {
-				color: global.$vampire-black;
-				background-color: global.$apple-red;
-				border: 1px solid global.$golden-brown;
-				box-shadow: 0px 0px 4px 1px global.$apple-red;
-				
-				&:hover {
-					background-color: #eae440;
-				}
-			}
-		}
-
-		&__listroom {
-			display: flex;
-			gap: 0.5rem;
-			padding: 0.5rem;
-			transition: background-color 0.5s;
-			background-color: global.$charcoal-grey;
-
-			&:hover {
-				background-color: global.$black-chestnut-oak;
-			}
-			
-			&-info {
-				display: flex;
-				flex-direction: column;
-				flex-grow: 1;
-				gap: 0.5rem;
-			}
-
-			&-name {
-				position: absolute;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				width: 100%;
-				height: 100%;
-				font-size: 1rem;
-				color: global.$premier-yellow;
-			}
-
-			&-avatar {
-				width: 3rem; 
-				height: 3rem;
-				box-sizing: border-box;
-				box-shadow: 3px 3px 4px 1px global.$vampire-black;
-
-				img {
-					max-height: 100%;
-					max-width: 100%;
-				}
-			}
-		}
-
-		&__listroom-list {
-			overflow-y: overlay;
-		}
-
-		&__add-listroom {
-			padding: 0.5rem;
-			background-color: global.$charcoal-grey;
-			color: global.$chalk-white;
-			box-shadow: 0px 0px 7px 3px global.$vampire-black;
-			z-index: 1;
-
-			#{$sidebar}__hoverable {
-				display: flex;
-				align-items: center;
-				gap: 0.5rem;
-				transition: all 0.2s;
-
-				&:hover {
-					color: global.$premier-yellow;
-					background-color: global.$black-chestnut-oak;
-					cursor: pointer;
-				}
-			}
-
-			span {
-				font-size: 0.9rem;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				overflow: hidden;
-			}
-		}
-	
-		&__channel-list {
-			display: flex;
-			gap: 0.25rem;
-			flex-direction: column;
-		}
-	
-		&__channel {
-			$channel: &;
-			display: flex;
-			box-sizing: border-box;
-			height: 1.8rem;
-			overflow: hidden;
-			transition: all 0.2s;
-			box-shadow: 3px 3px 4px 1px global.$vampire-black;
-			background-color: global.$charcoal-grey;
-
-			* {			
-				transition: all 0.2s;
-			}
-
-			& i {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-
-				color: global.$rose-gold;
-
-
-				font-size: 1rem;
-				font-weight: bold;
-
-				box-sizing: border-box;
-
-				height: 100%;
-				aspect-ratio: 1 / 1;
-				
-				border: 3px solid global.$black-chestnut-oak;
-			}
-	
-			&-name {
-				border-top: 3px solid global.$black-chestnut-oak;
-				border-bottom: 3px solid transparent;
-				box-sizing: border-box;
-				color: global.$acapulco-aqua;
-				
-				padding-left: 0.5rem;
-				
-				display: flex;
-				flex-grow: 1;
-				align-items: center;
-
-				font-size: 1rem;
-			}
-	
-			&:hover {
-				cursor: pointer;
-
-				#{$channel}-name {
-					background-color: global.$black-chestnut-oak;
-					color: global.$chalk-white;
-				}
-
-				i {
-					background-color: global.$anthracite;
-					color: global.$chalk-white;
-				}
-			}
-		}
-
-		
-		&__add-channel {
-			display: flex;
-			gap: 0.5rem;
-			box-sizing: border-box;
-			
-			color: global.$chalk-white;
-			align-items: center;
-			transition: all 0.2s;
-			font-size: 0.9rem;
-			line-height: 0.9rem;
-
-	
-			&:hover {
-				background-color: global.$black-chestnut-oak;
-				color: global.$premier-yellow;
-				cursor: pointer;
-			}
+		&--secondary {
+			width: 15rem;
 		}
 	}
 
-
-	&-section--main {
-		background-color: global.$anthracite;
+	&__join {
 		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
-
-		&__wrapper {
-			position: relative;
-			flex: 1;
-		}
-
-		&__header {
-			font-size: 1.2rem;
-			font-weight: bold;
-			color: global.$premier-yellow;
-			background-color: global.$black-chestnut-oak;
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			height: 2rem;
-			width: auto;
-		}
-
-		&__subheader {
-			font-size: 1rem;
-			font-weight: bold;
-			color: global.$chalk-white;
-			background-color: global.$deep-burgundy;
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			height: 1.2rem;
-			width: auto;
-
-			z-index: 1;
-		}
-
-		&__dashboard {
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			overflow: auto;
-			white-space: bold;
-			color: white;
-			overflow-wrap: break-word;
-
-			display: flex;
-			flex-direction: column;
-		}
-	}
-
-	&-section--overlay {
-		display: flex;
-		justify-content: center;
 		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		box-shadow: 0px 0px 7px 1px global.$saturated-titanium-yellow;
+		width: 6rem;
+		padding: 0.25rem;
+		background-color: global.$saturated-titanium-yellow;
+		color: global.$vampire-black;
+		margin: 0.5rem;
+	}
 
-		background-color: hsla(0, 0%, 3%, 0.4);
+	&__category {
+		position: relative;
+		display: flex;
+		gap: 0.25rem;
+		align-items: center;
+		padding: 0.3125rem;
+		background-color: global.$charcoal-grey;
+		
+		transition: background-color 0.25s;
+		transition: color 0.25s;
 
-		position: fixed;
-		width: 100%;
-		height: 100%;
-		z-index: 100;
+		z-index: 2;
 
-		&__window {
-			display: flex;
-			flex-direction: column;
-			flex-grow: 1;
-			gap: 1rem;
-			border-radius: 4px;
-			padding: 2.5rem;
-			box-sizing: border-box;
+		& i:hover {
+			color: global.$premier-yellow;
+		}
+
+		&:hover {
+			cursor: pointer;
+
+			& .secondary-text, & .icon:first-of-type {
+				color: global.$premier-yellow;
+			}
+
+			& + .app__channel-group {
+				border-color: global.$premier-yellow;
+			}
+
+			& + .app__channel-group .channel_slider {
+				height: 100%;
+			}
+		}
+	}
+
+	&__channel {
+		position: relative;
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.25rem;
+
+		transition: background-color 0.25s;
+		transition: color 0.25s;
+		z-index: 1;
+
+		background-color: global.$vampire-black;
+
+
+		&:hover {
+			cursor: pointer;
 			background-color: global.$black-chestnut-oak;
-			max-width: 500px;
-		}
-
-		&__header {
-			display: flex;
-			justify-content: space-between;
-	
-			* {
-				color: global.$chalk-white;
-				font-size: 1.2rem;
-				font-weight: bold;
-			}
-			a:hover {
-				text-decoration: underline;
-			}
-		}
-
-		&__close {
-			i {
-				font-size: 1.5rem;
-			}
-
-			&:hover {
-				cursor: pointer;
-			}
-		}
-	
-		&__form-field {
-			display: flex;
-			flex-direction: column;
-			gap: 0.2rem;
-		}
-		
-		&__label {
-			font-size: 0.9rem;
-			font-weight: bold;
 			color: global.$chalk-white;
 		}
-		
-		&__input input {
-			color: global.$chalk-white;
-			font-size: 1.2rem;
-			padding: 0.1rem 0.3rem;
-			box-sizing: border-box;
-			border-radius: 4px;
-			color-scheme: dark; // changes the icon and popup color
-			height: 2.5rem;
-			width: 100%;
-	
-			/* 2x25% times darker black chestnut oak */
-			background-color: #181615;
-		}
-		
-		&__submit {
-			color: global.$chalk-white;
-			background-color: global.$amethyst;
-			padding: 0.9rem 0rem;
-			border: none;
-			border-radius: 4px;
-			font-size: 1.1rem;
-			width: 100%;
-			transition: background-color 0.5s;
-	
-			&:hover {
-				cursor: pointer;
-				background-color: #7a3db8;
-			}
-		}
+	}
 
-		&__footnote {
-			font-size: 0.7rem;
-			color: global.$blue-bayoux;
-		}
+	&__channel-group {
+		border-left: 0.3125rem solid global.$charcoal-grey;
+		transition: border-color 0.25s;
 	}
 }

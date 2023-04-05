@@ -16,123 +16,48 @@
 	-->	
 	<div class="app-section--sidebar primary">
 		<div class="app-section--sidebar__element">
-			<div class="app-section--sidebar__header">
+			<div class="app__header has-shadow">
 				Friends
 			</div>
 			<div class="wrapper--remaining-space">
 				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
 					<li class="app-section--sidebar__label">Online</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+					<li class="app-section--sidebar__modelbox">
+						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--small has-shadow">
+							<img src="{{ MEDIA_URL }}" alt="">
 						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--online">
+						<div class="wrapper--remaining-space">
+							<ul class="app-section--sidebar__infobox">
+								<li class="app-section--sidebar__name app-section--sidebar__name--small app-section--sidebar__name--bold online-main">
 									User name User name User name
 								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--online">
-								Online
-							</li>
-						</ul>
-					</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
-						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--online">
-									User name User name User name
+								<li class="app-section--sidebar__status app-section--sidebar__status--small online-secondary">
+									Online
 								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--online">
-								Online
-							</li>
-						</ul>
-					</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+							</ul>
 						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--online">
-									User name User name User name
-								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--online">
-								Online
-							</li>
-						</ul>
 					</li>
 					<li class="app-section--sidebar__label">Offline</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+					<li class="app-section--sidebar__modelbox">
+						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--small has-shadow">
+							<img src="{{ MEDIA_URL }}" alt="">
 						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
+						<div class="wrapper--remaining-space">
+							<ul class="app-section--sidebar__infobox">
+								<li class="app-section--sidebar__name app-section--sidebar__name--small offline-main">
 									User name User name User name
 								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
-								Online
-							</li>
-						</ul>
-					</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
-						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
-									User name User name User name
+								<li class="app-section--sidebar__status app-section--sidebar__status--small offline-secondary">
+									Online
 								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
-								Online
-							</li>
-						</ul>
-					</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
+							</ul>
 						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
-									User name User name User name
-								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
-								Online
-							</li>
-						</ul>
-					</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
-						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
-									User name User name User name
-								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
-								Online
-							</li>
-						</ul>
 					</li>
 				</ul>
 			</div>
 		</div>
 		<div class="app-section--sidebar__element app-section--sidebar__element--events">
-			<div class="app-section--sidebar__header">
+			<div class="app__header has-shadow">
 				Events
 			</div>
 			<div class="wrapper--remaining-space">
@@ -142,44 +67,44 @@
 			</div>
 		</div>
 		<div class="app-section--sidebar__element app-section--sidebar__element--roomlist">
-			<div class="app-section--sidebar__header">
+			<div class="app__header has-shadow">
 				Chatrooms
 			</div>
 			<div class="wrapper--remaining-space">
 				<ul class="app-section--sidebar__content app-section--sidebar__content--no-padding">
-					{% for room in room_list %}
-						<a href="{% url 'room' room.pk %}">
-							<li class="app-section--sidebar__listroom">
-								<div class="app-section--sidebar__listroom-avatar">
-									<div style="width: 3rem; height: 3rem; background-color: brown;"></div>
+					{% for membership in user.memberships.all %}
+					<a href="{% url 'room' membership.room.pk %}" class="app-section--sidebar__modelbox app-section--sidebar__modelbox--joined-room">
+						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--medium has-shadow">
+							<img src="{{ MEDIA_URL }}{{ membership.room.image.url }}" alt="">
+						</div>
+						<div class="wrapper--remaining-space">
+							<div class="app-section--sidebar__infobox">
+								<div class="app-section--sidebar__name app-section--sidebar__name--medium">
+									{{ membership.room.name }}
 								</div>
-								<div class="app-section--sidebar__listroom-info">
-									<div class="wrapper--remaining-space">
-										<div class="app-section--sidebar__listroom-name">
-											{{ room }}
-										</div>
-									</div>
-								</div>
-							</li>
-						</a>
+							</div>
+						</div>
+					</a>
 					{% endfor %}
+					<div class="app-section--sidebar__modelbox app-section--sidebar__modelbox--create-room">
+						<div class="wrapper--remaining-space">
+							<div class="app-section--sidebar__infobox app-section--sidebar__infobox--centered has-shadow">
+								<div class="app-section--sidebar__status app-section--sidebar__status--small">
+									Rooms Joined
+								</div>
+								<div class="app-section--sidebar__status app-section--sidebar__status--medium" id="room-count">
+									{{ user.memberships.count }}
+								</div>
+							</div>
+						</div>
+						<div class="app-section--sidebar__icon app-section--sidebar__icon--large has-shadow">
+							<i class="material-symbols-outlined">
+								list_alt_add
+							</i>
+						</div>
+					</div>
 				</ul>
-			</div>
-		</div>
-		<div class="app-section--sidebar__user">
-			<div class="app-section--sidebar__big-avatar">
-				<div style="width: 3rem; height: 3rem; background-color: brown;"></div>
-			</div>
-			<ul class="app-section--sidebar__friend-info">
-				<div class="wrapper--remaining-space">
-					<li class="app-section--sidebar__username app-section--sidebar__username--online">
-						User name User name User name
-					</li>
-				</div>
-				<li class="app-section--sidebar__status app-section--sidebar__status--online">
-					Online
-				</li>
-			</ul>
+			</div>		
 		</div>
 	</div>
 	<!--
@@ -189,7 +114,7 @@
 	-->	
 	<div class="app-section--main">
 		<div class="app-section--main">
-			<div class="app-section--main__header">
+			<div class="app__header">
 				<div class="app-section--main__title">
 					Dashboard
 				</div>
@@ -210,23 +135,56 @@
 
 	-->	
 	<div class="app-section--sidebar secondary">
-		<div class="app-section--sidebar__element app-section--sidebar__element--friendlist">
-			<div class="app-section--sidebar__header">
-				News & Updates
+		<div class="app-section--sidebar__element app-section--sidebar__element--room-card">
+			<div class="app__header">
+				News
+			</div>
+			<div class="app-section--sidebar__subheader has-shadow">
+				<input type="text" class="app-section--sidebar__search" placeholder="Search">
+				<span class="app-section--sidebar__modelbox right">
+					<div class="app-section--sidebar__icon app-section--sidebar__icon--small">
+						<i class="material-symbols-outlined">
+							settings
+						</i>
+					</div>
+				</span>
 			</div>
 			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--friendlist">
-					{% for news in site_news %}
-					<li class="app-section--sidebar__news">
-						<div class="app-section--sidebar__news-date">
-							{{ news.day_month_year }}
-						</div>
-						<div class="app-section--sidebar__news-title">
-							{{ news.title }}
-						</div>
-					</li>
-					{% endfor %}
+				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
+					
 				</ul>
+			</div>
+		</div>
+		<div class="app-section--sidebar__footer">
+			<div class="app-section--sidebar__modelbox app-section--sidebar__modelbox--request-user">
+				<div class="app-section--sidebar__avatar app-section--sidebar__avatar--medium has-shadow">
+					<img src="{{ MEDIA_URL }}{{ user.profile.image.url }}" alt="">
+				</div>
+				<div class="wrapper--remaining-space">
+					<div class="app-section--sidebar__infobox">
+						<div class="app-section--sidebar__modelbox online-main">
+							<div class="app-section--sidebar__name app-section--sidebar__name--medium">
+								{{ user.username }}
+							</div>
+							<div class="app-section--sidebar__icon app-section--sidebar__icon--small">
+								<i class="material-symbols-outlined">
+									key_visualizer
+								</i>
+							</div>
+						</div>
+						<div class="app-section--sidebar__status app-section--sidebar__status--small online-secondary">
+							Online
+						</div>
+					</div>
+				</div>
+				
+				<a href="{% url 'dashboard' %}" class="app-section--sidebar__dashboard-button right">
+					<div class="app-section--sidebar__icon app-section--sidebar__icon--large has-shadow">
+						<i class="material-symbols-outlined">
+							home
+						</i>
+					</div>
+				</a>
 			</div>
 		</div>
 	</div>
@@ -234,123 +192,7 @@
 {% endblock %}
 
 {% block scripts %}
-{{ channel.id|json_script:"channel-id" }}
-{{ request.user.username|json_script:"username" }}
 <script>
-window.addEventListener("load", function() {
-	const messageSubmitButton = document.querySelector('.app-section--main__chatbar-submit');
-	const messageInput = document.querySelector('.app-section--main__chatbar-input');
-	const messageContainer = document.querySelector('.app-section--main__channel');
-	messageContainer.scrollTop = messageContainer.scrollHeight;
 
-
-	const channelID = JSON.parse(document.getElementById('channel-id').textContent);
-	const userName = JSON.parse(document.getElementById('username').textContent);
-
-	const ChatSocket = new WebSocket(
-		'ws://'
-		+ window.location.host
-		+ '/ws/chat/'
-		+ channelID
-		+ '/'
-	);
-
-	ChatSocket.onmessage = function(event) {
-		const data = JSON.parse(event.data);
-		console.log(event.data)
-		if (data['pattern'] == 'joined_channel') {
-			messageContainer.innerHTML += (
-			`
-			<li class="app-section--main__log">
-				<div class="app-section--main__message-header">
-					<span class="app-section--main__log-user">${data.username}</span>
-					<span class="app-section--main__log-action">Joined</span>
-					<span class="app-section--main__log-timestamp">${data.date}</span>
-				</div>
-			</li>
-			`
-			);
-			messageContainer.scrollTop = messageContainer.scrollHeight;
-		}
-		else if (data['pattern'] == 'joined_channel') {
-			messageContainer.innerHTML += (
-			`
-			<li class="app-section--main__log">
-				<div class="app-section--main__message-header">
-					<span class="app-section--main__log-user">${data.username}</span>
-					<span class="app-section--main__log-action">Left</span>
-					<span class="app-section--main__log-timestamp">${data.date}</span>
-				</div>
-			</li>
-			`
-			);
-			messageContainer.scrollTop = messageContainer.scrollHeight;
-		}
-		else if (data['pattern'] == 'sent_message') {
-			messageContainer.innerHTML += (
-			`
-			<li class="app-section--main__message">
-				<div class="app-section--main__message-header">
-					<span class="app-section--main__message-user">${data.username}</span>
-					<span class="app-section--main__message-timestamp">${data.date}</span>
-				</div>
-				<div class="app-section--main__message-body">
-					${data.content}
-				</div>
-			</li>
-			`
-			);
-			messageContainer.scrollTop = messageContainer.scrollHeight;
-		}
-		
-		
-	};
-
-	ChatSocket.onclose = function(event) {
-		console.log('onclose');
-	};
-
-	function submitMessage() {
-		const content = messageInput.value;
-		ChatSocket.send(JSON.stringify({
-			'action': 'message',
-			'content': content,
-			'username': userName,
-			'channel': channelID,
-		}));
-		messageInput.value = '';
-	}
-
-	messageInput.addEventListener("keyup", function(event) {
-		if (event.key === "Enter" && !event.shiftKey) {
-			event.preventDefault();
-			submitMessage();
-		}
-	});
-	messageSubmitButton.addEventListener("click", function(event) {
-		event.preventDefault();
-		submitMessage();
-	});
-
-	/*--------------------
-	Join
-	--------------------*/
-	let joinButton = document.querySelector('.app-section--sidebar__button--join')
-	joinButton && joinButton.addEventListener('click', function() {
-		ChatSocket.send(JSON.stringify({
-			'action': 'join'
-		}));
-	});
-	
-	/*--------------------
-	Leave
-	--------------------*/
-	let leaveButton = document.querySelector('.app-section--sidebar__button--leave')
-	leaveButton && leaveButton.addEventListener('click', function() {
-		ChatSocket.send(JSON.stringify({
-			'action': 'leave'
-		}));
-	});
-});
 </script>
 {% endblock %}

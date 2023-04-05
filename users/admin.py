@@ -1,13 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Profile, ConnectionHistory, UserTab
+from .models import Profile
 from django.forms import TextInput, Textarea
 
 class ProfileInline(admin.StackedInline):
     model = Profile
+    
 class UserAdmin(admin.ModelAdmin):
-    inlines = (ProfileInline, )
+    inlines = (ProfileInline,)
     search_fields = ['email', 'username']
     list_display = ['username', 'email', 'date_joined', 'get_premium']
     ordering = ['-date_joined']
@@ -20,5 +21,4 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
-admin.site.register(ConnectionHistory)
-admin.site.register(UserTab)
+admin.site.register(Profile)

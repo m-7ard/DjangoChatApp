@@ -8,297 +8,136 @@
 
 {% block content %}
 <div class="app">
-	<!--
+	<div class="app__sidebar app__sidebar--secondary">
 
-		PRIMARY SIDEBAR
 
-	-->	
-	<div class="app-section--sidebar primary">
-		<div class="app-section--sidebar__element">
-			<div class="app-section--sidebar__header">
+
+		<div class="container container--fill">
+			<div class="container__header">
 				Friends
 			</div>
+			<div class="container__subheader has-shadow">
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						search
+					</i>
+				</span>
+				<span class="wrapper--remaining-space">
+					<input type="text" class="container__search">
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						patient_list
+					</i>
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						person_add
+					</i>
+				</span>
+			</div>
 			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					<li class="app-section--sidebar__label">Online</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<img src="{{ MEDIA_URL }}" alt="">
-						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--online">
-									User name User name User name
-								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--online">
-								Online
-							</li>
-						</ul>
+				<ul class="container__content">
+					{% for member in room.members.all %}
+					<li class="modelbox modelbox--hoverable">
+						<span class="avatar avatar--small has-shadow">
+							<img src="{{ MEDIA_URL }}{{ member.image.url }}" alt="">
+						</span>
+						<span class="wrapper--remaining-space">
+							<span class="modelbox__info">
+								<div class="primary-text primary-text--small ellipsis online-color--primary">
+									{{ member.user.username }}
+								</div>
+								<div class="secondary-text secondary-text--small ellipsis online-color--secondary">
+									{{ member.user.profile.status }}
+								</div>
+							</span>
+						</span>
 					</li>
-					<li class="app-section--sidebar__label">Offline</li>
-					<li class="app-section--sidebar__friend">
-						<div class="app-section--sidebar__avatar">
-							<div style="width: 2rem; height: 2rem; background-color: brown;"></div>
-						</div>
-						<ul class="app-section--sidebar__friend-info">
-							<div class="wrapper--remaining-space">
-								<li class="app-section--sidebar__username app-section--sidebar__username--offline">
-									User name User name User name
-								</li>
-							</div>
-							<li class="app-section--sidebar__status app-section--sidebar__status--offline">
-								Online
-							</li>
-						</ul>
-					</li>
+					{% endfor %}
 				</ul>
 			</div>
 		</div>
-		<div class="app-section--sidebar__element app-section--sidebar__element--events">
-			<div class="app-section--sidebar__header">
+
+
+
+		<div class="container container--fill">
+			<div class="container__header has-shadow">
 				Events
 			</div>
 			<div class="wrapper--remaining-space">
-				<div class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					
+				<div class="container__content">
+					<div class="">
+
+					</div>
 				</div>
 			</div>
 		</div>
-		<div class="app-section--sidebar__element app-section--sidebar__element--roomlist">
-			<div class="app-section--sidebar__header">
-				Chatrooms
+		<div class="container container--fill">
+			<div class="container__header">
+					Groups			
+			</div>
+			<div class="container__subheader has-shadow">
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						search
+					</i>
+				</span>
+				<span class="wrapper--remaining-space">
+					<input type="text" class="container__search">
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						list_alt_add
+					</i>
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						travel_explore
+					</i>
+				</span>
 			</div>
 			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--no-padding">
-					<div class="app-section--sidebar__listroom-list">
-						{% for room in room_list %}
-						<a href="{% url 'room' room.pk %}" class="app-section--sidebar__listroom">
-							<div class="app-section--sidebar__listroom-avatar">
-								<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
-							</div>
-							<div class="app-section--sidebar__listroom-info">
-								<div class="wrapper--remaining-space">
-									<div class="app-section--sidebar__listroom-name">
-										{{ room }}
-									</div>
+				<ul class="container__content">
+					{% for membership in user.memberships.all %}
+					{% with membership.room as joined_room  %}
+					<li class="modelbox modelbox--hoverable">
+						<span class="avatar avatar--medium has-shadow">
+							<img src="{{ MEDIA_URL }}{{ joined_room.image.url }}" alt="">
+						</span>
+						<span class="wrapper--remaining-space">
+							<span class="modelbox__info">
+								<div class="primary-text primary-text--medium ellipsis online-color--primary">
+									{{ joined_room }}
 								</div>
-							</div>
-						</a>
-						{% endfor %}
-					</div>		
-				</ul>
-			</div>		
-		</div>
-		<div class="app-section--sidebar__add-listroom">
-			<div class="app-section--sidebar__hoverable">
-				<i class="material-symbols-outlined">
-					list_alt_add
-				</i>
-				<span>Create Room</span>
-			</div>
-		</div>
-		
-	</div>
-	<!--
-
-		MAIN
-
-	-->	
-	<div class="app-section--main">
-		{% block main %}{% endblock %}
-	</div>
-	<!--
-
-		SECONDARY SIDEBAR
-
-	-->	
-	<div class="app-section--sidebar secondary">
-		<div class="app-section--sidebar__element app-section--sidebar__element--room-card">
-			<div class="app-section--sidebar__header">
-				Room
-			</div>
-			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					<li class="app-section--sidebar__room">
-						<a href="{% url 'room' room.pk %}">
-							<div class="app-section--sidebar__room-avatar">
-								<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
-							</div>
-						</a>
-						<div class="wrapper--remaining-space">
-							<ul class="app-section--sidebar__room-info">
-								<a href="{% url 'room' room.pk %}">
-									<li class="app-section--sidebar__room-name">
-										{{ room.name }}
-									</li>
-								</a>
-								<li class="wrapper--remaining-space">
-									<div class="app-section--sidebar__room-description">
-										{{ room.description }}
-									</div>
-								</li>
-							</ul>
-						</div>
-					</li>
-					<li class="app-section--sidebar__room-utility">
-						{% if user|user_is_member:room %}
-						<a href=".">
-							<span class="app-section--sidebar__button app-section--sidebar__button--leave">
-							Leave
+								<div class="secondary-text secondary-text--medium ellipsis online-color--secondary">
+									{{ joined_room.members.all.count }} Members
+								</div>
 							</span>
-						</a>
-						{% else %}
-						<a href=".">
-							<span class="app-section--sidebar__button app-section--sidebar__button--join">
-								Join
-							</span>
-						</a>
-						{% endif %}
-						<span class="app-section--sidebar__icon-container">
-		
 						</span>
 					</li>
-					<li class="app-section--sidebar__label">
-						Channels
-					</li>
-					<div class="app-section--sidebar__add-channel">
-						<i class="material-symbols-outlined">
-							library_add
-						</i>
-						<span>Create New Channel</span>
-					</div>
-					<ul class="app-section--sidebar__channel-list">
-						{% for channel in room.channels.all %}
-						<a href="{% url 'channel' room=room.pk channel=channel.pk %}" class="app-section--sidebar__channel">
-							<i class="material-symbols-outlined">
-								align_horizontal_left
-							</i>
-							<span class="app-section--sidebar__channel-name">
-								{{ channel.name }}									
-							</span>
-						</a>
-						{% endfor %}
-					</ul>
+					{% endwith %}
+					{% endfor %}
 				</ul>
 			</div>
 		</div>
-		{% block secondary-sidebar %}{% endblock %}
-		<div class="app-section--sidebar__user">
-			<div class="app-section--sidebar__user-avatar">
-				<img src="{{ MEDIA_URL }}{{ user.profile.image.url }}" alt="">
-			</div>
-			<ul class="app-section--sidebar__friend-info">
-				<div class="wrapper--remaining-space">
-					<li class="app-section--sidebar__username app-section--sidebar__username--online">
-						{{ user.username }}
-					</li>
-				</div>
-				<li class="app-section--sidebar__status app-section--sidebar__status--online">
-					Online
-				</li>
-			</ul>
-		</div>
+	</div>
+
+
+
+
+
+	<div class="app__main">
+		{% block app__main %}{% endblock %}
+	</div>
+
+
+
+
+
+	<div class="app__sidebar app__sidebar--primary">
+		{% block app__sidebar--primary %}{% endblock %}
 	</div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script>
-window.addEventListener("load", function() {
-	const app = document.querySelector('.app')
-	const createChannelField = document.querySelector('.app-section--sidebar__add-channel');
-	const createRoomField = document.querySelector('.app-section--sidebar__add-listroom');
-	var overlay;
-	var submitCreateChannel;
 
-	createChannelField && createChannelField.addEventListener('click', addChannelOverlay);
-	createRoomField && createRoomField.addEventListener('click', addRoomOverlay);
-
-	function addChannelOverlay() { 
-		overlay = document.createElement('div')
-		overlay.setAttribute('class', "app-section--overlay")
-		overlay.innerHTML =
-		`
-		<form class="app-section--overlay__window" action="{% url 'create-channel' room.pk %}" method="POST">
-			{% csrf_token %}
-			<div class="app-section--overlay__header">
-				<span>Create New Channel</span>
-				<span class="app-section--overlay__close"><i class="material-symbols-outlined">close</i></span>
-			</div>
-			<div class="app-section--overlay__form-field">
-				<div class="app-section--overlay__label">
-					Name:
-				</div>
-				<div class="app-section--overlay__input">
-					<input type="text" name="name" maxlength="30">
-				</div>
-				<div class="app-section--overlay__footnote">
-					Max Length: 30
-				</div>
-			</div>
-			<div class="app-section--overlay__form-field">
-				<div class="app-section--overlay__label">
-					Description:
-				</div>
-				<div class="app-section--overlay__input">
-					<input type="text" name="description" maxlength="60">
-				</div>
-				<div class="app-section--overlay__footnote">
-					Max Length: 60
-				</div>
-			</div>
-			<button class="app-section--overlay__submit" type="submit">Create New Channel</button>
-		</form>
-		`
-		app.appendChild(overlay)
-		submitCreateChannel = document.querySelector('.app-section--overlay__submit')
-		document.querySelector('.app-section--overlay__close').addEventListener('click', removeOverlay);
-	}
-
-	function addRoomOverlay() { 
-		overlay = document.createElement('div')
-		overlay.setAttribute('class', "app-section--overlay")
-		overlay.innerHTML =
-		`
-		<form class="app-section--overlay__window" action="{% url 'create-room' %}" method="POST">
-			{% csrf_token %}
-			<div class="app-section--overlay__header">
-				<span>Create New Room</span>
-				<span class="app-section--overlay__close"><i class="material-symbols-outlined">close</i></span>
-			</div>
-			<div class="app-section--overlay__form-field">
-				<div class="app-section--overlay__label">
-					Name:
-				</div>
-				<div class="app-section--overlay__input">
-					<input type="text" name="name" maxlength="50">
-				</div>
-				<div class="app-section--overlay__footnote">
-					Max Length: 50
-				</div>
-			</div>
-			<div class="app-section--overlay__form-field">
-				<div class="app-section--overlay__label">
-					Description:
-				</div>
-				<div class="app-section--overlay__input">
-					<input type="text" name="description" maxlength="60">
-				</div>
-				<div class="app-section--overlay__footnote">
-					Max Length: 60
-				</div>
-			</div>
-			<button class="app-section--overlay__submit" type="submit">Create New Room</button>
-		</form>
-		`
-		app.appendChild(overlay)
-		submitCreateChannel = document.querySelector('.app-section--overlay__submit')
-		document.querySelector('.app-section--overlay__close').addEventListener('click', removeOverlay);
-	}
-
-	function removeOverlay() {
-		app.removeChild(overlay);
-	};
-});
-</script>
 {% endblock %}

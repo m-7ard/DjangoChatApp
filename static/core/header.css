@@ -11,6 +11,8 @@ body {
   left: 0;
   padding: 0;
   margin: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 a {
@@ -21,8 +23,7 @@ input {
   margin: 0;
   padding: 0;
   border: solid 0px #888;
-  vertical-align: middle;
-  height: 30px;
+  vertical-align: top;
 }
 
 input[type=submit] {

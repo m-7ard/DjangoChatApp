@@ -1,0 +1,19 @@
+<a class="app__channel offline-color--primary" href="{% url 'channel' room=room_pk channel=channel_pk %}">
+	<span class="icon icon--tiny">
+		<i class="material-symbols-outlined">
+			{% if kind == 'text' %}
+			keyboard
+			{% elif kind == 'voice' %}
+			volume_up
+			{% endif %}
+		</i>
+	</span>
+	<div class="secondary-text secondary-text--medium ellipsis">
+		{{ name }}
+	</div>
+	<span class="icon icon--tiny right">
+		<i class="material-symbols-outlined">
+			settings
+		</i>
+	</span>
+</a>

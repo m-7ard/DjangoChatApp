@@ -1,14 +1,16 @@
+from PIL import Image
+from itertools import chain
+
 from django.db import models
 from django.contrib.auth.models import User
 
-from PIL import Image
 
 
 class Room(models.Model):
     name = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=60, blank=True)
     owner = models.ForeignKey(User, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
-    image = models.ImageField(default='blank.png')
+    image = models.ImageField(default='blank.png', max_length=500)
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -17,19 +19,61 @@ class Room(models.Model):
     def members_by_users(self):
         return self.members.all()
 
+    def members_by_status(self):
+        online = self.members.all().filter(
+            user__profile__status='online'
+        )
+        offline = self.members.all().difference(online)
+        result = {
+            'Online': online,
+            'Offline': offline
+        }
+        return result
+
+    def channels_and_categories(self):
+        uncategorised_channels = self.channels.all().filter(category=None)
+        categories = self.categories.all()
+        query = sorted(
+            chain(uncategorised_channels, categories),
+            key=lambda obj: obj.order,
+        )
+
+        return query
+
 
 class Channel(models.Model):
+    TEXT = 'text'
+    VOICE = 'voice'
+    KIND = (
+        (TEXT, 'Text Channel'),
+        (VOICE, 'Voice Channel'),
+    )
     room = models.ForeignKey(Room, related_name='channels', on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=60, blank=True)
-    display_logs = models.ManyToManyField('Action')
-    
+    display_logs = models.ManyToManyField('Action', blank=True)
+    category = models.ForeignKey('ChannelCategory', on_delete=models.SET_NULL, related_name='channels', null=True, blank=True)
+    kind = models.CharField(max_length=20, choices=KIND, default=TEXT)
+    order = models.PositiveIntegerField(default=1_000_000)
+
     def __str__(self):
         return f'{self.room}: {self.name}'
 
     def display_actions(self):
         return [action.name for action in self.display_logs.all()]
 
+
+class ChannelCategory(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='categories')
+    name = models.CharField(max_length=30)
+    order = models.PositiveIntegerField(default=1_000_000)
+    
+    def channels_by_order(self):
+        return self.channels.all().order_by('order')
+    
+    def __str__(self):
+        return f'{self.room}: {self.name} | order: {self.order}'
+    
 
 class Role(models.Model):
     name = models.CharField(max_length=50, blank=False, default='Role')
@@ -127,17 +171,17 @@ class Reaction(models.Model):
 
 
 class MessageReaction(models.Model):
-	message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
-	reaction = models.ForeignKey(Reaction, on_delete=models.CASCADE)
-	users = models.ManyToManyField(User, blank=True)
-	
-	def add_user(self, user):
-		self.users.add(user)
-	
-	def remove_user(self, user):
-		self.users.remove(user)
-		if len(self.users) == 0:
-			self.delete()
-	
-	def image(self):
-		return self.reaction.image
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
+    reaction = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+    users = models.ManyToManyField(User, blank=True)
+    
+    def add_user(self, user):
+        self.users.add(user)
+    
+    def remove_user(self, user):
+        self.users.remove(user)
+        if len(self.users) == 0:
+            self.delete()
+    
+    def image(self):
+        return self.reaction.image

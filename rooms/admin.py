@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Room, Channel, Message, Log, Role, Member, Action, Reaction, MessageReaction
+from .models import Room, Channel, Message, Log, Role, Member, Action, Reaction, MessageReaction, ChannelCategory
 
 
 class RoleInline(admin.StackedInline):
@@ -39,3 +39,4 @@ admin.site.register(Member)
 admin.site.register(Action)
 admin.site.register(Reaction)
 admin.site.register(MessageReaction)
+admin.site.register(ChannelCategory)

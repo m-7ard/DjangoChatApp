@@ -1,0 +1,42 @@
+<form class="app-section--overlay__window" action="{% url 'update-room' pk %}" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	<input type="hidden" name="room" value="{{ pk }}">
+	<div class="app-section--overlay__header">
+		<span>Update Room</span>
+		<span class="app-section--overlay__close"><i class="material-symbols-outlined">close</i></span>
+	</div>
+	<div class="app-section--overlay__form-field">
+		<div class="app-section--overlay__label">
+			Name:
+		</div>
+		<div class="app-section--overlay__input">
+			<input type="text" name="name" maxlength="50" value="{{ name }}">
+		</div>
+		<div class="app-section--overlay__footnote">
+			Max Length: 50
+		</div>
+	</div>
+	<div class="app-section--overlay__form-field">
+		<div class="app-section--overlay__label">
+			Description:
+		</div>
+		<div class="app-section--overlay__input">
+			<input type="text" name="description" maxlength="60" value="{{ description }}">
+		</div>
+		<div class="app-section--overlay__footnote">
+			Max Length: 60
+		</div>
+	</div>
+	<div class="app-section--overlay__form-field">
+		<div class="app-section--overlay__label">
+			Image:
+		</div>
+		<div class="app-section--overlay__input">
+			<input type="file" name="image">
+		</div>
+		<div class="app-section--overlay__footnote">
+			Select An Image.
+		</div>
+	</div>
+	<button class="app-section--overlay__submit" type="submit">Update Room</button>
+</form>

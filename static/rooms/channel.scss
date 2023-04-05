@@ -22,12 +22,12 @@
 		display: grid;
 		grid-template: auto / auto 1fr;
 		align-items: baseline;
-		gap: 0rem 0.3rem;
+		gap: 0rem 0.25rem;
 
 		&-header {
 			display: flex;
 			align-items: baseline;
-			gap: 0.3rem;
+			gap: 0.25rem;
 		}
 		&-timestamp {
 			color: global.$acapulco-aqua;
@@ -36,6 +36,12 @@
 		&-user {
 			color: global.$premier-yellow;
 			font-size: 1.1rem;
+			width: fit-content;
+
+			&:hover {
+				cursor: pointer;
+				text-decoration: underline;
+			}
 		}
 		&-blank {
 			min-width: min-content;
@@ -128,6 +134,13 @@
 				}
 			}
 		}
+	}
+
+	&__profile {
+		position: absolute;
+		padding: 0.5rem;
+		background-color: global.$black-chestnut-oak;
+		z-index: 1;
 	}
 
 	&__react {
