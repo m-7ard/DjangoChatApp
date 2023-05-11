@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
@@ -15,8 +16,6 @@ from .forms import (
     ChannelUpdateForm, 
     RoomForm
 )
-
-from itertools import chain
 
 
 class DashboardView(TemplateView):
@@ -127,7 +126,6 @@ class RoomUpdateView(FormView):
     
     
 def get_html_form(request, form_name, *args, **kwargs):
-    print(request.GET)
     form_path = os.path.join('rooms', 'templates', 'rooms', 'forms', form_name)
     
     with open(form_path, 'r') as f:

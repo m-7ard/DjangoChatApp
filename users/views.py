@@ -1,44 +1,49 @@
+import random
+
 from django.urls import reverse, reverse_lazy
 from django.views.generic.edit import CreateView
 from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
-from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
-from .forms import UserAttributes_SignupForm, ProfileAttributes_SignupForm
+from django.shortcuts import render
+
+from .forms import SignupForm
+from .models import CustomUser
 
 
 class SignupView(TemplateView):
-    model = User
     template_name = 'users/signup.html'
-    form_class = UserAttributes_SignupForm # technically doesn't do anything here
 
     def get_context_data(self, **kwargs):
-        context = super(SignupView, self).get_context_data(**kwargs)
-        context['ProfileAttributes_SignupForm'] = ProfileAttributes_SignupForm()
-        context['UserAttributes_SignupForm'] = UserAttributes_SignupForm()
+        context = super().get_context_data(**kwargs)
+        context['SignupForm'] = SignupForm()
         
         return context
 
     def post(self, request, *args, **kwargs):
-        profile_form = ProfileAttributes_SignupForm(data=request.POST)
-        user_form = UserAttributes_SignupForm(data=request.POST)
-        if profile_form.is_valid() and user_form.is_valid():
-            print(profile_form.cleaned_data, '*' * 100)
-            user = user_form.save()
-            # creates a blank profile with the signals at models.py
-            user.profile.birthday = profile_form.cleaned_data.get('birthday')
-            user.save()
+        user_form = SignupForm(data=request.POST)
+        username = request.POST.get('username')
 
-        return HttpResponseRedirect(reverse_lazy('frontpage'))
-		
+        existing_username_ids = CustomUser.objects.filter(username=username).values_list('username_id', flat=True)
+        free_ids = [value for value in range(0, 100) if value not in existing_username_ids]
+        if not free_ids:
+            user_form.add_error('username', f'All IDs for username {username} are taken, please choose a different username.')
+
+        if user_form.is_valid():
+            user = user_form.save(commit=False)
+            user.username_id = random.choice(free_ids)
+            return HttpResponseRedirect(reverse_lazy('frontpage'))
+            
+        return render(request, self.template_name, {'SignupForm': user_form})
+        
 
 class SigninView(LoginView):
     template_name = 'users/signin.html'
     success_url = reverse_lazy('frontpage')
     
     def form_invalid(self, form):
-        """If the form is invalid, render the invalid form."""
-        return self.render_to_response(self.get_context_data(form=form))
+        form.add_error('password', 'Invalid credentials, please check your email or password.')
+        return render(self.request, self.template_name, self.get_context_data(form=form))
 
     def get_success_url(self):
         return self.request.GET.get('next') or reverse_lazy('frontpage')

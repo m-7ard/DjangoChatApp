@@ -1,0 +1,43 @@
+<li class="friend friend--{{ friend.status }}">
+	<span class="avatar avatar--small has-shadow">
+		<img src="{{ friend.image.url }}" alt="">
+	</span>
+	<span class="wrapper--remaining-space">
+		<ul class="friend__body">
+			<li class="friend__username">
+				{{ friend.username }}
+			</li>
+			<li class="friend__status">
+				{{ friend.status }}
+			</li>
+		</ul>
+	</span>
+	<span class="friendship" data-pk="{{ friendship.pk }}">
+		{% if friendship.status == 'pending' %}
+		<span class="friendship__accept" data-command="manage_friendship" data-kind="accept">
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">
+					task_alt
+				</i>
+			</div>
+		</span>
+		<span class="friendship__reject" data-command="manage_friendship" data-kind="reject">
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">
+					cancel
+				</i>
+			</div>
+		</span>
+		{% elif friendship.status == 'accepted' %}
+		<span class="friendship" data-pk="{{ friendship.pk }}">
+			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target=".friendship__menu">
+				<div class="icon icon--small">
+					<i class="material-symbols-outlined">
+						expand_more
+					</i>
+				</div>
+			</div>
+		</span>
+		{% endif %}
+	</span>
+</li>	

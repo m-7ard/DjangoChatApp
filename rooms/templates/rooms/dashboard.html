@@ -4,195 +4,150 @@
 
 {% block extrahead %}
 <link rel="stylesheet" type="text/css" href="{% static 'rooms/app.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'rooms/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="app">
-	<!--
-
-		PRIMARY SIDEBAR
-
-	-->	
-	<div class="app-section--sidebar primary">
-		<div class="app-section--sidebar__element">
-			<div class="app__header has-shadow">
+	<div class="app__sidebar app__sidebar--secondary">
+		<div class="container container--fill">
+			<div class="container__header">
 				Friends
 			</div>
-			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					<li class="app-section--sidebar__label">Online</li>
-					<li class="app-section--sidebar__modelbox">
-						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--small has-shadow">
-							<img src="{{ MEDIA_URL }}" alt="">
-						</div>
-						<div class="wrapper--remaining-space">
-							<ul class="app-section--sidebar__infobox">
-								<li class="app-section--sidebar__name app-section--sidebar__name--small app-section--sidebar__name--bold online-main">
-									User name User name User name
-								</li>
-								<li class="app-section--sidebar__status app-section--sidebar__status--small online-secondary">
-									Online
-								</li>
-							</ul>
-						</div>
-					</li>
-					<li class="app-section--sidebar__label">Offline</li>
-					<li class="app-section--sidebar__modelbox">
-						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--small has-shadow">
-							<img src="{{ MEDIA_URL }}" alt="">
-						</div>
-						<div class="wrapper--remaining-space">
-							<ul class="app-section--sidebar__infobox">
-								<li class="app-section--sidebar__name app-section--sidebar__name--small offline-main">
-									User name User name User name
-								</li>
-								<li class="app-section--sidebar__status app-section--sidebar__status--small offline-secondary">
-									Online
-								</li>
-							</ul>
-						</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-		<div class="app-section--sidebar__element app-section--sidebar__element--events">
-			<div class="app__header has-shadow">
-				Events
-			</div>
-			<div class="wrapper--remaining-space">
-				<div class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					
-				</div>
-			</div>
-		</div>
-		<div class="app-section--sidebar__element app-section--sidebar__element--roomlist">
-			<div class="app__header has-shadow">
-				Chatrooms
-			</div>
-			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--no-padding">
-					{% for membership in user.memberships.all %}
-					<a href="{% url 'room' membership.room.pk %}" class="app-section--sidebar__modelbox app-section--sidebar__modelbox--joined-room">
-						<div class="app-section--sidebar__avatar app-section--sidebar__avatar--medium has-shadow">
-							<img src="{{ MEDIA_URL }}{{ membership.room.image.url }}" alt="">
-						</div>
-						<div class="wrapper--remaining-space">
-							<div class="app-section--sidebar__infobox">
-								<div class="app-section--sidebar__name app-section--sidebar__name--medium">
-									{{ membership.room.name }}
-								</div>
-							</div>
-						</div>
-					</a>
-					{% endfor %}
-					<div class="app-section--sidebar__modelbox app-section--sidebar__modelbox--create-room">
-						<div class="wrapper--remaining-space">
-							<div class="app-section--sidebar__infobox app-section--sidebar__infobox--centered has-shadow">
-								<div class="app-section--sidebar__status app-section--sidebar__status--small">
-									Rooms Joined
-								</div>
-								<div class="app-section--sidebar__status app-section--sidebar__status--medium" id="room-count">
-									{{ user.memberships.count }}
-								</div>
-							</div>
-						</div>
-						<div class="app-section--sidebar__icon app-section--sidebar__icon--large has-shadow">
-							<i class="material-symbols-outlined">
-								list_alt_add
-							</i>
-						</div>
-					</div>
-				</ul>
-			</div>		
-		</div>
-	</div>
-	<!--
-
-		MAIN
-
-	-->	
-	<div class="app-section--main">
-		<div class="app-section--main">
-			<div class="app__header">
-				<div class="app-section--main__title">
-					Dashboard
-				</div>
-			</div>
-			<div class="app-section--main__subheader">
-				News, Announcements, Activity...
-			</div>
-			<div class="wrapper--remaining-space">
-				<div class="app-section--main__dashboard">
-					
-				</div>
-			</div>
-		</div>
-	</div>
-	<!--
-
-		SECONDARY SIDEBAR
-
-	-->	
-	<div class="app-section--sidebar secondary">
-		<div class="app-section--sidebar__element app-section--sidebar__element--room-card">
-			<div class="app__header">
-				News
-			</div>
-			<div class="app-section--sidebar__subheader has-shadow">
-				<input type="text" class="app-section--sidebar__search" placeholder="Search">
-				<span class="app-section--sidebar__modelbox right">
-					<div class="app-section--sidebar__icon app-section--sidebar__icon--small">
-						<i class="material-symbols-outlined">
-							settings
-						</i>
-					</div>
+			<div class="container__subheader has-shadow">
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						search
+					</i>
+				</span>
+				<span class="wrapper--remaining-space">
+					<input type="text" class="container__search">
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						patient_list
+					</i>
+				</span>
+				<span class="icon icon--small">
+					<i class="material-symbols-outlined">
+						person_add
+					</i>
 				</span>
 			</div>
 			<div class="wrapper--remaining-space">
-				<ul class="app-section--sidebar__content app-section--sidebar__content--has-padding">
-					
+				<ul class="container__content">
+					<ul class="container__section" data-friendship="pending">
+						{% for friendship in user.friendships.pending %}
+							{% with user|get_friendship_friend:friendship as friend %}
+								{% include "./elements/friend.html" %}
+							{% endwith %}
+						{% endfor %}
+						<li class="container__label container__label--optional flex-first">
+							Incoming Friend Requests
+						</li>
+					</ul>
+					<ul class="container__section" data-friendship="all">
+						{% for friendship in user.friendships.accepted %}
+							{% with user|get_friendship_friend:friendship as friend %}
+								{% include "./elements/friend.html" %}
+							{% endwith %}
+						{% endfor %}
+						<li class="container__label container__label--optional flex-first">
+							All Friends
+						</li>
+					</ul>
 				</ul>
 			</div>
 		</div>
-		<div class="app-section--sidebar__footer">
-			<div class="app-section--sidebar__modelbox app-section--sidebar__modelbox--request-user">
-				<div class="app-section--sidebar__avatar app-section--sidebar__avatar--medium has-shadow">
-					<img src="{{ MEDIA_URL }}{{ user.profile.image.url }}" alt="">
+		<div class="container container--fill">
+			<div class="container__header has-shadow">
+				Events
+			</div>
+			<div class="wrapper--remaining-space">
+				<div class="container__content">
+
 				</div>
-				<div class="wrapper--remaining-space">
-					<div class="app-section--sidebar__infobox">
-						<div class="app-section--sidebar__modelbox online-main">
-							<div class="app-section--sidebar__name app-section--sidebar__name--medium">
-								{{ user.username }}
-							</div>
-							<div class="app-section--sidebar__icon app-section--sidebar__icon--small">
-								<i class="material-symbols-outlined">
-									key_visualizer
-								</i>
-							</div>
-						</div>
-						<div class="app-section--sidebar__status app-section--sidebar__status--small online-secondary">
-							Online
-						</div>
-					</div>
-				</div>
-				
-				<a href="{% url 'dashboard' %}" class="app-section--sidebar__dashboard-button right">
-					<div class="app-section--sidebar__icon app-section--sidebar__icon--large has-shadow">
-						<i class="material-symbols-outlined">
-							home
-						</i>
-					</div>
-				</a>
 			</div>
 		</div>
+		<div class="container container--fill">
+			<div class="container__header">
+				Groups			
+			</div>
+			<div class="container__subheader has-shadow">
+				<span class="icon icon--small icon__hoverable">
+					<i class="material-symbols-outlined">
+						search
+					</i>
+				</span>
+				<span class="wrapper--remaining-space">
+					<input type="text" class="container__search">
+				</span>
+				<span class="icon icon--small icon__hoverable" data-command="">
+					<i class="material-symbols-outlined">
+						list_alt_add
+					</i>
+				</span>
+				<span class="icon icon--small icon__hoverable">
+					<i class="material-symbols-outlined">
+						travel_explore
+					</i>
+				</span>
+			</div>
+			<div class="wrapper--remaining-space">
+				<ul class="container__content">
+					{% for membership in user.memberships.all %}
+					{% with membership.room as joined_room  %}
+					<a class="modelbox modelbox--hoverable" href="{% url 'room' joined_room.pk %}">
+						<span class="avatar avatar--medium has-shadow">
+							<img src="{{ MEDIA_URL }}{{ joined_room.image.url }}" alt="">
+						</span>
+						<span class="wrapper--remaining-space">
+							<span class="modelbox__info">
+								<div class="primary-text primary-text--medium ellipsis online-color--primary">
+									{{ joined_room }}
+								</div>
+								<div class="secondary-text secondary-text--medium ellipsis online-color--secondary">
+									{{ joined_room.members.all.count }} Members
+								</div>
+							</span>
+						</span>
+					</a>
+					{% endwith %}
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="app__main">
+
+	</div>
+
+	<div class="app__sidebar app__sidebar--primary">
+		{% block app__sidebar--primary %}{% endblock %}
 	</div>
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script>
+{% block tooltips %}
 
-</script>
+<div class="friendship__menu tooltip tooltip--hidden has-shadow">
+	<div class="friendship__action secondary-text secondary-text--small tooltip__close">
+		Message Friend
+	</div>
+	<div class="friendship__action secondary-text secondary-text--small tooltip__close">
+		Add Nickname
+	</div>
+	<div class="friendship__action secondary-text secondary-text--small tooltip__close" data-command="manage_friendship" data-kind="remove">
+		Remove Friend
+	</div>
+</div>
+
+<div class="profile tooltip tooltip--hidden has-shadow" id="member-profile">
+	{% include "./elements/member-profile.html" %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/app.js' %}"></script>
 {% endblock %}

@@ -12,14 +12,16 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1;
-		background-color: global.$anthracite;
+		background-color: global.$vampire-black;
 		// min-width: 16.875rem;
+		overflow: hidden;
 	}
 
 	&__sidebar {
 		display: flex;
 		flex-direction: column;
 		background-color: global.$charcoal-grey;
+		overflow: hidden;
 
 		&--primary {
 			width: 20rem;
@@ -35,26 +37,32 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: bold;
-		box-shadow: 0px 0px 7px 1px global.$saturated-titanium-yellow;
 		width: 6rem;
 		padding: 0.25rem;
-		background-color: global.$saturated-titanium-yellow;
-		color: global.$vampire-black;
 		margin: 0.5rem;
+		background-color: global.$saturated-titanium-yellow;
+		color: global.$charcoal-grey;
+		box-shadow: 0px 0px 7px 1px global.$saturated-titanium-yellow;
 	}
 
 	&__category {
-		position: relative;
 		display: flex;
-		gap: 0.25rem;
-		align-items: center;
+		align-items: center;		
 		padding: 0.3125rem;
+		gap: 0.25rem;
 		background-color: global.$charcoal-grey;
-		
 		transition: background-color 0.25s;
 		transition: color 0.25s;
-
 		z-index: 2;
+		position: relative;
+
+		& .icon:first-of-type {
+			transition: transform 0.5s;
+
+			.dropdown:has(.dropdown__content--hidden) & {
+				transform: rotate(-90deg);
+			}
+		}
 
 		& i:hover {
 			color: global.$premier-yellow;
@@ -87,12 +95,12 @@
 		transition: color 0.25s;
 		z-index: 1;
 
-		background-color: global.$vampire-black;
+		background-color: global.$black-grey;
 
 
 		&:hover {
 			cursor: pointer;
-			background-color: global.$black-chestnut-oak;
+			background-color: global.$black-grey;
 			color: global.$chalk-white;
 		}
 	}
@@ -101,4 +109,12 @@
 		border-left: 0.3125rem solid global.$charcoal-grey;
 		transition: border-color 0.25s;
 	}
+
+	[data-friendship] .container__label {
+		display: none;
+	}
+
+	[data-friendship]:has(.modelbox) .container__label {
+		display: flex;
+	} 
 }

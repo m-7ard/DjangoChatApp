@@ -1,7 +1,10 @@
+@use '../core/global';
+
 html { 
 	height:100%; 
 	font-family: "Lato", monospace;
 }
+
 body {
 	position:absolute; 
 	top:0; 
@@ -23,10 +26,13 @@ input { margin:0; padding:0; border:solid 0px #888; vertical-align:top; }
 input[type="submit"] { height:32px; }
 input:focus { outline:none!important; }
 
-
-
 ul, li {
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
+}
+
+button {
+	all: unset;
+	cursor: pointer;
 }

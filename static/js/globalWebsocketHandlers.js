@@ -1,4 +1,4 @@
-let chatSocketSendHandlers = {
+const chatSocketSendHandlers = {
 	'ping':
 		function(event) {
 			console.log('pinged')
@@ -20,7 +20,7 @@ let chatSocketSendHandlers = {
 		},
 };
 
-let chatSocketReceiveHandlers = {
+const chatSocketReceiveHandlers = {
 	'ping': chatSocketSendHandlers["ping"],
 	'requestServerResponse': 
 		function() {
@@ -28,7 +28,7 @@ let chatSocketReceiveHandlers = {
 		},
 	'offline':
 		function(data) {
-			let user_references = document.querySelectorAll('')
+			let user_references = document.querySelectorAll('.deez')
 		},
 	'create-room': 
 		function(data) {

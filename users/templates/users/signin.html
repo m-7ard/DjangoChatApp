@@ -1,36 +1,35 @@
 {% extends "core/header.html" %}
-{% load static %}
-
-{% block extrahead %}
-<link rel="stylesheet" type="text/css" href="{% static 'users/signin.css' %}">
-{% endblock %}
 
 {% block content %}
-<div class="signin">
-	<form action="" method="POST" class="signin__content">
-		<ul class="signin__header">
-			<li><a href="{% url 'frontpage' %}" class="signin__header-element">⇦ Go back</a></li>
-			<li class="signin__header-element">Sign into your account</li>
-		</ul>
+<div class="account">
+	<form method="POST" class="form">
+		<div class="form__title x-center">
+			Sign into your account
+		</div>
 		{% csrf_token %}
-		<div class="signin__form-field">
-			<div class="signin__label">
-				{{ form.username.label }}
+		{% for field in form %}
+		{% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
+		<div class="form__field {{ modifier }}">
+			<div class="form__label">
+				{{ field.label }}
 			</div>
-			<div class="signin__input">
-				{{ form.username }}
+			<div class="form__input">
+				{{ field }}
 			</div>
+			{% for error in field.errors %}
+			<div class="form__error">
+				{{ error }}
+			</div>
+			{% endfor %}
 		</div>
-		<div class="signin__form-field">
-			<div class="signin__label">
-				{{ form.password.label }}
-			</div>
-			<div class="signin__input">
-				{{ form.password }}
-			</div>
-		</div>
-		
-		<button class="signin__submit" type="submit">Sign In</button>
+		{% endwith %}
+		{% endfor %}
+		<button class="form__submit" type="submit">
+			Sign In
+		</button>
+		<a href="{% url 'signup' %}" class="account__link">
+			Don't Have An Account Yet?
+		</a>
 	</form>
 </div>
 

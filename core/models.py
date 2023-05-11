@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+
+from users.models import CustomUser
 
 
 class News(models.Model):
     title = models.CharField(blank=False, max_length=100)
     content = models.TextField(blank=False)
-    author = models.ForeignKey(User, related_name='authored', on_delete=models.CASCADE, blank=False, null=True)
+    author = models.ForeignKey(CustomUser, related_name='authored', on_delete=models.CASCADE, blank=False, null=True)
     date_posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:

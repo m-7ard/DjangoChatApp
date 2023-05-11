@@ -8,6 +8,9 @@
 
 
 {% block app__main %}
+
+{% include "./elements/reactions.html" %}
+
 <div class="container container--fill">
 	<div class="container__header">
 		{{ channel.name }}
@@ -28,71 +31,31 @@
 		</span>
 	</div>
 	<div class="wrapper--remaining-space">
-		<ul class="container__content">
+		<ul class="container__content" id="app__messages">
 			{% for backlog in backlogs %}
 				{% if backlog|classname == 'Message' %}
-				{% with backlog as message %}
-					<li class="message">
-						<span class="avatar avatar--small has-shadow">
-							<img src="{{ MEDIA_URL }}{{ message.user.profile.image.url }}" alt="">
-						</span>
-						<span class="message__body">
-							<div class="message__header">
-								<div class="primary-text primary-text--medium online-color--primary">
-									{{ message.user.username }}
-								</div>
-								<div class="message__timestamp secondary-text secondary-text--small offline-color--primary">
-									{{ message.display_date }}
-								</div>
-							</div>
-							<div class="message__content secondary-text secondary-text--large">
-								{{ message.content }}
-							</div>
-						</span>
-						<div class="message__actions has-shadow">
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										add_reaction
-									</i>
-								</div>
-							</span>
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										comment
-									</i>
-								</div>
-							</span>
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										menu
-									</i>
-								</div>
-							</span>
-						</div>
-					</li>
-				{% endwith %}
+					{% with backlog as message %}
+						{% include "./elements/message.html" with pk=message.pk image=message.user.profile.image.url username=message.member.display_name timestamp=message.display_date content=message.content editable=message.user.pk|eq:user.pk %}
+					{% endwith %}
 				{% elif backlog|classname == 'Log' %}
-				{% with backlog as log %}
-					<li class="log">
-						<span class="primary-text primary-text--small offline-color--primary">
-							{{ log.trigger_user }}
-						</span>
-						<span class="secondary-text secondary-text--small offline-color--secondary">
-							{{ log.action.display_name }}
-						</span>
-						{% if log.target_user %}
-						<span class="primary-text primary-text--small offline-color--primary">
-							{{ log.target_user }}
-						</span>
-						{% endif %}
-						<span class="secondary-text secondary-text--small offline-color--secondary">
-							{{ log.display_date }}
-						</span>
-					</li>
-				{% endwith %}
+					{% with backlog as log %}
+						<li class="log">
+							<span class="primary-text primary-text--small offline-color--primary">
+								{{ log.trigger_user }}
+							</span>
+							<span class="secondary-text secondary-text--small offline-color--secondary">
+								{{ log.action.display_name }}
+							</span>
+							{% if log.target_user %}
+							<span class="primary-text primary-text--small offline-color--primary">
+								{{ log.target_user }}
+							</span>
+							{% endif %}
+							<span class="secondary-text secondary-text--small offline-color--secondary">
+								{{ log.display_date }}
+							</span>
+						</li>
+					{% endwith %}
 				{% endif %}
 			{% endfor %}
 		</ul>
@@ -120,7 +83,7 @@
 {% endblock %}
 
 {% block app__sidebar--primary %}
-	{% include "./pattern/app__sidebar--primary.html" %}
+	{% include "./elements/app__sidebar--primary.html" %}
 {% endblock %}
 
 
@@ -128,309 +91,119 @@
 {{ block.super }}
 <script>
 window.addEventListener("load", function() {
-	// DOM elements
-	const messageForm = document.querySelector('.app-section--main__chatbar')
-	const messageInput = document.querySelector('.app-section--main__chatbar-input');
-	const messageContainer = document.querySelector('.app-section--main__channel');
-	messageContainer.scrollTop = messageContainer.scrollHeight;
-	const joinButton = document.querySelector('.app-section--sidebar__button--join');
-	const leaveButton = document.querySelector('.app-section--sidebar__button--leave');
-	const reactionEmotes = document.querySelectorAll('.app-section--main__react-emote');
+	Object.assign(chatSocketSendHandlers, {
+		'send_message': function submitMessage(event) {
+			if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
+				return;
+			};
+			event.preventDefault();
+			chatSocket.send(JSON.stringify({
+				'action': 'send_message',
+				'content': chatbarInput.value.trim()
+			}));
+			chatbarInput.value = '';
+		},
+		'delete_message': function deleteMessageDB(event) {
+			let message = event.target.closest('.message');
+			chatSocket.send(JSON.stringify({
+				'action': 'delete_message',
+				'pk': message.dataset.pk
+			}));
+		},
+		'react_message': function addOrRemoveReactionDB(event) {
+			let reaction = event.target.closest('.reactions__reaction, .message__reaction');
+			let message = event.target.closest('.message');
+			chatSocket.send(JSON.stringify({
+				'action': 'react_message',
+				'reactionPk': reaction.dataset.pk,
+				'messagePk': message.dataset.pk
+			}));
+		},
+		'edit_message': function editMessageDB(event) {
+			if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
+				return;
+			};
+			event.preventDefault();
+			let editInput = event.target;
+			let message = event.target.closest('.message');
+			let contentContainer = editInput.closest('.message__content');
+			contentContainer.classList.remove('message__content--editing');
+			chatSocket.send(JSON.stringify({
+				'action': 'edit_message',
+				'messagePk': message.dataset.pk,
+				'content': editInput.value.trim()
+			}));
+			editInput.remove()
+		},
+	});
 
-	// actions that send data to the WebSocket
-	chatSocketSendHandlers = {
-		...chatSocketSendHandlers,
-		"message": 
-			function(event) {
-				event.preventDefault();
-				if ((event.key === "Enter" && !event.shiftKey) || event.type == "submit") { 
-						let content = messageInput.value;
-						chatSocket.send(JSON.stringify({
-							'action': 'message',
-							'content': content,
-							'user': userPk,
-							'channel': channelID,
-						}));
-						messageInput.value = '';
-				};
-			},
-		"join": 
-			function(event) {
-				chatSocket.send(JSON.stringify({
-					'action': 'join'
-				}));
-			},
-		"leave":
-			function(event) {
-				chatSocket.send(JSON.stringify({
-					'action': 'leave'
-				}));
-			},
-		"delete":
-			function(event) {
-				let message = event.target.closest(`.app-section--main__message`);
-				let pk = message.getAttribute('pk');
-				chatSocket.send(JSON.stringify({
-					'action': 'delete',
-					'pk': pk
-				}));
-			},
-		"react":
-			function(event) {
-				let reaction;
-				let message;
-				if (event.target.closest('.app-section--main__react')) {
-					reaction = event.target.closest('.app-section--main__react-emote');
-					message = (
-						messageContainer.querySelector('.has-open-action')
-						.closest('.app-section--main__message')
-					);
-				}
-				else {
-					reaction = event.target.closest('.app-section--main__message-reaction');
-					message = event.target.closest('.app-section--main__message');
-				};
-				
-				let messagePk = message.getAttribute('pk');
-				let reactionPk = reaction.getAttribute('pk');
-				console.log(reactionPk)
-				chatSocket.send(JSON.stringify({
-					'action': 'react',
-					'reaction_pk': reactionPk,
-					'message_pk': messagePk,
-				}));
-			},
-	};
+	/* Extend chatSocketReceiveHandlers with channel-wide handlers */
+	Object.assign(chatSocketReceiveHandlers, {
+		'send_message': function receiveMessage(data) {
+			let message = new DOMParser().parseFromString(data.html, "text/html").querySelector('.message');
+			appMessages.appendChild(message);
+			appMessages.scrollTo(0, appMessages.scrollHeight);
+		},
+		'delete_message': function deleteMessageDOM(data) {
+			let pk = data.pk;
+			let message = document.querySelector(`.message[data-pk="${pk}"]`);
+			message.remove();
+		},
+		'react_message': function addOrRemoveReactionDB(data) {
+			let {actionType, reactionPk, messagePk} = data;
+			console.log(actionType, reactionPk, messagePk)
+			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
+			let messageReactions = message.querySelector('.message__reactions');
+			if (actionType == ['addReaction']) {
+				let reaction = messageReactions.querySelector(`.message__reaction[data-pk="${reactionPk}"]`);
+				reaction.classList.add('message__reaction--selected');
+				let counter = reaction.querySelector('.message__counter');
+				counter.innerText = parseInt(counter.innerText) + 1;
+			}
+			else if (actionType == ['removeReaction']) {
+				let reaction = messageReactions.querySelector(`.message__reaction[data-pk="${reactionPk}"]`);
+				reaction.classList.remove('message__reaction--selected');
+				let counter = reaction.querySelector('.message__counter');
+				counter.innerText = parseInt(counter.innerText) - 1;
+			}
+			else if (actionType == ['createReaction']) {
+				let reaction = document.createElement('span');
+				reaction.classList.add('message__reaction');
+				reaction.classList.add('message__reaction--selected');
+				reaction.classList.add('has-shadow');
+				reaction.dataset.pk = reactionPk;
+				reaction.dataset.command = "react";
+				reaction.innerHTML = `
+				<img src="{{ MEDIA_URL }}${data.url}" alt="">
+				<span class="message__counter">1</span>
+				`;
+				messageReactions.appendChild(reaction);
+			}
+			else if (actionType == ['deleteReaction']) {
+				let reaction = messageReactions.querySelector(`.message__reaction[data-pk="${reactionPk}"]`);
+				reaction.remove();
+			}
+		},
+		'edit_message': function editMessageDOM(data) {
+			let {messagePk, content} = data;
+			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
+			let contentContainer = message.querySelector('.message__content');
+			contentContainer.innerText = content;
+		},
+		'response': () => { console.log('response exists') }
+	});
 
-	// actions that receive data from the WebSocket
-	chatSocketReceiveHandlers = {
-		...chatSocketReceiveHandlers,
-		'message': 
-			function(data) {
-				let message = document.createElement('li');
-				message.classList.add('app-section--main__message');
-				message.setAttribute('pk', `${data.pk}`)
-				message.innerHTML += (
-				`
-				<div class="app-section--main__message-timestamp">${data.date}</div>
-				<div class="wrapper--remaining-space">
-					<div class="app-section--main__message-user">${data.username}</div>
-				</div>
-				<div class="app-section--main__message-blank"></div>
-				<div class="app-section--main__message-body">
-					<span>${data.content}</span>
-					<div class="app-section--main__message-actions">
-						<span action="react">
-							<i class="material-symbols-outlined">add_reaction</i>
-						</span>
-						<span action="delete">
-							<i class="material-symbols-outlined">delete</i>
-						</span>
-						<span action="menu">
-							<i class="material-symbols-outlined">menu</i>
-						</span>	
-					</div>				
-				</div>
-				<div class="app-section--main__message-blank"></div>
-				<div class="app-section--main__message-reactions"></div>
-				`
-				);
-				messageContainer.appendChild(message);
-				messageContainer.scrollTop = messageContainer.scrollHeight;
-			},
-		'delete': 
-			function(data) {
-				let pk = data.pk;
-				let message = document.querySelector(`.app-section--main__message[pk="${pk}"]`);
-				message.remove();
-			},
-		'log':
-			function(data) {
-				let triggerUser = data.trigger_user;
-				let targetUser = data.target_user;
-				let action = data.action_display_name;
-				let date = data.date;
-
-				let log = document.createElement('li');
-				log.classList.add('app-section--main__log');
-				if (targetUser) {
-					log.innerHTML += (
-					`
-					<div class="app-section--main__message-header">
-						<span class="app-section--main__log-user">${triggerUser}</span>
-						<span class="app-section--main__log-action">${action}</span>
-						<span class="app-section--main__log-user">${targetUser}</span>
-						<span class="app-section--main__log-timestamp">${date}</span>
-					</div>
-					`
-					);
-				}
-				else {
-					log.innerHTML += (
-					`
-					<div class="app-section--main__message-header">
-						<span class="app-section--main__log-user">${triggerUser}</span>
-						<span class="app-section--main__log-action">${action}</span>
-						<span class="app-section--main__log-timestamp">${date}</span>
-					</div>
-					`
-					);
-				};
-				
-				messageContainer.appendChild(log);
-				messageContainer.scrollTop = messageContainer.scrollHeight;
-			},
-		"react":
-			function(data) {
-				let reactionPk = data.reaction_pk;
-				let messagePk = data.message_pk;
-
-				let loggedInUserPk = parseInt("{{ user.pk }}");
-				let websocketUserPk = data.user_pk;
-
-				// message
-				let message = messageContainer.querySelector(`.app-section--main__message[pk="${messagePk}"]`)
-				// specific message reaction or null
-				let reaction = message.querySelector(`.app-section--main__message-reaction[pk="${reactionPk}"]`);
-				// container with all reactions or null
-				let reactions = message.querySelector('.app-section--main__message-reactions');
-
-				let imageURL = data.image_URL;
-				let modifier = data.modifier;
-
-				if (modifier == 'create') {
-					let newReaction = document.createElement('div');
-					newReaction.classList.add('app-section--main__message-reaction');
-					loggedInUserPk === websocketUserPk ? newReaction.classList.add('active') : newReaction.classList.add('inactive');
-					newReaction.setAttribute('pk', reactionPk);
-					newReaction.innerHTML += (
-					`
-					<img src="${imageURL}">
-					<span class="count">1</span>
-					`
-					);
-					reactions.appendChild(newReaction);
-				}
-				else if (modifier == 'delete') {
-					reaction.remove()
-				}
-				else if (modifier == 'add') {
-					let count = reaction.querySelector('.count');
-					toggleReactionClass(reaction);
-					count.innerHTML = parseInt(count.innerHTML) + 1;
-				}
-				else if (modifier == 'remove') {
-					let count = reaction.querySelector('.count');
-					toggleReactionClass(reaction);
-					count.innerHTML = parseInt(count.innerHTML) - 1;
-				};
-
-				function toggleReactionClass(reaction) {
-					if (loggedInUserPk === websocketUserPk) {
-						reaction.classList.toggle('active');
-						reaction.classList.toggle('inactive');
-					};
-				};
-			},
-
-	};
-
-	// actions that relate to the messages
-	const messageActionHandlers = {
-		"delete":
-			chatSocketSendHandlers["delete"],
-		'menu': 
-			function(event) {
-				console.log('balls')
-			},
-		'react':
-			function(event) {
-				event.stopPropagation();
-				let message = event.target.closest('.app-section--main__message');
-				let actionsContainer = message.querySelector('.app-section--main__message-actions');
-				let reactionsTooltip = document.querySelector('.app-section--main__react');
-
-				if (reactionsTooltip.style.display == 'flex') {
-					reactionsTooltip.style.display = 'none';
-					window.removeEventListener('click', closeTooltipAndResetActions);
-				}
-				else {
-					// keep the action field displayed while the tooltip is open
-					actionsContainer.classList.add('has-open-action');
-					Popper.createPopper(actionsContainer, reactionsTooltip, {
-						placement: 'bottom-end',
-						modifiers: [
-								{
-								name: 'offset',
-								options: {
-									offset: [0, 5],
-								},
-							},
-						],
-					});
-					reactionsTooltip.style.display = 'flex';
-					window.addEventListener('click', closeTooltipAndResetActions);
-				};
-
-				function closeTooltipAndResetActions(event) {
-					if (!event.target.closest('.app-section--main__react')) {
-						reactionsTooltip.style.display = 'none';
-						actionsContainer.classList.remove('has-open-action');
-						window.removeEventListener('click', closeTooltipAndResetActions);
-					};
-				};
-			},
-	};
+	const chatbarInput = document.querySelector('.chatbar__input');
+	const appMessages = document.querySelector('#app__messages');
+	appMessages.scrollTo(0, appMessages.scrollHeight);
 
 
-	
 
-	
-	messageContainer.addEventListener('click', messageActionDelegator);
-	messageContainer.addEventListener('click', messageReactionListener);
-	messageContainer.addEventListener('click', messageProfileListener);
+	/* Message */ chatbarInput.addEventListener('keypress', chatSocketSendHandlers['send_message'])
 
-	messageForm.addEventListener("submit", chatSocketSendHandlers["message"]);
-	messageInput.addEventListener("keyup", chatSocketSendHandlers["message"]);
-	joinButton && joinButton.addEventListener('click', chatSocketSendHandlers["join"]);
-	leaveButton && leaveButton.addEventListener('click', chatSocketSendHandlers["leave"]);
-	reactionEmotes && reactionEmotes.forEach((element) => element.addEventListener("click", chatSocketSendHandlers["react"]))
-	setInterval(chatSocketSendHandlers["requestServerResponse"], 3000)
 
-	function messageActionDelegator(event) {
-		let actionNode = event.target.closest('[action]');
-		if (actionNode) {
-			let action = actionNode.getAttribute('action');
-			let handler = messageActionHandlers[action];
-			handler(event);
-		};
-	};
 
-	function messageReactionListener(event) {
-		if (event.target.closest('.app-section--main__message-reaction')) {
-			let handler = chatSocketSendHandlers["react"];
-			handler(event);
-		}
-	};
 
-	function messageProfileListener(event) {
-		console.log(event.target, event.target.classList)
-		if (event.target.classList.contains('app-section--main__message-user')) {
-			let username = event.target;
-			let profile = document.createElement('div');
-			profile.classList.add('app-section--main__profile');
-			profile.classList.add('has-shadow');
-			profile.innerHTML += (
-			`
-			
-			`)
-
-			Popper.createPopper(username, profile, {
-				placement: 'bottom-end',
-			});
-			event.target.parentNode.appendChild(profile);
-		};
-	};	
 });
 </script>
 {% endblock %}

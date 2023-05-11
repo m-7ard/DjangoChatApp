@@ -1,0 +1,97 @@
+<li class="message" data-pk="{{ message_pk }}">
+	<div class="message__body">
+		<span class="avatar avatar--small has-shadow">
+			<img src="{{ MEDIA_URL }}{{ image }}" alt="">
+		</span>
+		<span class="message__main">
+			<div class="message__info">
+				<div class="message__user primary-text primary-text--medium online-color--primary tooltip__trigger"
+				data-target="#member-profile" 
+				data-positioning='{"top": "100%", "left": "0px"}'
+				data-pk="{{ member_pk }}"
+				>
+					{{ username }}
+				</div>
+				<div class="secondary-text secondary-text--small offline-color--primary">
+					{{ timestamp }}
+				</div>
+			</div>
+			<div class="message__content secondary-text secondary-text--large">
+				{{ content|linebreaksbr|convert_reactions:room_pk }}
+			</div>
+			{% spaceless %}
+			<div class="message__reactions">
+				{% for message_reaction in message.reactions.all %}
+				<span class="message__reaction has-shadow {% if user in message_reaction.users.all %}message__reaction--selected{% endif %}"
+				data-pk="{{ message_reaction.reaction.pk }}" data-command="react_message">
+					<img src="{{ MEDIA_URL }}{{ message_reaction.image.url }}" alt="">
+					<span class="message__counter">
+						{{ message_reaction.users.all.count }}
+					</span>
+				</span>
+				{% endfor %}
+			</div>
+			{% endspaceless %}
+		</span>
+	</div>
+	<div class="message__actions has-shadow">
+		<span class="message__action tooltip__trigger" 
+		data-target=".reactions" 
+		data-positioning='{"top": "0px", "right": "-100%"}' 
+		data-kind="message_reaction"
+		>
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">								
+					add_reaction
+				</i>
+			</div>
+		</span>
+		<span class="message__action" data-command="reply_message">
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">								
+					comment
+				</i>
+			</div>
+		</span>
+		{% if editable %}
+		<span class="message__action" data-command="edit_message">
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">								
+					edit
+				</i>
+			</div>
+		</span>
+		{% endif %}
+		<span class="dropdown">
+			<div class="message__action dropdown__trigger">
+				<div class="icon icon--small">
+					<i class="material-symbols-outlined">								
+						menu
+					</i>
+				</div>
+			</div>
+			<ul class="message__menu dropdown__content dropdown__content--hidden has-shadow">
+				<li class="message__action" data-command="delete_message">
+					<div class="icon icon--small">
+						<i class="material-symbols-outlined">								
+							delete
+						</i>
+					</div>
+					<div class="secondary-text secondary-text--small">
+						Delete
+					</div>
+				</li>
+				<li class="message__action" data-command="link_message">
+					<div class="icon icon--small">
+						<i class="material-symbols-outlined">								
+							link
+						</i>
+					</div>
+					<div class="secondary-text secondary-text--small">
+						Message Link
+					</div>
+				</li>
+			</ul>
+		</span>
+	</div>
+</li>

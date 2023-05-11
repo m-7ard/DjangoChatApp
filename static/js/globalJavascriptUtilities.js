@@ -39,3 +39,61 @@ async function getReverseUrl(name, parameters) {
 	const viewUrl = await response.text();
 	return viewUrl
 }
+
+
+function positionFixedContainer(element, reference, positioning) {
+	// positioning arg needs to be a dict / object. Use JSON.parse on the data-positioning.
+	let referenceDimensions = reference.getBoundingClientRect();
+	
+	//
+	Object.entries(positioning).forEach(([key, value]) => {
+		if (value.includes('%') && ['left', 'right'].includes(key)) { 
+			positioning[key] = reference.offsetWidth * (parseInt(value.slice(0, -1)) / 100) + "px";
+		}
+		else if (value.includes('%') && ['top', 'bottom'].includes(key)) { 
+			positioning[key] = reference.offsetHeight * (parseInt(value.slice(0, -1)) / 100) + "px";
+		};
+	});
+	
+	//
+	if (positioning.top != undefined) {
+		element.style.top = `calc(${referenceDimensions.top}px + calc(${positioning.top}))`;
+	} else {
+		element.style.top = '';
+	};
+	if (positioning.left != undefined) {
+		element.style.left = `calc(${referenceDimensions.left}px + calc(${positioning.left}))`
+	} else {
+		element.style.left = '';
+	};
+	if (positioning.right != undefined) {
+		element.style.right = `calc(${document.body.clientWidth - referenceDimensions.right}px - calc(${positioning.right}))`;
+	} else {
+		element.style.right = '';
+	};
+	if (positioning.bottom != undefined) {
+		element.style.bottom = `calc(${document.body.clientHeight - referenceDimensions.bottom}px - calc(${positioning.bottom}))`;
+	} else {
+		element.style.bottom = '';
+	};
+};
+
+function fitFixedContainer(element) {
+	let elementDimensions = element.getBoundingClientRect();
+	if (elementDimensions.bottom > document.body.clientHeight) {
+		element.style.bottom = '0px';
+		element.style.top = '';
+	}; 
+	if (elementDimensions.top < 0) {
+		element.style.top = '0px';
+		element.style.bottom = '';
+	}; 
+	if (elementDimensions.right > document.body.clientWidth) {
+		element.style.right = '0px';
+		element.style.left = '';
+	}; 
+	if (elementDimensions.left < 0) {
+		element.style.left = '0px';
+		element.style.right = '';
+	};
+};

@@ -5,76 +5,29 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-
-		<link rel="stylesheet" type="text/css" href="{% static 'core/header.css' %}">
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		
-		<script src="https://kit.fontawesome.com/a10bcdf2a0.js" crossorigin="anonymous"></script>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
-		<script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
-
+		<link rel="stylesheet" type="text/css" href="{% static 'core/header.css' %}">		
 		{% block extrahead %}{% endblock %}
 	</head>
 	<body>
 		{% block content %}{% endblock %}
+		<div class="layer layer--tooltips">
+			{% block tooltips %}{% endblock %}
+		</div>
 	</body>
-	<script>
-		window.addEventListener("load", function() {
-			// DOM elements
-			const dropdownTriggers = document.querySelectorAll('.dropdown-trigger');
-
-			dropdownTriggers.forEach((trigger) => {
-				trigger.addEventListener('click', (event) => triggerDropdown(trigger, event))
-			})
-
-			// Functions
-			function triggerDropdown(trigger, event) {
-				let container = trigger.closest('.dropdown-container');
-				let content = container.querySelector('.dropdown-content');
-				let closed = container.classList.toggle('closed');
-				let opened = container.classList.toggle('open');
-			}
-		});
-	</script>
 
 	
 	{{ channel.id|json_script:"channel-id" }}
 	{{ room.pk|json_script:"room-pk" }}
 	{{ request.user.id|json_script:"user-id" }}
 
+	<script src="{% static 'js/dist/main.js' %}"></script>
+	
 	<script src="{% static 'js/globalWebsocketHandlers.js' %}"></script>
-	<script>
-		// JSON elements
-		const channelID = JSON.parse(document.getElementById('channel-id').textContent) || null;
-		const roomPk = JSON.parse(document.getElementById('room-pk').textContent) || null;
-		const userPk = JSON.parse(document.getElementById('user-id').textContent) || null;
-
-		chatSocket = new WebSocket(
-			'ws://'
-			+ window.location.host
-			+ '/ws/chat/'
-			+ roomPk
-			+ '/'
-			+ channelID
-			+ '/'
-		);
-
-		chatSocket.onmessage = function(event) {
-			let data = JSON.parse(event.data);
-			let action = data.action;
-			console.log(action)
-			let handler = chatSocketReceiveHandlers[action];
-			handler(data);
-		};
-
-		chatSocket.onclose = function(event) {
-			console.log('onclose');
-		};
-	</script>
+	<script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
+	<script src="{% static 'js/header.js' %}" defer></script>
 	{% block scripts %}{% endblock %}
 </html>

@@ -1,0 +1,29 @@
+{
+  "name": "djangochatapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-7ard/DjangoChatApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/m-7ard/DjangoChatApp/issues"
+  },
+  "homepage": "https://github.com/m-7ard/DjangoChatApp#readme",
+  "dependencies": {
+    "@popperjs/core": "^2.11.7",
+    "tippy.js": "^6.3.7"
+  },
+  "devDependencies": {
+    "webpack": "^5.78.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

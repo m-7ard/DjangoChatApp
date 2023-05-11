@@ -19,7 +19,9 @@
 </div>
 {% endblock %}
 
-{% block secondary-sidebar %}{% endblock %}
+{% block app__sidebar--primary %}
+	{% include "./elements/app__sidebar--primary.html" %}
+{% endblock %}
 
 {% block scripts %}
 {{ block.super }}

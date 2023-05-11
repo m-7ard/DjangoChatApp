@@ -2,14 +2,17 @@ import json
 import datetime
 import asyncio
 import threading
+from pathlib import Path
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
-
+from django.template import Template, Context
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 
+from DjangoChatApp.templatetags.custom_tags import convert_reactions
 from .forms import MessageForm
 from .models import (
     Message, 
@@ -21,27 +24,35 @@ from .models import (
     Reaction, 
     MessageReaction
 )
+from users.models import Friendship
 
-from utils import get_object_or_none
-
+from utils import get_object_or_none, get_rendered_html
+from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.loop = asyncio.get_event_loop()
-        self.ping = False
-
+        # self.ping = False
         self.user = self.scope['user']
-        self.session = self.scope['session']
+        self.room = await sync_to_async(get_object_or_none)(
+            obj=Room,
+            pk=self.scope['url_route']['kwargs'].get('room')
+        )
 
-        self.room_pk = self.scope['url_route']['kwargs'].get('room')
-        self.channel_pk = self.scope['url_route']['kwargs'].get('channel')
+        self.channel = await sync_to_async(get_object_or_none)(
+            obj=Channel,
+            pk=self.scope['url_route']['kwargs'].get('channel')
+        )
+        
+        self.room_pk = 0
+        self.channel_pk = 0
 
-        self.room_group_name = f'room_{self.room_pk}'
-        self.channel_group_name = f'channel_{self.channel_pk}'
+        self.room_group_name = f'room_{self.room.pk}'
+        self.channel_group_name = f'channel_{self.channel.pk}'
         self.user_group_name = f'user_{self.user.pk}'
 
         # Users in a Channel
-        if self.channel_pk:
+        if self.channel:
             await self.channel_layer.group_add(
                 self.channel_group_name,
                 self.channel_name,
@@ -54,7 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         # Users in a Room
-        if self.room_pk:
+        if self.room:
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name,
@@ -67,22 +78,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        print('accepted')
 
         # Ping to see if the user is online
-        self.ping_task = asyncio.create_task(self.send_ping())
-
-        await self.update_user_status(self.user, 'online')
+        # self.ping_task = asyncio.create_task(self.send_ping())
+        # await self.update_user_status(self.user, 'online')
 
     async def disconnect(self, response_code=None):
-        global users_to_check
-
-        if hasattr(self, 'ping_task'):
-            self.ping_task.cancel()
+        # if hasattr(self, 'ping_task'):
+        #     self.ping_task.cancel()
         
-        user = await sync_to_async(User.objects.get)(pk=self.user.pk)
-        self.loop.create_task(self.async_user_check(user))
+        # user = await sync_to_async(User.objects.get)(pk=self.user.pk)
+        # self.loop.create_task(self.async_user_check(user))
         # If I wanted to use it on the other thread
         # users_to_check.append(user)
+
+        print('disconnect', response_code)
 
         await self.channel_layer.group_discard(
             'online_users',
@@ -90,7 +101,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
 
-        
 
         if self.channel_pk:
             await self.channel_layer.group_discard(
@@ -103,18 +113,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name,
             )
 
-        
-            
     async def receive(self, text_data):
         handlers = {
-            'join': self.room_user_logs_delegator,
-            'leave': self.room_user_logs_delegator,
-            'message': self.message,
-            'delete': self.delete,
-            'react': self.react,
-            'ping': self.receive_ping,
+            # 'join': self.room_user_logs_delegator,
+            # 'leave': self.room_user_logs_delegator,
+            
+            'send_message': self.send_message,
+            'edit_message': self.edit_message,
+            'delete_message': self.delete_message,
+            'react_message': self.react_message,
+            'manage_friendship': self.manage_friendship,
+
+            # 'ping': self.receive_ping,
             'requestServerResponse': self.requestServerResponse,
         }
+
         data = json.loads(text_data)
         action = data['action']
         handler = handlers.get(action)
@@ -124,22 +137,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             raise 'No such handler'
         
     async def requestServerResponse(self, data):
-        @database_sync_to_async
-        def get_users():
-            room = Room.objects.get(id=self.room_pk)
-            online_members = room.members.filter(
-                user__profile__status='online'
-            )
-            
-            return online_members
+        await self.channel_layer.group_send(
+            self.channel_group_name, {
+            'type': 'send_to_JS',
+            'action': 'response'
+            }
+        )
         
-        online_members = await get_users()
-        
-
     async def send_to_JS(self, event):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
     
+    """
     async def send_ping(self):
         while True:
             await self.send(text_data=json.dumps({'action': 'ping'}))
@@ -152,53 +161,41 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.update_user_last_ping()
         print(f'ping updated at {self.user.profile.last_ping}')
         self.ping = True
-            
-    async def react(self, data):
-        @sync_to_async
-        def add_or_remove_reaction_DB(message_pk, reaction_pk):
-            message = Message.objects.get(pk=message_pk)
-            reaction = Reaction.objects.get(pk=reaction_pk)
-            message_reaction, created = MessageReaction.objects.get_or_create(
-                message=message,
-                reaction=reaction,
-            )
+    """
 
-            if user in message_reaction.users.all():
-                message_reaction.users.remove(user)
-                if len(message_reaction.users.all()) == 0:
-                    modifier = 'delete'
-                    message_reaction.delete()
-                else:
-                    modifier = 'remove'
+    @database_sync_to_async
+    def react_message(self, data):
+        reaction = get_object_or_none(Reaction, pk=data['reactionPk'])
+        message = get_object_or_none(Message, pk=data['messagePk'])
+        message_reaction, created = MessageReaction.objects.get_or_create(reaction=reaction, message=message)
+        send_data = {**data}
+
+        if self.user in message_reaction.users.all():
+            message_reaction.users.remove(self.user)
+            if len(message_reaction.users.all()) == 0:
+                message_reaction.delete()
+                send_data['actionType'] = 'deleteReaction'
             else:
-                message_reaction.users.add(user)
-                if created:
-                    modifier = 'create'
-                else:
-                    modifier = 'add'
-                
-            image_url = message_reaction.reaction.image.url or None
-            return (image_url, modifier)
-        
-        user = self.user
-        message_pk = data['message_pk']
-        reaction_pk= data['reaction_pk']
-        image_url, modifier = await add_or_remove_reaction_DB(message_pk=message_pk, reaction_pk=reaction_pk)
+                send_data['actionType'] = 'removeReaction'
+        else:
+            message_reaction.users.add(self.user)
+            if created:
+                send_data['actionType'] = 'createReaction'
+                send_data['url'] = message_reaction.reaction.image.url
+            else:
+                send_data['actionType'] = 'addReaction'
 
-        await self.channel_layer.group_send(
-            self.channel_group_name,
-            {
+        self.loop.create_task(
+            self.channel_layer.group_send(
+                self.channel_group_name, {
                 'type': 'send_to_JS',
-                'action': 'react',
-                'message_pk': message_pk,
-                'reaction_pk': reaction_pk,
-                'user_pk': user.pk,
-                'image_URL': image_url,
-                'modifier': modifier,
-            }
+                'action': 'react_message',
+                **send_data
+                }
+            )
         )
 
-
+    """
     async def room_user_logs_delegator(self, data):
         async def join(data):
             @sync_to_async
@@ -285,77 +282,121 @@ class ChatConsumer(AsyncWebsocketConsumer):
         handler = handlers.get(action)
         if handler:
             await handler(data)
+    """
 
-    async def message(self, data):
-        @sync_to_async
-        def save_message_DB(user, channel, content):
-            channel = Channel.objects.get(id=channel)
-            user = User.objects.get(pk=user)
-            member = get_object_or_none(Member, user=user, room=channel.room)
-            
-            if member:
-                form = MessageForm(data={
-                    'user': user, 
-                    'channel': channel, 
-                    'member': member, 
-                    'content': content
-                })
-                if form.is_valid():
-                    New_Message = form.save()
-                    return New_Message
-
-        user = data['user']
-        channel = data['channel']
+    @database_sync_to_async
+    def send_message(self, data):
+        member = get_object_or_none(Member, user=self.user, room=self.room)
         content = data['content']
 
-        message = await save_message_DB(
-            user=user,
-            channel=channel,
-            content=content,
-        )
+        if member:
+            form = MessageForm(data={
+                'user': self.user, 
+                'channel': self.channel, 
+                'member': member, 
+                'content': content
+            })
+                
+            if form.is_valid():
+                message = form.save()
+                data = {
+                    'timestamp': message.display_date(),
+                    'username': message.member.display_name(),
+                    'message_pk': message.pk,
+                    'room_pk': self.room.pk,
+                    'content': content,
+                    'image': message.user.profile.image.url,
+                    'editable': True
+                }
+                message_html = get_rendered_html(
+                    Path(__file__).parent / 'templates/rooms/elements/message.html', 
+                    data
+                )
+                self.loop.create_task(
+                    self.channel_layer.group_send(
+                        self.channel_group_name,
+                        {
+                        'type': 'send_to_JS',
+                        'action': 'send_message',
+                        'html': message_html
+                        }
+                    )
+                )
+                
+    @database_sync_to_async
+    def edit_message(self, data):
+        member = get_object_or_none(Member, user=self.user, room=self.room)
+        content = data['content']
+        send_data = {**data}
+
+        if member:
+            instance = get_object_or_none(Message, pk=data['messagePk'])
+            form = MessageForm(data={
+                'user': self.user, 
+                'channel': self.channel, 
+                'member': member, 
+                'content': content
+            }, instance=instance)
+                
+            if form.is_valid():
+                message = form.save()
+                send_data['content'] = convert_reactions(message.content, self.room.pk)
+                
+                self.loop.create_task(
+                    self.channel_layer.group_send(
+                        self.channel_group_name,
+                        {
+                        'type': 'send_to_JS',
+                        'action': 'edit_message',
+                        **send_data
+                        }
+                    )
+                )
+
+    @database_sync_to_async
+    def delete_message(self, data):
+        pk = data['pk']
+        message = get_object_or_none(Message, pk=pk)
 
         if message:
-            date = message.display_date()
-            username = message.member.nickname or message.user.username
-            pk = message.pk
-            
-            await self.channel_layer.group_send(
+            message.delete()
+            self.loop.create_task(self.channel_layer.group_send(
                 self.channel_group_name,
                 {
                 'type': 'send_to_JS',
-                'action': 'message',
-                'content': content,
-                'username': username,
-                'channel': channel,
-                'date': date,
-                'pk': pk,
+                'action': 'delete_message',
+                'pk': pk
                 }
-            )
+            ))
 
-    async def delete(self, data):
-        @sync_to_async
-        def delete_message_DB(pk):
-            message = get_object_or_none(Message, pk=pk)
-            if message:
-                message.delete()
-                return True
+    @database_sync_to_async
+    def manage_friendship(self, data):
+        kind = data['kind']
+        friendship = get_object_or_none(Friendship, pk=data['friendshipPk'])
+        send_data = {**data}
 
-        pk = data['pk']
-        deleted = await delete_message_DB(
-            pk=pk
-        )
+        if not friendship:
+            return
 
-        if deleted:
-            await self.channel_layer.group_send(
-                self.channel_group_name,
-                {
-                    'type': 'send_to_JS',
-                    'action': 'delete',
-                    'pk': pk
-                }
-            ) 
+        if kind == 'accept':
+            friendship.status = 'accepted'
+            friendship.save()
+            send_data['category'] = 'all'
+        elif kind == 'reject' or kind == 'remove':
+            friendship.delete()
+        else:
+            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove".')
+    
+        self.loop.create_task(self.channel_layer.group_send(
+            self.channel_group_name,
+            {
+            'type': 'send_to_JS',
+            'action': 'friendship',
+            **send_data,
+            }
+        ))
         
-
+    """
     @database_sync_to_async
     def update_user_last_ping(self):
         self.user.profile.last_ping = datetime.datetime.now()
@@ -368,7 +409,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_user_status(self, user, status):
         user.profile.status = status
-
+    """
+    
     """
     
     Checks whether the user has completely left the site

@@ -28,71 +28,31 @@
 		</span>
 	</div>
 	<div class="wrapper--remaining-space">
-		<ul class="container__content">
+		<ul class="container__content" id="app__messages">
 			{% for backlog in backlogs %}
 				{% if backlog|classname == 'Message' %}
-				{% with backlog as message %}
-					<li class="message">
-						<span class="avatar avatar--small has-shadow">
-							<img src="{{ MEDIA_URL }}{{ message.user.profile.image.url }}" alt="">
-						</span>
-						<span class="message__body">
-							<div class="message__header">
-								<div class="primary-text primary-text--medium online-color--primary">
-									{{ message.user.username }}
-								</div>
-								<div class="message__timestamp secondary-text secondary-text--small offline-color--primary">
-									{{ message.display_date }}
-								</div>
-							</div>
-							<div class="message__content secondary-text secondary-text--large">
-								{{ message.content }}
-							</div>
-						</span>
-						<div class="message__actions has-shadow">
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										add_reaction
-									</i>
-								</div>
-							</span>
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										comment
-									</i>
-								</div>
-							</span>
-							<span class="message__action">
-								<div class="icon icon--small">
-									<i class="material-symbols-outlined">								
-										menu
-									</i>
-								</div>
-							</span>
-						</div>
-					</li>
-				{% endwith %}
+					{% with backlog as message %}
+						{% include "./elements/message.html" with message_pk=message.pk room_pk=room.pk image=message.user.profile.image.url username=message.member.display_name timestamp=message.display_date content=message.content editable=message.user.pk|eq:user.pk member_pk=message.member.pk %}
+					{% endwith %}
 				{% elif backlog|classname == 'Log' %}
-				{% with backlog as log %}
-					<li class="log">
-						<span class="primary-text primary-text--small offline-color--primary">
-							{{ log.trigger_user }}
-						</span>
-						<span class="secondary-text secondary-text--small offline-color--secondary">
-							{{ log.action.display_name }}
-						</span>
-						{% if log.target_user %}
-						<span class="primary-text primary-text--small offline-color--primary">
-							{{ log.target_user }}
-						</span>
-						{% endif %}
-						<span class="secondary-text secondary-text--small offline-color--secondary">
-							{{ log.display_date }}
-						</span>
-					</li>
-				{% endwith %}
+					{% with backlog as log %}
+						<li class="log">
+							<span class="primary-text primary-text--small offline-color--primary">
+								{{ log.trigger_user }}
+							</span>
+							<span class="secondary-text secondary-text--small offline-color--secondary">
+								{{ log.action.display_name }}
+							</span>
+							{% if log.target_user %}
+							<span class="primary-text primary-text--small offline-color--primary">
+								{{ log.target_user }}
+							</span>
+							{% endif %}
+							<span class="secondary-text secondary-text--small offline-color--secondary">
+								{{ log.display_date }}
+							</span>
+						</li>
+					{% endwith %}
 				{% endif %}
 			{% endfor %}
 		</ul>
@@ -108,7 +68,7 @@
 		<span class="wrapper--remaining-space">
 			<textarea class="chatbar__input secondary-text secondary-text--large"></textarea>
 		</span>
-		<span class="chatbar__button">
+		<span class="chatbar__button tooltip__trigger" data-target=".reactions" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar_reaction">
 			<div class="icon icon--small">
 				<i class="material-symbols-outlined">
 					sentiment_satisfied
@@ -120,29 +80,16 @@
 {% endblock %}
 
 {% block app__sidebar--primary %}
-	{% include "./pattern/app__sidebar--primary.html" %}
+	{% include "./elements/app__sidebar--primary.html" %}
+{% endblock %}
+
+{% block tooltips %}
+	{{ block.super }}
+	{% include "./elements/reactions.html" %}
 {% endblock %}
 
 
 {% block scripts %}
 {{ block.super }}
-<script>
-window.addEventListener("load", function() {
-	const chatbarInput = document.querySelector('chatbar__input')
-	
-
-
-	window.addEventListener()
-
-
-
-	function submitMessage(event) {
-		if ((event.key === "Enter" && event.shiftKey)) {
-			return
-		}
-
-		
-	}
-});
-</script>
+<script src="{% static 'js/channel.js' %}"></script>
 {% endblock %}
