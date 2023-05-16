@@ -6,17 +6,15 @@
 <link rel="stylesheet" type="text/css" href="{% static 'rooms/room.css' %}">
 {% endblock %}
 
-{% block main %}
-<div class="app-section--main__header">
-	<div class="app-section--main__title">
-		{% firstof room.name %}
+{% block app__main %}
+<div class="container container--fill">
+	<div class="wrapper--remaining-space">
+		<div class="container__content">
+			
+		</div>
 	</div>
 </div>
-<div class="wrapper--remaining-space">
-	<div class="app-section--main__dashboard">
-		
-	</div>
-</div>
+
 {% endblock %}
 
 {% block app__sidebar--primary %}

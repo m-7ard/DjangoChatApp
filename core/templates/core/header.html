@@ -13,6 +13,20 @@
 		{% block extrahead %}{% endblock %}
 	</head>
 	<body>
+		{% for message in messages %}
+		<div class="error">
+			<span class="error__message">
+				{{ message }}
+			</span>
+			<span class="error__close" data-command="close-error">
+				<div class="icon icon--small">
+					<i class="material-symbols-outlined">
+						close
+					</i>
+				</div>
+			</span>
+		</div>
+		{% endfor %}
 		{% block content %}{% endblock %}
 		<div class="layer layer--tooltips">
 			{% block tooltips %}{% endblock %}
@@ -20,7 +34,7 @@
 	</body>
 
 	
-	{{ channel.id|json_script:"channel-id" }}
+	{{ channel.pk|json_script:"channel-pk" }}
 	{{ room.pk|json_script:"room-pk" }}
 	{{ request.user.id|json_script:"user-id" }}
 

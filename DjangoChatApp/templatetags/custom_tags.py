@@ -48,9 +48,20 @@ def get_friendship_friend(user, friendship):
 def attribute_modifier(obj, json_string):
     parsed_json = json.loads(json_string)
     attribute, success_string = parsed_json['attribute'], parsed_json['on_success']
-    print(getattr(obj, attribute, None))
     if getattr(obj, attribute, None):
         return success_string
     else:
         return ''
+    
+@register.filter(name="equality_modifier")
+def equality_modifier(unpackable, string):
+    self, other = unpackable
+    if self == other:
+        return string
+    else:
+        return ''
+    
+@register.filter(name="add_argument")
+def equality_modifier(self, other):
+    return self, other
     

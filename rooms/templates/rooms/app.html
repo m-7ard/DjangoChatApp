@@ -8,6 +8,12 @@
 
 {% block content %}
 <div class="app">
+	<div class="app__sidebar app__sidebar--primary">
+		{% block app__sidebar--primary %}{% endblock %}
+	</div>
+	<div class="app__main">
+		{% block app__main %}{% endblock %}
+	</div>
 	<div class="app__sidebar app__sidebar--secondary">
 		<div class="container container--fill">
 			<div class="container__header">
@@ -35,100 +41,45 @@
 			</div>
 			<div class="wrapper--remaining-space">
 				<ul class="container__content">
-					<ul data-friendship="pending">
-						<li class="container__label secondary-text secondary-text--small">
+					<ul class="container__section" data-friendship="pending">
+						{% for friendship in user.friendships.pending %}
+							{% with user|get_friendship_friend:friendship as friend %}
+								{% include "./elements/friend.html" %}
+							{% endwith %}
+						{% endfor %}
+						<li class="container__label container__label--optional flex-first">
 							Incoming Friend Requests
 						</li>
-						{% for friendship in user.profile.friendships.pending %}
+					</ul>
+					<ul class="container__section" data-friendship="all">
+						{% for friendship in user.friendships.accepted %}
 							{% with user|get_friendship_friend:friendship as friend %}
-							<li class="modelbox modelbox--hoverable">
-								<span class="avatar avatar--small has-shadow">
-									<img src="{{ MEDIA_URL }}{{ friend.profile.image.url }}" alt="">
-								</span>
-								<span class="wrapper--remaining-space">
-									<div class="modelbox__info">
-										<div class="primary-text primary-text--small ellipsis {{ friend.profile.status }}-color--primary">
-											{{ friend.username }}
-										</div>
-										<div class="secondary-text secondary-text--small ellipsis {{ friend.profile.status }}-color--secondary">
-											{{ friend.profile.status }}
-										</div>
-									</div>
-								</span>
-								<span class="friendship align-center" data-pk="{{ friendship.pk }}">
-									<span class="icon icon__hoverable icon--small offline-color--primary" data-command="manage_friendship" data-kind="accept">
-										<i class="material-symbols-outlined">
-											task_alt
-										</i>
-									</span>
-									<span class="icon icon__hoverable icon--small offline-color--primary" data-command="manage_friendship" data-kind="reject">
-										<i class="material-symbols-outlined">
-											cancel
-										</i>
-									</span>
-								</span>
-							</li>	
+								{% include "./elements/friend.html" %}
 							{% endwith %}
 						{% endfor %}
-					</ul>
-					<ul data-friendship="all">
-						<li class="container__label secondary-text secondary-text--small">
+						<li class="container__label container__label--optional flex-first">
 							All Friends
 						</li>
-						{% for friendship in user.profile.friendships.accepted %}
-							{% with user|get_friendship_friend:friendship as friend %}
-								<li class="modelbox modelbox--hoverable">
-									<span class="avatar avatar--small has-shadow">
-										<img src="{{ MEDIA_URL }}{{ friend.profile.image.url }}" alt="">
-									</span>
-									<span class="wrapper--remaining-space">
-										<div class="modelbox__info">
-											<div class="primary-text primary-text--small ellipsis {{ friend.profile.status }}-color--primary">
-												{{ friend.username }}
-											</div>
-											<div class="secondary-text secondary-text--small ellipsis {{ friend.profile.status }}-color--secondary">
-												{{ friend.profile.status }}
-											</div>
-										</div>
-									</span>
-									<span class="friendship align-center" data-pk="{{ friendship.pk }}">
-										<div class="icon icon__hoverable icon--small offline-color--primary tooltip__trigger" 
-										data-positioning='{"top": "100%", "right": "0px"}' 
-										data-target=".friendship__menu">
-											<i class="material-symbols-outlined">
-												expand_more
-											</i>
-										</div>
-									</span>
-								</li>
-							{% endwith %}
-						{% endfor %}
-						
 					</ul>
 				</ul>
 			</div>
 		</div>
-
-
-
 		<div class="container container--fill">
 			<div class="container__header has-shadow">
 				Events
 			</div>
 			<div class="wrapper--remaining-space">
 				<div class="container__content">
-					<div class="">
 
-					</div>
 				</div>
 			</div>
 		</div>
 		<div class="container container--fill">
 			<div class="container__header">
-					Groups			
+				Groups			
 			</div>
 			<div class="container__subheader has-shadow">
-				<span class="icon icon--small">
+				<span class="icon icon--small icon__hoverable">
 					<i class="material-symbols-outlined">
 						search
 					</i>
@@ -136,12 +87,12 @@
 				<span class="wrapper--remaining-space">
 					<input type="text" class="container__search">
 				</span>
-				<span class="icon icon--small">
+				<span class="icon icon--small icon__hoverable overlay__trigger" data-view-name="create-room">
 					<i class="material-symbols-outlined">
 						list_alt_add
 					</i>
 				</span>
-				<span class="icon icon--small">
+				<span class="icon icon--small icon__hoverable">
 					<i class="material-symbols-outlined">
 						travel_explore
 					</i>
@@ -150,35 +101,13 @@
 			<div class="wrapper--remaining-space">
 				<ul class="container__content">
 					{% for membership in user.memberships.all %}
-					{% with membership.room as joined_room  %}
-					<a class="modelbox modelbox--hoverable" href="{% url 'room' joined_room.pk %}">
-						<span class="avatar avatar--medium has-shadow">
-							<img src="{{ MEDIA_URL }}{{ joined_room.image.url }}" alt="">
-						</span>
-						<span class="wrapper--remaining-space">
-							<span class="modelbox__info">
-								<div class="primary-text primary-text--medium ellipsis online-color--primary">
-									{{ joined_room }}
-								</div>
-								<div class="secondary-text secondary-text--medium ellipsis online-color--secondary">
-									{{ joined_room.members.all.count }} Members
-								</div>
-							</span>
-						</span>
-					</a>
+					{% with membership.room as object %}
+						{% include "./elements/room.html" %}
 					{% endwith %}
 					{% endfor %}
 				</ul>
 			</div>
 		</div>
-	</div>
-
-	<div class="app__main">
-		{% block app__main %}{% endblock %}
-	</div>
-
-	<div class="app__sidebar app__sidebar--primary">
-		{% block app__sidebar--primary %}{% endblock %}
 	</div>
 </div>
 {% endblock %}
@@ -199,6 +128,39 @@
 
 <div class="profile tooltip tooltip--hidden has-shadow" id="member-profile">
 	{% include "./elements/member-profile.html" %}
+</div>
+
+<div class="menu tooltip tooltip--hidden has-shadow" id="update-channel">
+	<div class="menu__item overlay__trigger" data-view-name="edit-channel">
+		<span>
+			Edit Channel
+		</span>
+		<span class="icon icon--tiny">
+			<i class="material-symbols-outlined">
+				edit_square
+			</i>
+		</span>
+	</div>
+	<div class="menu__item">
+		<span>
+			Channel Settings
+		</span>
+		<span class="icon icon--tiny">
+			<i class="material-symbols-outlined">
+				tune
+			</i>
+		</span>
+	</div>
+	<div class="menu__item">
+		<span>
+			Channel Category
+		</span>
+		<span class="icon icon--tiny">
+			<i class="material-symbols-outlined">
+				library_books
+			</i>
+		</span>
+	</div>
 </div>
 
 {% endblock %}

@@ -6,28 +6,37 @@ from utils import get_object_or_none
 class ChannelCreationForm(forms.ModelForm):
     class Meta:
         model = Channel
-        fields = ['name', 'description', 'kind', 'category', 'order']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        fields = ['name', 'description', 'kind', 'order']
         
-class ChannelUpdateForm(forms.ModelForm):
+
+class ChannelEditForm(forms.ModelForm):
     class Meta:
         model = Channel
         fields = ['name', 'description', 'order']
 
+
 class RoomForm(forms.ModelForm):
-    image = forms.ImageField(required=False)
-        
+    image = forms.ImageField(required=True)
+
     class Meta:
         model = Room
         fields = ['name', 'description', 'image']
         
+    def name(self):
+        name = self.cleaned_data['name']
+        if not name:
+            raise forms.ValidationError('Room requires a name.')
+        
+        return name
+        
     def clean_image(self):
         image = self.cleaned_data.get('image')
+
         if image:
             return image
         else:
+            # Keep the current image at the time of editing
+            # if none provided
             return self.initial.get('image')
 
 class MessageForm(forms.ModelForm):

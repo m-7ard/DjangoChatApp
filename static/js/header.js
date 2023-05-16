@@ -1,5 +1,5 @@
 // JSON elements
-const channelID = JSON.parse(document.getElementById('channel-id').textContent) || null;
+const channelPk = JSON.parse(document.getElementById('channel-pk').textContent) || null;
 const roomPk = JSON.parse(document.getElementById('room-pk').textContent) || null;
 const userPk = JSON.parse(document.getElementById('user-id').textContent) || null;
 
@@ -13,7 +13,7 @@ chatSocket = new WebSocket(
 	+ '/ws/chat/'
 	+ roomPk
 	+ '/'
-	+ channelID
+	+ channelPk
 	+ '/'
 );
 
@@ -35,6 +35,8 @@ chatSocket.onopen = function() {
 	/*
 	NOTE: server hangs for some reason on some connections, 
 		reason not clear
+	NOTE-2: seems to be related to the way offline tracking was
+		handled in the consumer, specific reason unclears
 	*/
 	console.log('opened')
 	chatSocket.send(JSON.stringify({
@@ -42,7 +44,11 @@ chatSocket.onopen = function() {
 	}))
 }
 
-const commandHandlers = {};
+const commandHandlers = {
+	'close-error': (event) => {
+		event.target.closest('.error').remove()
+	}
+};
 
 
 const windowClickHandlers = {
@@ -72,7 +78,7 @@ const windowClickHandlers = {
 		let trigger = event.target.closest('.tooltip__trigger');
 		let tooltip = document.querySelector(trigger.dataset.target);
 		Object.entries(tooltipHandlers).forEach(([selector, fn]) => {
-			if (tooltip.classList.contains(selector)) {
+			if (tooltip.classList.contains(selector) || tooltip.id == selector) {
 				fn({
 					tooltip: tooltip,
 					trigger: trigger,
@@ -80,7 +86,46 @@ const windowClickHandlers = {
 			};
 		});
 	},
+	'.overlay__trigger': async function addOverlay(event) {
+		let trigger = event.target.closest('.overlay__trigger');
+		let viewName = trigger.dataset.viewName;
+		
+		let html = await overlayHandlers[viewName]({trigger, viewName});
+		let overlay = document.createElement('div');
+		overlay.innerHTML = html;
+		overlay.classList.add('layer');
+		overlay.classList.add('layer--overlay');
+		let closeButton = overlay.querySelector('.overlay__close');
+		closeButton.addEventListener('click', () => overlay.remove());
+		document.body.appendChild(overlay);
+	}
 };
+
+const overlayHandlers = {
+	'create-channel': async ({trigger, viewName}) => {
+		let category = trigger.closest('.category');
+		let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
+		url.searchParams.append('parameters', JSON.stringify({
+			'room': roomPk,
+		}));
+		url.searchParams.append('getData', JSON.stringify({
+			'category': category.dataset.pk,
+		}));
+		let request = await fetch(url);
+		let response = await request.text();
+		return response
+	},
+	'edit-channel': async ({trigger, viewName}) => {
+		let pk = trigger.closest('[data-pk]').dataset.pk;
+		let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
+		url.searchParams.append('parameters', JSON.stringify({
+			'channel': pk,
+		}));
+		let request = await fetch(url);
+		let response = await request.text();
+		return response
+	}
+}
 
 const tooltipHandlers = {
 	'friendship__menu': ({tooltip, trigger}) => {
@@ -122,6 +167,10 @@ const tooltipHandlers = {
 		let response = await request.text();
 		tooltip.innerHTML  = response;
 		console.log(response);
+	},
+	'update-channel': ({tooltip, trigger}) => {
+		let channel = trigger.closest('.channel');
+		tooltip.setAttribute('data-pk', channel.dataset.pk);
 	}
 }
 
@@ -136,7 +185,7 @@ window.addEventListener('click', function delegateClick(event) {
 /* Slides need a fixed maxHeight */
 document.querySelectorAll('.dropdown__content--slide').forEach((content) => {
 	content.style.maxHeight = content.offsetHeight + "px";
-}); 
+});
 
 /*
 
@@ -183,8 +232,6 @@ window.addEventListener('click', function toggleTooltips(event) {
 	let eventTrigger = event.target.closest('.tooltip__trigger');
 	let eventTooltip = event.target.closest('.tooltip');
 	
-
-
 	if (!eventTooltip && !eventTrigger) {
 		closeTooltips();
 	}

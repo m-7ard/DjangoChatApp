@@ -1,0 +1,26 @@
+<form class="form" action="{% url 'create-room' %}" method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+	<div class="form__title x-center">
+		Create New Room
+	</div>
+	{% for field in form %}
+	{% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
+	<div class="form__field {{ modifier }}">
+		<div class="form__label">
+			{{ field.label }}
+		</div>
+		<div class="form__input">
+			{{ field }}
+		</div>
+		{% for error in field.errors %}
+		<div class="form__error">
+			{{ error }}
+		</div>
+		{% endfor %}
+	</div>
+	{% endwith %}
+	{% endfor %}
+	<button class="form__submit" type="submit">
+		Create New Room
+	</button>
+</form>

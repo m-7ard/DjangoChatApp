@@ -103,7 +103,7 @@
   font-size: 0.8125rem;
 }
 .text-secondary-large {
-  font-size: 0.925rem;
+  font-size: 0.875rem;
 }
 
 .color-primary-online {
@@ -139,22 +139,21 @@
   display: none;
 }
 
-.ellipsis {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-x: clip;
-}
-
 .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
-  transition: color 0.2s;
 }
 .icon i {
   color: inherit;
   font-size: inherit;
+}
+.icon__hoverable {
+  transition: color 0.2s;
 }
 .icon__hoverable:hover {
   cursor: pointer;
@@ -181,6 +180,11 @@
   font-size: 3rem;
 }
 
+.generic--column {
+  display: flex;
+  flex-direction: column;
+}
+
 .tooltip {
   position: fixed;
   pointer-events: all;
@@ -189,15 +193,23 @@
   display: none !important;
 }
 
-.layer--tooltips {
-  z-index: 1000;
-  background-color: transparent;
+.layer {
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   left: 0;
+  z-index: 1000;
+}
+.layer--tooltips {
+  background-color: transparent;
   pointer-events: none;
+}
+.layer--overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.299);
 }
 
 .container {
@@ -213,7 +225,7 @@
   font-size: 1.125rem;
   font-weight: bold;
   color: #eff688;
-  z-index: 3;
+  z-index: 4;
 }
 .container__subheader {
   display: flex;
@@ -221,14 +233,14 @@
   gap: 0.25rem;
   font-size: 1rem;
   background-color: #181615;
-  z-index: 2;
+  z-index: 3;
 }
 .container__content {
   position: absolute;
   height: 100%;
   width: 100%;
   overflow: overlay;
-  z-index: 3;
+  z-index: 2;
 }
 .container--fill {
   flex: 1 1 0px;
@@ -744,11 +756,20 @@
   max-height: 100vh;
   overflow: overlay;
 }
+.form__header {
+  display: flex;
+  padding: 0;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
 .form__title {
   font-size: 1.125rem;
   color: #e0dbd1;
   font-weight: bold;
-  align-self: center;
+}
+.form__subtitle {
+  font-size: 0.8125rem;
+  color: #8D8A84;
 }
 .form__field {
   display: flex;
@@ -758,14 +779,14 @@
 .form__field--error .form__label {
   color: #FF3D3D;
 }
-.form__field--error .form__input input {
+.form__field--error .form__input input:not([type=file]) {
   border: 1px solid #6B2A2A;
 }
 .form__label {
   font-weight: bold;
   font-size: 0.8125rem;
 }
-.form__input input {
+.form__input input:not([type=file]) {
   width: 100%;
   padding: 0.5rem;
   box-sizing: border-box;
@@ -792,6 +813,74 @@
   background-color: #9966cc;
   border-radius: 0.25rem;
 }
+.form__close {
+  cursor: pointer;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+.form .option {
+  display: flex;
+  padding: 0.5rem;
+  gap: 1rem;
+  background-color: #101010;
+  align-items: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+.form .option:hover {
+  background-color: #161615;
+}
+.form .option:hover .option__kind {
+  color: #e0dbd1;
+}
+.form .option:hover .option__select {
+  color: #e0dbd1;
+}
+.form .option:hover .option__name {
+  color: #e0dbd1;
+}
+.form .option:has(input:checked) {
+  background-color: #161615;
+}
+.form .option:has(input:checked) .option__kind {
+  color: #e0dbd1;
+}
+.form .option:has(input:checked) .option__select {
+  color: #e0dbd1;
+}
+.form .option:has(input:checked) .option__name {
+  color: #e0dbd1;
+}
+.form .option:has(input:checked) .option__select {
+  border-radius: 50%;
+  background-color: #e0dbd1;
+}
+.form .option__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.form .option__name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  color: #D2D0C8;
+  font-size: 0.9375rem;
+}
+.form .option__description {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  color: #80a4a3;
+  font-size: 0.8125rem;
+}
+.form .option__kind {
+  color: #62777e;
+}
+.form .option__select {
+  color: #80a4a3;
+}
 
 .friend {
   display: flex;
@@ -813,10 +902,16 @@
   color: #62777e;
 }
 .friend__username {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   font-size: 0.9375rem;
   font-weight: bold;
 }
 .friend__status {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   font-size: 0.75rem;
 }
 .friend__body {
@@ -825,4 +920,223 @@
 }
 .friend:hover {
   background-color: #212120;
+}
+
+.room {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  /*
+  TODO: this is a bad idea, use a separate .card or something
+  */
+}
+.room__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+.room__description {
+  color: #cbc83e;
+  font-size: 0.8125rem;
+  overflow: overlay;
+  overflow-wrap: break-word;
+}
+.room__name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 1rem;
+  color: #eff688;
+  font-weight: bold;
+}
+.room__count {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 0.8125rem;
+  color: #cbc83e;
+}
+.room:hover {
+  background-color: #212120;
+}
+
+.news {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  align-items: center;
+  cursor: pointer;
+}
+.news:hover {
+  background-color: #212120;
+}
+.news__title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 0.9375rem;
+  color: #e0dbd1;
+}
+.news__date {
+  font-size: 0.9375rem;
+  color: #8D8A84;
+}
+
+.channels {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.25rem;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.category:has(.dropdown__content--hidden) .category__expand {
+  transform: rotate(-90deg);
+}
+.category__header {
+  display: flex;
+  padding: 0.25rem;
+  gap: 0.5rem;
+  align-items: center;
+}
+.category__name {
+  display: flex;
+  padding: 0;
+  gap: 0.25rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 0.8125rem;
+  font-weight: bold;
+  color: #8D8A84;
+  cursor: pointer;
+  transition: color 0.2s;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.category__name:hover {
+  color: #e0dbd1;
+}
+.category__add {
+  color: #8D8A84;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.category__add:hover {
+  color: #e0dbd1;
+}
+.category__channels {
+  padding-left: 0.5rem;
+}
+.category__expand {
+  transition: transform 0.2s;
+}
+
+.channel {
+  display: flex;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  align-items: center;
+  color: #8D8A84;
+}
+.channel:hover {
+  color: #e0dbd1;
+  background-color: #212120;
+}
+.channel:hover .channel__settings {
+  display: block;
+}
+.channel__kind {
+  color: #62777e;
+}
+.channel__name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 0.9375rem;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.channel__settings {
+  color: #8D8A84;
+  display: none;
+}
+.channel__settings:hover {
+  color: #e0dbd1;
+}
+
+.option {
+  position: relative;
+  overflow: hidden;
+}
+.option input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.error {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  background-color: #6B2A2A;
+  color: #e0dbd1;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1000;
+}
+.error__message {
+  font-size: 0.9375rem;
+  font-weight: bold;
+}
+.error__close {
+  align-self: flex-end;
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0;
+  background-color: #212120;
+  overflow: hidden;
+  border-radius: 0.25rem;
+}
+.menu__item {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #8D8A84;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+.menu__item:hover {
+  color: #e0dbd1;
+  background-color: #0E0D0C;
 }/*# sourceMappingURL=room.css.map */

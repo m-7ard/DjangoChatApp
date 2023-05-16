@@ -34,15 +34,8 @@ class Room(models.Model):
         }
         return result
 
-    def channels_and_categories(self):
-        uncategorised_channels = self.channels.all().filter(category=None)
-        categories = self.categories.all()
-        query = sorted(
-            chain(uncategorised_channels, categories),
-            key=lambda obj: obj.order,
-        )
-
-        return query
+    def uncategorised(self):
+        return self.channels.all().filter(category=None)
 
 
 class Channel(models.Model):
@@ -66,6 +59,10 @@ class Channel(models.Model):
     def display_actions(self):
         return [action.name for action in self.display_logs.all()]
 
+    
+
+
+    
 
 class ChannelCategory(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='categories')
@@ -109,7 +106,7 @@ class Member(models.Model):
     nickname = models.CharField(max_length=30, blank=True)
     
     def __str__(self):
-        return self.user.username
+        return self.user.__str__()
     
     def display_date(self):
         return self.date_added.strftime("%H:%M:%S")

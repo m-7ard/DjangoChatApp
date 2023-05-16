@@ -1,19 +1,27 @@
-<a class="app__channel offline-color--primary" href="{% url 'channel' room=room_pk channel=channel_pk %}">
-	<span class="icon icon--tiny">
+<li class="channel" style="order: {{ category.order }};" data-pk="{{ object.pk }}">
+	{% if object.kind == 'text' %}
+	<span class="channel__kind">
+		<div class="icon icon--small">
+			<i class="material-symbols-outlined">
+				tag
+			</i>
+		</div>
+	</span>
+	{% elif object.kind == 'voice' %}
+	<span class="icon icon--small">
 		<i class="material-symbols-outlined">
-			{% if kind == 'text' %}
-			keyboard
-			{% elif kind == 'voice' %}
 			volume_up
-			{% endif %}
 		</i>
 	</span>
-	<div class="secondary-text secondary-text--medium ellipsis">
-		{{ name }}
-	</div>
-	<span class="icon icon--tiny right">
-		<i class="material-symbols-outlined">
-			settings
-		</i>
+	{% endif %}
+	<span class="channel__name">
+		{{ object.name }}
 	</span>
-</a>
+	<span class="channel__settings tooltip__trigger right" data-target="#update-channel" data-positioning='{"top": "100%", "left": "0px"}'>
+		<div class="icon icon--tiny">
+			<i class="material-symbols-outlined">
+				settings
+			</i>
+		</div>
+	</span>
+</li>

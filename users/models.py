@@ -70,7 +70,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     def __str__(self):
-        return f'{self.username}#{self.username_id}'
+        return f'{self.username}#{str(self.username_id).zfill(2)}'
     
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))

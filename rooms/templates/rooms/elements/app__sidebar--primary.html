@@ -1,6 +1,50 @@
-<div class="container container--fill">
+<div class="container">
 	<div class="container__header">
 		Room
+	</div>
+	<div class="container__subheader has-shadow">
+		<span class="icon icon--small">
+			<i class="material-symbols-outlined">
+				notifications
+			</i>
+		</span>
+		<span class="icon icon--small">
+			<i class="material-symbols-outlined">
+				settings
+			</i>
+		</span>
+	</div>
+	<div class="room">
+		<span class="avatar avatar--large has-shadow">
+			<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
+		</span>
+		<span class="wrapper--remaining-space">
+			<div class="room__body">
+				<div class="room__name">
+					{{ room.name }}
+				</div>
+				<div class="room__description">
+					{{ room.description }}
+				</div>
+			</div>
+		</span>
+	</div>
+
+	{% if user in room.members_by_users %}
+	<div class="modelbox">
+		<div class="app__join right left">
+			Join
+		</div>
+	</div>
+	{% endif %}
+
+			
+			
+
+</div>
+<div class="container container--fill">
+	<div class="container__header">
+		Channels
 	</div>
 	<div class="container__subheader has-shadow">
 		<span class="icon icon--small">
@@ -13,82 +57,52 @@
 		</span>
 		<span class="icon icon--small">
 			<i class="material-symbols-outlined">
-				notifications
-			</i>
-		</span>
-		<span class="icon icon--small">
-			<i class="material-symbols-outlined">
 				settings
 			</i>
 		</span>
 	</div>
 	<div class="wrapper--remaining-space">
-		<ul class="container__content">
-			<li class="modelbox">
-				<span class="avatar avatar--large has-shadow">
-					<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
-				</span>
-				<span class="wrapper--remaining-space">
-					<div class="modelbox__info">
-						<div class="primary-text primary-text--large ellipsis online-color--primary">
-							{{ room.name }}
-						</div>
-						<div class="wrapper--remaining-space">
-							<div class="modelbox__content">
-								<div class="secondary-text secondary-text--large online-color--secondary">
-									{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}{{ room.description }}
+		<div class="container__content">
+			<ul class="channels">
+				{% for category in room.categories.all %}
+				<ul class="category dropdown" style="order: {{ category.order }};" data-pk="{{ category.pk }}">
+					<li class="category__header">
+						<span class="category__name dropdown__trigger">
+							<span class="category__expand">
+								<div class="icon icon--tiny">
+									<i class="material-symbols-outlined">
+										expand_more
+									</i>
 								</div>
-							</div>				
-						</div>
-					</div>
-				</span>
-			</li>
-			{% if user in room.members_by_users %}
-			<li class="modelbox">
-				<div class="app__join right left">
-					Join
-				</div>
-			</li>
-			{% endif %}
-			<li class="container__header has-shadow">
-				Channels
-			</li>
-			{% for object in room.channels_and_categories %}
-				{% if object|classname == 'ChannelCategory' %}
-					{% with object as room_category %}
-					<ul class="dropdown">
-						<li class="app__category has-shadow offline-color--primary dropdown__trigger">
-							<span class="icon icon--tiny">
+							</span>
+							<span>
+								{{ category.name }}
+							</span>
+						</span>
+						<span class="category__add right overlay__trigger" data-view-name="create-channel">
+							<div class="icon icon--tiny">
 								<i class="material-symbols-outlined">
-									arrow_drop_down
+									add
 								</i>
-							</span>
-							<span class="secondary-text secondary-text--medium">
-								{{ room_category.name }}
-							</span>
-							<span class="icon icon--tiny right">
-								<i class="material-symbols-outlined">
-									add_circle
-								</i>
-							</span>
-						</li>
-						<ul class="app__channel-group dropdown__content dropdown__content--slide dropdown__content--visible dropdown__content--static">
-							{% for room_channel in room_category.channels_by_order %}
-								{% include "./channel.html" with kind=room_channel.kind name=room_channel.name room_pk=room.pk channel_pk=room_channel.pk %}
-							{% endfor %}
-						</ul>
+							</div>
+						</span>
+					</li>
+					<ul class="category__channels dropdown__content dropdown__content--static dropdown__content--slide">
+						{% for object in category.channels.all %}
+							{% include "./channel.html" %}
+						{% endfor %}
 					</ul>
-					{% endwith %}
-				{% elif object|classname == 'Channel' %}
-					{% with object as room_channel %}
-						{% include "./channel.html" with kind=room_channel.kind name=room_channel.name room_pk=room.pk channel_pk=room_channel.pk %}
-					{% endwith %}
-				{% endif %}
-			{% endfor %}
-		</ul>
+				</ul>
+				{% endfor %}
+				{% for object in room.uncategorised %}
+					{% include "./channel.html" %}
+				{% endfor %}
+			</ul>
+		</div>
 	</div>
+	
+	
 </div>
-
 
 
 <div class="container container--fill">

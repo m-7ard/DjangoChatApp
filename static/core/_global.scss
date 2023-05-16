@@ -40,7 +40,7 @@ $text-primary-large: 1.125rem;
 
 $text-secondary-small: 0.75rem;
 $text-secondary-medium: 0.8125rem;
-$text-secondary-large: 0.925rem;
+$text-secondary-large: 0.875rem;
 
 // other reusables
 $padding-small: 0.25rem;
@@ -57,6 +57,9 @@ $online-secondary: $moss;
 $offline-primary: $acapulco-aqua;
 $offline-secondary: $blue-bayoux;
 
+$light-primary: $chalk-white;
+$light-secondary: $battleship-grey;
+
 // mixins 
 @mixin modelbox {
 	display: flex;
@@ -64,12 +67,30 @@ $offline-secondary: $blue-bayoux;
 	gap: $gap-medium;
 }
 
-@mixin absolute-box {
+@mixin absolute-box($height, $width) {
 	position: absolute;
-	height: 100%;
-	width: 100%;
+	height: $height;
+	width: $width;
 }
 
+@mixin flex-row($padding, $gap) {
+	display: flex;
+	padding: $padding;
+	gap: $gap;
+}
+
+@mixin flex-column($padding, $gap) {
+	display: flex;
+	flex-direction: column;
+	padding: $padding;
+	gap: $gap;
+}
+
+@mixin ellipsis {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow-x: clip;
+}
 
 
 
@@ -225,16 +246,14 @@ $offline-secondary: $blue-bayoux;
 	}
 }
 
-.ellipsis {
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	overflow-x: clip;
-}
-
 .icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
 	box-sizing: border-box;
 	user-select: none;
-	transition: color 0.2s;
+
 
 	i {
 		color: inherit;
@@ -242,6 +261,8 @@ $offline-secondary: $blue-bayoux;
 	}
 
 	&__hoverable {
+		transition: color 0.2s;
+
 		&:hover {
 			cursor: pointer;
 			color: $premier-yellow;
@@ -273,6 +294,13 @@ $offline-secondary: $blue-bayoux;
 	}
 }
 
+.generic {
+	&--column {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
 .tooltip {
 	position: fixed;
 	pointer-events: all;
@@ -283,15 +311,23 @@ $offline-secondary: $blue-bayoux;
 }
 
 .layer {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	z-index: 1000;
+
 	&--tooltips {
-		z-index: 1000;
 		background-color: transparent;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		right: 0;
-		left: 0;
 		pointer-events: none;
+	}
+
+	&--overlay {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(0, 0, 0, 0.299);
 	}
 }
 
@@ -308,7 +344,7 @@ $offline-secondary: $blue-bayoux;
 		font-size: $text-primary-large;
 		font-weight: bold;
 		color: $online-primary;
-		z-index: 3;
+		z-index: 4;
 	}
 
 	&__subheader {
@@ -317,13 +353,13 @@ $offline-secondary: $blue-bayoux;
 		gap: $gap-small;
 		font-size: $text-primary-medium;
 		background-color: $charcoal-grey;
-		z-index: 2;
+		z-index: 3;
 	}
 
 	&__content {
-		@include absolute-box;
+		@include absolute-box(100%, 100%);
 		overflow: overlay;
-		z-index: 3;
+		z-index: 2;
 	}
 	
 	&--fill {
@@ -922,11 +958,20 @@ $offline-secondary: $blue-bayoux;
 	max-height: 100vh;
 	overflow: overlay;
 
+	&__header {
+		@include flex-row(0, $gap-medium);
+		justify-content: space-between;
+	}
+
 	&__title {
 		font-size: $text-primary-large;
 		color: $chalk-white;
 		font-weight: bold;
-		align-self: center;
+	}
+
+	&__subtitle {
+		font-size: $text-secondary-medium;
+		color: $light-secondary;
 	}
 
 	&__field {
@@ -939,7 +984,7 @@ $offline-secondary: $blue-bayoux;
 				color: $vermillion;
 			}
 
-			.form__input input {
+			.form__input input:not([type="file"]) {
 				border: 1px solid $garnet;
 			}
 		}
@@ -951,7 +996,7 @@ $offline-secondary: $blue-bayoux;
 	}
 
 	&__input {
-		input {
+		input:not([type="file"]) {
 			width: 100%;
 			padding: 0.5rem;
 			box-sizing: border-box;
@@ -978,12 +1023,78 @@ $offline-secondary: $blue-bayoux;
 		justify-content: center;
 		align-items: center;
 
-		padding: 1rem;
+		padding: $padding-large;
 		font-weight: bold;
 		font-size: $text-primary-large;
 		color: $chalk-white;
 		background-color: $amethyst;
 		border-radius: 0.25rem;
+	}
+
+	&__close {
+		cursor: pointer;
+		height: fit-content;
+	}
+
+	.option {
+		@include flex-row($padding-medium, $gap-large);
+		background-color: $black-grey;
+		align-items: center;
+		border-radius: 0.25rem;
+		transition: background-color 0.2s;
+
+		@mixin active {
+			background-color: $night;
+
+			.option__kind {
+				color: $light-primary;
+			}
+
+			.option__select {
+				color: $light-primary;
+			}
+
+			.option__name {
+				color: $light-primary;
+			}
+		}
+
+		&:hover {
+			@include active;
+		}
+
+		&:has(input:checked) {
+			@include active;
+
+			.option__select {
+				border-radius: 50%;
+				background-color: $light-primary;
+			}
+		}
+
+		&__body {
+			@include flex-column(0, 0);
+		}
+
+		&__name {
+			@include ellipsis;
+			color: $soft-grey;
+			font-size: $text-primary-small;
+		}
+
+		&__description {
+			@include ellipsis;
+			color: $offline-primary;
+			font-size: $text-secondary-medium;
+		}
+
+		&__kind {
+			color: $offline-secondary;
+		}
+
+		&__select {
+			color: $offline-primary;
+		}
 	}
 }
 
@@ -1011,11 +1122,13 @@ $offline-secondary: $blue-bayoux;
 	}
 
 	&__username {
+		@include ellipsis;
 		font-size: $text-primary-small;
 		font-weight: bold;
 	}
 
 	&__status {
+		@include ellipsis;
 		font-size: $text-secondary-small;
 	}
 
@@ -1026,5 +1139,213 @@ $offline-secondary: $blue-bayoux;
 
 	&:hover {
 		background-color: $eerie-black;
+	}
+}
+
+.room {
+	@include modelbox;
+	transition: background-color 0.2s;
+	cursor: pointer;
+
+	&__body {
+		@include flex-column(0, 0);
+		@include absolute-box(100%, 100%);
+		overflow: hidden;
+	}
+
+	/*
+	TODO: this is a bad idea, use a separate .card or something
+	*/
+
+	&__description {
+		color: $online-secondary;
+		font-size: $text-secondary-medium;
+		overflow: overlay;
+		overflow-wrap: break-word;
+	}
+
+	&__name {
+		@include ellipsis;
+		font-size: $text-primary-medium;
+		color: $online-primary;
+		font-weight: bold;
+	}
+
+	&__count {
+		@include ellipsis;
+		font-size: $text-secondary-medium;
+		color: $online-secondary;
+	}
+
+	&:hover {
+		background-color: $eerie-black;
+	}
+}
+
+.news {
+	@include flex-row($padding-medium, $gap-medium);
+	align-items: center;
+	cursor: pointer;
+
+	&:hover {
+		background-color: $eerie-black;
+	}
+
+	&__title {
+		@include ellipsis;
+		font-size: $text-primary-small;
+		color: $light-primary;
+	}
+
+	&__date {
+		font-size: $text-primary-small;
+		color: $light-secondary;
+	}
+}
+
+.channels {
+	@include flex-column($padding-medium, $gap-small);
+}
+
+.category {
+	@include flex-column(0, 0);
+
+	&:has(.dropdown__content--hidden) {
+		.category__expand {
+			transform: rotate(-90deg);
+		}
+	}
+
+	&__header {
+		@include flex-row($padding-small, $gap-medium);
+		align-items: center;
+	}
+
+	&__name {
+		@include flex-row(0, $gap-small);
+		@include ellipsis;
+		font-size: $text-secondary-medium;
+		font-weight: bold;
+		color: $light-secondary;
+		cursor: pointer;
+		transition: color 0.2s;
+		user-select: none;
+
+		&:hover {
+			color: $light-primary;
+		}
+	}
+
+	&__add {
+		color: $light-secondary;
+		cursor: pointer;
+		transition: color 0.2s;
+		
+		&:hover {
+			color: $light-primary;
+		}
+	}
+
+	&__channels {
+		padding-left: $padding-medium;
+	}
+
+	&__expand {
+		transition: transform 0.2s;
+	}
+}
+
+.channel {
+	@include flex-row($padding-small, $gap-small);
+	transition: background-color 0.2s, color 0.2s;
+	cursor: pointer;
+
+	align-items: center;
+	color: $light-secondary;
+
+	&:hover {
+		color: $light-primary;
+		background-color: $eerie-black;
+		
+		.channel__settings {
+			display: block;
+		}
+	}
+
+	&__kind {
+		color: $offline-secondary;
+	}
+
+	&__name {
+		@include ellipsis;
+		font-size: $text-primary-small;
+		user-select: none;
+	}
+
+	&__settings {
+		color: $light-secondary;
+		display: none;
+
+		&:hover {
+			color: $light-primary;
+		}
+	}
+}
+
+.option {
+	position: relative;
+	overflow: hidden;
+
+	input {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+}
+
+.error {
+	@include flex-row($padding-medium, $gap-medium);
+	background-color: $garnet;
+	color: $chalk-white;
+	align-items: center;
+	justify-content: space-between;
+	position: relative;
+	z-index: 1000;
+
+	&__message {
+		font-size: $text-primary-small;
+		font-weight: bold;
+	}
+
+	&__close {
+		align-self: flex-end;
+		cursor: pointer;
+	}
+}
+
+.menu {
+	@include flex-column($padding-medium, 0);
+	background-color: $eerie-black;
+	overflow: hidden;
+	border-radius: 0.25rem;
+
+	&__item {
+		@include flex-row($padding-medium, $gap-medium);
+		justify-content: space-between;
+		align-items: center;
+		font-size: $text-secondary-large;
+		color: $light-secondary;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: color 0.2s, background-color 0.2s;
+
+		&:hover {
+			color: $light-primary;
+			background-color: $anthracite;
+		}
 	}
 }

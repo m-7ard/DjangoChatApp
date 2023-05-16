@@ -1,9 +1,9 @@
 import json
-import os
+import urllib.parse
 from pathlib import Path
 
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.apps import apps
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import TemplateView, View
@@ -13,6 +13,7 @@ from django.utils.html import escape
 
 from django.template import Template, RequestContext, Context
 from django.http import HttpResponse
+
 
 
 class FrontpageView(TemplateView):
@@ -42,14 +43,35 @@ class RequestData(View):
                 data[key] = escape(value)
         
         return JsonResponse(data)
-    
 
-def get_reverse_url(request, name, *args, **kwargs):
-    parameters = json.loads(request.GET.get('parameters'))
-    return HttpResponse(reverse(name, kwargs=parameters))
+        
+def GetViewByName(request, name, *args, **kwargs):
+    # parameters, as in .../room/<int:room>/ url parameters
+    parameters = request.GET.get('parameters', {})
+    get_data = request.GET.get('getData', {})
+
+
+    if parameters:
+        parameters = json.loads(parameters)
+
+    if get_data:
+        get_data = json.loads(get_data)
+        get_data = urllib.parse.urlencode(get_data)
+
+    url = reverse(name, kwargs=parameters)
+    url += f'?{get_data}'
+
+    return redirect(url)
 
 
 class GetHtmlElementFromData(View):
+    """ 
+    Both GetHtmlElementFromData and GetHtmlElementFromModel retrieve a
+    html element given an app label and element path;
+    GetHtmlElementFromData will however populate it with the manually
+    provided data, while GetHtmlElementFromModel will populate it with
+    model data, by passing it as a context variable.
+    """
     def get(self, request):
         app_label = request.GET.get('appLabel')
         template_route = request.GET.get('templateRoute')
@@ -67,10 +89,15 @@ class GetHtmlElementFromData(View):
 
 
 class GetHtmlElementFromModel(View):
+    """
+    GetHtmlElementFromModel will populate the element with
+    model data, by passing it as a context variable. Requires
+    a pk, app label and model name.
+    """
     def get(self, request):
         app_label = request.GET.get('appLabel')
         template_route = request.GET.get('templateRoute')
-        context_data = request.GET.get('contextData', {})
+        context_data = json.loads(request.GET.get('contextData', '{}'))
         element_path = Path().resolve() / app_label / template_route
         model_name = request.GET.get('modelName')
         pk = request.GET.get('pk')
