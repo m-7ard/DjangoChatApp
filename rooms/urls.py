@@ -5,7 +5,7 @@ from .views import (
 	ChannelView, 
 	ChannelCreateView, 
 	RoomCreateView,
-    ChannelEditView,
+    ChannelUpdateView,
 	RoomUpdateView,
     get_html_form,
 )
@@ -18,5 +18,5 @@ urlpatterns = [
 	path('create/room/', RoomCreateView.as_view(), name="create-room"),
 	path('create/channel/<int:room>', ChannelCreateView.as_view(), name='create-channel'),
 	path('update/room/<int:room>/', RoomUpdateView.as_view(), name='update-room'),
-    path('update/channel/<int:channel>/', ChannelEditView.as_view(), name='edit-channel'),
+    path('update/channel/<int:channel>/', ChannelUpdateView.as_view(), name='update-channel'),
 ]

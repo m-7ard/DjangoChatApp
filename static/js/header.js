@@ -46,7 +46,23 @@ chatSocket.onopen = function() {
 
 const commandHandlers = {
 	'close-error': (event) => {
-		event.target.closest('.error').remove()
+		event.target.closest('.error').remove();
+	},
+	'select-option': (event) => {
+		let option = event.target.closest('.option');
+		let select = option.closest('.select');
+		let selectTrigger = select.querySelector('.select__trigger');
+		let triggerName = selectTrigger.querySelector('.option__name');
+		triggerName.innerText = option.dataset.value;
+		select.classList.remove('select--active');
+	},
+	'navigate-form': (event) => {
+		let button = event.target.closest('.formbox__button');
+		let formbox = button.closest('.formbox');
+		let targetSelector = button.dataset.target;
+		let target = formbox.querySelector(targetSelector);
+		formbox.querySelectorAll('.form').forEach((form) => form.classList.add('form--hidden'));
+		target.classList.remove('form--hidden');
 	}
 };
 
@@ -84,7 +100,7 @@ const windowClickHandlers = {
 					trigger: trigger,
 				});
 			};
-		});
+		})
 	},
 	'.overlay__trigger': async function addOverlay(event) {
 		let trigger = event.target.closest('.overlay__trigger');
@@ -95,10 +111,26 @@ const windowClickHandlers = {
 		overlay.innerHTML = html;
 		overlay.classList.add('layer');
 		overlay.classList.add('layer--overlay');
-		let closeButton = overlay.querySelector('.overlay__close');
-		closeButton.addEventListener('click', () => overlay.remove());
+		let closeButtons = overlay.querySelectorAll('.overlay__close');
+		closeButtons.forEach((closeButton) => closeButton.addEventListener('click', () => overlay.remove()));
 		document.body.appendChild(overlay);
-	}
+	},
+	'.select__trigger': function toggleSelect(event) {
+		let trigger = event.target.closest('.select__trigger');
+		let select = trigger.closest('.select');
+		select.classList.toggle('select--active');
+		window.addEventListener('click', (newEvent) => {
+			let newSelect = newEvent.target.closest('.select');
+			if (newSelect == select) {
+				return
+			}
+
+			select?.classList.remove('select--active');
+		}, {once: true});
+	},
+
+
+
 };
 
 const overlayHandlers = {
@@ -115,7 +147,7 @@ const overlayHandlers = {
 		let response = await request.text();
 		return response
 	},
-	'edit-channel': async ({trigger, viewName}) => {
+	'update-channel': async ({trigger, viewName}) => {
 		let pk = trigger.closest('[data-pk]').dataset.pk;
 		let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
 		url.searchParams.append('parameters', JSON.stringify({

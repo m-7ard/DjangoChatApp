@@ -1,5 +1,5 @@
 from django import forms
-from .models import Room, Channel, Message, ChannelCategory
+from .models import Room, Channel, Message, ChannelCategory, Action
 from utils import get_object_or_none
 
 
@@ -13,6 +13,23 @@ class ChannelEditForm(forms.ModelForm):
     class Meta:
         model = Channel
         fields = ['name', 'description', 'order']
+
+
+class ChannelCategoryForm(forms.ModelForm):
+    class Meta:
+        model = Channel
+        fields = ['category']
+        
+
+class ChannelPermissionsForm(forms.ModelForm):
+    display_logs = forms.ModelMultipleChoiceField(
+        queryset=Action.objects.all(),
+        widget=forms.CheckboxSelectMultiple()
+    )
+
+    class Meta:
+        model = Channel
+        fields = ['display_logs']
 
 
 class RoomForm(forms.ModelForm):

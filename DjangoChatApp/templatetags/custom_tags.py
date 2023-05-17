@@ -62,6 +62,10 @@ def equality_modifier(unpackable, string):
         return ''
     
 @register.filter(name="add_argument")
-def equality_modifier(self, other):
+def add_argument(self, other):
     return self, other
+
+@register.filter(name="printInConsole")
+def printInConsole(self):
+    print(self)
     

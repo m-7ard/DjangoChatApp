@@ -17,8 +17,10 @@ from core.models import News
 from .models import Room, Channel, Log, ChannelCategory
 from .forms import (
     ChannelCreationForm,
-    ChannelEditForm, 
-    RoomForm
+    ChannelEditForm,
+    ChannelCategoryForm,
+    ChannelPermissionsForm, 
+    RoomForm,
 )
 
 from utils import get_object_or_none
@@ -107,42 +109,40 @@ class ChannelCreateView(FormView):
         return redirect('dashboard')
 
 
-class ChannelEditView(UpdateView):
-    form_class = ChannelEditForm
-    model = Channel
-    template_name = 'rooms/forms/edit-channel.html'
-
-    def get_object(self, queryset=None):
-        return get_object_or_none(Channel, pk=self.kwargs.get('channel'))
-    
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(**kwargs)
-        context['title'] = 'Edit Channel'
-        return self.render_to_response(context)
-    
-    def get_success_url(self):
-        return reverse('channel', kwargs={'room': self.object.room.pk, 'channel': self.object.pk})
-
-"""
-TODO: 3 Forms in 1 for the channel updating
-"""
-
-
-class ChannelCategoryView(UpdateView):
-    form_class = ChannelEditForm
-    model = Channel
+class ChannelUpdateView(TemplateView):
     template_name = 'rooms/forms/update-channel.html'
-
-    def get_object(self, queryset=None):
-        return get_object_or_none(Channel, pk=self.kwargs.get('channel'))
     
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
         context = self.get_context_data(**kwargs)
-        context['title'] = 'Edit Channel'
+        channel = Channel.objects.get(pk=kwargs['channel'])
+        context['category'] = channel.category
+        context['channel'] = channel
+        context['ChannelEditForm'] = ChannelEditForm(instance=channel)
+        context['ChannelCategoryForm'] = ChannelCategoryForm(instance=channel)
+        context['ChannelPermissionsForm'] = ChannelPermissionsForm(instance=channel)
+        
         return self.render_to_response(context)
+    
+    def post(self, request, *args, **kwargs):
+        form_name = request.POST.get('form')
+        if form_name == 'ChannelEditForm':
+            form = ChannelEditForm
+        elif form_name == 'ChannelCategoryForm':
+            form = ChannelCategoryForm
+        elif form_name == 'ChannelPermissionsForm':
+            form = ChannelPermissionsForm
+        
+        channel_form = form(
+            instance=Channel.objects.get(pk=kwargs['channel']),
+            data=request.POST
+        )
 
+        if channel_form.is_valid():
+            channel = channel_form.save()
+            return redirect('channel', room=channel.room.pk, channel=channel.pk)
+
+        return redirect('dashboard')
+        
 
 class RoomCreateView(FormView):
     form_class = RoomForm
