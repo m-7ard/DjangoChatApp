@@ -58,10 +58,6 @@ class Channel(models.Model):
 
     def display_actions(self):
         return [action.name for action in self.display_logs.all()]
-
-    
-
-
     
 
 class ChannelCategory(models.Model):

@@ -56,13 +56,13 @@ const commandHandlers = {
 		triggerName.innerText = option.dataset.value;
 		select.classList.remove('select--active');
 	},
-	'navigate-form': (event) => {
-		let button = event.target.closest('.formbox__button');
-		let formbox = button.closest('.formbox');
+	'switch-tab': (event) => {
+		let button = event.target.closest('[data-command="switch-tab"]');
+		let formbox = button.closest('.switchable');
 		let targetSelector = button.dataset.target;
 		let target = formbox.querySelector(targetSelector);
-		formbox.querySelectorAll('.form').forEach((form) => form.classList.add('form--hidden'));
-		target.classList.remove('form--hidden');
+		formbox.querySelectorAll('.switchable__content').forEach((form) => form.classList.add('switchable__content--hidden'));
+		target.classList.remove('switchable__content--hidden');
 	}
 };
 
@@ -103,6 +103,8 @@ const windowClickHandlers = {
 		})
 	},
 	'.overlay__trigger': async function addOverlay(event) {
+		event.preventDefault();
+		
 		let trigger = event.target.closest('.overlay__trigger');
 		let viewName = trigger.dataset.viewName;
 		

@@ -1,13 +1,13 @@
-<a class="room" href="{% url 'room' object.pk %}">
+<a class="membership" href="{% url 'room' object.pk %}">
 	<span class="avatar avatar--medium has-shadow">
 		<img src="{{ object.image.url }}" alt="">
 	</span>
 	<span class="wrapper--remaining-space">
-		<div class="room__body">
-			<div class="room__name">
+		<div class="membership__body">
+			<div class="membership__name">
 				{{ object }}
 			</div>
-			<div class="room__count">
+			<div class="membership__count">
 				{{ object.members.all.count }} Members
 			</div>
 		</div>

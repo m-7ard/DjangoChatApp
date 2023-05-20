@@ -1,20 +1,21 @@
 import os
-from pathlib import Path
-from typing import Any, Dict, Optional, Type
+import json
+from typing import Any, Optional
+
 from django.db import models
 from django.forms.forms import BaseForm
 from django.forms.models import BaseModelForm
 
-from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView
+from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
-from django.urls import reverse
-from django.core.exceptions import SuspiciousOperation
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.template import Template, RequestContext
 from django.contrib import messages
 
+
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory
+from .models import Room, Channel, Log, ChannelCategory, Action
 from .forms import (
     ChannelCreationForm,
     ChannelEditForm,
@@ -117,6 +118,7 @@ class ChannelUpdateView(TemplateView):
         channel = Channel.objects.get(pk=kwargs['channel'])
         context['category'] = channel.category
         context['channel'] = channel
+        context['actions'] = Action.objects.all()
         context['ChannelEditForm'] = ChannelEditForm(instance=channel)
         context['ChannelCategoryForm'] = ChannelCategoryForm(instance=channel)
         context['ChannelPermissionsForm'] = ChannelPermissionsForm(instance=channel)
@@ -138,11 +140,36 @@ class ChannelUpdateView(TemplateView):
         )
 
         if channel_form.is_valid():
-            channel = channel_form.save()
+            channel = channel_form.save(commit=False)
+            if form_name == 'ChannelPermissionsForm':
+                print(Action.objects.filter(pk__in=request.POST.getlist('display_logs')))
+                channel.display_logs.set(Action.objects.filter(pk__in=request.POST.getlist('display_logs')))
+
+            channel.save()
+
             return redirect('channel', room=channel.room.pk, channel=channel.pk)
 
         return redirect('dashboard')
+
+
+class ChannelDeleteView(DeleteView):
+    model = Channel
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        channel = self.kwargs.get('channel')
+
+        return queryset.get(pk=channel)
+
+    def delete(self, *args, **kwargs):
+        self.object = self.get_object()
+        super().delete(*args, **kwargs)
         
+    def get_success_url(self):
+        return reverse('room', kwargs={'room': self.object.room.pk})
+
 
 class RoomCreateView(FormView):
     form_class = RoomForm

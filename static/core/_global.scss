@@ -104,6 +104,11 @@ $light-secondary: $battleship-grey;
 	margin-right: auto;
 }
 
+.y-center {
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
 .align-center {
 	align-items: center;
 }
@@ -950,10 +955,7 @@ $light-secondary: $battleship-grey;
 	@include flex-column($padding-large, $gap-medium);
 	width: 26rem;
 	color: $chalk-white;
-
-	&--hidden {
-		display: none
-	}
+	overflow: overlay;
 
 	&__header {
 		@include flex-row(0, $gap-medium);
@@ -989,7 +991,11 @@ $light-secondary: $battleship-grey;
 
 	&__label {
 		font-weight: bold;
-		font-size: $text-secondary-medium
+		font-size: $text-secondary-medium;
+
+		&--danger {
+			color: $vermillion;
+		}
 	}
 
 	&__input {
@@ -1016,22 +1022,132 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__submit {
-		display: flex;
+		@include flex-row($padding-medium, 0);
 		justify-content: center;
 		align-items: center;
 		margin-top: auto;
-
-		padding: $padding-large;
 		font-weight: bold;
+
 		font-size: $text-primary-large;
-		color: $chalk-white;
-		background-color: $amethyst;
+		color: $light-secondary;
+		background-color: $pakistan-green;
 		border-radius: 0.25rem;
+		transition: background-color 0.2s, color 0.2s;
+
+		&:hover {
+			background-color: $office-green;
+			color: $light-primary;
+		}
+	}
+
+	&__delete {
+		@include flex-row($padding-medium, 0);
+		border-radius: 0.25rem;
+		font-size: $text-primary-large;
+		font-weight: bold;
+		background-color: $garnet;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: background-color 0.2s;
+
+		&:hover {
+			background-color: $vermillion;
+		}
 	}
 
 	&__close {
 		cursor: pointer;
 		height: fit-content;
+	}
+
+	&__content {
+		@include absolute-box(100%, 100%);
+		overflow: auto;
+	}
+
+	.checkbox {
+		@include flex-column($padding-large, $gap-small);
+		border-bottom: 1px solid $charcoal-grey;
+
+		&__header {
+			@include flex-row(0, $gap-medium);
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		&__label {
+			font-size: $text-primary-small;
+			color: $light-primary;
+		}
+
+		&__description {
+			font-size: $text-secondary-large;
+			color: $light-secondary;
+		}
+
+		.switch {
+			$bg: $vampire-black;
+			$height: 1rem;
+			height: $height;
+			width: 2.25rem;
+
+			input {
+				min-height: calc(100% + $padding-small * 2);
+				min-width: calc(100% + $padding-small * 2);
+			}
+
+			&:has(input:not(:checked)) {
+				.switch__slider {
+					left: calc(0%);
+					background-color: $light-primary;
+				}
+
+				.switch__element {
+					div {
+						background-color: $black-olive;
+					}
+				}
+			}
+
+			&:has(input:checked) {
+				.switch__slider {
+					left: calc(100% - $height);
+					background-color: $light-primary;
+				}
+
+				.switch__element {
+					div {
+						background-color: $pakistan-green
+					}
+				}
+			}
+
+			&__element {
+				div {
+					padding: $padding-small;
+				}
+			}
+
+			&__slider {
+				height: $height;
+				width: $height;
+			}
+
+			&__edge {
+				height: $height;
+				width: $height;
+			}
+
+			&__body {
+				height: $height;
+			}
+
+			&__slider {
+				height: $height;
+				width: $height;
+			}
+		}
 	}
 
 	.option {
@@ -1090,7 +1206,7 @@ $light-secondary: $battleship-grey;
 
 		&__description {
 			@include ellipsis;
-			color: $offline-primary;
+			color: $acapulco-aqua;
 			font-size: $text-secondary-medium;
 		}
 
@@ -1099,7 +1215,7 @@ $light-secondary: $battleship-grey;
 		}
 
 		&__select {
-			color: $offline-primary;
+			color: $acapulco-aqua;
 		}
 	}
 }
@@ -1108,15 +1224,14 @@ $light-secondary: $battleship-grey;
 	@include flex-row(0, 0);
 	border-radius: 0.25rem;
 	height: 30rem;
-	overflow: overlay;
 	background-color: $eerie-black;
-
-	max-height: 100vh;
 	max-width: 100vw;
+	max-height: 100vh;
 
 	&__navigation {
 		@include flex-column($padding-large, $gap-medium);
 		border-right: 1px solid $charcoal-grey;
+		overflow: overlay;
 	}
 
 	&__button {
@@ -1131,7 +1246,7 @@ $light-secondary: $battleship-grey;
 
 		&:hover {
 			color: $light-primary;
-			background-color: $anthracite;
+			background-color: $charcoal-grey;
 		}
 	}
 }
@@ -1180,7 +1295,7 @@ $light-secondary: $battleship-grey;
 	}
 }
 
-.room {
+.membership {
 	@include modelbox;
 	transition: background-color 0.2s;
 	cursor: pointer;
@@ -1218,6 +1333,21 @@ $light-secondary: $battleship-grey;
 	&:hover {
 		background-color: $eerie-black;
 	}
+
+	&__join {
+		@include flex-row($padding-medium, 0);
+		align-items: center;
+		justify-content: center;
+		font-size: $text-secondary-large;
+		font-weight: bold;
+		background-color: $saturated-titanium-yellow;
+		color: $charcoal-grey;
+		box-shadow: $shadow-dimensions $saturated-titanium-yellow;
+	}
+}
+
+.room-card {
+
 }
 
 .news {
@@ -1412,3 +1542,70 @@ $light-secondary: $battleship-grey;
 	}
 }
 
+.switchable {
+	&__content {
+		&--hidden {
+			display: none;
+		}
+	}
+}
+
+.switch {
+		@include flex-row(0, 0);
+		position: relative;
+		align-items: center;
+		justify-content: center;
+
+	input {
+		cursor: pointer;
+		position: absolute;
+		z-index: 1000;
+		opacity: 0;
+	}
+
+	&__element {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+
+		div {
+			position: absolute;
+			min-height: 100%;
+			min-width: 100%;
+			transition: background-color 0.2s;
+		}
+	}
+
+	&__slider {
+		position: absolute;
+		border-radius: 50%;
+		transition: left 0.2s;
+	}
+
+	&__edge {
+		&--left {
+			border-radius: 50% 0% 0% 50%;
+
+			div {
+				border-radius: 50% 0% 0% 50%;
+			}
+		}
+
+		&--right {
+			border-radius: 0% 50% 50% 0%;
+
+			div {
+				border-radius: 0% 50% 50% 0%;
+			}
+		}
+	}
+
+	&__body {
+		flex-grow: 1;
+	}
+
+	&__slider {
+		position: absolute;
+	}
+}

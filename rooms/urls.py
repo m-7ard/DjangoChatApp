@@ -1,22 +1,14 @@
 from django.urls import path
-from .views import (
-    DashboardView, 
-	RoomView, 
-	ChannelView, 
-	ChannelCreateView, 
-	RoomCreateView,
-    ChannelUpdateView,
-	RoomUpdateView,
-    get_html_form,
-)
+
+from . import views
 
 urlpatterns = [
-    path('get_html_form/<str:form_name>', get_html_form, name="rooms-get_html_form"),
-	path('dashboard/', DashboardView.as_view(), name='dashboard'),
-	path('<int:room>/', RoomView.as_view(), name='room'),
-	path('<int:room>/<int:channel>/', ChannelView.as_view(), name='channel'),
-	path('create/room/', RoomCreateView.as_view(), name="create-room"),
-	path('create/channel/<int:room>', ChannelCreateView.as_view(), name='create-channel'),
-	path('update/room/<int:room>/', RoomUpdateView.as_view(), name='update-room'),
-    path('update/channel/<int:channel>/', ChannelUpdateView.as_view(), name='update-channel'),
+	path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+	path('<int:room>/', views.RoomView.as_view(), name='room'),
+	path('<int:room>/<int:channel>/', views.ChannelView.as_view(), name='channel'),
+	path('create/room/', views.RoomCreateView.as_view(), name="create-room"),
+	path('create/channel/<int:room>', views.ChannelCreateView.as_view(), name='create-channel'),
+	path('update/room/<int:room>/', views.RoomUpdateView.as_view(), name='update-room'),
+    path('update/channel/<int:channel>/', views.ChannelUpdateView.as_view(), name='update-channel'),
+    path('delete/channel/<int:channel>/', views.ChannelDeleteView.as_view(), name='delete-channel'),
 ]

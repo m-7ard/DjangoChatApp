@@ -3,12 +3,12 @@
 		Room
 	</div>
 	<div class="container__subheader has-shadow">
-		<span class="icon icon--small">
+		<span class="icon icon--small right">
 			<i class="material-symbols-outlined">
 				notifications
 			</i>
 		</span>
-		<span class="icon icon--small">
+		<span class="icon icon--small overlay__trigger" data-viewName="">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
@@ -26,17 +26,13 @@
 				<div class="room__description">
 					{{ room.description }}
 				</div>
+				<div class="room__join bottom">
+					Join
+				</div>
 			</div>
 		</span>
-	</div>
 
-	{% if user in room.members_by_users %}
-	<div class="modelbox">
-		<div class="app__join right left">
-			Join
-		</div>
 	</div>
-	{% endif %}
 
 			
 			

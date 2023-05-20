@@ -22,15 +22,10 @@ class ChannelCategoryForm(forms.ModelForm):
         
 
 class ChannelPermissionsForm(forms.ModelForm):
-    display_logs = forms.ModelMultipleChoiceField(
-        queryset=Action.objects.all(),
-        widget=forms.CheckboxSelectMultiple()
-    )
-
     class Meta:
         model = Channel
         fields = ['display_logs']
-
+    
 
 class RoomForm(forms.ModelForm):
     image = forms.ImageField(required=True)

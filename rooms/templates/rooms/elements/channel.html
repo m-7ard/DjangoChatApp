@@ -1,4 +1,4 @@
-<li class="channel" style="order: {{ category.order }};" data-pk="{{ object.pk }}">
+<a class="channel" style="order: {{ category.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
 	{% if object.kind == 'text' %}
 	<span class="channel__kind">
 		<div class="icon icon--small">
@@ -24,4 +24,4 @@
 			</i>
 		</div>
 	</span>
-</li>
+</a>
