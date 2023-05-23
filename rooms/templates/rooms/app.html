@@ -102,7 +102,7 @@
 				<ul class="container__content">
 					{% for membership in user.memberships.all %}
 					{% with membership.room as object %}
-						{% include "./elements/room.html" %}
+						{% include "./elements/membership.html" %}
 					{% endwith %}
 					{% endfor %}
 				</ul>

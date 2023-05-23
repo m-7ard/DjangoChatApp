@@ -6,9 +6,9 @@ from django.db import models
 from users.models import CustomUser
 
 
-
+# _Room
 class Room(models.Model):
-    name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50)
     description = models.CharField(max_length=60, blank=True)
     owner = models.ForeignKey(CustomUser, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
     image = models.ImageField(default='blank.png', max_length=500)
@@ -38,6 +38,7 @@ class Room(models.Model):
         return self.channels.all().filter(category=None)
 
 
+# _Channel
 class Channel(models.Model):
     TEXT = 'text'
     VOICE = 'voice'
@@ -60,6 +61,7 @@ class Channel(models.Model):
         return [action.name for action in self.display_logs.all()]
     
 
+# _ChannelCategory
 class ChannelCategory(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='categories')
     name = models.CharField(max_length=30)
@@ -72,6 +74,7 @@ class ChannelCategory(models.Model):
         return f'{self.room}: {self.name} | order: {self.order}'
     
 
+# _Role
 class Role(models.Model):
     name = models.CharField(max_length=50, blank=False, default='Role')
     hierarchy = models.IntegerField(default=10)
@@ -94,6 +97,7 @@ class Role(models.Model):
     can_view_channels = models.ManyToManyField(Channel, related_name='viewable_by_roles', blank=True)
 
 
+# _Member
 class Member(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='memberships')
     roles = models.ManyToManyField(Role, related_name='members')
@@ -114,7 +118,7 @@ class Member(models.Model):
         return self.user.profile.image.url
 
 
-
+# _Message
 class Message(models.Model):
     content = models.CharField(max_length=1000, blank=False)
     member = models.ForeignKey(Member, related_name='messages', on_delete=models.SET_NULL, null=True, blank=True)
@@ -132,6 +136,7 @@ class Message(models.Model):
         return f'{self.pk} | user: {self.user} (pk: {self.user.pk}) | room: {self.channel.room.name} | channel: {self.channel.name}'
 
         
+# _Action
 class Action(models.Model):
     name = models.CharField(max_length=20)
     display_name = models.CharField(max_length=20)
@@ -141,6 +146,7 @@ class Action(models.Model):
         return f'{self.name}: {self.description}'
 
 
+# _Log
 class Log(models.Model):
     action = models.ForeignKey(Action, related_name='logs', on_delete=models.SET_NULL, null=True)
     room = models.ForeignKey(Room, related_name='logs', on_delete=models.CASCADE, null=True)
@@ -161,10 +167,11 @@ class Log(models.Model):
         return 'log'
 
 
+# _Reaction
 class Reaction(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reactions', blank=True, null=True)
     name = models.CharField(max_length=20)
-    image = models.ImageField()
+    image = models.ImageField(max_length=500)
 
     # def save(self):
     #     super().save()
@@ -176,6 +183,8 @@ class Reaction(models.Model):
     def __str__(self):
         return f'{self.name} | room: {self.room}'
 
+
+# _MessageReaction
 class MessageReaction(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
     reaction = models.ForeignKey(Reaction, on_delete=models.CASCADE)

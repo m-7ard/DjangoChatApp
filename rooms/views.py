@@ -21,7 +21,8 @@ from .forms import (
     ChannelEditForm,
     ChannelCategoryForm,
     ChannelPermissionsForm, 
-    RoomForm,
+    RoomCreationForm,
+    RoomEditForm,
 )
 
 from utils import get_object_or_none
@@ -142,7 +143,6 @@ class ChannelUpdateView(TemplateView):
         if channel_form.is_valid():
             channel = channel_form.save(commit=False)
             if form_name == 'ChannelPermissionsForm':
-                print(Action.objects.filter(pk__in=request.POST.getlist('display_logs')))
                 channel.display_logs.set(Action.objects.filter(pk__in=request.POST.getlist('display_logs')))
 
             channel.save()
@@ -172,11 +172,11 @@ class ChannelDeleteView(DeleteView):
 
 
 class RoomCreateView(FormView):
-    form_class = RoomForm
+    form_class = RoomCreationForm
     template_name = 'rooms/forms/create-room.html'
     
     def post(self, request, *args, **kwargs):
-        room_form = RoomForm(data=request.POST, files=request.FILES)
+        room_form = RoomCreationForm(data=request.POST, files=request.FILES)
         if room_form.is_valid():
             room = room_form.save(commit=False)
             room.owner = request.user
@@ -186,19 +186,32 @@ class RoomCreateView(FormView):
         return render(request, self.template_name, {'form': room_form})
     
 
-class RoomUpdateView(FormView):
-    form_class = RoomForm
-
-    def get_form(self):
-        room = Room.objects.get(pk=self.kwargs['room'])
-        return self.form_class(instance=room, data=self.request.POST)
-
-    def form_valid(self, form):
-        room = form.save()
-        return redirect('room', room=room.pk)
+class RoomUpdateView(TemplateView):
+    template_name = 'rooms/forms/update-room.html'
     
-    def form_invalid(self, form):
-        return HttpResponseBadRequest('Invalid Form Input')
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        room = Room.objects.get(pk=kwargs['room'])
+        context['room'] = room
+        context['RoomEditForm'] = RoomEditForm(instance=room)
+        
+        return self.render_to_response(context)
+    
+    def post(self, request, *args, **kwargs):
+        form_name = request.POST.get('form')
+        if form_name == 'RoomEditForm':
+            form = RoomEditForm
+        
+        room_form = form(
+            instance=Room.objects.get(pk=kwargs['room']),
+            data=request.POST,
+            files=request.FILES
+        )
+
+        if room_form.is_valid():
+            room = room_form.save()
+
+            return redirect('room', room=room.pk)
     
     
 def get_html_form(request, form_name, *args, **kwargs):

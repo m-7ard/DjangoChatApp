@@ -1,19 +1,19 @@
 <a class="channel" style="order: {{ category.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
-	{% if object.kind == 'text' %}
 	<span class="channel__kind">
+		{% if object.kind == 'text' %}
 		<div class="icon icon--small">
 			<i class="material-symbols-outlined">
 				tag
 			</i>
 		</div>
+		{% elif object.kind == 'voice' %}
+		<div class="icon icon--small">
+			<i class="material-symbols-outlined">
+				volume_up
+			</i>
+		</div>
+		{% endif %}
 	</span>
-	{% elif object.kind == 'voice' %}
-	<span class="icon icon--small">
-		<i class="material-symbols-outlined">
-			volume_up
-		</i>
-	</span>
-	{% endif %}
 	<span class="channel__name">
 		{{ object.name }}
 	</span>

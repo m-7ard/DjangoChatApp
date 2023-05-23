@@ -1,6 +1,6 @@
 window.addEventListener('load', () => {
 	Object.assign(chatSocketSendHandlers, {
-		'manage_friendship': function acceptOrRejectFriendRequestDB(event) {
+		'manage-friendship': function acceptOrRejectFriendRequestDB(event) {
 			let trigger = event.target.closest('[data-command="manage_friendship"]');
 			let friendshipPk = trigger.closest('.friendship, .tooltip').dataset.pk;
 			let kind = trigger.dataset.kind;
@@ -13,7 +13,7 @@ window.addEventListener('load', () => {
 	});
 
 	Object.assign(chatSocketReceiveHandlers, {
-		'manage_friendship': function acceptOrRejectFriendRequestDOM(data) {
+		'manage-friendship': function acceptOrRejectFriendRequestDOM(data) {
 			let friend = document.querySelector(`.friendship[data-pk="${data.friendshipPk}"]`).closest('.modelbox');
 			if (data.kind == 'accept') {
 				let category = document.querySelector(`[data-friendship="${data.category}"]`);
@@ -36,6 +36,6 @@ window.addEventListener('load', () => {
 	});
 
 	Object.assign(commandHandlers, {
-		'manage_friendship': chatSocketSendHandlers['manage_friendship'],
+		'manage-friendship': chatSocketSendHandlers['manage-friendship'],
 	});
 });

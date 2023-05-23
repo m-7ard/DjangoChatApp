@@ -3,47 +3,42 @@
 		Room
 	</div>
 	<div class="container__subheader has-shadow">
-		<span class="icon icon--small right">
+		<span class="icon icon--small icon--hoverable right">
 			<i class="material-symbols-outlined">
 				notifications
 			</i>
 		</span>
-		<span class="icon icon--small overlay__trigger" data-viewName="">
+		<span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="update-room">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
 		</span>
 	</div>
-	<div class="room">
+	<div class="room-card">
 		<span class="avatar avatar--large has-shadow">
 			<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
 		</span>
 		<span class="wrapper--remaining-space">
-			<div class="room__body">
-				<div class="room__name">
+			<div class="room-card__body">
+				<div class="room-card__name">
 					{{ room.name }}
 				</div>
-				<div class="room__description">
+				<div class="room-card__description">
 					{{ room.description }}
 				</div>
-				<div class="room__join bottom">
+				<div class="room-card__join bottom">
 					Join
 				</div>
 			</div>
 		</span>
-
 	</div>
-
-			
-			
-
 </div>
 <div class="container container--fill">
 	<div class="container__header">
 		Channels
 	</div>
 	<div class="container__subheader has-shadow">
-		<span class="icon icon--small">
+		<span class="icon icon--small icon--hoverable">
 			<i class="material-symbols-outlined">
 				search
 			</i>
@@ -51,7 +46,7 @@
 		<span class="wrapper--remaining-space">
 			<input type="text" class="container__search">
 		</span>
-		<span class="icon icon--small">
+		<span class="icon icon--small icon--hoverable">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
@@ -76,7 +71,7 @@
 							</span>
 						</span>
 						<span class="category__add right overlay__trigger" data-view-name="create-channel">
-							<div class="icon icon--tiny">
+							<div class="icon icon--tiny icon--hoverable">
 								<i class="material-symbols-outlined">
 									add
 								</i>
@@ -106,12 +101,12 @@
 		Members
 	</div>
 	<div class="container__subheader has-shadow">
-		<span class="icon icon--small">
+		<span class="icon icon--small icon--hoverable">
 			<i class="material-symbols-outlined">
 				group
 			</i>
 		</span>
-		<span class="icon icon--small">
+		<span class="icon icon--small icon--hoverable">
 			<i class="material-symbols-outlined">
 				search
 			</i>
@@ -119,7 +114,7 @@
 		<span class="wrapper--remaining-space">
 			<input type="text" class="container__search">
 		</span>
-		<span class="icon icon--small">
+		<span class="icon icon--small icon--hoverable">
 			<i class="material-symbols-outlined">
 				settings
 			</i>

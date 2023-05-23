@@ -2,6 +2,7 @@ from django import forms
 from .models import Room, Channel, Message, ChannelCategory, Action
 from utils import get_object_or_none
 
+from core.widgets import AvatarInput
 
 class ChannelCreationForm(forms.ModelForm):
     class Meta:
@@ -25,21 +26,28 @@ class ChannelPermissionsForm(forms.ModelForm):
     class Meta:
         model = Channel
         fields = ['display_logs']
+        
     
-
-class RoomForm(forms.ModelForm):
-    image = forms.ImageField(required=True)
-
+class RoomCreationForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['name', 'description', 'image']
         
-    def name(self):
-        name = self.cleaned_data['name']
-        if not name:
-            raise forms.ValidationError('Room requires a name.')
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+
+        if image:
+            return image
+        else:
+            # Keep the current image at the time of editing
+            # if none provided
+            return self.initial.get('image')
         
-        return name
+
+class RoomEditForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['name', 'description', 'image']
         
     def clean_image(self):
         image = self.cleaned_data.get('image')

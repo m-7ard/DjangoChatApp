@@ -29,53 +29,52 @@
 	</div>
 	<div class="wrapper--remaining-space">
 		<ul class="container__content" id="app__messages">
-			{% for backlog in backlogs %}
-				{% if backlog|classname == 'Message' %}
-					{% with backlog as message %}
-						{% include "./elements/message.html" with message_pk=message.pk room_pk=room.pk image=message.user.profile.image.url username=message.member.display_name timestamp=message.display_date content=message.content editable=message.user.pk|eq:user.pk member_pk=message.member.pk %}
-					{% endwith %}
-				{% elif backlog|classname == 'Log' %}
-					{% with backlog as log %}
-						<li class="log">
-							<span class="primary-text primary-text--small offline-color--primary">
-								{{ log.trigger_user }}
-							</span>
-							<span class="secondary-text secondary-text--small offline-color--secondary">
-								{{ log.action.display_name }}
-							</span>
-							{% if log.target_user %}
-							<span class="primary-text primary-text--small offline-color--primary">
-								{{ log.target_user }}
-							</span>
-							{% endif %}
-							<span class="secondary-text secondary-text--small offline-color--secondary">
-								{{ log.display_date }}
-							</span>
-						</li>
-					{% endwith %}
+			{% for object in backlogs %}
+				{% if object|classname == 'Message' %}
+					{% include "./elements/message.html" %}
+				{% elif object|classname == 'Log' %}
+                    <li class="log">
+                        <span class="primary-text primary-text--small offline-color--primary">
+                            {{ object.trigger_user }}
+                        </span>
+                        <span class="secondary-text secondary-text--small offline-color--secondary">
+                            {{ object.action.display_name }}
+                        </span>
+                        {% if object.target_user %}
+                        <span class="primary-text primary-text--small offline-color--primary">
+                            {{ object.target_user }}
+                        </span>
+                        {% endif %}
+                        <span class="secondary-text secondary-text--small offline-color--secondary">
+                            {{ object.display_date }}
+                        </span>
+                    </li>
 				{% endif %}
 			{% endfor %}
 		</ul>
 	</div>
 	<div class="chatbar">
-		<span class="chatbar__button">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">
-					attach_file
-				</i>
-			</div>
-		</span>
-		<span class="wrapper--remaining-space">
-			<textarea class="chatbar__input secondary-text secondary-text--large"></textarea>
-		</span>
-		<span class="chatbar__button tooltip__trigger" data-target=".reactions" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar_reaction">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">
-					sentiment_satisfied
-				</i>
-			</div>
-		</span>
-	</div>
+        <div class="chatbar__body has-shadow">
+            <span class="chatbar__button">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        attach_file
+                    </i>
+                </div>
+            </span>
+            <span class="wrapper--remaining-space">
+                <textarea class="chatbar__input secondary-text secondary-text--large"></textarea>
+            </span>
+            <span class="chatbar__button tooltip__trigger" data-target=".reactions" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar_reaction">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        sentiment_satisfied
+                    </i>
+                </div>
+            </span>
+        </div>
+    </div>
+		
 </div>
 {% endblock %}
 

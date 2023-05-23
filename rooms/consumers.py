@@ -31,45 +31,41 @@ from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        print(self.scope)
         self.loop = asyncio.get_event_loop()
-        # self.ping = False
         self.user = self.scope['user']
-        self.room = await sync_to_async(get_object_or_none)(
-            obj=Room,
-            pk=self.scope['url_route']['kwargs'].get('room')
-        )
-
-        self.channel = await sync_to_async(get_object_or_none)(
-            obj=Channel,
-            pk=self.scope['url_route']['kwargs'].get('channel')
-        )
+        self.room, self.channel = None, None
         
-        self.room_pk = 0
-        self.channel_pk = 0
+        room_pk = self.scope['url_route']['kwargs'].get('room')
+        channel_pk = self.scope['url_route']['kwargs'].get('channel')
 
-        self.room_group_name = f'room_{self.room.pk}'
-        self.channel_group_name = f'channel_{self.channel.pk}'
-        self.user_group_name = f'user_{self.user.pk}'
+        if room_pk:
+            self.room = await sync_to_async(get_object_or_none)(obj=Room, pk=room_pk)
+            self.room_group_name = f'room_{room_pk}'
 
-        # Users in a Channel
-        if self.channel:
+            # Users in a Room
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name,
+            )
+
+        if channel_pk:
+            self.channel = await sync_to_async(get_object_or_none)(obj=Channel, pk=channel_pk)
+            self.channel_group_name = f'channel_{channel_pk}'
+
+            # Users in a Channel
             await self.channel_layer.group_add(
                 self.channel_group_name,
                 self.channel_name,
             )
+
+        self.user_group_name = f'user_{self.user.pk}'
 
         # User Tabs
         await self.channel_layer.group_add(
             self.user_group_name,
             self.channel_name,
         )
-
-        # Users in a Room
-        if self.room:
-            await self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name,
-            )
 
         # All Users
         await self.channel_layer.group_add(
@@ -102,12 +98,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
 
-        if self.channel_pk:
+        if self.channel:
             await self.channel_layer.group_discard(
                 self.channel_group_name,
                 self.channel_name,
             )
-        if self.room_pk:
+        if self.room:
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name,
@@ -118,11 +114,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # 'join': self.room_user_logs_delegator,
             # 'leave': self.room_user_logs_delegator,
             
-            'send_message': self.send_message,
-            'edit_message': self.edit_message,
-            'delete_message': self.delete_message,
-            'react_message': self.react_message,
-            'manage_friendship': self.manage_friendship,
+            'send-message': self.send_message,
+            'edit-message': self.edit_message,
+            'delete-message': self.delete_message,
+            'react-message': self.react_message,
+            'manage-friendship': self.manage_friendship,
 
             # 'ping': self.receive_ping,
             'requestServerResponse': self.requestServerResponse,
@@ -137,12 +133,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             raise 'No such handler'
         
     async def requestServerResponse(self, data):
-        await self.channel_layer.group_send(
-            self.channel_group_name, {
-            'type': 'send_to_JS',
-            'action': 'response'
-            }
-        )
+        await self.send_to_JS({
+            'action': 'requestServerResponse'
+        })
         
     async def send_to_JS(self, event):
         print('sending', 'data: ', event)
@@ -288,25 +281,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def send_message(self, data):
         member = get_object_or_none(Member, user=self.user, room=self.room)
         content = data['content']
+        send_data = {**data}
 
         if member:
-            form = MessageForm(data={
+            message_form = MessageForm(data={
                 'user': self.user, 
                 'channel': self.channel, 
                 'member': member, 
                 'content': content
             })
                 
-            if form.is_valid():
-                message = form.save()
+            if message_form.is_valid():
+                message = message_form.save()
                 data = {
-                    'timestamp': message.display_date(),
-                    'username': message.member.display_name(),
-                    'message_pk': message.pk,
-                    'room_pk': self.room.pk,
-                    'content': content,
-                    'image': message.user.profile.image.url,
-                    'editable': True
+                    'room': self.room,
+                    'user': self.user,
+                    'object': message
                 }
                 message_html = get_rendered_html(
                     Path(__file__).parent / 'templates/rooms/elements/message.html', 
@@ -314,11 +304,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
                 self.loop.create_task(
                     self.channel_layer.group_send(
-                        self.channel_group_name,
-                        {
+                        self.channel_group_name, {
                         'type': 'send_to_JS',
-                        'action': 'send_message',
-                        'html': message_html
+                        'html': message_html,
+                        **send_data
                         }
                     )
                 )
@@ -330,7 +319,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         send_data = {**data}
 
         if member:
-            instance = get_object_or_none(Message, pk=data['messagePk'])
+            instance = Message.objects.get(pk=data['messagePk'])
             form = MessageForm(data={
                 'user': self.user, 
                 'channel': self.channel, 

@@ -7,44 +7,36 @@ window.addEventListener('load', () => {
 	
 	*/
 	Object.assign(chatSocketSendHandlers, {
-		'send_message': function submitMessage(event) {
+		'send-message': function submitMessage(event) {
 			if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
 				return;
 			};
 			event.preventDefault();
 			chatSocket.send(JSON.stringify({
-				'action': 'send_message',
+				'action': 'send-message',
 				'content': chatbarInput.value.trim()
 			}));
 			chatbarInput.value = '';
 		},
-		'delete_message': function deleteMessageDB(event) {
+		'delete-message': function deleteMessageDB(event) {
 			let message = event.target.closest('.message');
 			chatSocket.send(JSON.stringify({
-				'action': 'delete_message',
+				'action': 'delete-message',
 				'pk': message.dataset.pk
 			}));
 		},
-		'react_message': function addOrRemoveReactionDB(reactionPk, messagePk) {
+		'react-message': function addOrRemoveReactionDB(reactionPk, messagePk) {
 			chatSocket.send(JSON.stringify({
-				'action': 'react_message',
+				'action': 'react-message',
 				'reactionPk': reactionPk,
 				'messagePk': messagePk
 			}));
 		},
-		'edit_message': function editMessageDB(event) {
-			if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
-				return;
-			};
-			event.preventDefault();
-			let editInput = event.target;
-			let message = event.target.closest('.message');
-			let contentContainer = editInput.closest('.message__content');
-			contentContainer.classList.remove('message__content--editing');
+		'edit-message': function editMessageDB({messagePk, content}) {
 			chatSocket.send(JSON.stringify({
-				'action': 'edit_message',
-				'messagePk': message.dataset.pk,
-				'content': editInput.value.trim()
+				'action': 'edit-message',
+				'messagePk': messagePk,
+				'content': content
 			}));
 			editInput.remove()
 		},
@@ -59,17 +51,17 @@ window.addEventListener('load', () => {
 	*/
 
 	Object.assign(chatSocketReceiveHandlers, {
-		'send_message': function receiveMessage(data) {
+		'send-message': function receiveMessage(data) {
 			let message = new DOMParser().parseFromString(data.html, "text/html").querySelector('.message');
 			appMessages.appendChild(message);
 			appMessages.scrollTo(0, appMessages.scrollHeight);
 		},
-		'delete_message': function deleteMessageDOM(data) {
+		'delete-message': function deleteMessageDOM(data) {
 			let pk = data.pk;
 			let message = document.querySelector(`.message[data-pk="${pk}"]`);
 			message.remove();
 		},
-		'react_message': function addOrRemoveReactionDB(data) {
+		'react-message': function addOrRemoveReactionDB(data) {
 			let {actionType, reactionPk, messagePk} = data;
 			console.log(actionType, reactionPk, messagePk)
 			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
@@ -104,7 +96,7 @@ window.addEventListener('load', () => {
 				reaction.remove();
 			}
 		},
-		'edit_message': function editMessageDOM(data) {
+		'edit-message': function editMessageDOM(data) {
 			let {messagePk, content} = data;
 			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
 			let contentContainer = message.querySelector('.message__content');
@@ -123,33 +115,85 @@ window.addEventListener('load', () => {
 
 
 	Object.assign(commandHandlers, {
-		'delete_message': chatSocketSendHandlers['delete_message'],
-		'edit_message': function editMessage(event) {
-			// close any open editors
-			document.querySelectorAll('.message__content--editing')?.forEach((element) => {
-				element.classList.remove('message__content--editing');
-				element.querySelector('.message__edit').remove()
+		'delete-message': chatSocketSendHandlers['delete-message'],
+		'edit-message': function editMessage(event) {
+			// Close any open editors
+            let messagesWithOpenEditors = document.querySelectorAll('.message--editing');
+			messagesWithOpenEditors?.forEach((message) => {
+				message.classList.remove('message--editing');
+                message.querySelector('.message__edit').remove();
 			});
 
+            // Message DOM elements
 			let message = event.target.closest('.message');
+            let messageBody = message.querySelector('.message__body');
 			let contentContainer = message.querySelector('.message__content');
-			let contentContainerCopy = contentContainer.cloneNode(true);
-			contentContainer.classList.add('message__content--editing');
-			let editInput = document.createElement('textarea');
-			editInput.classList.add('message__edit');
-			contentContainerCopy.querySelectorAll('img').forEach((img) => {
-				img.replaceWith(`:${img.alt}:`);
-			});
-			editInput.value = contentContainerCopy.textContent.trim();
-			editInput.addEventListener('keypress', chatSocketSendHandlers['edit_message']);
+			let editInput = quickCreateElement('textarea', {
+                classList: ['message__edit'],
+                attributes: {},
+            });
+
+            // Prompts for saving and canceling
+            let prompts = quickCreateElement('div', {
+                classList: ['message__prompts'],
+                attributes: {},
+            });
+            prompts.innerHTML = `
+                <span data-action="cancel">Cancel</span>
+                <span data-action="save">Save</span>
+            `;
+
+            // Show message as being edited
+			message.classList.add('message--editing');
 			contentContainer.appendChild(editInput);
+            messageBody.appendChild(prompts);
+
+            // Put message content into the editor (emotes are converted to text)
+            editInput.value = (Array.from(contentContainer.childNodes).reduce((accumulator, current) => {
+                if (current.alt) {
+                    accumulator += ':' + current.alt + ':';
+                } 
+                else if (current.textContent) {
+                    accumulator += current.textContent;
+                }
+                else if (current.nodeName == 'BR') {
+                    accumulator += '\n'
+                }
+                return accumulator;
+            }, '')).trim(); // remove extra whitespace
+
+
+            prompts.querySelector('[data-action="save"]').addEventListener('click', save);
+            prompts.querySelector('[data-action="cancel"]').addEventListener('click', stopEditing);
+			editInput.addEventListener('keypress', (e) => {
+                if (!(e.key == "Enter") || (e.key === "Enter" && e.shiftKey)) {
+                    return;
+                };
+                save();
+            });
+            
+            function stopEditing () {
+                message.classList.remove('message--editing');
+                editInput.remove();
+                prompts.remove();
+            };
+
+            function save () {
+                message.classList.remove('message--editing');
+                editInput.remove();
+                prompts.remove();
+                chatSocketSendHandlers['edit-message']({
+                    'content': editInput.value,
+                    'messagePk': message.dataset.pk, 
+                });
+            };
 		},
-		'react_message': function reactMessage(event) {
+		'react-message': function reactMessage(event) {
 			let reaction = event.target.closest('.message__reaction');
 			let reactionPk = reaction.dataset.pk;
 			let message = event.target.closest('.message');
 			let messagePk = message.dataset.pk;
-			chatSocketSendHandlers['react_message'](reactionPk, messagePk);
+			chatSocketSendHandlers['react-message'](reactionPk, messagePk);
 		},
 		'open_profile': function openProfile(event) {
 			
@@ -164,5 +208,5 @@ window.addEventListener('load', () => {
 	appMessages.scrollTo(0, appMessages.scrollHeight);
 
 	// Chatbar enter listener
-	chatbarInput.addEventListener('keypress', chatSocketSendHandlers['send_message'])
+	chatbarInput.addEventListener('keypress', chatSocketSendHandlers['send-message'])
 });

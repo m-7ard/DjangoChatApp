@@ -1,10 +1,13 @@
 import json
 import re
 
+from django.template import Template, Context
 from django.template.defaulttags import register
 from django.apps import apps
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
+from django.http import JsonResponse, HttpResponse
+
 
 
 from rooms.models import Member, Room, Reaction
@@ -34,7 +37,8 @@ def convert_reactions(text, room_pk):
         except Reaction.DoesNotExist:
             return match.group(0)
 
-    return mark_safe(re.sub(pattern, replace_with, text))
+
+    return Template(re.sub(pattern, replace_with, text)).render(Context({}))
     
 
 @register.filter(name="get_friendship_friend")

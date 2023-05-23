@@ -97,3 +97,11 @@ function fitFixedContainer(element) {
 		element.style.right = '';
 	};
 };
+
+function quickCreateElement(elementTag, {classList, attributes}) {
+    /* elementTag: String, classList: Object, attributes: Object */
+    const element = document.createElement(elementTag);
+    classList.forEach((value) => element.classList.add(value));
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+};
