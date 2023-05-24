@@ -103,15 +103,24 @@ window.addEventListener('click', function toggleTooltips(event) {
 	let eventTrigger = event.target.closest('.tooltip__trigger');
 	let eventTooltip = event.target.closest('.tooltip');
 	
+    /* Nothing tooltip-related was clicked */
 	if (!eventTooltip && !eventTrigger) {
 		closeTooltips();
 	}
 
+    /* 
+        If a tooltip was clicked, check if a close trigger for that tooltip 
+        was clicked 
+    */
 	if (eventTooltip) {
 		let eventTooltipClose = event.target.closest('.tooltip__close');
 		eventTooltipClose ? closeTooltips() : closeTooltips(eventTooltip);
 	}
 
+    /*
+        If a tooltip trigger is clicked, close all other tooltips and open or close
+        and position the tooltip accordingly.
+    */
 	if (eventTrigger) {
 		let triggerTarget = document.querySelector(eventTrigger.dataset.target);
 		closeTooltips(triggerTarget);

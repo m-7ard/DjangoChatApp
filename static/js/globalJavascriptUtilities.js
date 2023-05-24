@@ -98,10 +98,17 @@ function fitFixedContainer(element) {
 	};
 };
 
-function quickCreateElement(elementTag, {classList, attributes}) {
+function quickCreateElement(elementTag, {classList, attributes, parent, eventListener}) {
     /* elementTag: String, classList: Object, attributes: Object */
     const element = document.createElement(elementTag);
-    classList.forEach((value) => element.classList.add(value));
-    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    if (classList) {
+        classList.forEach((value) => element.classList.add(value));
+    };
+    if (attributes) {
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    };
+    if (parent) {
+        parent.appendChild(element);
+    };
     return element;
 };

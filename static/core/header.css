@@ -370,6 +370,9 @@
 .message__avatar {
   grid-row: 1/-1;
 }
+.message__avatar .avatar {
+  cursor: pointer;
+}
 .message__header {
   display: flex;
   padding: 0;
@@ -379,6 +382,10 @@
 .message__user {
   font-size: 1rem;
   font-weight: bold;
+  cursor: pointer;
+}
+.message__user:hover {
+  text-decoration: underline;
 }
 .message__timestamp {
   font-size: 0.8125rem;
@@ -420,6 +427,7 @@
 .message__content img {
   max-height: 1.5rem;
   max-width: 1.5rem;
+  vertical-align: middle;
 }
 .message__edit {
   all: unset;

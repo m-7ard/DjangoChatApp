@@ -533,6 +533,10 @@ $light-secondary: $battleship-grey;
 
     &__avatar {
         grid-row: 1/-1;
+
+        .avatar {
+            cursor: pointer;
+        }
     }
 
     &__header {
@@ -543,6 +547,11 @@ $light-secondary: $battleship-grey;
     &__user {
         font-size: $text-primary-medium;
         font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 
     &__timestamp {
@@ -581,7 +590,7 @@ $light-secondary: $battleship-grey;
     }
 
 	&__content {
-		position: relative;
+        position: relative;
 		word-wrap: break-word;
         white-space: pre-wrap;
         line-height: 1.5rem;
@@ -592,6 +601,7 @@ $light-secondary: $battleship-grey;
 		img {
 			max-height: 1.5rem;
 			max-width: 1.5rem;
+            vertical-align: middle;
 		}
 	}
 

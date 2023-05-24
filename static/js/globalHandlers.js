@@ -55,8 +55,8 @@ const windowClickHandlers = {
 	'.tooltip__trigger': function delegateTooltipTrigger(event) {
 		let trigger = event.target.closest('.tooltip__trigger');
 		let tooltip = document.querySelector(trigger.dataset.target);
-		Object.entries(tooltipHandlers).forEach(([selector, fn]) => {
-			if (tooltip.classList.contains(selector) || tooltip.id == selector) {
+		Object.entries(tooltipHandlers).forEach(([key, fn]) => {
+			if (tooltip.id == key) {
 				fn({
 					tooltip: tooltip,
 					trigger: trigger,
@@ -152,30 +152,22 @@ const overlayHandlers = {
 
 */
 const tooltipHandlers = {
-	'friendship__menu': ({tooltip, trigger}) => {
+	'friendship-menu': ({tooltip, trigger}) => {
 		let friendshipPk = trigger.closest('.friendship').dataset.pk;
 		tooltip.setAttribute('data-pk', friendshipPk);
 	},
 	'reactions': ({tooltip, trigger}) => {
 		let kind = trigger.dataset.kind;
-		if (kind == 'message_reaction') {
+		if (kind == 'message-reaction') {
 			let message = trigger.closest('.message');
-			tooltip.onclick = (event) => {
-				let reaction = event.target.closest('.reactions__reaction');
-				if (!reaction) {
-					return
-				};
-				
-				chatSocketSendHandlers['react_message'](reaction.dataset.pk, message.dataset.pk);
-			};
+			tooltip.onclick = (event) => commandHandlers['react-message-from-reactions']({event, message});
 		}
-		else if (kind == 'chatbar_reaction') {
-			tooltip.onclick = (event) => {
-				let chatbarInput = document.querySelector('.chatbar__input');
-				let reaction = event.target.closest('.reactions__reaction');
-				chatbarInput.value += `:${reaction.dataset.name}:`;
-			};
-		};
+		else if (kind == 'chatbar-reaction') {
+			tooltip.onclick = commandHandlers['react-chatbar'];
+		}
+        else {
+            throw Error('The data-kind attribute received from .tooltip__trigger is invalid. Check that it matches one of the kinds in tooltipHandlers["message-reactions"].')
+        }
 	},
 	'profile': async ({tooltip, trigger}) => {
 		let url = new URL(window.location.origin + '/GetHtmlElementFromModel/');

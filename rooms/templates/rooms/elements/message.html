@@ -24,7 +24,8 @@
     <div class="message__reactions">
         {% for message_reaction in object.reactions.all %}
         <span class="message__reaction {% if object.user in message_reaction.users.all %} message__reaction--selected {% endif %}"
-        data-pk="{{ message_reaction.reaction.pk }}" data-command="react-message">
+        data-pk="{{ message_reaction.reaction.pk }}" 
+        data-command="react-message-from-message">
             <img src="{{ message_reaction.image.url }}" alt="">
             <span class="message__counter">
                 {{ message_reaction.users.all.count }}
@@ -35,9 +36,9 @@
     {% endspaceless %}
     <div class="message__actions has-shadow">
 		<span class="message__action tooltip__trigger" 
-		data-target=".reactions" 
+		data-target="#reactions" 
 		data-positioning='{"top": "0px", "right": "-100%"}' 
-		data-kind="message_reaction"
+		data-kind="message-reaction"
 		>
 			<div class="icon icon--small">
 				<i class="material-symbols-outlined">								
@@ -69,28 +70,31 @@
 					</i>
 				</div>
 			</div>
-			<ul class="menu dropdown__content dropdown__content--hidden has-shadow">
-				<li class="menu__item" data-command="delete-message">
-                    <span>
-						Delete
-					</span>
-                    <span class="icon icon--small">
-						<i class="material-symbols-outlined">								
-							delete
-						</i>
-					</span>
-				</li>
-				<li class="menu__item" data-command="link-message">
-					<span>
-						Message Link
-					</span>
-                    <span class="icon icon--small">
-						<i class="material-symbols-outlined">								
-							link
-						</i>
-					</span>
-				</li>
-			</ul>
+            <div class="dropdown__content dropdown__content--hidden">
+                <ul class="menu has-shadow">
+                    <li class="menu__item" data-command="delete-message">
+                        <span>
+                            Delete
+                        </span>
+                        <span class="icon icon--small">
+                            <i class="material-symbols-outlined">								
+                                delete
+                            </i>
+                        </span>
+                    </li>
+                    <li class="menu__item" data-command="link-message">
+                        <span>
+                            Message Link
+                        </span>
+                        <span class="icon icon--small">
+                            <i class="material-symbols-outlined">								
+                                link
+                            </i>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+			
 		</span>
     </div>
 </li>

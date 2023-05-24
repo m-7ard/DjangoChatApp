@@ -30,6 +30,7 @@ from utils import get_object_or_none, get_rendered_html
 from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
         print(self.scope)
         self.loop = asyncio.get_event_loop()
@@ -125,12 +126,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }
 
         data = json.loads(text_data)
-        action = data['action']
+        action = data.get('action')
         handler = handlers.get(action)
+        print('-------' * 10)
+        print(action)
         if handler:
             await handler(data)
         else:
-            raise 'No such handler'
+            raise 'No such handler exists'
         
     async def requestServerResponse(self, data):
         await self.send_to_JS({
@@ -158,8 +161,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def react_message(self, data):
-        reaction = get_object_or_none(Reaction, pk=data['reactionPk'])
-        message = get_object_or_none(Message, pk=data['messagePk'])
+        reaction = get_object_or_none(Reaction, pk=data.get('reactionPk'))
+        message = get_object_or_none(Message, pk=data.get('messagePk'))
+        print(reaction, message)
+        if not reaction or not message:
+            return
+        
         message_reaction, created = MessageReaction.objects.get_or_create(reaction=reaction, message=message)
         send_data = {**data}
 
@@ -344,19 +351,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def delete_message(self, data):
-        pk = data['pk']
-        message = get_object_or_none(Message, pk=pk)
+        print(data.get('messagePk'))
+        message = get_object_or_none(Message, pk=data.get('messagePk'))
+        send_data = {**data}
 
         if message:
             message.delete()
-            self.loop.create_task(self.channel_layer.group_send(
-                self.channel_group_name,
-                {
-                'type': 'send_to_JS',
-                'action': 'delete_message',
-                'pk': pk
-                }
-            ))
+            self.task_group_send(send_data)
+
 
     @database_sync_to_async
     def manage_friendship(self, data):
@@ -384,21 +386,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             **send_data,
             }
         ))
-        
-    """
-    @database_sync_to_async
-    def update_user_last_ping(self):
-        self.user.profile.last_ping = datetime.datetime.now()
-        self.user.profile.save()
-    
-    @database_sync_to_async
-    def get_user_last_ping(self):
-        return self.user.profile.last_ping
-    
-    @database_sync_to_async
-    def update_user_status(self, user, status):
-        user.profile.status = status
-    """
     
     """
     
@@ -432,6 +419,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             self.update_user_status(self.user, 'offline')
             print('user is online')
+
+    def task_group_send(self, send_data):
+        self.loop.create_task(self.channel_layer.group_send(
+            self.channel_group_name,
+            {
+            'type': 'send_to_JS',
+            **send_data
+            }
+        ))
 
 
 """

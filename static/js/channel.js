@@ -18,14 +18,13 @@ window.addEventListener('load', () => {
 			}));
 			chatbarInput.value = '';
 		},
-		'delete-message': function deleteMessageDB(event) {
-			let message = event.target.closest('.message');
+		'delete-message': function deleteMessageDB({messagePk}) {
 			chatSocket.send(JSON.stringify({
 				'action': 'delete-message',
-				'pk': message.dataset.pk
+				'messagePk': messagePk
 			}));
 		},
-		'react-message': function addOrRemoveReactionDB(reactionPk, messagePk) {
+		'react-message': ({reactionPk, messagePk}) => {
 			chatSocket.send(JSON.stringify({
 				'action': 'react-message',
 				'reactionPk': reactionPk,
@@ -38,7 +37,6 @@ window.addEventListener('load', () => {
 				'messagePk': messagePk,
 				'content': content
 			}));
-			editInput.remove()
 		},
 	});
 
@@ -56,13 +54,11 @@ window.addEventListener('load', () => {
 			appMessages.appendChild(message);
 			appMessages.scrollTo(0, appMessages.scrollHeight);
 		},
-		'delete-message': function deleteMessageDOM(data) {
-			let pk = data.pk;
-			let message = document.querySelector(`.message[data-pk="${pk}"]`);
+		'delete-message': function deleteMessageDOM({messagePk}) {
+			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
 			message.remove();
 		},
-		'react-message': function addOrRemoveReactionDB(data) {
-			let {actionType, reactionPk, messagePk} = data;
+		'react-message': function addOrRemoveReactionDB({actionType, reactionPk, messagePk}) {
 			console.log(actionType, reactionPk, messagePk)
 			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
 			let messageReactions = message.querySelector('.message__reactions');
@@ -115,28 +111,33 @@ window.addEventListener('load', () => {
 
 
 	Object.assign(commandHandlers, {
-		'delete-message': chatSocketSendHandlers['delete-message'],
-		'edit-message': function editMessage(event) {
+		'delete-message': (event) => {
+            let message = event.target.closest('.message');
+            chatSocketSendHandlers['delete-message']({
+                'messagePk': message.dataset.pk,
+            })
+        },
+		'edit-message': (event) => {
 			// Close any open editors
             let messagesWithOpenEditors = document.querySelectorAll('.message--editing');
-			messagesWithOpenEditors?.forEach((message) => {
-				message.classList.remove('message--editing');
-                message.querySelector('.message__edit').remove();
-			});
+			messagesWithOpenEditors?.forEach((message) => stopEditing(message));
 
             // Message DOM elements
 			let message = event.target.closest('.message');
+			let messageContent = message.querySelector('.message__content');
             let messageBody = message.querySelector('.message__body');
-			let contentContainer = message.querySelector('.message__content');
+
 			let editInput = quickCreateElement('textarea', {
                 classList: ['message__edit'],
                 attributes: {},
+                parent: messageContent,
             });
 
             // Prompts for saving and canceling
             let prompts = quickCreateElement('div', {
                 classList: ['message__prompts'],
                 attributes: {},
+                parent: messageBody,
             });
             prompts.innerHTML = `
                 <span data-action="cancel">Cancel</span>
@@ -145,11 +146,9 @@ window.addEventListener('load', () => {
 
             // Show message as being edited
 			message.classList.add('message--editing');
-			contentContainer.appendChild(editInput);
-            messageBody.appendChild(prompts);
 
             // Put message content into the editor (emotes are converted to text)
-            editInput.value = (Array.from(contentContainer.childNodes).reduce((accumulator, current) => {
+            editInput.value = (Array.from(messageContent.childNodes).reduce((accumulator, current) => {
                 if (current.alt) {
                     accumulator += ':' + current.alt + ':';
                 } 
@@ -158,13 +157,13 @@ window.addEventListener('load', () => {
                 }
                 else if (current.nodeName == 'BR') {
                     accumulator += '\n'
-                }
+                };
                 return accumulator;
-            }, '')).trim(); // remove extra whitespace
+            }, '')).trim(); // remove leading and trailing whitespace
 
 
             prompts.querySelector('[data-action="save"]').addEventListener('click', save);
-            prompts.querySelector('[data-action="cancel"]').addEventListener('click', stopEditing);
+            prompts.querySelector('[data-action="cancel"]').addEventListener('click', () => stopEditing(message));
 			editInput.addEventListener('keypress', (e) => {
                 if (!(e.key == "Enter") || (e.key === "Enter" && e.shiftKey)) {
                     return;
@@ -172,29 +171,49 @@ window.addEventListener('load', () => {
                 save();
             });
             
-            function stopEditing () {
-                message.classList.remove('message--editing');
-                editInput.remove();
-                prompts.remove();
+            function stopEditing (messageElement) {
+                messageElement.classList.remove('message--editing');
+                messageElement.querySelector('.message__edit').remove();
+                messageElement.querySelector('.message__prompts').remove();
             };
 
             function save () {
-                message.classList.remove('message--editing');
-                editInput.remove();
-                prompts.remove();
+                stopEditing(message);
                 chatSocketSendHandlers['edit-message']({
                     'content': editInput.value,
                     'messagePk': message.dataset.pk, 
                 });
             };
 		},
-		'react-message': function reactMessage(event) {
+		'react-message-from-message': (event) => {
 			let reaction = event.target.closest('.message__reaction');
 			let reactionPk = reaction.dataset.pk;
 			let message = event.target.closest('.message');
 			let messagePk = message.dataset.pk;
-			chatSocketSendHandlers['react-message'](reactionPk, messagePk);
+			chatSocketSendHandlers['react-message']({
+                messagePk,
+                reactionPk, 
+            });
 		},
+		'react-message-from-reactions': ({event, message}) => {
+            /* 
+                This function is called from tooltipHandlers['reactions'] 
+            */
+            let reaction = event.target.closest('.reactions__reaction');
+            if (!reaction) {
+                return
+            };
+            
+            chatSocketSendHandlers['react-message']({
+                'reactionPk': reaction.dataset.pk,
+                'messagePk': message.dataset.pk,
+            });
+        },
+        'react-chatbar': (event) => {
+            let chatbarInput = document.querySelector('.chatbar__input');
+            let reaction = event.target.closest('.reactions__reaction');
+            chatbarInput.value += `:${reaction.dataset.name}:`;
+        },
 		'open_profile': function openProfile(event) {
 			
 		},
