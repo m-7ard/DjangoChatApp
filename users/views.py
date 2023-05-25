@@ -32,7 +32,8 @@ class SignupView(TemplateView):
         if user_form.is_valid():
             user = user_form.save(commit=False)
             user.username_id = random.choice(free_ids)
-            return HttpResponseRedirect(reverse_lazy('frontpage'))
+            user.save()
+            return render(request, '', {'SignupForm': user_form})
             
         return render(request, self.template_name, {'SignupForm': user_form})
         

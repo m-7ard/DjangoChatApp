@@ -98,7 +98,7 @@ function fitFixedContainer(element) {
 	};
 };
 
-function quickCreateElement(elementTag, {classList, attributes, parent, eventListener}) {
+function quickCreateElement(elementTag, {classList, attributes, parent, eventListeners, innerHTML}) {
     /* elementTag: String, classList: Object, attributes: Object */
     const element = document.createElement(elementTag);
     if (classList) {
@@ -109,6 +109,12 @@ function quickCreateElement(elementTag, {classList, attributes, parent, eventLis
     };
     if (parent) {
         parent.appendChild(element);
+    };
+    if (eventListeners) {
+        Object.entries(eventListeners).forEach(([kind, fn]) => element.addEventListener(kind, fn));
+    };
+    if (innerHTML) {
+        element.innerHTML = innerHTML;
     };
     return element;
 };

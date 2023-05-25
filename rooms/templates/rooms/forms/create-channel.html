@@ -18,7 +18,6 @@
 				</div>
 			</div>
 		</div>
-	
 		<input type="hidden" name="category" value="{{ category.pk }}"></input>
 		{% for field in form %}
 		{% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}

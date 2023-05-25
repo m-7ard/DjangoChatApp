@@ -58,8 +58,7 @@ window.addEventListener('load', () => {
 			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
 			message.remove();
 		},
-		'react-message': function addOrRemoveReactionDB({actionType, reactionPk, messagePk}) {
-			console.log(actionType, reactionPk, messagePk)
+		'react-message': function addOrRemoveReactionDB({actionType, reactionPk, messagePk, imageUrl}) {
 			let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
 			let messageReactions = message.querySelector('.message__reactions');
 			if (actionType == ['addReaction']) {
@@ -75,17 +74,15 @@ window.addEventListener('load', () => {
 				counter.innerText = parseInt(counter.innerText) - 1;
 			}
 			else if (actionType == ['createReaction']) {
-				let reaction = document.createElement('span');
-				reaction.classList.add('message__reaction');
-				reaction.classList.add('message__reaction--selected');
-				reaction.classList.add('has-shadow');
-				reaction.dataset.pk = reactionPk;
-				reaction.dataset.command = "react";
-				reaction.innerHTML = `
-				<img src="${data.url}" alt="">
-				<span class="message__counter">1</span>
-				`;
-				messageReactions.appendChild(reaction);
+                quickCreateElement('span', {
+                    parent: messageReactions,
+                    classList: ['message__reaction', 'message__reaction--selected'],
+                    attributes: {'data-pk': reactionPk, 'data-command': 'react'},
+                    innerHTML: `
+                        <img src="${imageUrl}" alt="">
+                        <span class="message__counter">1</span>
+                    `,
+                });
 			}
 			else if (actionType == ['deleteReaction']) {
 				let reaction = messageReactions.querySelector(`.message__reaction[data-pk="${reactionPk}"]`);
@@ -108,8 +105,6 @@ window.addEventListener('load', () => {
 	-------------------------
 
 	*/
-
-
 	Object.assign(commandHandlers, {
 		'delete-message': (event) => {
             let message = event.target.closest('.message');
@@ -131,6 +126,12 @@ window.addEventListener('load', () => {
                 classList: ['message__edit'],
                 attributes: {},
                 parent: messageContent,
+                eventListeners: {'keypress': (e) => {
+                    if (!(e.key == "Enter") || (e.key === "Enter" && e.shiftKey)) {
+                        return;
+                    };
+                    save();
+                }},
             });
 
             // Prompts for saving and canceling
@@ -164,12 +165,6 @@ window.addEventListener('load', () => {
 
             prompts.querySelector('[data-action="save"]').addEventListener('click', save);
             prompts.querySelector('[data-action="cancel"]').addEventListener('click', () => stopEditing(message));
-			editInput.addEventListener('keypress', (e) => {
-                if (!(e.key == "Enter") || (e.key === "Enter" && e.shiftKey)) {
-                    return;
-                };
-                save();
-            });
             
             function stopEditing (messageElement) {
                 messageElement.classList.remove('message--editing');

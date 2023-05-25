@@ -3,6 +3,13 @@
 		Room
 	</div>
 	<div class="container__subheader has-shadow">
+        {% if user != room.owner %}
+        <span class="icon icon--small icon--hoverable" data-command="leave-room">
+			<i class="material-symbols-outlined">
+				door_open
+			</i>
+		</span>
+        {% endif %}
 		<span class="icon icon--small icon--hoverable right">
 			<i class="material-symbols-outlined">
 				notifications
@@ -26,9 +33,11 @@
 				<div class="room-card__description">
 					{{ room.description }}
 				</div>
-				<div class="room-card__join bottom">
+                {% if not user|is_member:room %}
+				<div class="room-card__join bottom" data-command="join-room" data-pk="{{ room.pk }}">
 					Join
 				</div>
+                {% endif %}
 			</div>
 		</span>
 	</div>

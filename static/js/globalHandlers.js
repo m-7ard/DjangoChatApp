@@ -23,6 +23,12 @@ const commandHandlers = {
 		formbox.querySelectorAll('.switchable__content').forEach((form) => form.classList.add('switchable__content--hidden'));
 		target.classList.remove('switchable__content--hidden');
 	},
+    'join-room': (event) => {
+        let joinButton = event.target.closest('[data-command="join-room"]');
+        chatSocketSendHandlers['join-room']({
+            roomPk: joinButton.dataset.pk
+        });
+    }
 };
 /*
 
@@ -33,17 +39,6 @@ const windowClickHandlers = {
 	'.dropdown__trigger': function toggleDropdown(event) {
 		let dropdown = event.target.closest('.dropdown');
 		let dropdownContent = dropdown.querySelector('.dropdown__content');
-
-		if (dropdownContent.classList.contains('dropdown__content--mouseleave')) {
-			let selector = dropdownContent.dataset.mouseleaveTrigger;
-			let boundary = event.target.closest(selector);
-			boundary.addEventListener('mouseleave', boundaryMouseleave);
-			function boundaryMouseleave() {
-				dropdownContent.classList.toggle('dropdown__content--hidden');
-				boundary.removeEventListener('mouseleave', boundaryMouseleave);
-			};
-		};
-
 		dropdownContent.classList.toggle('dropdown__content--hidden');
 	},
 	'[data-command]': function delegateCommand(event) {
@@ -51,18 +46,17 @@ const windowClickHandlers = {
 		console.log(command)
 		commandHandlers[command](event);
 	},
-
 	'.tooltip__trigger': function delegateTooltipTrigger(event) {
+        /* 
+            This should be changed to use the id directly to eliminate
+            the ambiguity
+        */
 		let trigger = event.target.closest('.tooltip__trigger');
 		let tooltip = document.querySelector(trigger.dataset.target);
-		Object.entries(tooltipHandlers).forEach(([key, fn]) => {
-			if (tooltip.id == key) {
-				fn({
-					tooltip: tooltip,
-					trigger: trigger,
-				});
-			};
-		})
+        tooltipHandlers[tooltip.id]({
+            tooltip: tooltip,
+            trigger: trigger,
+        });
 	},
 	'.overlay__trigger': async function addOverlay(event) {
 		event.preventDefault();
@@ -162,11 +156,11 @@ const tooltipHandlers = {
 			let message = trigger.closest('.message');
 			tooltip.onclick = (event) => commandHandlers['react-message-from-reactions']({event, message});
 		}
-		else if (kind == 'chatbar-reaction') {
-			tooltip.onclick = commandHandlers['react-chatbar'];
+		else if (kind == 'react-chatbar') {
+			tooltip.onclick = (event) => commandHandlers['react-chatbar'](event);
 		}
         else {
-            throw Error('The data-kind attribute received from .tooltip__trigger is invalid. Check that it matches one of the kinds in tooltipHandlers["message-reactions"].')
+            throw Error('The data-kind attribute received from .tooltip__trigger is invalid. Check that it matches one of the kinds in tooltipHandlers["reactions"].')
         }
 	},
 	'profile': async ({tooltip, trigger}) => {
@@ -212,6 +206,12 @@ const chatSocketSendHandlers = {
             console.error('Error requestServerResponse', error);
         }
     },
+    'join-room': ({roomPk}) => {
+        chatSocket.send(JSON.stringify({
+            'action': 'join-room',
+            'roomPk': roomPk
+        }))
+    }
 };
 /*
 
@@ -261,4 +261,7 @@ const chatSocketReceiveHandlers = {
         ];
         roomReferences.forEach((element) => element.remove())
     },
+    'join-room': (data) {
+        
+    }
 };

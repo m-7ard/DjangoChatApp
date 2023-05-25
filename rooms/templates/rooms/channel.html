@@ -33,22 +33,7 @@
 				{% if object|classname == 'Message' %}
 					{% include "./elements/message.html" %}
 				{% elif object|classname == 'Log' %}
-                    <li class="log">
-                        <span class="primary-text primary-text--small offline-color--primary">
-                            {{ object.trigger_user }}
-                        </span>
-                        <span class="secondary-text secondary-text--small offline-color--secondary">
-                            {{ object.action.display_name }}
-                        </span>
-                        {% if object.target_user %}
-                        <span class="primary-text primary-text--small offline-color--primary">
-                            {{ object.target_user }}
-                        </span>
-                        {% endif %}
-                        <span class="secondary-text secondary-text--small offline-color--secondary">
-                            {{ object.display_date }}
-                        </span>
-                    </li>
+                    {% include "./elements/log.html" %}
 				{% endif %}
 			{% endfor %}
 		</ul>
@@ -65,7 +50,7 @@
             <span class="wrapper--remaining-space">
                 <textarea class="chatbar__input secondary-text secondary-text--large"></textarea>
             </span>
-            <span class="chatbar__button tooltip__trigger" data-target=".reactions" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar_reaction">
+            <span class="chatbar__button tooltip__trigger" data-target="#reactions" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="react-chatbar">
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">
                         sentiment_satisfied

@@ -1,0 +1,16 @@
+<li class="log">
+    <span class="log__user">
+        {{ object.trigger_user }}
+    </span>
+    <span class="log__action">
+        {{ object.action.display_name }}
+    </span>
+    {% if object.target_user %}
+    <span class="log__user">
+        {{ object.target_user }}
+    </span>
+    {% endif %}
+    <span class="log__timestamp">
+        {{ object.display_date }}
+    </span>
+</li>

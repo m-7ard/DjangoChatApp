@@ -73,3 +73,7 @@ def add_argument(self, other):
 def printInConsole(self):
     print(self)
     
+@register.filter(name="is_member")
+def is_member(user, room):
+    return room.pk in user.memberships.all().values_list('room', flat=True)
+    

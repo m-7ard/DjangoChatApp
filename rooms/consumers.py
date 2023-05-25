@@ -30,11 +30,10 @@ from utils import get_object_or_none, get_rendered_html
 from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
-
     async def connect(self):
-        print(self.scope)
         self.loop = asyncio.get_event_loop()
         self.user = self.scope['user']
+        print(self.user, 'ppppp' * 10)
         self.room, self.channel = None, None
         
         room_pk = self.scope['url_route']['kwargs'].get('room')
@@ -112,7 +111,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         handlers = {
-            # 'join': self.room_user_logs_delegator,
+            'join-room': self.join_room,
             # 'leave': self.room_user_logs_delegator,
             
             'send-message': self.send_message,
@@ -160,10 +159,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
 
     @database_sync_to_async
+    def join_room(self, data):
+        room = get_object_or_none(Room, pk=data.get('roomPk'))
+        if not room:
+            return
+        
+        created, member = Member.objects.get_or_create(room=room, user=self.user)
+        if created:
+            action = Action.objects.get(name='join')
+            log = Log.objects.create()
+
+    @database_sync_to_async
     def react_message(self, data):
         reaction = get_object_or_none(Reaction, pk=data.get('reactionPk'))
         message = get_object_or_none(Message, pk=data.get('messagePk'))
-        print(reaction, message)
         if not reaction or not message:
             return
         
@@ -181,108 +190,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message_reaction.users.add(self.user)
             if created:
                 send_data['actionType'] = 'createReaction'
-                send_data['url'] = message_reaction.reaction.image.url
+                send_data['imageUrl'] = message_reaction.reaction.image.url
             else:
                 send_data['actionType'] = 'addReaction'
 
-        self.loop.create_task(
-            self.channel_layer.group_send(
-                self.channel_group_name, {
-                'type': 'send_to_JS',
-                'action': 'react_message',
-                **send_data
-                }
-            )
-        )
-
-    """
-    async def room_user_logs_delegator(self, data):
-        async def join(data):
-            @sync_to_async
-            def user_joins():
-                room = Room.objects.get(id=self.room_pk)
-                user = self.user
-                member, created = Member.objects.get_or_create(
-                    room=room,
-                    user=user
-                )
-                
-                return created
-
-            is_new_member = await user_joins()
-            if is_new_member:
-                action_name = 'room join'
-                log = await create_log_DB(action_name)
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'send_to_JS',
-                        'action': 'log',
-                        'action_display_name': log.action_display_name,
-                        'trigger_user': log.trigger_user.username,
-                        'date': log.display_date(),
-                    }
-                )
-        
-        async def leave(data):
-            @sync_to_async
-            def user_leaves():
-                room = Room.objects.get(id=self.room_pk)
-                user = self.user
-                member = get_object_or_none(Member, room=room, user=user)
-                exists = member is not None
-
-                if exists:
-                    member.delete()
-
-                return exists
-                
-            is_already_member = await user_leaves()
-            if is_already_member:
-                log = await create_log_DB('room leave')
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'send_to_JS',
-                        'action': 'log',
-                        'action_display_name': log.action_display_name,
-                        'trigger_user': log.trigger_user.username,
-                        'date': log.display_date(),
-                    }
-                )
-
-        @sync_to_async
-        def create_log_DB(action_name, message_pk=None):
-            room = Room.objects.get(id=self.room_pk)
-            action = Action.objects.get(name=action_name)
-            trigger_user = self.user
-            target_user = Message.objects.get(pk=message_pk).user if message_pk else None
-
-            if action_name == 'room join':
-                date = Member.objects.get(user=trigger_user, room=room).date_added
-            else:
-                date = datetime.datetime.now().strftime("%H:%M:%S")
-
-            log = Log.objects.create(
-                room=room,
-                trigger_user=trigger_user,
-                target_user=target_user,
-                action=action,
-                date_added=date
-            )
-
-            return log
-        
-        handlers = {
-            'join': join,
-            'leave': leave,
-        }
-
-        action = data['action']
-        handler = handlers.get(action)
-        if handler:
-            await handler(data)
-    """
+        self.task_group_send(send_data)
 
     @database_sync_to_async
     def send_message(self, data):

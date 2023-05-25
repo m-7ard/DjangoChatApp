@@ -2,35 +2,37 @@
 
 {% block content %}
 <div class="account">
-	<form method="POST" class="form has-shadow">
-		<div class="form__title x-center">
-			Create New Account
-		</div>
-		{% csrf_token %}
-		{% for field in SignupForm %}
-		{% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
-		<div class="form__field {{ modifier }}">
-			<div class="form__label">
-				{{ field.label }}
-			</div>
-			<div class="form__input">
-				{{ field }}
-			</div>
-			{% for error in field.errors %}
-			<div class="form__error">
-				{{ error }}
-			</div>
-			{% endfor %}
-		</div>
-		{% endwith %}
-		{% endfor %}
-		<button class="form__submit" type="submit">
-			Create New Account
-		</button>
-		<a href="{% url 'signin' %}" class="account__link">
-			Aready Have An Account?
-		</a>
-	</form>
+    <div class="formbox">
+        <form method="POST" class="form has-shadow">
+            <div class="form__title x-center">
+                Create New Account
+            </div>
+            {% csrf_token %}
+            {% for field in SignupForm %}
+            {% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
+            <div class="form__field {{ modifier }}">
+                <div class="form__label">
+                    {{ field.label }}
+                </div>
+                <div class="form__input">
+                    {{ field }}
+                </div>
+                {% for error in field.errors %}
+                <div class="form__error">
+                    {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endwith %}
+            {% endfor %}
+            <button class="form__submit" type="submit">
+                Create New Account
+            </button>
+            <a href="{% url 'signin' %}" class="account__link">
+                Aready Have An Account?
+            </a>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

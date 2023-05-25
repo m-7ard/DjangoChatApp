@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Any, Optional
+from itertools import chain
 
 from django.db import models
 from django.forms.forms import BaseForm
@@ -42,7 +42,7 @@ class RoomView(DetailView):
     context_object_name = 'room'
 
     def get_object(self):
-        return Room.objects.get(id=self.kwargs['room'])
+        return Room.objects.get(pk=self.kwargs['room'])
 
 class ChannelView(DetailView):
     template_name = 'rooms/channel.html'
@@ -50,17 +50,21 @@ class ChannelView(DetailView):
     context_object_name = 'channel'
 
     def get_object(self):
-        return Channel.objects.get(id=self.kwargs['channel'])
+        return Channel.objects.get(pk=self.kwargs['channel'])
 
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['backlogs'] = sorted([
-                *list(self.object.messages.all()),
-                *list(self.object.room.logs.all().filter(action__in=self.object.display_logs.all()))
-            ], key=lambda instance: instance.date_added)
+        channel = self.object
+        messages = channel.messages.all()
+        logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
+
+        context['backlogs'] = sorted(
+            chain(messages, logs),
+            key=lambda obj: obj.date_added
+        )
         context['room'] = kwargs['object'].room
         return context
 

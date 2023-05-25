@@ -1,35 +1,36 @@
 
-$vampire-black: #080808;
 $chalk-white: #e0dbd1;
-$walnut-dyed: #9f7462;
-$golden-brown: #c66b27;
-$cetacean-blue: #001440;
+$soft-grey: #D2D0C8;
+$battleship-grey: #8D8A84;
+
 $rich-black: #010b13;
-$rose-gold: #b76e79;
-$saturated-titanium-yellow: #d6d018;
-$black-chestnut-oak: #1E1D1C;
+$cetacean-blue: #001440;
 $amethyst: #9966cc;
-$premier-yellow: #eff688;
 $acapulco-aqua: #80a4a3;
 $blue-bayoux: #62777e;
-$deep-burgundy: #3d2b3c;
-$charcoal-grey: #131313;
-$apple-red: #E71D36;
-$anthracite: #0E0D0C;
+
+
+$premier-yellow: #eff688;
 $moss: #cbc83e;
+$saturated-titanium-yellow: #d6d018;
+
+$deep-burgundy: #3d2b3c;
+
+$vampire-black: #080808;
 $black-grey: #101010;
-
-
-$pakistan-green: #11450C;
-$battleship-grey: #8D8A84;
-$office-green: #158308;
+$charcoal-grey: #131313;
+$anthracite: #0E0D0C;
 $night: #161615;
+$black-chestnut-oak: #1E1D1C;
+$apollo-grey: #181818;
 $eerie-black: #212120;
 $black-olive: #403D39;
-$soft-grey: #D2D0C8;
+
+$pakistan-green: #11450C;
+$office-green: #158308;
+
 $garnet: #6B2A2A;
 $vermillion: #FF3D3D;
-$apollo-grey: #181818;
 
 /* Shadow Dimensions */
 $shadow-dimensions: 0px 0px 4px 1px;
@@ -52,6 +53,8 @@ $gap-small: 0.25rem;
 $gap-medium: 0.5rem;
 $gap-large: 1rem;
 
+
+// semantic colors
 $online-primary: $premier-yellow;
 $online-secondary: $moss;
 
@@ -522,6 +525,7 @@ $light-secondary: $battleship-grey;
     display: grid;
     grid-template-rows: auto 1fr;
     grid-template-columns: auto 1fr;
+    
 
     &:hover {
 		background-color: $eerie-black;
@@ -659,9 +663,9 @@ $light-secondary: $battleship-grey;
 		border: 1px solid $charcoal-grey;
 		user-select: none;
 		transition: box-shadow 0.25s, background-color 0.25s, border 0.25s;;
+        cursor: pointer;
 
 		&--selected {
-			cursor: pointer;
 			background-color: $black-olive;
 			border: 1px solid $black-olive;
 		}
@@ -671,24 +675,48 @@ $light-secondary: $battleship-grey;
 			max-height: 1.25rem;
 		}
 
+        &:not(.message__reaction--selected):hover {
+            background-color: $eerie-black;
+        }
+
 		&:hover {
-			cursor: pointer;
-			background-color: $black-olive;
-			border: 1px solid $black-olive;
+			border: 1px solid $blue-bayoux;
 		}
 	}
 
 	&__counter {
-		font-size: 1rem;
+		font-size: $text-primary-small;
 	}
 }
 
 .log {
-	display: flex;
+	@include flex-row($padding-medium, $gap-small);
 	align-items: baseline;
-	gap: 0.25rem;
-	padding: 0rem 0.5rem;
-	justify-content: flex-end;
+    color: $chalk-white;
+
+    &:hover {
+		background-color: $eerie-black;
+	}
+
+    &__user {
+        font-size: $text-primary-small;
+        font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__action {
+        color: $chalk-white;
+        font-size: $text-primary-small;
+    }
+
+    &__timestamp {
+        font-size: $text-secondary-medium;
+        color: $light-secondary;
+    }
 }
 
 .chatbar {
