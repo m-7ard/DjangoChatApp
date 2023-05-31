@@ -1,7 +1,11 @@
 from PIL import Image
 from itertools import chain
+from datetime import datetime
 
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation
 
 from users.models import CustomUser
 
@@ -13,6 +17,11 @@ class Room(models.Model):
     owner = models.ForeignKey(CustomUser, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
     image = models.ImageField(default='blank.png', max_length=500)
     date_added = models.DateTimeField(auto_now_add=True)
+
+    def banned_users(self):
+        return self.bans.all().filter(
+            expiration_date__gt=datetime.now()
+        ).values_list('user', flat=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -36,6 +45,13 @@ class Room(models.Model):
 
     def uncategorised(self):
         return self.channels.all().filter(category=None)
+
+
+# *RoomBan
+class RoomBan(models.Model):
+    room = models.ForeignKey(Room, related_name='bans', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, related_name='bans', on_delete=models.CASCADE)
+    expiration_date = models.DateTimeField()
 
 
 # *Channel
@@ -125,6 +141,7 @@ class Message(models.Model):
     user = models.ForeignKey(CustomUser, related_name='messages', on_delete=models.SET_NULL, null=True, blank=True)
     channel = models.ForeignKey(Channel, related_name='messages', on_delete=models.CASCADE, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
+    reactions = GenericRelation('Reaction', 'target_pk', 'target_type')
 
     class Meta:
         ordering = ('date_added',)
@@ -136,17 +153,12 @@ class Message(models.Model):
         return f'{self.pk} | user: {self.user} (pk: {self.user.pk}) | room: {self.channel.room.name} | channel: {self.channel.name}'
 
         
-"""
-
-TODO: change action and log logic, so it knows whether it's a 2 person
-action or not
-
-"""
 # *Action
 class Action(models.Model):
     name = models.CharField(max_length=20)
     display_name = models.CharField(max_length=20)
     description = models.CharField(max_length=200, blank=True, null=True)
+    icon = models.CharField(default='', max_length=30)
 
     def __str__(self):
         return f'{self.name}: {self.description}'
@@ -156,27 +168,21 @@ class Action(models.Model):
 class Log(models.Model):
     action = models.ForeignKey(Action, related_name='logs', on_delete=models.SET_NULL, null=True)
     room = models.ForeignKey(Room, related_name='logs', on_delete=models.CASCADE, null=True)
-    trigger_user = models.ForeignKey(CustomUser, related_name='room_actions', on_delete=models.SET_NULL, null=True)
-    target_user = models.ForeignKey(CustomUser, related_name='room_activity', on_delete=models.SET_NULL, null=True, blank=True)
+    receiver = models.ForeignKey(CustomUser, related_name='received_actions', on_delete=models.SET_NULL, null=True)
+    sender = models.ForeignKey(CustomUser, related_name='sent_actions', on_delete=models.SET_NULL, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
-
-    # if the action model were deleted, this would remain
-    # TODO: make it set through signals
-    action_display_name = models.CharField(max_length=255, blank=True, null=True)
+    reactions = GenericRelation('Reaction', 'target_pk', 'target_type')
 
     class Meta:
         ordering = ('date_added',)
         
     def display_date(self):
         return self.date_added.strftime("%H:%M:%S")
-    
-    def instance(self):
-        return 'log'
 
 
-# *Reaction
-class Reaction(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reactions', blank=True, null=True)
+# *Emote
+class Emote(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='emotes', blank=True, null=True)
     name = models.CharField(max_length=20)
     image = models.ImageField(max_length=500)
 
@@ -191,10 +197,13 @@ class Reaction(models.Model):
         return f'{self.name} | room: {self.room}'
 
 
-# *MessageReaction
-class MessageReaction(models.Model):
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
-    reaction = models.ForeignKey(Reaction, on_delete=models.CASCADE)
+# *Reaction
+class Reaction(models.Model):
+    target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    target_pk = models.PositiveIntegerField(null=True)
+    target_object = GenericForeignKey('target_type', 'target_pk')
+
+    emote = models.ForeignKey(Emote, on_delete=models.CASCADE, null=True)
     users = models.ManyToManyField(CustomUser, blank=True)
     
     def add_user(self, user):
@@ -206,7 +215,4 @@ class MessageReaction(models.Model):
             self.delete()
     
     def image(self):
-        return self.reaction.image
-    
-    def __str__(self):
-        return f'{self.message.pk} | reaction: {self.reaction.name} | room: {self.message.channel.room.name}'
+        return self.emote.image

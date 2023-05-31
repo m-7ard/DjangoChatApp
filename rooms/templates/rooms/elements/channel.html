@@ -1,4 +1,4 @@
-<a class="channel" style="order: {{ category.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
+<a class="channel" style="order: {{ object.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
 	<span class="channel__kind">
 		{% if object.kind == 'text' %}
 		<div class="icon icon--small">

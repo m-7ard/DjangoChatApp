@@ -114,16 +114,19 @@
 
 {% block tooltips %}
 
-<div class="friendship__menu tooltip tooltip--hidden has-shadow">
-	<div class="friendship__action secondary-text secondary-text--small tooltip__close">
-		Message Friend
-	</div>
-	<div class="friendship__action secondary-text secondary-text--small tooltip__close">
-		Add Nickname
-	</div>
-	<div class="friendship__action secondary-text secondary-text--small tooltip__close" data-command="manage_friendship" data-kind="remove">
-		Remove Friend
-	</div>
+<div class="menu tooltip tooltip--hidden has-shadow" id="manage-friendship">
+    <div class="menu__item">
+        Message
+    </div>
+    <div class="menu__item">
+        Profile
+    </div>
+    <div class="menu__item">
+        Remove Friend
+    </div>
+    <div class="menu__item">
+        Block
+    </div>
 </div>
 
 <div class="profile tooltip tooltip--hidden has-shadow" id="member-profile">
@@ -133,5 +136,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/app.js' %}"></script>
+
 {% endblock %}

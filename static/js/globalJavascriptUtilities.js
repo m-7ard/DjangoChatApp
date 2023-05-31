@@ -98,14 +98,24 @@ function fitFixedContainer(element) {
 	};
 };
 
+function editClassList(element, {add, remove}) {
+    add && add.forEach((classString) => element.classList.add(classString));
+    remove && remove.forEach((classString) => element.classList.remove(classString));
+};
+
+function editAttributes(element, {attributes}) {
+    attributes && Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+};
+
 function quickCreateElement(elementTag, {classList, attributes, parent, eventListeners, innerHTML}) {
-    /* elementTag: String, classList: Object, attributes: Object */
+    /* elementTag: String, classList: Object, attributes: Object
+        parent: HtmlNode, eventListeners: Object, innerHTML: String */
     const element = document.createElement(elementTag);
     if (classList) {
-        classList.forEach((value) => element.classList.add(value));
+        editClassList(element, {add: classList});
     };
     if (attributes) {
-        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+        editAttributes(element, {attributes});
     };
     if (parent) {
         parent.appendChild(element);
@@ -118,3 +128,14 @@ function quickCreateElement(elementTag, {classList, attributes, parent, eventLis
     };
     return element;
 };
+
+function processReaction({object, emote}) {
+    let objectType = object.dataset.objectType;
+    let objectPk = object.dataset.pk;
+    let emotePk = emote.dataset.emotePk;
+    chatSocketSendHandlers['react']({
+        objectType: objectType,
+        objectPk: objectPk,
+        emotePk, emotePk
+    });
+}

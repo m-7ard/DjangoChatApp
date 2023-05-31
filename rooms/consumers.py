@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.template import Template, Context
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.contrib.contenttypes.models import ContentType
 
 from DjangoChatApp.templatetags.custom_tags import convert_reactions
 from .forms import MessageForm
@@ -22,7 +23,7 @@ from .models import (
     Member, 
     Action, 
     Reaction, 
-    MessageReaction
+    Emote
 )
 from users.models import Friendship
 
@@ -32,8 +33,7 @@ from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.loop = asyncio.get_event_loop()
-        self.user = self.scope['user']
-        print(self.user, 'ppppp' * 10)
+        self.user = self.scope.get('user')
         self.room, self.channel = None, None
         
         room_pk = self.scope['url_route']['kwargs'].get('room')
@@ -59,21 +59,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name,
             )
 
-        self.user_group_name = f'user_{self.user.pk}'
+        if self.user:
+            self.user_group_name = f'user_{self.user.pk}'
 
-        # User Tabs
-        await self.channel_layer.group_add(
-            self.user_group_name,
-            self.channel_name,
-        )
+            # User Tabs
+            await self.channel_layer.group_add(
+                self.user_group_name,
+                self.channel_name,
+            )
 
-        # All Users
-        await self.channel_layer.group_add(
-            'online_users',
-            self.channel_name,
-        )
+            # All Users
+            await self.channel_layer.group_add(
+                'online_users',
+                self.channel_name,
+            )
 
         await self.accept()
+        self.loop.create_task(self.channel_layer.group_send(
+            self.channel_group_name,
+            {
+            'type': 'send_to_JS',
+            'action': 'requestServerResponse'
+            }
+        ))
         print('accepted')
 
         # Ping to see if the user is online
@@ -91,33 +99,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         print('disconnect', response_code)
 
-        await self.channel_layer.group_discard(
-            'online_users',
-            self.channel_name,
-        )
-
-
+        if self.room:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
 
         if self.channel:
             await self.channel_layer.group_discard(
                 self.channel_group_name,
-                self.channel_name,
+                self.channel_name
             )
-        if self.room:
+
+        if self.user:
             await self.channel_layer.group_discard(
-                self.room_group_name,
+                self.user_group_name,
+                self.channel_name
+            )
+
+            await self.channel_layer.group_discard(
+                'online_users',
                 self.channel_name,
             )
 
     async def receive(self, text_data):
         handlers = {
-            'join-room': self.join_room,
-            # 'leave': self.room_user_logs_delegator,
-            
             'send-message': self.send_message,
             'edit-message': self.edit_message,
-            'delete-message': self.delete_message,
-            'react-message': self.react_message,
+            'delete-backlog': self.delete_backlog,
+            'react': self.react,
             'manage-friendship': self.manage_friendship,
 
             # 'ping': self.receive_ping,
@@ -159,42 +169,92 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
 
     @database_sync_to_async
+    def delete_backlog(self, data):
+        object_type = data['objectType']
+        if object_type == 'message':
+            object_model = Message
+        elif object_type == 'log':
+            object_model = Log
+        else:
+            raise ValueError('objectType not defined in consumer delete_backlog method')
+
+        object_ = get_object_or_none(object_model, pk=data['objectPk'])
+        if object_:
+            object_.delete()
+
+        send_data = {**data}    
+        self.task_group_send(send_data, self.channel_group_name)
+        
+
+
+
+    @database_sync_to_async
     def join_room(self, data):
         room = get_object_or_none(Room, pk=data.get('roomPk'))
         if not room:
             return
         
-        created, member = Member.objects.get_or_create(room=room, user=self.user)
-        if created:
-            action = Action.objects.get(name='join')
-            log = Log.objects.create()
-
-    @database_sync_to_async
-    def react_message(self, data):
-        reaction = get_object_or_none(Reaction, pk=data.get('reactionPk'))
-        message = get_object_or_none(Message, pk=data.get('messagePk'))
-        if not reaction or not message:
+        if self.user.pk in room.banned_users():
             return
         
-        message_reaction, created = MessageReaction.objects.get_or_create(reaction=reaction, message=message)
+        member, created = Member.objects.get_or_create(room=room, user=self.user)
+        
+        if created:
+            send_data = {**data}
+            action = Action.objects.get(name='join')
+            log = Log.objects.create(action=action, room=room, receiver=self.user)
+            send_data['timestamp'] = log.display_date()
+            send_data['receiver'] = member.display_name()
+            send_data['action_display'] = log.action.display_name
+            
+            self.task_group_send(send_data, self.channel_group_name)
+
+
+    @database_sync_to_async
+    def react(self, data):
+        object_type = data['objectType']
+        if object_type == 'message':
+            object_model = Message
+        elif object_type == 'log':
+            object_model = Log
+        else:
+            raise ValueError('objectType not defined in consumer react method')
+        
+        object_ = get_object_or_none(object_model, pk=data.get('objectPk'))
+        emote = get_object_or_none(Emote, pk=data.get('emotePk'))
+        if not emote or not object_:
+            return
+        
+        reaction, created = Reaction.objects.get_or_create(
+            target_type=ContentType.objects.get_for_model(object_model), 
+            target_pk=data['objectPk'], 
+            emote=emote
+        )
+
         send_data = {**data}
 
-        if self.user in message_reaction.users.all():
-            message_reaction.users.remove(self.user)
-            if len(message_reaction.users.all()) == 0:
-                message_reaction.delete()
+        if self.user in reaction.users.all():
+            reaction.users.remove(self.user)
+            if len(reaction.users.all()) == 0:
+                reaction.delete()
                 send_data['actionType'] = 'deleteReaction'
             else:
                 send_data['actionType'] = 'removeReaction'
         else:
-            message_reaction.users.add(self.user)
+            reaction.users.add(self.user)
             if created:
                 send_data['actionType'] = 'createReaction'
-                send_data['imageUrl'] = message_reaction.reaction.image.url
+                send_data['imageUrl'] = reaction.emote.image.url
             else:
                 send_data['actionType'] = 'addReaction'
 
-        self.task_group_send(send_data)
+        self.loop.create_task(self.channel_layer.group_send(
+            self.channel_group_name,
+            {
+            'type': 'send_to_JS',
+            **send_data
+            }
+        ))
 
     @database_sync_to_async
     def send_message(self, data):
@@ -221,15 +281,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     Path(__file__).parent / 'templates/rooms/elements/message.html', 
                     data
                 )
-                self.loop.create_task(
-                    self.channel_layer.group_send(
-                        self.channel_group_name, {
-                        'type': 'send_to_JS',
-                        'html': message_html,
-                        **send_data
-                        }
-                    )
-                )
+                send_data['html'] = message_html
+                self.task_group_send(send_data, self.channel_group_name)
                 
     @database_sync_to_async
     def edit_message(self, data):
@@ -269,7 +322,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         if message:
             message.delete()
-            self.task_group_send(send_data)
+            self.task_group_send(send_data, self.channel_group_name)
 
 
     @database_sync_to_async
@@ -332,9 +385,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.update_user_status(self.user, 'offline')
             print('user is online')
 
-    def task_group_send(self, send_data):
+    def task_group_send(self, send_data, group_name):
+        print("Sending group message:", send_data)  # Add this line
+
         self.loop.create_task(self.channel_layer.group_send(
-            self.channel_group_name,
+            group_name,
             {
             'type': 'send_to_JS',
             **send_data

@@ -3,8 +3,8 @@
 		Room
 	</div>
 	<div class="container__subheader has-shadow">
-        {% if user != room.owner %}
-        <span class="icon icon--small icon--hoverable" data-command="leave-room">
+        {% if user|is_member:room and user != room.owner %}
+        <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="leave-room">
 			<i class="material-symbols-outlined">
 				door_open
 			</i>
@@ -26,7 +26,7 @@
 			<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
 		</span>
 		<span class="wrapper--remaining-space">
-			<div class="room-card__body">
+			<form class="room-card__body" method="POST" action="{% url 'join-room' room=room.pk %}">
 				<div class="room-card__name">
 					{{ room.name }}
 				</div>
@@ -34,11 +34,12 @@
 					{{ room.description }}
 				</div>
                 {% if not user|is_member:room %}
-				<div class="room-card__join bottom" data-command="join-room" data-pk="{{ room.pk }}">
+                {% csrf_token %}
+				<button class="room-card__join bottom">
 					Join
-				</div>
+                </button>
                 {% endif %}
-			</div>
+			</form>
 		</span>
 	</div>
 </div>

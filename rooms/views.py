@@ -1,12 +1,14 @@
 import os
 import json
 from itertools import chain
+from typing import Any, Dict
+from pathlib import Path
 
 from django.db import models
 from django.forms.forms import BaseForm
 from django.forms.models import BaseModelForm
 
-from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView
+from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -15,7 +17,7 @@ from django.contrib import messages
 
 
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory, Action
+from .models import Room, Channel, Log, ChannelCategory, Action, Member
 from .forms import (
     ChannelCreationForm,
     ChannelEditForm,
@@ -25,7 +27,7 @@ from .forms import (
     RoomEditForm,
 )
 
-from utils import get_object_or_none
+from utils import get_object_or_none, send_to_group, get_rendered_html
 
 
 class DashboardView(TemplateView):
@@ -216,15 +218,69 @@ class RoomUpdateView(TemplateView):
             room = room_form.save()
 
             return redirect('room', room=room.pk)
-    
-    
-def get_html_form(request, form_name, *args, **kwargs):
-    form_path = os.path.join('rooms', 'templates', 'rooms', 'forms', form_name)
-    
-    with open(form_path, 'r') as f:
-        form = f.read()
-        
-    form = Template(form)
-    context = RequestContext(request, request.GET)
 
-    return HttpResponse(form.render(context))
+
+class LeaveRoom(TemplateView):
+    template_name = 'rooms/forms/leave-room.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['room'] = Room.objects.get(pk=kwargs.get('room'))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        room = Room.objects.get(pk=kwargs.get('room'))
+        user = request.user
+        member = get_object_or_none(Member, room=room, user=user)
+        if member:
+            action = Action.objects.get(name='leave')
+            log = Log.objects.create(action=action, receiver=user, room=room)
+            context = {
+                'object': log, 
+                'room': room
+            }
+            log_html = get_rendered_html(
+                path=Path(__file__).parent / 'templates/rooms/elements/log.html', 
+                context_dict=context
+            )
+
+            member.delete()
+
+            send_data = {
+                'type': 'send_to_JS',
+                'action': 'leave-room',
+                'html': log_html,
+            }
+            for channel in room.channels.filter(display_logs=action):
+                send_to_group(f'channel_{channel.pk}', send_data)
+
+        return redirect('room', room=room.pk)
+    
+
+class JoinRoom(View):
+    def post(self, request, *args, **kwargs):
+        room = Room.objects.get(pk=kwargs.get('room'))
+        user = request.user
+        member, created = Member.objects.get_or_create(room=room, user=user)
+
+        if created:
+            action = Action.objects.get(name='join')
+            log = Log.objects.create(action=action, receiver=user, room=room)
+            context = {
+                'object': log, 
+                'room': room
+            }
+            log_html = get_rendered_html(
+                path=Path(__file__).parent / 'templates/rooms/elements/log.html', 
+                context_dict=context
+            )
+            send_data = {
+                'type': 'send_to_JS',
+                'action': 'join-room',
+                'html': log_html,
+            }
+
+            for channel in room.channels.filter(display_logs=action):
+                send_to_group(f'channel_{channel.pk}', send_data)
+
+        return redirect('room', room=room.pk)

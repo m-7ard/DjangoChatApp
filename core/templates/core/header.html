@@ -40,9 +40,14 @@
 	{{ request.user.id|json_script:"user-id" }}
 
 	<script src="{% static 'js/dist/main.js' %}"></script>
+    <script src="{% static 'js/handlers/chatSocketReceiveHandlers.js' %}"></script>
+    <script src="{% static 'js/handlers/chatSocketSendHandlers.js' %}"></script>
+    <script src="{% static 'js/handlers/commandHandlers.js' %}"></script>
+    <script src="{% static 'js/handlers/windowClickHandlers.js' %}"></script>
+    <script src="{% static 'js/handlers/overlayHandlers.js' %}"></script>
+    <script src="{% static 'js/handlers/tooltipHandlers.js' %}"></script>
 	
-	<script src="{% static 'js/globalHandlers.js' %}"></script>
-	<script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
+    <script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
 	<script src="{% static 'js/header.js' %}" defer></script>
 	{% block scripts %}{% endblock %}
 </html>

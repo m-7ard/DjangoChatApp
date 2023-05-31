@@ -1,16 +1,142 @@
-<li class="log">
-    <span class="log__user">
-        {{ object.trigger_user }}
-    </span>
-    <span class="log__action">
-        {{ object.action.display_name }}
-    </span>
-    {% if object.target_user %}
-    <span class="log__user">
-        {{ object.target_user }}
-    </span>
-    {% endif %}
-    <span class="log__timestamp">
-        {{ object.display_date }}
-    </span>
+
+<li class="backlog" data-pk="{{ object.pk }}" data-object-type="log">
+    <div class="backlog__icon">
+        <div class="icon icon--small">
+            <i class="material-symbols-outlined">
+                {{ object.action.icon }}
+            </i>
+        </div>
+    </div>
+    {% comment %} 
+    
+    
+    *header
+    
+    
+    {% endcomment %}
+    <div class="backlog__header">
+        {% if object.sender %}
+            <span class="backlog__user">
+                {% with membership=object.sender|get_member:room %}
+                    {% if membership %}
+                        {{ membership.display_name }}
+                    {% else %}
+                        {{ object.sender.username }}
+                    {% endif %}
+                {% endwith %}
+            </span>
+            <span class="backlog__action-name">
+                {{ object.action.display_name }}
+            </span>
+            <span class="backlog__user">
+                {% with membership=object.receiver|get_member:room %}
+                    {% if membership %}
+                        {{ membership.display_name }}
+                    {% else %}
+                        {{ object.receiver.username }}
+                    {% endif %}
+                {% endwith %}
+            </span>
+            <span class="backlog__timestamp">
+                {{ object.display_date }}
+            </span>
+        {% else %}
+            <span class="backlog__user">
+                {% with membership=object.receiver|get_member:room %}
+                    {% if membership %}
+                        {{ membership.display_name }}
+                    {% else %}
+                        {{ object.receiver.username }}
+                    {% endif %}
+                {% endwith %}
+            </span>
+            <span class="backlog__action-name">
+                {{ object.action.display_name }}
+            </span>
+            <span class="backlog__timestamp">
+                {{ object.display_date }}
+            </span>
+        {% endif %}
+    </div>
+    {% comment %} 
+    
+    
+    *reactions
+    
+    
+    {% endcomment %}
+    <div class="backlog__reactions">
+        {% for reaction in object.reactions.all %}
+        <span class="reaction {% if user in reaction.users.all %} reaction--selected {% endif %}"
+        data-emote-pk="{{ reaction.emote.pk }}"
+        data-command="react">
+            <img src="{{ reaction.emote.image.url }}" alt="">
+            <span class="reaction__counter">
+                {{ reaction.users.all.count }}
+            </span>
+        </span>
+        {% endfor %}
+    </div>
+    {% comment %} 
+    
+    
+    *actions
+    
+    
+    {% endcomment %}
+    <div class="backlog__actions has-shadow">
+		<span class="backlog__action tooltip__trigger" 
+		data-target="#emotes" 
+		data-positioning='{"top": "0px", "right": "-100%"}' 
+        data-kind="log"
+		>
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">								
+					add_reaction
+				</i>
+			</div>
+		</span>
+		{% if object.user == user %}
+		<span class="backlog__action" data-command="edit-message">
+			<div class="icon icon--small">
+				<i class="material-symbols-outlined">								
+					edit
+				</i>
+			</div>
+		</span>
+		{% endif %}
+		<span class="dropdown">
+			<div class="backlog__action dropdown__trigger">
+				<div class="icon icon--small">
+					<i class="material-symbols-outlined">								
+						menu
+					</i>
+				</div>
+			</div>
+            <div class="dropdown__content dropdown__content--hidden">
+                <ul class="menu has-shadow">
+                    <li class="menu__item" data-command="delete-message">
+                        <span>
+                            Delete
+                        </span>
+                        <span class="icon icon--small">
+                            <i class="material-symbols-outlined">								
+                                delete
+                            </i>
+                        </span>
+                    </li>
+                    <li class="menu__item" data-command="link-message">
+                        <span>
+                            Message Link
+                        </span>
+                        <span class="icon icon--small">
+                            <i class="material-symbols-outlined">								
+                                link
+                            </i>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+		</span>
+    </div>
 </li>

@@ -7,15 +7,24 @@ const userPk = JSON.parse(document.getElementById('user-id').textContent) || nul
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
 const tooltipContainers = document.querySelectorAll('.tooltip');
 
-let websocketUrl = 'ws://' + window.location.host + '/ws/chat/';
+let websocketUrl = 'ws://' + window.location.host;
 if (roomPk) {
-    websocketUrl += String(roomPk) + '/';
-};
-if (roomPk && channelPk) {
-    websocketUrl += String(channelPk) + '/';
-};
+    websocketUrl += '/ws/chat/' + String(roomPk) + '/';
+
+    if (channelPk) {
+        websocketUrl += String(channelPk) + '/';
+    };
+}
+else {
+    websocketUrl += '/ws/app/';
+}
 
 chatSocket = new WebSocket(websocketUrl);
+
+window.onbeforeunload = function() {
+    chatSocket.onclose = function () {};
+    chatSocket.close();
+};
 
 chatSocket.onmessage = function(event) {
 	let data = JSON.parse(event.data);

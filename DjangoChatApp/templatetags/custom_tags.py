@@ -10,12 +10,8 @@ from django.http import JsonResponse, HttpResponse
 
 
 
-from rooms.models import Member, Room, Reaction
+from rooms.models import Member, Room, Emote
 from ..settings import MEDIA_URL
-
-@register.filter(name='user_is_member')
-def user_is_member(user, room):
-    return Member.objects.filter(user=user, room=room).first()
 
 @register.filter(name='classname')
 def classname(obj):
@@ -32,9 +28,9 @@ def convert_reactions(text, room_pk):
     def replace_with(match):
         name = match.group(1)
         try:
-            reaction = Reaction.objects.get(room=room, name=name)
+            reaction = Emote.objects.get(room=room, name=name)
             return f'<img src="{reaction.image.url}" alt="{reaction.name}">'
-        except Reaction.DoesNotExist:
+        except Emote.DoesNotExist:
             return match.group(0)
 
 
@@ -56,24 +52,15 @@ def attribute_modifier(obj, json_string):
         return success_string
     else:
         return ''
-    
-@register.filter(name="equality_modifier")
-def equality_modifier(unpackable, string):
-    self, other = unpackable
-    if self == other:
-        return string
-    else:
-        return ''
-    
-@register.filter(name="add_argument")
-def add_argument(self, other):
-    return self, other
 
 @register.filter(name="printInConsole")
 def printInConsole(self):
     print(self)
     
+@register.filter(name="get_member")
+def get_member(user, room):
+    return room.members.all().filter(user=user).first()
+
 @register.filter(name="is_member")
 def is_member(user, room):
     return room.pk in user.memberships.all().values_list('room', flat=True)
-    

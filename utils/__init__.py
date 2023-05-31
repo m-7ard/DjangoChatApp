@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from channels.layers import get_channel_layer
@@ -19,6 +20,14 @@ def create_send_to_group(group_name, data):
     sync_send_to_group = async_to_sync(send_to_group)
     
     return sync_send_to_group
+
+def get_object_or_none(obj, **kwargs):
+    return obj.objects.filter(**kwargs).first()
+
+
+def send_to_group(group_name, data):
+    async_to_sync(channel_layer.group_send)(group_name, data)
+
 
 def get_rendered_html(path, context_dict={}):
     with open(path, 'r') as f:
