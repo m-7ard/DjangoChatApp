@@ -7,6 +7,10 @@ const userPk = JSON.parse(document.getElementById('user-id').textContent) || nul
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
 const tooltipContainers = document.querySelectorAll('.tooltip');
 
+// Tooltip context
+const tooltipContext = {};
+
+
 let websocketUrl = 'ws://' + window.location.host;
 if (roomPk) {
     websocketUrl += '/ws/chat/' + String(roomPk) + '/';

@@ -250,10 +250,6 @@
 * + .container__label--optional {
   display: block !important;
 }
-.container__section {
-  display: flex;
-  flex-direction: column;
-}
 
 .modelbox {
   display: flex;
@@ -601,27 +597,10 @@
 }
 
 .friendship {
-  gap: 0.5rem;
   display: flex;
+  padding: 0;
+  gap: 0.5rem;
   align-self: center;
-}
-.friendship__menu {
-  width: -moz-fit-content;
-  width: fit-content;
-  border-radius: 2px;
-  overflow: hidden;
-}
-.friendship__action {
-  color: #e0dbd1;
-  padding: 0.375rem;
-  background-color: #131313;
-  cursor: pointer;
-}
-.friendship__action:hover {
-  background-color: #1E1D1C;
-}
-.friendship__action:nth-of-type(n + 2) {
-  border-top: 1px solid #131313;
 }
 .friendship__accept {
   color: #11450C;
@@ -1453,4 +1432,25 @@
 }
 .reaction:hover {
   border: 1px solid #62777e;
+}
+
+.user-group {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.user-group:has(.user-group__content:empty) .user-group__index {
+  display: none;
+}
+.user-group__index {
+  color: #e0dbd1;
+  font-size: 0.8125rem;
+  padding: 0.5rem;
+}
+.user-group__content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
 }/*# sourceMappingURL=room.css.map */

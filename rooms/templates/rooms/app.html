@@ -41,24 +41,44 @@
 			</div>
 			<div class="wrapper--remaining-space">
 				<ul class="container__content">
-					<ul class="container__section" data-friendship="pending">
-						{% for friendship in user.friendships.pending %}
-							{% with user|get_friendship_friend:friendship as friend %}
-								{% include "./elements/friend.html" %}
-							{% endwith %}
-						{% endfor %}
-						<li class="container__label container__label--optional flex-first">
-							Incoming Friend Requests
-						</li>
+					<ul class="user-group" id="incoming-friendships">
+                        <li class="user-group__index">
+                            Incoming Friend Requests
+                        </li>
+                        {% spaceless %}
+                        <ul class="user-group__content">
+                            {% for friendship in user.received_friendships.pending %}
+                                {% with user|get_friendship_friend:friendship as object %}
+                                    {% include "./elements/friend.html" %}
+                                {% endwith %}
+                            {% endfor %}                          
+                        </ul>
+                        {% endspaceless %}
 					</ul>
-					<ul class="container__section" data-friendship="all">
-						{% for friendship in user.friendships.accepted %}
-							{% with user|get_friendship_friend:friendship as friend %}
-								{% include "./elements/friend.html" %}
-							{% endwith %}
+					<ul class="user-group">
+                        <li class="user-group__index">
+                            Friends
+                        </li>
+                        {% spaceless %}
+                        <ul class="user-group__content" data-category="accepted">
+                            {% for friendship in user.friendships.accepted %}
+                                {% with user|get_friendship_friend:friendship as object %}
+                                    {% include "./elements/friend.html" %}
+                                {% endwith %}
+                            {% endfor %}
+                        </ul>
+                        {% endspaceless %}
+					</ul>
+                    <ul class="container__section" data-friendship="outgoing">
+						{% for friendship in user.friendships.pending %}
+                            {% if user == friendship.sender %}
+                                {% with user|get_friendship_friend:friendship as object %}
+                                    {% include "./elements/friend.html" %}
+                                {% endwith %}
+                            {% endif %}
 						{% endfor %}
 						<li class="container__label container__label--optional flex-first">
-							All Friends
+							Outgoing Friend Requests
 						</li>
 					</ul>
 				</ul>
@@ -114,20 +134,20 @@
 
 {% block tooltips %}
 
-<div class="menu tooltip tooltip--hidden has-shadow" id="manage-friendship">
-    <div class="menu__item">
+<ul class="menu tooltip tooltip--hidden has-shadow" id="manage-friendship">
+    <a class="menu__item">
         Message
-    </div>
-    <div class="menu__item">
+    </a>
+    <li class="menu__item" data-tooltip-command="profile" data-kind="user">
         Profile
-    </div>
-    <div class="menu__item">
+    </li>
+    <li class="menu__item" data-tooltip-command="manage-friendship" data-kind="remove">
         Remove Friend
-    </div>
-    <div class="menu__item">
+    </li>
+    <li class="menu__item" data-tooltip-command="block">
         Block
-    </div>
-</div>
+    </li>
+</ul>
 
 <div class="profile tooltip tooltip--hidden has-shadow" id="member-profile">
 	{% include "./elements/member-profile.html" %}

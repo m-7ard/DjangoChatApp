@@ -51,8 +51,13 @@ const tooltipHandlers = {
 		tooltip.innerHTML  = response;
 		console.log(response);
 	},
-	'update-channel': ({tooltip, trigger}) => {
-		let channel = trigger.closest('.channel');
-		tooltip.setAttribute('data-pk', channel.dataset.pk);
-	}
+    'manage-friendship': ({tooltip, trigger}) => {
+        let friendship = trigger.closest('[data-object-type="friendship"]');
+        let friend  = trigger.closest('[data-object-type="friend"]');
+        tooltipContext[tooltip.id] = {
+            friendship: friendship,
+            friend: friend,
+        };
+    },
+    
 }

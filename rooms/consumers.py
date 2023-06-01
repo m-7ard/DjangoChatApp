@@ -9,7 +9,6 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.template import Template, Context
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
 
@@ -25,7 +24,7 @@ from .models import (
     Reaction, 
     Emote
 )
-from users.models import Friendship
+from users.models import Friendship, CustomUser
 
 from utils import get_object_or_none, get_rendered_html
 from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
@@ -328,29 +327,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def manage_friendship(self, data):
         kind = data['kind']
+        friend = CustomUser.objects.get(pk=data['friendPk'])
         friendship = get_object_or_none(Friendship, pk=data['friendshipPk'])
-        send_data = {**data}
+        user_send_data = {**data}
+        friend_send_data = {**data}
 
-        if not friendship:
-            return
+        if kind == 'create':
+            friendship, created = Friendship.objects.get_or_create(sender=self.user, receiver=friend, status='pending')
+            # avoid duplicates in html
+            if not created:
+                return
+            user_send_data['category'] = 'outgoing'
+            friend_send_data['category'] = 'incoming'
 
-        if kind == 'accept':
+            user_send_data['html'] = get_rendered_html(
+                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
+                {'object': friend}
+            )
+            friend_send_data['html'] = get_rendered_html(
+                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
+                {'object': self.user}
+            )
+        elif kind == 'accept':
             friendship.status = 'accepted'
             friendship.save()
-            send_data['category'] = 'all'
+            user_send_data['category'] = 'accepted'
+            friend_send_data['category'] = 'accepted'
         elif kind == 'reject' or kind == 'remove':
             friendship.delete()
         else:
-            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove".')
-    
-        self.loop.create_task(self.channel_layer.group_send(
-            self.channel_group_name,
-            {
-            'type': 'send_to_JS',
-            'action': 'friendship',
-            **send_data,
-            }
-        ))
+            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove", "create"')
+            
+        self.task_group_send(user_send_data, self.user_group_name)
+        self.task_group_send(friend_send_data, f'user_{friend.pk}')
+        
     
     """
     

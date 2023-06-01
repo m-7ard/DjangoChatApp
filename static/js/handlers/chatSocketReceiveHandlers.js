@@ -52,22 +52,24 @@ const chatSocketReceiveHandlers = {
 		appMessages.appendChild(log);
 		appMessages.scrollTo(0, appMessages.scrollHeight);
     },
-    'manage-friendship': function acceptOrRejectFriendRequestDOM(data) {
-        let friend = document.querySelector(`.friendship[data-pk="${data.friendshipPk}"]`).closest('.modelbox');
-        if (data.kind == 'accept') {
-            let category = document.querySelector(`[data-friendship="${data.category}"]`);
-            friend.querySelector('.friendship').innerHTML = `
-            <div class="icon icon__hoverable icon--small offline-color--primary tooltip__trigger" 
-            data-positioning='{"top": "100%", "right": "0px"}' 
-            data-target=".friendship__menu">
-                <i class="material-symbols-outlined">
-                    expand_more
-                </i>
-            </div>
-            `;
-            category.appendChild(friend);
+    'manage-friendship': (friendshipPk, friendPk, kind, category, html) => {
+        console.log(kind)
+        /*
+            TODO: for some reason this is undefined, find and fix
+        */
+        if (kind == 'create') {
+            let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
+            let friend = parseHTML(html);
+            userGroup.appendChild(friend);
         }
-        else if (data.kind == 'reject' || data.kind == 'remove') {
+        else if (kind == 'accept') {
+            let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
+            let friend = document.querySelector(`.friend[data-object-pk=${friendshipPk}]`);
+            userGroup.appendChild(friend);
+        }
+        else if (kind == 'reject' || kind == 'remove') {
+            let friend = document.querySelector(`.friend[data-object-pk="${friendPk}"]`);
+            console.log(friend)
             friend.remove();
         }
     },
@@ -81,7 +83,7 @@ const chatSocketReceiveHandlers = {
         let objectSelector = '.backlog';
         objectSelector += `[data-object-type="${objectType}"]`;
         objectSelector += `[data-pk="${objectPk}"]`;
-        let object = document.querySelector( objectSelector);
+        let object = document.querySelector(objectSelector);
         object.remove();
     },
     'react': ({actionType, emotePk, objectType, objectPk, imageUrl}) => {

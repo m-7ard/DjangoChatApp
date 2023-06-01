@@ -133,8 +133,8 @@ class FriendshipQuerySet(models.QuerySet):
 
 class Friendship(models.Model):
     status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted')])
-    sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='outgoing_friend_requests')
-    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='incoming_friend_requests')
+    sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='sent_friendships')
+    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='received_friendships')
     
     def users(self):
         return {self.sender, self.receiver}

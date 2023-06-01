@@ -1,27 +1,27 @@
-<li class="friend friend--{{ friend.status }}">
+<li class="friend friend--{{ object.status }}" data-object-type="friend" data-object-pk="{{ object.pk }}">
 	<span class="avatar avatar--small has-shadow">
-		<img src="{{ friend.image.url }}" alt="">
+		<img src="{{ object.image.url }}" alt="">
 	</span>
 	<span class="wrapper--remaining-space">
 		<ul class="friend__body">
 			<li class="friend__username">
-				{{ friend.username }}
+				{{ object.username }}
 			</li>
 			<li class="friend__status">
-				{{ friend.status }}
+				{{ object.status }}
 			</li>
 		</ul>
 	</span>
-	<span class="friendship" data-pk="{{ friendship.pk }}">
+	<span class="friendship" data-object-type="friendship" data-object-pk="{{ friendship.pk }}">
 		{% if friendship.status == 'pending' %}
-		<span class="friendship__accept" data-command="manage_friendship" data-kind="accept">
+		<span class="friendship__accept" data-command="manage-friendship" data-kind="accept">
 			<div class="icon icon--small">
 				<i class="material-symbols-outlined">
 					task_alt
 				</i>
 			</div>
 		</span>
-		<span class="friendship__reject" data-command="manage_friendship" data-kind="reject">
+		<span class="friendship__reject" data-command="manage-friendship" data-kind="reject">
 			<div class="icon icon--small">
 				<i class="material-symbols-outlined">
 					cancel
@@ -30,7 +30,7 @@
 		</span>
 		{% elif friendship.status == 'accepted' %}
 		<span class="friendship" data-pk="{{ friendship.pk }}">
-			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target=".friendship__menu">
+			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="#manage-friendship">
 				<div class="icon icon--small">
 					<i class="material-symbols-outlined">
 						expand_more

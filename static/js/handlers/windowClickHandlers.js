@@ -5,6 +5,12 @@ const windowClickHandlers = {
 		let dropdownContent = dropdown.querySelector('.dropdown__content');
 		dropdownContent.classList.toggle('dropdown__content--hidden');
 	},
+    '[data-tooltip-command]': (event) => {
+        let trigger = event.target.closest('[data-tooltip-command]');
+        let command = trigger.dataset.tooltipCommand;
+        let tooltip = event.target.closest('.tooltip');
+        tooltipCommandHandlers[command]({tooltip: tooltip, trigger: trigger});
+    },
 	'[data-command]': function delegateCommand(event) {
 		let command = event.target.closest('[data-command]').dataset.command;
 		console.log(command)

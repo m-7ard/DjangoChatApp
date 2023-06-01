@@ -107,7 +107,21 @@ const commandHandlers = {
     'emote-to-text': ({target, emote}) => {
         target.value += `:${emote.dataset.name}:`;
     },
-    'open_profile': function openProfile(event) {
+    'open_profile': () => {
         
+    },
+    'manage-friendship': (event) => {
+        let friendship = event.target.closest('[data-object-type="friendship"]');
+        let friend = event.target.closest('[data-object-type="friend"]');
+        let trigger = event.target.closest('[data-command="manage-friendship"]');
+
+        let friendshipPk = friendship.dataset.objectPk;
+        let friendPk = friend.dataset.objectPk;
+        let kind = trigger.dataset.kind;
+        chatSocketSendHandlers['manage-friendship']({
+            friendshipPk: friendshipPk,
+            friendPk: friendPk,
+            kind: kind
+        });
     },
 };

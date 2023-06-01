@@ -138,4 +138,8 @@ function processReaction({object, emote}) {
         objectPk: objectPk,
         emotePk, emotePk
     });
+};
+
+function parseHTML(string) {
+    return new DOMParser().parseFromString(string, "text/html").querySelector('body > *');
 }

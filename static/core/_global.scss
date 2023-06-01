@@ -396,11 +396,6 @@ $light-secondary: $battleship-grey;
 			}
 		}
 	}
-
-	&__section {
-		display: flex;
-		flex-direction: column;
-	}
 }
 
 .modelbox {
@@ -801,30 +796,8 @@ $light-secondary: $battleship-grey;
 
 
 .friendship {
-	gap: $gap-medium;
-	display: flex;
+	@include flex-row(0, $gap-medium);
 	align-self: center;
-
-	&__menu {
-		width: fit-content;
-		border-radius: 2px;
-		overflow: hidden;
-	}
-
-	&__action {
-		color: $chalk-white;
-		padding: 0.375rem;
-		background-color: $charcoal-grey;
-		cursor: pointer;
-
-		&:hover {
-			background-color: $black-chestnut-oak;
-		}
-
-		&:nth-of-type(n + 2) {
-			border-top: 1px solid $charcoal-grey;
-		}
-	}
 
 	&__accept {
 		color: $pakistan-green;
@@ -839,9 +812,9 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__manage {
-		color: $battleship-grey;
-		cursor: pointer;	
-		&:hover { color: $chalk-white; }
+		color: $light-secondary;
+		cursor: pointer;
+		&:hover { color: $light-primary; }
 	}
 }
 
@@ -1689,5 +1662,25 @@ $light-secondary: $battleship-grey;
 
     &:hover {
         border: 1px solid $blue-bayoux;
+    }
+}
+
+.user-group {
+    @include flex-column(0, 0);
+
+    &:has(.user-group__content:empty) {
+        .user-group__index {
+            display: none;
+        }
+    }
+
+    &__index {
+        color: $light-primary;
+        font-size: $text-secondary-medium;
+        padding: $gap-medium;
+    }
+
+    &__content {
+        @include flex-column(0, 0);
     }
 }

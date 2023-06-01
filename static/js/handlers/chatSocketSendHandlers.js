@@ -16,14 +16,12 @@ const chatSocketSendHandlers = {
             console.error('Error requestServerResponse', error);
         }
     },
-    'manage-friendship': function acceptOrRejectFriendRequestDB(event) {
-        let trigger = event.target.closest('[data-command="manage_friendship"]');
-        let friendshipPk = trigger.closest('.friendship, .tooltip').dataset.pk;
-        let kind = trigger.dataset.kind;
+    'manage-friendship': ({friendshipPk, friendPk, kind}) => {
         chatSocket.send(JSON.stringify({
-            'action': 'manage_friendship',
-            'kind': kind,
+            'action': 'manage-friendship',
             'friendshipPk': friendshipPk,
+            'kind': kind,
+            'friendPk': friendPk
         }));
     },
     'send-message': function submitMessage(event) {
