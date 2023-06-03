@@ -52,7 +52,7 @@ const chatSocketReceiveHandlers = {
 		appMessages.appendChild(log);
 		appMessages.scrollTo(0, appMessages.scrollHeight);
     },
-    'manage-friendship': (friendshipPk, friendPk, kind, category, html) => {
+    'manage-friendship': ({friendshipPk, friendPk, kind, category, html}) => {
         console.log(kind)
         /*
             TODO: for some reason this is undefined, find and fix
@@ -64,7 +64,18 @@ const chatSocketReceiveHandlers = {
         }
         else if (kind == 'accept') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
-            let friend = document.querySelector(`.friend[data-object-pk=${friendshipPk}]`);
+            let friend = document.querySelector(`.friend[data-object-pk="${friendPk}"]`);
+            let friendship = friend.querySelector('.friendship');
+            friendship.innerHTML = `
+                <div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="#friend-menu">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            expand_more
+                        </i>
+                    </div>
+                </div>
+            `;
+
             userGroup.appendChild(friend);
         }
         else if (kind == 'reject' || kind == 'remove') {
@@ -73,8 +84,8 @@ const chatSocketReceiveHandlers = {
             friend.remove();
         }
     },
-    'send-message': function receiveMessage(data) {
-        let message = new DOMParser().parseFromString(data.html, "text/html").querySelector('body > *');
+    'send-message': function receiveMessage({html}) {
+        let message = parseHTML(html);
         let appMessages = document.querySelector('#app-messages');
         appMessages.appendChild(message);
         appMessages.scrollTo(0, appMessages.scrollHeight);
@@ -82,7 +93,7 @@ const chatSocketReceiveHandlers = {
     'delete-backlog': ({objectType, objectPk}) => {
         let objectSelector = '.backlog';
         objectSelector += `[data-object-type="${objectType}"]`;
-        objectSelector += `[data-pk="${objectPk}"]`;
+        objectSelector += `[data-object-pk="${objectPk}"]`;
         let object = document.querySelector(objectSelector);
         object.remove();
     },
@@ -99,7 +110,7 @@ const chatSocketReceiveHandlers = {
         }
 
         objectSelector += `[data-object-type="${objectType}"]`
-        objectSelector += `[data-pk="${objectPk}"]`
+        objectSelector += `[data-object-pk="${objectPk}"]`
         
         let object = document.querySelector(objectSelector);
         let objectReactions = object.querySelector(objectReactionSelector);
@@ -132,12 +143,12 @@ const chatSocketReceiveHandlers = {
             reaction.remove();
         }
     },
-    'edit-message': function editMessageDOM(data) {
-        let {messagePk, content} = data;
-        let message = document.querySelector(`.message[data-pk="${messagePk}"]`);
-        let contentContainer = message.querySelector('.message__content');
+    'edit-message': function editMessageDOM({messagePk, content}) {
+        let message = document.querySelector(`[data-object-type="message"][data-object-pk="${messagePk}"]`);
+        let contentContainer = message.querySelector('.backlog__content');
         contentContainer.innerHTML = content;
     },
+    
     'response': () => { console.log('response exists') },
 
 };

@@ -1,0 +1,26 @@
+<ul class="menu tooltip tooltip--hidden has-shadow" id="friend-menu">
+    <a class="menu__item">
+        Message
+    </a>
+    <li class="menu__item" data-local-command="profile" data-kind="user">
+        Profile
+    </li>
+    {% if object.status == 'accepted' %}
+    <li class="menu__item" data-local-command="manage-friendship" data-kind="remove">
+        Remove Friend
+    </li>
+    {% endif %}
+    {% if object.status == 'pending' and user == object.receiver %}
+    <li class="menu__item" data-local-command="manage-friendship" data-kind="reject">
+        Ignore
+    </li>
+    {% endif %}
+    {% if object.status == 'pending' and user == object.sender %}
+    <li class="menu__item" data-local-command="manage-friendship" data-kind="reject">
+        Cancel
+    </li>
+    {% endif %}
+    <li class="menu__item" data-local-command="block">
+        Block
+    </li>
+</ul>

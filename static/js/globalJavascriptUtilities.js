@@ -129,17 +129,6 @@ function quickCreateElement(elementTag, {classList, attributes, parent, eventLis
     return element;
 };
 
-function processReaction({object, emote}) {
-    let objectType = object.dataset.objectType;
-    let objectPk = object.dataset.pk;
-    let emotePk = emote.dataset.emotePk;
-    chatSocketSendHandlers['react']({
-        objectType: objectType,
-        objectPk: objectPk,
-        emotePk, emotePk
-    });
-};
-
 function parseHTML(string) {
     return new DOMParser().parseFromString(string, "text/html").querySelector('body > *');
-}
+};

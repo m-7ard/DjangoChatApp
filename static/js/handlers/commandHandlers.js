@@ -18,28 +18,24 @@ const commandHandlers = {
 		formbox.querySelectorAll('.switchable__content').forEach((form) => form.classList.add('switchable__content--hidden'));
 		target.classList.remove('switchable__content--hidden');
 	},
-    'delete-backlog': (event) => {
-        let backlog = event.target.closest('.backlog');
-        let objectType = backlog.dataset.objectType;
-        let objectPk = backlog.dataset.pk;
-
-        chatSocketSendHandlers['delete-backlog']({
+    'delete-backlog': ({objectType, objectPk}) => {
+        chatSocket.send(JSON.stringify({
+            'action': 'delete-backlog',
             'objectType': objectType,
-            'objectPk': objectPk,
-        });
+            'objectPk': objectPk
+        }));
     },
-    'edit-message': (event) => {
+    'edit-message': ({message}) => {
         // Close any open editors
         let messagesWithOpenEditors = document.querySelectorAll('.message--editing');
-        messagesWithOpenEditors?.forEach((message) => stopEditing(message));
+        messagesWithOpenEditors?.forEach((openMessage) => stopEditing(openMessage));
 
         // Message DOM elements
-        let message = event.target.closest('.message');
-        let messageContent = message.querySelector('.message__content');
-        let messageBody = message.querySelector('.message__body');
+        let messageContent = message.querySelector('.backlog__content');
+        let messageBody = message.querySelector('.backlog__body');
 
         let editInput = quickCreateElement('textarea', {
-            classList: ['message__edit'],
+            classList: ['backlog__edit'],
             attributes: {},
             parent: messageContent,
             eventListeners: {'keypress': (e) => {
@@ -52,7 +48,7 @@ const commandHandlers = {
 
         // Prompts for saving and canceling
         let prompts = quickCreateElement('div', {
-            classList: ['message__prompts'],
+            classList: ['backlog__prompts'],
             attributes: {},
             parent: messageBody,
         });
@@ -62,9 +58,9 @@ const commandHandlers = {
         `;
 
         // Show message as being edited
-        message.classList.add('message--editing');
+        message.classList.add('backlog--editing');
 
-        // Put message content into the editor (emotes are converted to text)
+        // Put message content into the editor (emotes are converted to text, line breaks converted to \n)
         editInput.value = (Array.from(messageContent.childNodes).reduce((accumulator, current) => {
             if (current.alt) {
                 accumulator += ':' + current.alt + ':';
@@ -83,41 +79,35 @@ const commandHandlers = {
         prompts.querySelector('[data-action="cancel"]').addEventListener('click', () => stopEditing(message));
         
         function stopEditing (messageElement) {
-            messageElement.classList.remove('message--editing');
-            messageElement.querySelector('.message__edit').remove();
-            messageElement.querySelector('.message__prompts').remove();
+            messageElement.classList.remove('backlog--editing');
+            messageElement.querySelector('.backlog__edit').remove();
+            messageElement.querySelector('.backlog__prompts').remove();
         };
 
         function save () {
             stopEditing(message);
-            chatSocketSendHandlers['edit-message']({
+            chatSocket.send(JSON.stringify({
+                'action': 'edit-message',
                 'content': editInput.value,
-                'messagePk': message.dataset.pk, 
-            });
+                'messagePk': message.dataset.objectPk, 
+            }));
         };
     },
-    'react': (event) => {
-        let emote = event.target.closest('.reaction');
-        let object = event.target.closest('[data-object-type]');
-        processReaction({
-            object: object,
-            emote: emote
-        });
+    'react': ({objectType, objectPk, emotePk}) => {
+        chatSocket.send(JSON.stringify({
+            'action': 'react',
+            'objectType': objectType,
+            'objectPk': objectPk,
+            'emotePk': emotePk
+        }));
     },
     'emote-to-text': ({target, emote}) => {
         target.value += `:${emote.dataset.name}:`;
     },
-    'open_profile': () => {
-        
+    'open_profile': ({objectType, objectPk, emotePk}) => {
+        undefined
     },
-    'manage-friendship': (event) => {
-        let friendship = event.target.closest('[data-object-type="friendship"]');
-        let friend = event.target.closest('[data-object-type="friend"]');
-        let trigger = event.target.closest('[data-command="manage-friendship"]');
-
-        let friendshipPk = friendship.dataset.objectPk;
-        let friendPk = friend.dataset.objectPk;
-        let kind = trigger.dataset.kind;
+    'manage-friendship': ({friendshipPk, friendPk, kind}) => {
         chatSocketSendHandlers['manage-friendship']({
             friendshipPk: friendshipPk,
             friendPk: friendPk,

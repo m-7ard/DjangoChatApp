@@ -29,8 +29,8 @@
 			</div>
 		</span>
 		{% elif friendship.status == 'accepted' %}
-		<span class="friendship" data-pk="{{ friendship.pk }}">
-			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="#manage-friendship">
+		<span class="friendship" data-object-pk="{{ friendship.pk }}" data-object-type="friendship">
+			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="#friend-menu">
 				<div class="icon icon--small">
 					<i class="material-symbols-outlined">
 						expand_more

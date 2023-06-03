@@ -455,11 +455,11 @@
 .backlog--editing {
   background-color: #212120;
 }
-.backlog--editing .message__content {
+.backlog--editing .backlog__content {
   min-height: 5rem;
   color: transparent;
 }
-.backlog--editing .message__content img {
+.backlog--editing .backlog__content img {
   display: none;
 }
 .backlog__reactions {

@@ -88,7 +88,7 @@ of them on the window.
 
 */
 
-window.addEventListener('click', function closeOpenDropdowns(event) {
+window.addEventListener('click', (event) => {
 	// Note: this does not handle dropdown open logic, only closing / hiding, for open logic see windowClickHandlers['.dropdown__trigger']
 	let eventTrigger = event.target.closest('.dropdown__trigger');
 	dropdownContentContainers.forEach((content) => {
@@ -135,13 +135,13 @@ window.addEventListener('click', function toggleTooltips(event) {
         and position the tooltip accordingly.
     */
 	if (eventTrigger) {
-		let triggerTarget = document.querySelector(eventTrigger.dataset.target);
-		closeTooltips(triggerTarget);
-		if (triggerTarget.classList.contains('tooltip--hidden')) {
+		closeTooltips(tooltip);
+		if (tooltip.classList.contains('tooltip--hidden')) {
 			let positioning = JSON.parse(eventTrigger.dataset.positioning);
-			positionFixedContainer(triggerTarget, eventTrigger, positioning);
+			positionFixedContainer(tooltip, eventTrigger, positioning);
+
 		};
-		triggerTarget.classList.toggle('tooltip--hidden');
-		fitFixedContainer(triggerTarget);
+		tooltip.classList.toggle('tooltip--hidden');
+		fitFixedContainer(tooltip);
 	};
 });

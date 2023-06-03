@@ -211,6 +211,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def react(self, data):
+        print(data)
         object_type = data['objectType']
         if object_type == 'message':
             object_model = Message

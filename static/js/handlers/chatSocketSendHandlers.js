@@ -36,26 +36,4 @@ const chatSocketSendHandlers = {
         }));
         chatbarInput.value = '';
     },
-    'delete-backlog': ({objectType, objectPk}) => {
-        chatSocket.send(JSON.stringify({
-            'action': 'delete-backlog',
-            'objectType': objectType,
-            'objectPk': objectPk
-        }));
-    },
-    'react': ({objectType, objectPk, emotePk}) => {
-        chatSocket.send(JSON.stringify({
-            'action': 'react',
-            'objectType': objectType,
-            'objectPk': objectPk,
-            'emotePk': emotePk
-        }));
-    },
-    'edit-message': function editMessageDB({messagePk, content}) {
-        chatSocket.send(JSON.stringify({
-            'action': 'edit-message',
-            'messagePk': messagePk,
-            'content': content
-        }));
-    },
 };

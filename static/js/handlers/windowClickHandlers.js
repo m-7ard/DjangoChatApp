@@ -1,34 +1,27 @@
 
 const windowClickHandlers = {
-	'.dropdown__trigger': function toggleDropdown(event) {
+	'.dropdown__trigger': (event) => {
 		let dropdown = event.target.closest('.dropdown');
 		let dropdownContent = dropdown.querySelector('.dropdown__content');
 		dropdownContent.classList.toggle('dropdown__content--hidden');
 	},
-    '[data-tooltip-command]': (event) => {
-        let trigger = event.target.closest('[data-tooltip-command]');
-        let command = trigger.dataset.tooltipCommand;
-        let tooltip = event.target.closest('.tooltip');
-        tooltipCommandHandlers[command]({tooltip: tooltip, trigger: trigger});
-    },
-	'[data-command]': function delegateCommand(event) {
-		let command = event.target.closest('[data-command]').dataset.command;
+	'[data-command]': (event) => {
+		let trigger = event.target.closest('[data-command]');
+        let command = trigger.dataset.command;
 		console.log(command)
-		commandHandlers[command](event);
+		let args = processCommandEvent[command](event);
+        commandHandlers[command](args);
 	},
-	'.tooltip__trigger': function delegateTooltipTrigger(event) {
-        /* 
-            This should be changed to use the id directly to eliminate
-            the ambiguity
-        */
+	'.tooltip__trigger': (event) => {
 		let trigger = event.target.closest('.tooltip__trigger');
 		let tooltip = document.querySelector(trigger.dataset.target);
+
         tooltipHandlers[tooltip.id]({
             tooltip: tooltip,
             trigger: trigger,
         });
 	},
-	'.overlay__trigger': async function addOverlay(event) {
+	'.overlay__trigger': async (event) => {
 		event.preventDefault();
 		
 		let trigger = event.target.closest('.overlay__trigger');
