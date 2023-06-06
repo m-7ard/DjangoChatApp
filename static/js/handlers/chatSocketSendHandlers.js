@@ -16,14 +16,6 @@ const chatSocketSendHandlers = {
             console.error('Error requestServerResponse', error);
         }
     },
-    'manage-friendship': ({friendshipPk, friendPk, kind}) => {
-        chatSocket.send(JSON.stringify({
-            'action': 'manage-friendship',
-            'friendshipPk': friendshipPk,
-            'kind': kind,
-            'friendPk': friendPk
-        }));
-    },
     'send-message': function submitMessage(event) {
         if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
             return;

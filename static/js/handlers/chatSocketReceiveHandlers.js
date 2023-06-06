@@ -52,11 +52,8 @@ const chatSocketReceiveHandlers = {
 		appMessages.appendChild(log);
 		appMessages.scrollTo(0, appMessages.scrollHeight);
     },
-    'manage-friendship': ({friendshipPk, friendPk, kind, category, html}) => {
-        console.log(kind)
-        /*
-            TODO: for some reason this is undefined, find and fix
-        */
+    'manage-friendship': ({pk, model, app, kind, category, html}) => {
+        // object: "rooms:Friend"
         if (kind == 'create') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
             let friend = parseHTML(html);
@@ -64,25 +61,17 @@ const chatSocketReceiveHandlers = {
         }
         else if (kind == 'accept') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
-            let friend = document.querySelector(`.friend[data-object-pk="${friendPk}"]`);
+            let friend = document.querySelector(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`);
             let friendship = friend.querySelector('.friendship');
-            friendship.innerHTML = `
-                <div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="#friend-menu">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            expand_more
-                        </i>
-                    </div>
-                </div>
-            `;
+            friendship.innerHTML = parseHTML(html).querySelector('.friendship').innerHTML;
 
             userGroup.appendChild(friend);
         }
-        else if (kind == 'reject' || kind == 'remove') {
-            let friend = document.querySelector(`.friend[data-object-pk="${friendPk}"]`);
-            console.log(friend)
+        else if (['reject', 'remove', 'cancel'].includes(kind)) {
+            console.log(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`)
+            let friend = document.querySelector(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`);
             friend.remove();
-        }
+        };
     },
     'send-message': function receiveMessage({html}) {
         let message = parseHTML(html);
@@ -97,20 +86,17 @@ const chatSocketReceiveHandlers = {
         let object = document.querySelector(objectSelector);
         object.remove();
     },
-    'react': ({actionType, emotePk, objectType, objectPk, imageUrl}) => {
+    'react': ({model, app, pk, emotePk, actionType, imageUrl}) => {
         let objectSelector;
         let objectReactionSelector;
-        if (objectType == 'message') {
-            objectSelector = '.backlog';
-            objectReactionSelector = '.backlog__reactions';
-        }
-        else if (objectType == 'log') {
+        if (model == 'Message' || model == 'Log') {
             objectSelector = '.backlog';
             objectReactionSelector = '.backlog__reactions';
         }
 
-        objectSelector += `[data-object-type="${objectType}"]`
-        objectSelector += `[data-object-pk="${objectPk}"]`
+        objectSelector += `[data-model="${model}"]`
+        objectSelector += `[data-app="${app}"]`
+        objectSelector += `[data-pk="${pk}"]`
         
         let object = document.querySelector(objectSelector);
         let objectReactions = object.querySelector(objectReactionSelector);

@@ -1,5 +1,11 @@
 from django.urls import path
-from .views import FrontpageView, RequestData, GetViewByName, GetHtmlElementFromModel, GetHtmlElementFromData
+from .views import (
+    FrontpageView, 
+    RequestData, 
+    GetViewByName, 
+    GetHtmlElementFromModel, 
+    GetTooltip,
+)
 
 
 urlpatterns = [
@@ -7,4 +13,6 @@ urlpatterns = [
     path('RequestData/', RequestData.as_view(), name='RequestData'),
     path('GetViewByName/<str:name>/', GetViewByName),
     path('GetHtmlElementFromModel/', GetHtmlElementFromModel.as_view()),
+    path('tooltip/<str:id>/', GetTooltip.as_view()),
+
 ]

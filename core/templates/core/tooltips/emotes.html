@@ -1,0 +1,46 @@
+<div class="emotes tooltip has-shadow" id="emotes" 
+data-context='
+{
+    "objects": {
+        "object": {
+            "model":"{{ object|classname }}",
+            "app":"{{ object|app_name }}",
+            "pk":"{{ object.pk }}"
+        },
+        "room": {
+            "model":"Room",
+            "app":"{{ room|app_name }}",
+            "pk":"{{ room.pk }}"
+        }
+    },
+    "variables": {
+        "emoteCommand":"react"
+    }
+}'>
+	<div class="emotes__header has-shadow">
+		<input class="emotes__search" type="text" name="">
+		<span class="icon icon--small">
+			<i class="material-symbols-outlined">								
+				search
+			</i>
+		</span>
+	</div>
+	<div class="emotes__body">
+		<ul class="emotes__rooms has-shadow">
+			{% for membership in user.memberships.all %}
+                {% with membership.room as joined_room  %}
+                    <li class="avatar avatar--small">
+                        <img src="{{ MEDIA_URL }}{{ joined_room.image.url }}" alt="">
+                    </li>
+                {% endwith %}
+			{% endfor %}
+		</ul>
+		<ul class="emotes__content">
+			{% for emote in room.emotes.all %}
+                <li class="emotes__emote" data-emote-pk="{{ emote.pk }}" data-name="{{ emote.name }}" data-command="{{ emoteCommand }}">
+                    <img src="{{ MEDIA_URL }}{{ emote.image.url }}" alt="{{ emote.name }}">
+                </li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>

@@ -8,18 +8,41 @@ const windowClickHandlers = {
 	'[data-command]': (event) => {
 		let trigger = event.target.closest('[data-command]');
         let command = trigger.dataset.command;
-		console.log(command)
-		let args = processCommandEvent[command](event);
-        commandHandlers[command](args);
+        let handler = commandHandlers[command];
+        handler(event);
 	},
-	'.tooltip__trigger': (event) => {
+	'.tooltip__trigger': async (event) => {
 		let trigger = event.target.closest('.tooltip__trigger');
-		let tooltip = document.querySelector(trigger.dataset.target);
+        let target = trigger.dataset.target;
+        let contextObject = trigger.closest('[data-context]');
+        let openTooltip = document.querySelector('.tooltip');
+        if (openTooltip && (openTooltip.id == target)) {
+            /* 
+            Checks if a trigger and a tooltip refer to the
+            same object / context 
+            */
+            if (openTooltip.dataset.context == contextObject.dataset.context) {
+                openTooltip.remove();
+                return;
+            }
+            else {
+                openTooltip.remove();
+            };
+        };
 
-        tooltipHandlers[tooltip.id]({
-            tooltip: tooltip,
-            trigger: trigger,
-        });
+        let tooltipLayer = document.querySelector('.layer--tooltips');
+        let url = new URL(window.location.origin + '/tooltip/' + target);
+        if (contextObject) {
+            url.searchParams.append('context', contextObject.dataset.context);
+        };
+        let request = await fetch(url);
+        let response = await request.text();
+        let tooltip = parseHTML(response);
+
+        let positioning = JSON.parse(trigger.dataset.positioning);
+        positionFixedContainer(tooltip, trigger, positioning);
+        tooltipLayer.appendChild(tooltip);
+        fitFixedContainer(tooltip);
 	},
 	'.overlay__trigger': async (event) => {
 		event.preventDefault();

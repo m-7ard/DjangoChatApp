@@ -50,26 +50,7 @@ const tooltipHandlers = {
 		console.log(response);
 	},
 	'friend-menu': ({tooltip, trigger}) => {
-		tooltip.onclick = (event) => {
-			let command = trigger.dataset.localCommand;
-			if (!command) {
-				return
-			};
-
-			let friendship = trigger.closest('[data-object-type="friendship"]');
-			let friend  = trigger.closest('[data-object-type="friend"]');
-
-			if (command == 'manage-friendship') {
-				commandHandlers['manage-friendship']({
-					friendshipPk: friendship.dataset.objectPk,
-					friendPk: friend.dataset.objectPk,
-					kind: trigger.dataset.kind
-				});
-			}
-			else if (command == 'react') {
-				
-			}
-		}
+        
 	},
 	
 }

@@ -1,3 +1,5 @@
+/* getModelData is not being used right now, probably unecessary */
+
 async function getModelData(app_label, model_name, pk, keys) {
 	const url = new URL(window.location.origin + '/RequestData/');
 	url.searchParams.append('model_name', model_name);
@@ -131,4 +133,21 @@ function quickCreateElement(elementTag, {classList, attributes, parent, eventLis
 
 function parseHTML(string) {
     return new DOMParser().parseFromString(string, "text/html").querySelector('body > *');
+};
+
+/* abstraction from tooltiphandlers['profile'], using fetch call in the 
+    windowclickhandler instead for now */
+
+async function requestElement({appLabel, modelName, pk, contextVariable, templateRoute}) {
+    let url = new URL(window.location.origin + '/GetHtmlElementFromModel/');
+    let getRequestData = {
+        appLabel: appLabel,
+        modelName: modelName,
+        pk: pk,
+        contextVariable: contextVariable,
+        templateRoute: templateRoute
+    };
+    Object.entries(getRequestData).forEach(([key, value]) => url.searchParams.append(key, value));
+    let request = await fetch(url);
+    let response = await request.text();
 };

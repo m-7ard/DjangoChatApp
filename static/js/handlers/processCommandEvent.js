@@ -1,15 +1,4 @@
 const processCommandEvent = {
-    'manage-friendship': (event) => {
-        let friendship = event.target.closest('[data-object-type="friendship"]');
-        let friend = event.target.closest('[data-object-type="friend"]');
-        let trigger = event.target.closest('[data-command="manage-friendship"]');
-        let args = {
-            friendshipPk: friendship.dataset.objectPk,
-            friendPk: friend.dataset.objectPk,
-            kind: trigger.dataset.kind
-        };
-        return args;
-    },
     'react': (event) => {
         let emote = event.target.closest('.reaction');
         let object = event.target.closest('[data-object-type]');

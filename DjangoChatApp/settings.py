@@ -69,7 +69,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
 
-				'rooms.context_processors.room_list',
+				# 'app.context_processors.function',
             ],
 			'libraries': {
 				'custom_tags': 'DjangoChatApp.templatetags.custom_tags'

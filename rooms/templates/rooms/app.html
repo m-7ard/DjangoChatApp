@@ -9,7 +9,7 @@
 {% block content %}
 <div class="app">
 	<div class="app__sidebar app__sidebar--primary">
-		{% block app__sidebar--primary %}{% endblock %}
+		{% block left-sidebar %}{% endblock %}
 	</div>
 	<div class="app__main">
 		{% block app__main %}{% endblock %}
@@ -132,14 +132,6 @@
 		</div>
 	</div>
 </div>
-{% endblock %}
-
-{% block tooltips %}
-
-<div class="profile tooltip tooltip--hidden has-shadow" id="member-profile">
-	{% include "./elements/member-profile.html" %}
-</div>
-
 {% endblock %}
 
 {% block scripts %}

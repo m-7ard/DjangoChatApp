@@ -7,6 +7,7 @@ from django.apps import apps
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
 from django.http import JsonResponse, HttpResponse
+from django.contrib.contenttypes.models import ContentType
 
 
 
@@ -56,6 +57,7 @@ def attribute_modifier(obj, json_string):
 @register.filter(name="printInConsole")
 def printInConsole(self):
     print(self)
+    return self
     
 @register.filter(name="get_member")
 def get_member(user, room):
@@ -64,3 +66,7 @@ def get_member(user, room):
 @register.filter(name="is_member")
 def is_member(user, room):
     return room.pk in user.memberships.all().values_list('room', flat=True)
+
+@register.filter(name='app_name')
+def app_name(self):
+    return self._meta.app_label

@@ -107,41 +107,27 @@ window.addEventListener('click', (event) => {
 
 // Opening and Closing of tooltips is handled entirely by this (v) handler
 
-window.addEventListener('click', function toggleTooltips(event) {
-	const closeTooltips = (exception) => {
-		tooltipContainers.forEach((tooltip) => {
-			!(exception == tooltip) && tooltip.classList.add('tooltip--hidden');
-		});
-	};
-	let eventTrigger = event.target.closest('.tooltip__trigger');
-	let eventTooltip = event.target.closest('.tooltip');
-	
-    /* Nothing tooltip-related was clicked */
-	if (!eventTooltip && !eventTrigger) {
-		closeTooltips();
-	}
+/*
 
-    /* 
-        If a tooltip was clicked, check if a close trigger for that tooltip 
-        was clicked 
-    */
-	if (eventTooltip) {
-		let eventTooltipClose = event.target.closest('.tooltip__close');
-		eventTooltipClose ? closeTooltips() : closeTooltips(eventTooltip);
-	}
+NEW PLAN: there will only be one tooltip element at any time, it
+is retrieved through an async call, we can pass in args, meaning,
+we can set attributes, meanining further, we can unify event 
+processor logic into one file.
 
-    /*
-        If a tooltip trigger is clicked, close all other tooltips and open or close
-        and position the tooltip accordingly.
-    */
-	if (eventTrigger) {
-		closeTooltips(tooltip);
-		if (tooltip.classList.contains('tooltip--hidden')) {
-			let positioning = JSON.parse(eventTrigger.dataset.positioning);
-			positionFixedContainer(tooltip, eventTrigger, positioning);
+*/
 
-		};
-		tooltip.classList.toggle('tooltip--hidden');
-		fitFixedContainer(tooltip);
-	};
+
+window.addEventListener('click', (event) => {
+	let tooltip = event.target.closest('.tooltip');
+	let trigger = event.target.closest('.tooltip__trigger');
+    let close = event.target.closest('.tooltip__close');
+
+    if (!trigger && !tooltip) {
+        let openTooltip = document.querySelector('.tooltip');
+        openTooltip?.remove();
+    };
+
+    if (close) {
+        tooltip.remove();
+    };
 });

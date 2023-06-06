@@ -15,6 +15,9 @@ from django.template import Template, RequestContext, Context
 from django.http import HttpResponse
 
 
+from users.models import Friendship, CustomUser
+from rooms.models import Log, Message, Reaction, Room
+from utils import get_rendered_html, get_object_or_none
 
 class FrontpageView(TemplateView):
     template_name = 'core/frontpage.html'
@@ -43,6 +46,34 @@ class RequestData(View):
                 data[key] = escape(value)
         
         return JsonResponse(data)
+    
+
+class GetTooltip(View):
+    def get(self, request, *args, **kwargs):
+        tooltip_id = kwargs.get('id')
+        client_context = json.loads(request.GET.get('context'))
+        objects = client_context.get('objects', {})
+        variables = client_context.get('variables', {})
+        
+        template_context = {'user': request.user}
+
+        for context_variable, values in objects.items():
+            model_name = values.get('model')
+            app_label = values.get('app')
+            pk = values.get('pk')
+            
+            model = apps.get_model(app_label=app_label, model_name=model_name)
+            template_context[context_variable] = get_object_or_none(model, pk=pk)
+
+        for context_variable, value in variables.items():
+            template_context[context_variable] = value
+
+        html = get_rendered_html(
+            path=Path(__file__).parent / f'templates/core/tooltips/{tooltip_id}.html', 
+            context_dict=template_context
+        )
+        return HttpResponse(html)
+        
 
         
 def GetViewByName(request, name, *args, **kwargs):

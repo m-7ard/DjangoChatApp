@@ -1,5 +1,25 @@
-
-<li class="backlog" data-object-pk="{{ object.pk }}" data-object-type="log">
+<li class="backlog" 
+data-model="{{ object|classname }}" 
+data-app="{{ object|app_name }}" 
+data-pk="{{ object.pk }}" 
+data-context='
+{
+    "objects": {
+        "object": {
+            "model":"{{ object|classname }}",
+            "app":"{{ object|app_name }}",
+            "pk":"{{ object.pk }}"
+        },
+        "room": {
+            "model":"Room",
+            "app":"{{ room|app_name }}",
+            "pk":"{{ room.pk }}"
+        }
+    },
+    "variables": {
+        "emoteCommand":"react"
+    }
+}'>
     <div class="backlog__icon">
         <div class="icon icon--small">
             <i class="material-symbols-outlined">
@@ -86,7 +106,7 @@
     {% endcomment %}
     <div class="backlog__actions has-shadow">
 		<span class="backlog__action tooltip__trigger" 
-		data-target="#emotes" 
+		data-target="emotes" 
 		data-positioning='{"top": "0px", "right": "-100%"}' 
         data-kind="backlog"
 		>

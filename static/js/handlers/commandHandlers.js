@@ -93,12 +93,13 @@ const commandHandlers = {
             }));
         };
     },
-    'react': ({objectType, objectPk, emotePk}) => {
+    'react': (event) => {
+        let contextObject = event.target.closest('[data-context]');
+        let emoteObject = event.target.closest('[data-emote-pk]');
         chatSocket.send(JSON.stringify({
-            'action': 'react',
-            'objectType': objectType,
-            'objectPk': objectPk,
-            'emotePk': emotePk
+            action: 'react',
+            context: contextObject.dataset.context,
+            emotePk: emoteObject.dataset.emotePk
         }));
     },
     'emote-to-text': ({target, emote}) => {
@@ -107,11 +108,14 @@ const commandHandlers = {
     'open_profile': ({objectType, objectPk, emotePk}) => {
         undefined
     },
-    'manage-friendship': ({friendshipPk, friendPk, kind}) => {
-        chatSocketSendHandlers['manage-friendship']({
-            friendshipPk: friendshipPk,
-            friendPk: friendPk,
-            kind: kind
-        });
+    'manage-friendship': (event) => {
+        let trigger = event.target.closest('[data-command="manage-friendship"]');
+        let contextObject = event.target.closest('[data-context]');
+        
+        chatSocket.send(JSON.stringify({
+            action: 'manage-friendship',
+            context: contextObject.dataset.context,
+            kind: trigger.dataset.kind,
+        }));
     },
 };

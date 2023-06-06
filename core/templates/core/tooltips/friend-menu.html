@@ -1,26 +1,39 @@
-<ul class="menu tooltip tooltip--hidden has-shadow" id="friend-menu">
-    <a class="menu__item">
+<ul class="menu tooltip has-shadow" id="friend-menu" 
+data-context='
+{
+    "objects": {
+        "object": {
+            "model":"{{ object|classname }}",
+            "app":"{{ object|app_name }}",
+            "pk":"{{ object.pk }}"
+        },
+        "friendship": {
+            "model":"{{ friendship|classname }}",
+            "app":"{{ friendship|app_name }}",
+            "pk":"{{ friendship.pk }}"
+        }
+    }
+}'>
+    <a class="menu__item tooltip__close">
         Message
     </a>
-    <li class="menu__item" data-local-command="profile" data-kind="user">
+    <li class="menu__item tooltip__close" data-command="profile" data-kind="user">
         Profile
     </li>
-    {% if object.status == 'accepted' %}
-    <li class="menu__item" data-local-command="manage-friendship" data-kind="remove">
+    {% if friendship.status == 'accepted' %}
+    <li class="menu__item tooltip__close" data-command="manage-friendship" data-kind="remove">
         Remove Friend
     </li>
-    {% endif %}
-    {% if object.status == 'pending' and user == object.receiver %}
-    <li class="menu__item" data-local-command="manage-friendship" data-kind="reject">
+    {% elif friendship.status == 'pending' and user == friendship.receiver %}
+    <li class="menu__item tooltip__close" data-command="manage-friendship" data-kind="reject">
         Ignore
     </li>
-    {% endif %}
-    {% if object.status == 'pending' and user == object.sender %}
-    <li class="menu__item" data-local-command="manage-friendship" data-kind="reject">
+    {% elif friendship.status == 'pending' and user == friendship.sender %}
+    <li class="menu__item tooltip__close" data-command="manage-friendship" data-kind="cancel">
         Cancel
     </li>
     {% endif %}
-    <li class="menu__item" data-local-command="block">
+    <li class="menu__item tooltip__close" data-command="block">
         Block
     </li>
 </ul>

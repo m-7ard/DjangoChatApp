@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.template import Template, Context
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
+from django.apps import apps
 
 from DjangoChatApp.templatetags.custom_tags import convert_reactions
 from .forms import MessageForm
@@ -211,27 +212,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def react(self, data):
-        print(data)
-        object_type = data['objectType']
-        if object_type == 'message':
-            object_model = Message
-        elif object_type == 'log':
-            object_model = Log
-        else:
-            raise ValueError('objectType not defined in consumer react method')
-        
-        object_ = get_object_or_none(object_model, pk=data.get('objectPk'))
-        emote = get_object_or_none(Emote, pk=data.get('emotePk'))
+        client_context = json.loads(data['context'])
+        objects = client_context['objects']
+
+        emote_pk = data.get('emotePk')
+        object_model_name = objects['object'].get('model')
+        object_app_label = objects['object'].get('app')
+        object_pk = objects['object'].get('pk')
+        model = apps.get_model(app_label=object_app_label, model_name=object_model_name)
+
+        object_ = get_object_or_none(model, pk=object_pk)
+        emote = get_object_or_none(Emote, pk=emote_pk)
+
         if not emote or not object_:
             return
         
         reaction, created = Reaction.objects.get_or_create(
-            target_type=ContentType.objects.get_for_model(object_model), 
-            target_pk=data['objectPk'], 
+            target_type=ContentType.objects.get_for_model(model), 
+            target_pk=object_pk, 
             emote=emote
         )
 
-        send_data = {**data}
+        send_data = {
+            'action': data['action'],
+            **objects['object'],
+            'emotePk': emote_pk,
+        }
 
         if self.user in reaction.users.all():
             reaction.users.remove(self.user)
@@ -327,34 +333,56 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def manage_friendship(self, data):
+        client_context = json.loads(data['context'])
+        objects = client_context['objects']
         kind = data['kind']
-        friend = CustomUser.objects.get(pk=data['friendPk'])
-        friendship = get_object_or_none(Friendship, pk=data['friendshipPk'])
-        user_send_data = {**data}
-        friend_send_data = {**data}
+
+        friendship_pk = objects['friendship'].get('pk')
+        friend_pk = objects['object'].get('pk')
+
+        friend = CustomUser.objects.get(pk=friend_pk)
+        friendship = get_object_or_none(Friendship, pk=friendship_pk)
+        
+        send_data = {
+            'action': data['action'],
+            **objects['object'],
+            'kind': kind,
+        }
+
+        user_send_data = {**send_data}
+        friend_send_data = {**send_data}
 
         if kind == 'create':
             friendship, created = Friendship.objects.get_or_create(sender=self.user, receiver=friend, status='pending')
             # avoid duplicates in html
             if not created:
                 return
+            
             user_send_data['category'] = 'outgoing'
             friend_send_data['category'] = 'incoming'
 
             user_send_data['html'] = get_rendered_html(
                 Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'object': friend}
+                {'object': friend, 'friendship': friendship}
             )
             friend_send_data['html'] = get_rendered_html(
                 Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'object': self.user}
+                {'object': self.user, 'friendship': friendship}
             )
         elif kind == 'accept':
             friendship.status = 'accepted'
             friendship.save()
+
             user_send_data['category'] = 'accepted'
             friend_send_data['category'] = 'accepted'
-        elif kind == 'reject' or kind == 'remove':
+            
+            html = get_rendered_html(
+                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
+                {'object': self.user, 'friendship': friendship}
+            )
+            friend_send_data['html'] = html
+            user_send_data['html'] = html
+        elif kind in ['reject', 'remove', 'cancel']:
             friendship.delete()
         else:
             raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove", "create"')
