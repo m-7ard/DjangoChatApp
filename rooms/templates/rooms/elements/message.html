@@ -5,19 +5,11 @@ data-pk="{{ object.pk }}"
 data-context='
 {
     "objects": {
-        "object": {
-            "model":"{{ object|classname }}",
-            "app":"{{ object|app_name }}",
-            "pk":"{{ object.pk }}"
-        },
-        "room": {
-            "model":"Room",
-            "app":"{{ room|app_name }}",
-            "pk":"{{ room.pk }}"
-        }
+        "object": {{ object|object_to_json }},
+        "room": {{ room|object_to_json }}
     },
     "variables": {
-        "emoteCommand":"react"
+        "emoteCommand": "react"
     }
 }'>
     <div class="backlog__avatar">

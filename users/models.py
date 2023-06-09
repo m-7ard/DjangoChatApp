@@ -75,6 +75,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
 
+    def display_name(self):
+        return self.username
+    
+    def joined_site(self):
+        return self.date_joined.strftime("%d %B %Y")
+    
+    def full_name(self):
+        return f'{self.username}#{str(self.username_id).zfill(2)}'
+    
     class Meta:
         constraints = [
             models.CheckConstraint(

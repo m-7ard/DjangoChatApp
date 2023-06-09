@@ -25,18 +25,18 @@ const commandHandlers = {
             'objectPk': objectPk
         }));
     },
-    'edit-message': ({message}) => {
+    'edit-message': (event) => {
         // Close any open editors
-        let messagesWithOpenEditors = document.querySelectorAll('.message--editing');
+        let messagesWithOpenEditors = document.querySelectorAll('.backlog--editing');
         messagesWithOpenEditors?.forEach((openMessage) => stopEditing(openMessage));
 
         // Message DOM elements
+        let message = event.target.closest('.backlog');
         let messageContent = message.querySelector('.backlog__content');
         let messageBody = message.querySelector('.backlog__body');
 
         let editInput = quickCreateElement('textarea', {
             classList: ['backlog__edit'],
-            attributes: {},
             parent: messageContent,
             eventListeners: {'keypress': (e) => {
                 if (!(e.key == "Enter") || (e.key === "Enter" && e.shiftKey)) {
@@ -49,7 +49,6 @@ const commandHandlers = {
         // Prompts for saving and canceling
         let prompts = quickCreateElement('div', {
             classList: ['backlog__prompts'],
-            attributes: {},
             parent: messageBody,
         });
         prompts.innerHTML = `
@@ -75,9 +74,11 @@ const commandHandlers = {
         }, '')).trim(); // remove leading and trailing whitespace
 
 
+        // Add functionality to prompts
         prompts.querySelector('[data-action="save"]').addEventListener('click', save);
         prompts.querySelector('[data-action="cancel"]').addEventListener('click', () => stopEditing(message));
         
+        // Shorcuts
         function stopEditing (messageElement) {
             messageElement.classList.remove('backlog--editing');
             messageElement.querySelector('.backlog__edit').remove();
@@ -89,7 +90,7 @@ const commandHandlers = {
             chatSocket.send(JSON.stringify({
                 'action': 'edit-message',
                 'content': editInput.value,
-                'messagePk': message.dataset.objectPk, 
+                'messagePk': message.dataset.pk, 
             }));
         };
     },
@@ -102,8 +103,13 @@ const commandHandlers = {
             emotePk: emoteObject.dataset.emotePk
         }));
     },
-    'emote-to-text': ({target, emote}) => {
-        target.value += `:${emote.dataset.name}:`;
+    'emote-to-text': (event) => {
+        let trigger = event.target.closest('[data-command="emote-to-text"]');
+        let contextObject = event.target.closest('[data-context]');
+        let context = JSON.parse(contextObject.dataset.context);
+        let inputParent = document.querySelector(context.variables.inputParent);
+        let input = inputParent.querySelector('[data-role="input"]');
+        input.value += `:${trigger.dataset.name}:`;
     },
     'open_profile': ({objectType, objectPk, emotePk}) => {
         undefined

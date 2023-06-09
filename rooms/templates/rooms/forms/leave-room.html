@@ -1,4 +1,4 @@
-<div class="formbox">
+<div class="formbox formbox--fixed overlay">
     <form class="form" method="POST" action="{% url 'leave-room' room=room.pk %}">
         {% csrf_token %}
         <div class="form__header">

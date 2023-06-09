@@ -48,7 +48,7 @@
                         {% spaceless %}
                         <ul class="user-group__content">
                             {% for friendship in user.received_friendships.pending %}
-                                {% with user|get_friendship_friend:friendship as object %}
+                                {% with user|get_friendship_friend:friendship as friend %}
                                     {% include "./elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}                          
@@ -62,7 +62,7 @@
                         {% spaceless %}
                         <ul class="user-group__content" data-category="accepted">
                             {% for friendship in user.friendships.accepted %}
-                                {% with user|get_friendship_friend:friendship as object %}
+                                {% with user|get_friendship_friend:friendship as friend %}
                                     {% include "./elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}
@@ -76,7 +76,7 @@
                         {% spaceless %}
                         <ul class="user-group__content">
                             {% for friendship in user.sent_friendships.pending %}
-                                {% with user|get_friendship_friend:friendship as object %}
+                                {% with user|get_friendship_friend:friendship as friend %}
                                     {% include "./elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}                          
@@ -98,7 +98,7 @@
 		</div>
 		<div class="container container--fill">
 			<div class="container__header">
-				Groups			
+				Rooms			
 			</div>
 			<div class="container__subheader has-shadow">
 				<span class="icon icon--small icon__hoverable">
@@ -123,9 +123,9 @@
 			<div class="wrapper--remaining-space">
 				<ul class="container__content">
 					{% for membership in user.memberships.all %}
-					{% with membership.room as object %}
-						{% include "./elements/membership.html" %}
-					{% endwith %}
+                        {% with membership.room as object %}
+                            {% include "./elements/membership.html" %}
+                        {% endwith %}
 					{% endfor %}
 				</ul>
 			</div>

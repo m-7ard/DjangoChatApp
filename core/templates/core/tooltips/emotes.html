@@ -1,22 +1,5 @@
 <div class="emotes tooltip has-shadow" id="emotes" 
-data-context='
-{
-    "objects": {
-        "object": {
-            "model":"{{ object|classname }}",
-            "app":"{{ object|app_name }}",
-            "pk":"{{ object.pk }}"
-        },
-        "room": {
-            "model":"Room",
-            "app":"{{ room|app_name }}",
-            "pk":"{{ room.pk }}"
-        }
-    },
-    "variables": {
-        "emoteCommand":"react"
-    }
-}'>
+data-context='{{ client_context }}'>
 	<div class="emotes__header has-shadow">
 		<input class="emotes__search" type="text" name="">
 		<span class="icon icon--small">

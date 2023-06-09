@@ -252,6 +252,7 @@ class LeaveRoom(TemplateView):
                 'html': log_html,
             }
             for channel in room.channels.filter(display_logs=action):
+                print(channel.pk, '------------------' * 20)
                 send_to_group(f'channel_{channel.pk}', send_data)
 
         return redirect('room', room=room.pk)

@@ -1,19 +1,5 @@
 <ul class="menu tooltip has-shadow" id="friend-menu" 
-data-context='
-{
-    "objects": {
-        "object": {
-            "model":"{{ object|classname }}",
-            "app":"{{ object|app_name }}",
-            "pk":"{{ object.pk }}"
-        },
-        "friendship": {
-            "model":"{{ friendship|classname }}",
-            "app":"{{ friendship|app_name }}",
-            "pk":"{{ friendship.pk }}"
-        }
-    }
-}'>
+data-context='{{ client_context }}'>
     <a class="menu__item tooltip__close">
         Message
     </a>

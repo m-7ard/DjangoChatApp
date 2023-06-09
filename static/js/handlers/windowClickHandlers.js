@@ -12,16 +12,11 @@ const windowClickHandlers = {
         handler(event);
 	},
 	'.tooltip__trigger': async (event) => {
+        event.preventDefault();
 		let trigger = event.target.closest('.tooltip__trigger');
-        let target = trigger.dataset.target;
-        let contextObject = trigger.closest('[data-context]');
         let openTooltip = document.querySelector('.tooltip');
-        if (openTooltip && (openTooltip.id == target)) {
-            /* 
-            Checks if a trigger and a tooltip refer to the
-            same object / context 
-            */
-            if (openTooltip.dataset.context == contextObject.dataset.context) {
+        if (openTooltip) {
+            if (openTooltip.dataset.randomId == trigger.dataset.randomId) {
                 openTooltip.remove();
                 return;
             }
@@ -29,7 +24,8 @@ const windowClickHandlers = {
                 openTooltip.remove();
             };
         };
-
+        let target = trigger.dataset.target;
+        let contextObject = trigger.closest('[data-context]');
         let tooltipLayer = document.querySelector('.layer--tooltips');
         let url = new URL(window.location.origin + '/tooltip/' + target);
         if (contextObject) {
@@ -38,6 +34,9 @@ const windowClickHandlers = {
         let request = await fetch(url);
         let response = await request.text();
         let tooltip = parseHTML(response);
+        let sharedID = randomID()
+        tooltip.setAttribute('data-random-id', sharedID)
+        trigger.setAttribute('data-random-id', sharedID)
 
         let positioning = JSON.parse(trigger.dataset.positioning);
         positionFixedContainer(tooltip, trigger, positioning);
@@ -46,15 +45,16 @@ const windowClickHandlers = {
 	},
 	'.overlay__trigger': async (event) => {
 		event.preventDefault();
-		
 		let trigger = event.target.closest('.overlay__trigger');
-		let viewName = trigger.dataset.viewName;
-		
-		let overlay = await overlayHandlers[viewName]({trigger, viewName});
-		editClassList(overlay, {add: ['layer', 'layer--overlay']});
-		let closeButtons = overlay.querySelectorAll('.overlay__close');
-		closeButtons.forEach((closeButton) => closeButton.addEventListener('click', () => overlay.remove()));
-		document.body.appendChild(overlay);
+		let viewName = trigger.dataset.viewName;		
+		let overlayLayer = await overlayHandlers[viewName]({trigger, viewName});
+		editClassList(overlayLayer, {add: ['layer', 'layer--overlay']});
+        overlayLayer.addEventListener('click', (e) => {
+            if (!(e.target.closest('.overlay')) || (e.target.closest('.overlay__close'))) {
+                overlayLayer.remove();
+            };
+        });
+        document.body.appendChild(overlayLayer);
 	},
 	'.select__trigger': function toggleSelect(event) {
 		let trigger = event.target.closest('.select__trigger');

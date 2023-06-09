@@ -151,3 +151,11 @@ async function requestElement({appLabel, modelName, pk, contextVariable, templat
     let request = await fetch(url);
     let response = await request.text();
 };
+
+function objectSelector(data) {
+    return `[data-model="${data.model}"][data-app="${data.app}"][data-pk="${data.pk}"]`
+}
+
+function randomID() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}

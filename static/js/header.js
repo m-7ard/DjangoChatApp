@@ -105,17 +105,6 @@ window.addEventListener('click', (event) => {
 	});
 });
 
-// Opening and Closing of tooltips is handled entirely by this (v) handler
-
-/*
-
-NEW PLAN: there will only be one tooltip element at any time, it
-is retrieved through an async call, we can pass in args, meaning,
-we can set attributes, meanining further, we can unify event 
-processor logic into one file.
-
-*/
-
 
 window.addEventListener('click', (event) => {
 	let tooltip = event.target.closest('.tooltip');

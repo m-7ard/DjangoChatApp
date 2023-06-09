@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from rooms.models import Member, Room, Emote
 from ..settings import MEDIA_URL
+import utils
 
 @register.filter(name='classname')
 def classname(obj):
@@ -70,3 +71,7 @@ def is_member(user, room):
 @register.filter(name='app_name')
 def app_name(self):
     return self._meta.app_label
+
+@register.filter(name='object_to_json')
+def object_to_json(self):
+    return utils.object_to_json(self)

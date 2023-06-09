@@ -101,11 +101,7 @@
 			</ul>
 		</div>
 	</div>
-	
-	
 </div>
-
-
 <div class="container container--fill">
 	<div class="container__header">
 		Members
@@ -133,21 +129,7 @@
 	<div class="wrapper--remaining-space">
 		<ul class="container__content">
 			{% for member in room.members.all %}
-			<li class="modelbox modelbox--hoverable">
-				<span class="avatar avatar--small has-shadow">
-					<img src="{{ MEDIA_URL }}{{ member.image.url }}" alt="">
-				</span>
-				<span class="wrapper--remaining-space">
-					<span class="modelbox__info">
-						<div class="primary-text primary-text--small ellipsis online-color--primary">
-							{{ member.user.username }}
-						</div>
-						<div class="secondary-text secondary-text--small ellipsis online-color--secondary">
-							{{ member.user.profile.status }}
-						</div>
-					</span>
-				</span>
-			</li>
+                {% include "./member.html" %}
 			{% endfor %}
 		</ul>
 	</div>

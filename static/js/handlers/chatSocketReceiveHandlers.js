@@ -41,19 +41,18 @@ const chatSocketReceiveHandlers = {
         roomReferences.forEach((element) => element.remove())
     },
     'join-room': ({html}) => {
-        let appMessages = document.querySelector('#app__messages');
-        let log = new DOMParser().parseFromString(html, "text/html").querySelector('.log');
+        let appMessages = document.querySelector('#app-messages');
+        let log = parseHTML(html);
 		appMessages.appendChild(log);
 		appMessages.scrollTo(0, appMessages.scrollHeight);
     },
     'leave-room': ({html}) => {
-        let appMessages = document.querySelector('#app__messages');
-        let log = new DOMParser().parseFromString(html, "text/html").querySelector('.log');
+        let appMessages = document.querySelector('#app-messages');
+        let log = parseHTML(html);
 		appMessages.appendChild(log);
 		appMessages.scrollTo(0, appMessages.scrollHeight);
     },
-    'manage-friendship': ({pk, model, app, kind, category, html}) => {
-        // object: "rooms:Friend"
+    'manage-friendship': ({frienship, kind, category, html}) => {
         if (kind == 'create') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
             let friend = parseHTML(html);
@@ -61,15 +60,14 @@ const chatSocketReceiveHandlers = {
         }
         else if (kind == 'accept') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
-            let friend = document.querySelector(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`);
-            let friendship = friend.querySelector('.friendship');
-            friendship.innerHTML = parseHTML(html).querySelector('.friendship').innerHTML;
-
+            let friendship = document.querySelector(objectSelector(frienship));
+            let friend = friendship.closest('.friend');
+            friend.innerHTML = parseHTML(html).innerHTML;
             userGroup.appendChild(friend);
         }
         else if (['reject', 'remove', 'cancel'].includes(kind)) {
-            console.log(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`)
-            let friend = document.querySelector(`[data-model="${model}"][data-app="${app}"][data-pk="${pk}"]`);
+            let friendship = document.querySelector(objectSelector(frienship));
+            let friend = friendship.closest('.friend');
             friend.remove();
         };
     },
@@ -129,9 +127,9 @@ const chatSocketReceiveHandlers = {
             reaction.remove();
         }
     },
-    'edit-message': function editMessageDOM({messagePk, content}) {
-        let message = document.querySelector(`[data-object-type="message"][data-object-pk="${messagePk}"]`);
-        let contentContainer = message.querySelector('.backlog__content');
+    'edit-message': ({message, content}) => {
+        let messageNode = document.querySelector(objectSelector(message));
+        let contentContainer = messageNode.querySelector('.backlog__content');
         contentContainer.innerHTML = content;
     },
     

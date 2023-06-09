@@ -17,7 +17,7 @@ from django.http import HttpResponse
 
 from users.models import Friendship, CustomUser
 from rooms.models import Log, Message, Reaction, Room
-from utils import get_rendered_html, get_object_or_none
+from utils import get_rendered_html, get_object_or_none, json_to_object
 
 class FrontpageView(TemplateView):
     template_name = 'core/frontpage.html'
@@ -28,7 +28,6 @@ class RequestData(View):
         app_label = request.GET.get('app_label')
         model_name = request.GET.get('model_name')
         pk = request.GET.get('pk')
-        print(pk)
 
         model = apps.get_model(app_label=app_label, model_name=model_name)
         instance = model.objects.get(pk=pk)
@@ -51,19 +50,17 @@ class RequestData(View):
 class GetTooltip(View):
     def get(self, request, *args, **kwargs):
         tooltip_id = kwargs.get('id')
-        client_context = json.loads(request.GET.get('context'))
+        client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
         objects = client_context.get('objects', {})
         variables = client_context.get('variables', {})
         
-        template_context = {'user': request.user}
+        template_context = {
+            'client_context': request.GET.get('context'),
+            'user': request.user
+        }
 
         for context_variable, values in objects.items():
-            model_name = values.get('model')
-            app_label = values.get('app')
-            pk = values.get('pk')
-            
-            model = apps.get_model(app_label=app_label, model_name=model_name)
-            template_context[context_variable] = get_object_or_none(model, pk=pk)
+            template_context[context_variable] = json_to_object(values)
 
         for context_variable, value in variables.items():
             template_context[context_variable] = value
@@ -74,7 +71,6 @@ class GetTooltip(View):
         )
         return HttpResponse(html)
         
-
         
 def GetViewByName(request, name, *args, **kwargs):
     # parameters, as in .../room/<int:room>/ url parameters

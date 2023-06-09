@@ -17,6 +17,7 @@ class Room(models.Model):
     owner = models.ForeignKey(CustomUser, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
     image = models.ImageField(default='blank.png', max_length=500)
     date_added = models.DateTimeField(auto_now_add=True)
+    default_role = models.ForeignKey('Role', on_delete=models.CASCADE, related_name='+', null=True)
 
     def banned_users(self):
         return self.bans.all().filter(
@@ -98,11 +99,9 @@ class Role(models.Model):
     color = models.CharField(default='#e0dbd1', max_length=7)
 
     can_create_message = models.BooleanField(default=True)
-    can_delete_own_message = models.BooleanField(default=True)
     can_delete_lower_message = models.BooleanField(default=False)
     can_delete_higher_message = models.BooleanField(default=False)
     
-    can_edit_own_message = models.BooleanField(default=True)
     can_edit_lower_message = models.BooleanField(default=False)
     can_edit_higher_message = models.BooleanField(default=False)
 
@@ -122,16 +121,25 @@ class Member(models.Model):
     nickname = models.CharField(max_length=30, blank=True)
     
     def __str__(self):
-        return self.user.__str__()
+        return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
     
-    def display_date(self):
-        return self.date_added.strftime("%H:%M:%S")
+    def joined_site(self):
+        return self.user.joined_site()
+    
+    def joined_room(self):
+        return self.date_added.strftime("%d %B %Y")
 
     def display_name(self):
         return self.nickname or self.user.username
     
+    def full_name(self):
+        return self.user.full_name()
+    
     def image(self):
-        return self.user.profile.image.url
+        return self.user.image.url
+    
+    def bio(self):
+        return self.user.bio
 
 
 # *Message

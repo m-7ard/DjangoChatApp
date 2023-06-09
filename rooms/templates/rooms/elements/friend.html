@@ -1,71 +1,72 @@
-<li class="friend friend--{{ object.status }}" 
-data-model="{{ object|classname }}" 
-data-app="{{ object|app_name }}" 
-data-pk="{{ object.pk }}"
+<li class="user user--{{ friend.status }}" 
+data-model="{{ friend|classname }}" 
+data-app="{{ friend|app_name }}" 
+data-pk="{{ friend.pk }}"
 data-context='
 {
     "objects": {
-        "object": {
-            "model":"{{ object|classname }}",
-            "app":"{{ object|app_name }}",
-            "pk":"{{ object.pk }}"
-        },
-        "friendship": {
-            "model":"{{ friendship|classname }}",
-            "app":"{{ friendship|app_name }}",
-            "pk":"{{ friendship.pk }}"
-        }
+        "friend": {{ friend|object_to_json }},
+        "friendship": {{ friendship|object_to_json }}
     }
 }'>
-	<span class="avatar avatar--small has-shadow">
-		<img src="{{ object.image.url }}" alt="">
-	</span>
-	<span class="wrapper--remaining-space">
-		<ul class="friend__body">
-			<li class="friend__username">
-				{{ object.username }}
-			</li>
-			<li class="friend__status">
-				{{ object.status }}
-			</li>
-		</ul>
-	</span>
-	<span class="friendship" data-model="{{ friendship|classname }}" data-app="{{ friendship|app_name }}" data-pk="{{ friendship.pk }}">
-		{% if friendship.status == 'pending' and user == friendship.receiver %}
-		<span class="friendship__accept" data-command="manage-friendship" data-kind="accept">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">
-					task_alt
-				</i>
-			</div>
-		</span>
-		<span class="friendship__reject" data-command="manage-friendship" data-kind="reject">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">
-					cancel
-				</i>
-			</div>
-		</span>
-        {% elif friendship.status == 'pending' and user == friendship.sender %}
-		<span class="friendship" data-object-pk="{{ friendship.pk }}" data-object-type="friendship">
-			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="friend-menu">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						expand_more
-					</i>
-				</div>
-			</div>
-		</span>
-		{% elif friendship.status == 'accepted' %}
-		<span class="friendship" data-object-pk="{{ friendship.pk }}" data-object-type="friendship">
-			<div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="friend-menu">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						expand_more
-					</i>
-				</div>
-			</div>
-		</span>
-		{% endif %}
-	</span>
+<span class="avatar avatar--small has-shadow">
+    <img src="{{ friend.image.url }}" alt="">
+</span>
+<span class="wrapper--remaining-space">
+    <ul class="user__body">
+        <li class="user__username">
+            {{ friend.username }}
+        </li>
+        <li class="user__status">
+            {{ friend.status }}
+        </li>
+    </ul>
+</span>
+<span class="friendship" 
+data-model="{{ friendship|classname }}" 
+data-app="{{ friendship|app_name }}" 
+data-pk="{{ friendship.pk }}">
+    {% if friendship.status == 'pending' and user == friendship.receiver %}
+    <span class="friendship__accept" data-command="manage-friendship" data-kind="accept">
+        <div class="icon icon--small">
+            <i class="material-symbols-outlined">
+                task_alt
+            </i>
+        </div>
+    </span>
+    <span class="friendship__reject" data-command="manage-friendship" data-kind="reject">
+        <div class="icon icon--small">
+            <i class="material-symbols-outlined">
+                cancel
+            </i>
+        </div>
+    </span>
+    {% elif friendship.status == 'pending' and user == friendship.sender %}
+    <span class="friendship" 
+    data-model="{{ friendship|classname }}" 
+    data-app="{{ friendship|app_name }}" 
+    data-pk="{{ friendship.pk }}">
+        <div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="friend-menu">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    expand_more
+                </i>
+            </div>
+        </div>
+    </span>
+    {% elif friendship.status == 'accepted' %}
+    <span class="friendship" 
+    data-model="{{ friendship|classname }}" 
+    data-app="{{ friendship|app_name }}" 
+    data-pk="{{ friendship.pk }}">
+        <div class="friendship__manage tooltip__trigger" data-positioning='{"top": "100%", "right": "0px"}' data-target="friend-menu">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    expand_more
+                </i>
+            </div>
+        </div>
+    </span>
+    {% endif %}
+</span>
 </li>	

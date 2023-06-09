@@ -1,4 +1,12 @@
 const overlayHandlers = {
+    'create-room': async ({trigger, viewName}) => {
+        let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
+		let request = await fetch(url);
+		let response = await request.text();
+		let layer = document.createElement('div');
+		layer.innerHTML = response;
+		return layer
+	},
 	'create-channel': async ({trigger, viewName}) => {
 		let category = trigger.closest('.category');
 		let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
@@ -10,10 +18,11 @@ const overlayHandlers = {
 		}));
 		let request = await fetch(url);
 		let response = await request.text();
-		let overlay = document.createElement('div');
-		overlay.innerHTML = response;
-		return overlay
+		let layer = document.createElement('div');
+		layer.innerHTML = response;
+		return layer
 	},
+
 	'update-channel': async ({trigger, viewName}) => {
 		let pk = trigger.closest('[data-pk]').dataset.pk;
 		let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
@@ -22,9 +31,9 @@ const overlayHandlers = {
 		}));
 		let request = await fetch(url);
 		let response = await request.text();
-		let overlay = document.createElement('div');
-		overlay.innerHTML = response;
-		return overlay
+		let layer = document.createElement('div');
+		layer.innerHTML = response;
+		return layer
 	},
 	'update-room': async ({trigger, viewName}) => {
 		let pk = roomPk;
@@ -34,18 +43,18 @@ const overlayHandlers = {
 		}));
 		let request = await fetch(url);
 		let response = await request.text();
-		let overlay = document.createElement('div');
-		overlay.innerHTML = response;
+		let layer = document.createElement('div');
+		layer.innerHTML = response;
         /**************
             TODO: SAVE IMAGE ON BACKEND TO ACTUALLY DISPLAY IT */
-		let imageInput = overlay.querySelector('input[name="image"]');
+		let imageInput = layer.querySelector('input[name="image"]');
 		let imagePreview = imageInput.closest('.upload').querySelector('.upload__image img');
 		imageInput.onchange = function(event) {
 			let file = imageInput.value;
 			imagePreview.src = file;
 		}
         /**************/
-		return overlay
+		return layer
 	},
     'leave-room': async ({trigger, viewName}) => {
         let pk = roomPk;
@@ -55,9 +64,9 @@ const overlayHandlers = {
 		}));
 		let request = await fetch(url);
 		let response = await request.text();
-        let overlay = quickCreateElement('div', {
+        let layer = quickCreateElement('div', {
             innerHTML: response,
         });
-        return overlay
+        return layer
     },
 }

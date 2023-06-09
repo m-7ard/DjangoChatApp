@@ -27,7 +27,7 @@ from .models import (
 )
 from users.models import Friendship, CustomUser
 
-from utils import get_object_or_none, get_rendered_html
+from utils import get_object_or_none, get_rendered_html, json_to_object, object_to_json
 from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -75,13 +75,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         await self.accept()
-        self.loop.create_task(self.channel_layer.group_send(
-            self.channel_group_name,
-            {
-            'type': 'send_to_JS',
-            'action': 'requestServerResponse'
-            }
-        ))
+
+        # sends a signal to check the websocket is working
+        if hasattr(self, 'channel_group_name'):
+            self.loop.create_task(self.channel_layer.group_send(
+                self.channel_group_name,
+                {
+                'type': 'send_to_JS',
+                'action': 'requestServerResponse'
+                }
+            ))
+
         print('accepted')
 
         # Ping to see if the user is online
@@ -191,10 +195,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def join_room(self, data):
         room = get_object_or_none(Room, pk=data.get('roomPk'))
-        if not room:
-            return
-        
-        if self.user.pk in room.banned_users():
+        if not room or self.user.pk in room.banned_users():
             return
         
         member, created = Member.objects.get_or_create(room=room, user=self.user)
@@ -308,13 +309,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if form.is_valid():
                 message = form.save()
                 send_data['content'] = convert_reactions(message.content, self.room.pk)
-                
+                send_data['message'] = object_to_json(message)
+
                 self.loop.create_task(
                     self.channel_layer.group_send(
                         self.channel_group_name,
                         {
                         'type': 'send_to_JS',
-                        'action': 'edit_message',
                         **send_data
                         }
                     )
@@ -333,20 +334,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def manage_friendship(self, data):
-        client_context = json.loads(data['context'])
+        client_context = json.loads(data.pop('context'))
         objects = client_context['objects']
+        
         kind = data['kind']
-
-        friendship_pk = objects['friendship'].get('pk')
-        friend_pk = objects['object'].get('pk')
-
-        friend = CustomUser.objects.get(pk=friend_pk)
-        friendship = get_object_or_none(Friendship, pk=friendship_pk)
+        friendship = json_to_object(objects['friendship'])
+        friend = json_to_object(objects['friend'])
         
         send_data = {
-            'action': data['action'],
-            **objects['object'],
-            'kind': kind,
+            **data,
+            'frienship': objects['friendship'],
         }
 
         user_send_data = {**send_data}
@@ -358,34 +355,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if not created:
                 return
             
-            user_send_data['category'] = 'outgoing'
-            friend_send_data['category'] = 'incoming'
-
             user_send_data['html'] = get_rendered_html(
                 Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'object': friend, 'friendship': friendship}
+                {'friend': friend, 'friendship': friendship}
             )
             friend_send_data['html'] = get_rendered_html(
                 Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'object': self.user, 'friendship': friendship}
+                {'friend': self.user, 'friendship': friendship}
             )
+            user_send_data['category'] = 'outgoing'
+            friend_send_data['category'] = 'incoming'
         elif kind == 'accept':
             friendship.status = 'accepted'
             friendship.save()
-
-            user_send_data['category'] = 'accepted'
-            friend_send_data['category'] = 'accepted'
-            
-            html = get_rendered_html(
+            friend_send_data['html'] = get_rendered_html(
                 Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'object': self.user, 'friendship': friendship}
+                {'friend': self.user, 'friendship': friendship}
             )
-            friend_send_data['html'] = html
-            user_send_data['html'] = html
+            user_send_data['html'] = get_rendered_html(
+                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
+                {'friend': friend, 'friendship': friendship}
+            )
+            friend_send_data['category'] = 'accepted'
+            user_send_data['category'] = 'accepted'
         elif kind in ['reject', 'remove', 'cancel']:
             friendship.delete()
         else:
-            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove", "create"')
+            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove", "create", "cancel"')
             
         self.task_group_send(user_send_data, self.user_group_name)
         self.task_group_send(friend_send_data, f'user_{friend.pk}')

@@ -1,0 +1,22 @@
+<li class="user user--{{ member.user.status }} tooltip__trigger" data-target="profile" data-positioning='{"left": "100%", "top": "0px"}' 
+data-context='
+{
+    "objects": {
+        "object": {{ member|object_to_json }}
+    }
+}
+'>
+    <span class="avatar avatar--small has-shadow">
+        <img src="{{ member.user.image.url }}" alt="">
+    </span>
+    <span class="wrapper--remaining-space">
+        <ul class="user__body">
+            <li class="user__username">
+                {{ member.display_name }}
+            </li>
+            <li class="user__status">
+                {{ member.user.status }}
+            </li>
+        </ul>
+    </span>
+</li>

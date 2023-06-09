@@ -203,36 +203,6 @@ $light-secondary: $battleship-grey;
 	}
 }
 
-.color {
-	&-primary {
-		&-online {
-			color: $premier-yellow;
-		}
-
-		&-offline {
-			color: $blue-bayoux;
-		}
-
-		&-light {
-			color: $chalk-white;
-		}
-	}
-
-	&-secondary {
-		&-offline {
-			color: $acapulco-aqua;
-		}
-	
-		&-light {
-			color: $soft-grey;
-		}
-
-		&-online {
-			color: $moss;
-		}
-	}
-}
-
 .dropdown {
 	position: relative;
 
@@ -819,37 +789,85 @@ $light-secondary: $battleship-grey;
 }
 
 .profile {
-	display: flex;
-	flex-direction: column;
-	padding: 0.5rem;
-	background-color: $black-chestnut-oak;
-	color: $chalk-white;
-	gap: 0.5rem;
-	width: 20rem;
-	border-radius: 4px;
-	overflow: hidden;
+    background-color: $black-chestnut-oak;
+    width: 20rem;
+    overflow: hidden;
+    border-radius: 4px;
 
-	&__header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
+    .avatar {
+        padding: $padding-medium;
+        background-color: $black-chestnut-oak;
+        overflow: hidden;
+        border-radius: 4px;
+    }
 
-	&__body {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		padding: 0.5rem;
-		background-color: $charcoal-grey;
-		border-radius: 4px;
-	}
+    &__field {
+        @include flex-column(0, $gap-small);
+    }
 
-	&__badges {
-		display: flex;
-		gap: 0.25rem;
-	}
+    &__header {
+        @include flex-row($padding-medium, $gap-medium);
+        align-items: end;
+        justify-content: space-between;
+        position: relative;
+    }
 
+    &__banner {
+        position: absolute;
+        top: 0;
+        bottom: 50%;
+        left: 0;
+        right: 0;
+        background-color: $black-olive;
+        z-index: -1;
+    }
 
+    &__body {
+        @include flex-column($padding-medium, $gap-medium);
+        margin: $padding-medium;
+        background-color: $night;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+    &__display-name {
+        font-size: $text-primary-medium;
+        font-weight: bold;
+        color: $light-primary;
+    }
+
+    &__username {
+        font-size: $text-secondary-large;
+        color: $light-secondary;
+    }
+
+    &__divider {
+        height: 1px;
+        width: 100%;
+        background-color: $light-secondary;
+        margin: $gap-medium 0;
+    }
+
+    &__info {
+        @include flex-row(0, $gap-small);
+    }
+
+    &__label {
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+        color: $light-primary;
+    }
+
+    &__bio {
+        font-size: $text-secondary-medium;
+        color: $light-primary;
+        overflow-wrap: break-word;
+    }
+
+    &__date {
+        font-size: $text-secondary-small;
+        color: $battleship-grey;
+    }
 }
 
 .account {
@@ -1189,25 +1207,26 @@ $light-secondary: $battleship-grey;
 	}
 }
 
-.friend {
+.user {
 	@include modelbox;
+    $self: &;
 	transition: background-color 0.2s;
 	cursor: pointer;
 	
 	&--online {
-		.friend__username {
+		#{$self}__username {
 			color: $online-primary;
 		}
-		.friend__status {
+		#{$self}__status {
 			color: $online-secondary;
 		}
 	}
 
 	&--offline {
-		.friend__username {
+		#{$self}__username {
 			color: $offline-primary;
 		}
-		.friend__status {
+		#{$self}__status {
 			color: $offline-secondary;
 		}
 	}
@@ -1682,5 +1701,25 @@ $light-secondary: $battleship-grey;
 
     &__content {
         @include flex-column(0, 0);
+    }
+}
+
+.role {
+    @include flex-row($padding-small, $gap-small);
+    background-color: $black-olive;
+    border-radius: 4px;
+    align-items: center;
+    width: fit-content;
+
+
+    &__color {
+        height: 0.5rem;
+        width: 0.5rem;
+        border-radius: 9999px;
+    }
+
+    &__name {
+        font-size: $text-secondary-small;
+        color: $light-primary;
     }
 }
