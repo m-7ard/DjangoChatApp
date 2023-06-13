@@ -74,4 +74,12 @@ def app_name(self):
 
 @register.filter(name='object_to_json')
 def object_to_json(self):
-    return utils.object_to_json(self)
+    return json.dumps(utils.object_to_dict(self))
+
+@register.filter(name='chain_arg')
+def chain_arg(*args):
+    return args
+
+@register.filter(name='member_has_permission')
+def member_has_permission(member, permission):
+    return utils.member_has_permission(member, permission)

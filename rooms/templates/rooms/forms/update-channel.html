@@ -200,9 +200,6 @@
 	</form>
 
 
-
-
-
 	<form class="form switchable__content switchable__content--hidden" action="{% url 'delete-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="DeleteChannel">
 		{% csrf_token %}
 		<div class="form__header">

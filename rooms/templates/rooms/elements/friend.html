@@ -1,14 +1,15 @@
-<li class="user user--{{ friend.status }}" 
-data-model="{{ friend|classname }}" 
-data-app="{{ friend|app_name }}" 
-data-pk="{{ friend.pk }}"
+<li class="user user--{{ friend.status }} tooltip__trigger" data-target="profile" data-positioning='{"right": "-100%", "top": "0px"}' 
 data-context='
 {
     "objects": {
-        "friend": {{ friend|object_to_json }},
-        "friendship": {{ friendship|object_to_json }}
+        "object": {{ friend|object_to_json }}
     }
-}'>
+}
+'
+data-model="{{ friend|classname }}" 
+data-app="{{ friend|app_name }}" 
+data-pk="{{ friend.pk }}"
+>
 <span class="avatar avatar--small has-shadow">
     <img src="{{ friend.image.url }}" alt="">
 </span>
@@ -25,7 +26,13 @@ data-context='
 <span class="friendship" 
 data-model="{{ friendship|classname }}" 
 data-app="{{ friendship|app_name }}" 
-data-pk="{{ friendship.pk }}">
+data-pk="{{ friendship.pk }}" data-context='
+{
+    "objects": {
+        "friend": {{ friend|object_to_json }},
+        "friendship": {{ friendship|object_to_json }}
+    }
+}'>
     {% if friendship.status == 'pending' and user == friendship.receiver %}
     <span class="friendship__accept" data-command="manage-friendship" data-kind="accept">
         <div class="icon icon--small">

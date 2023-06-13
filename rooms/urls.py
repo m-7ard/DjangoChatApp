@@ -12,5 +12,7 @@ urlpatterns = [
 	path('create/channel/<int:room>', views.ChannelCreateView.as_view(), name='create-channel'),
 	path('update/room/<int:room>/', views.RoomUpdateView.as_view(), name='update-room'),
     path('update/channel/<int:channel>/', views.ChannelUpdateView.as_view(), name='update-channel'),
+    path('delete/room/<int:room>/', views.DeleteRoom.as_view(), name='delete-room'),
     path('delete/channel/<int:channel>/', views.ChannelDeleteView.as_view(), name='delete-channel'),
+
 ]

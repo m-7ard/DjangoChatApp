@@ -27,7 +27,7 @@ from .models import (
 )
 from users.models import Friendship, CustomUser
 
-from utils import get_object_or_none, get_rendered_html, json_to_object, object_to_json
+from utils import get_object_or_none, get_rendered_html, dict_to_object, object_to_dict
 from DjangoChatApp.templatetags.custom_tags import get_friendship_friend
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -309,7 +309,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if form.is_valid():
                 message = form.save()
                 send_data['content'] = convert_reactions(message.content, self.room.pk)
-                send_data['message'] = object_to_json(message)
+                send_data['message'] = object_to_dict(message)
 
                 self.loop.create_task(
                     self.channel_layer.group_send(
@@ -338,8 +338,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         objects = client_context['objects']
         
         kind = data['kind']
-        friendship = json_to_object(objects['friendship'])
-        friend = json_to_object(objects['friend'])
+        friendship = dict_to_object(objects['friendship'])
+        friend = dict_to_object(objects['friend'])
         
         send_data = {
             **data,

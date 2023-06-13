@@ -17,7 +17,7 @@ from django.http import HttpResponse
 
 from users.models import Friendship, CustomUser
 from rooms.models import Log, Message, Reaction, Room
-from utils import get_rendered_html, get_object_or_none, json_to_object
+from utils import get_rendered_html, get_object_or_none, dict_to_object
 
 class FrontpageView(TemplateView):
     template_name = 'core/frontpage.html'
@@ -60,7 +60,7 @@ class GetTooltip(View):
         }
 
         for context_variable, values in objects.items():
-            template_context[context_variable] = json_to_object(values)
+            template_context[context_variable] = dict_to_object(values)
 
         for context_variable, value in variables.items():
             template_context[context_variable] = value

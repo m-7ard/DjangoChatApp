@@ -3,5 +3,16 @@
 		{
 			"path": ".."
 		}
-	]
+    ],
+    "settings": {
+        "sqltools.useNodeRuntime": true,
+        "sqltools.connections": [
+            {
+                "previewLimit": 50,
+                "driver": "SQLite",
+                "name": "DjangoChatApp",
+                "database": "${workspaceFolder:django_work}/DjangoChatApp/db.sqlite3"
+            }
+        ]
+    }
 }

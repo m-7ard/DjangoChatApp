@@ -17,7 +17,7 @@ from django.contrib import messages
 
 
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory, Action, Member
+from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message
 from .forms import (
     ChannelCreationForm,
     ChannelEditForm,
@@ -27,7 +27,13 @@ from .forms import (
     RoomEditForm,
 )
 
-from utils import get_object_or_none, send_to_group, get_rendered_html
+from utils import (
+    get_object_or_none, 
+    send_to_group, 
+    get_rendered_html,
+    member_has_permission,
+
+)
 
 
 class DashboardView(TemplateView):
@@ -60,7 +66,15 @@ class ChannelView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         channel = self.object
-        messages = channel.messages.all()
+        member = Member.objects.get(
+            room=channel.room,
+            user=self.request.user
+        )
+        if member_has_permission(member, 'view_message'):
+            messages = channel.messages.all()
+        else:
+            messages = channel.messages.all().filter(member=member)
+        
         logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
 
         context['backlogs'] = sorted(
@@ -252,10 +266,27 @@ class LeaveRoom(TemplateView):
                 'html': log_html,
             }
             for channel in room.channels.filter(display_logs=action):
-                print(channel.pk, '------------------' * 20)
                 send_to_group(f'channel_{channel.pk}', send_data)
 
         return redirect('room', room=room.pk)
+    
+
+class DeleteRoom(DeleteView):
+    model = Room
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        room = self.kwargs.get('room')
+        return queryset.get(pk=room)
+
+    def delete(self, *args, **kwargs):
+        self.object = self.get_object()
+        super().delete(*args, **kwargs)
+        
+    def get_success_url(self):
+        return reverse('frontpage')
     
 
 class JoinRoom(View):

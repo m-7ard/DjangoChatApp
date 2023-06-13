@@ -128,9 +128,9 @@ const chatSocketReceiveHandlers = {
         }
     },
     'edit-message': ({message, content}) => {
-        let messageNode = document.querySelector(objectSelector(message));
-        let contentContainer = messageNode.querySelector('.backlog__content');
-        contentContainer.innerHTML = content;
+        let backlog = document.querySelector(objectSelector(message));
+        let backlogContent = backlog.querySelector('.backlog__content');
+        backlogContent.innerHTML = content;
     },
     
     'response': () => { console.log('response exists') },

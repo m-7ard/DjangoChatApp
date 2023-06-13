@@ -3,9 +3,11 @@ from itertools import chain
 from datetime import datetime
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.auth.models import Permission
 
 from users.models import CustomUser
 
@@ -17,8 +19,37 @@ class Room(models.Model):
     owner = models.ForeignKey(CustomUser, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
     image = models.ImageField(default='blank.png', max_length=500)
     date_added = models.DateTimeField(auto_now_add=True)
-    default_role = models.ForeignKey('Role', on_delete=models.CASCADE, related_name='+', null=True)
+    default_role = models.OneToOneField('Role', on_delete=models.CASCADE, related_name='+', null=True)
 
+    def save(self, *args, **kwargs):
+        created = getattr(self, 'pk', None) is None
+        super().save(*args, **kwargs)
+        if created:
+            default_category = ChannelCategory.objects.create(
+                room=self,
+                name='Text Channels',
+                order=0,
+            )
+
+
+            default_role = Role.objects.create(room=self, name='all', color='#e0dbd1')
+            self.default_role = default_role
+
+
+            default_channel = Channel.objects.create(
+                room=self,
+                name='general',
+                description='default channel', 
+                category=default_category
+            )
+            default_channel.display_logs.set(Action.objects.all())
+
+
+            owner_member = Member.objects.create(user=self.owner, room=self)
+            owner_member.roles.add(default_role)
+
+            super().save(*args, **kwargs)
+    
     def banned_users(self):
         return self.bans.all().filter(
             expiration_date__gt=datetime.now()
@@ -71,6 +102,16 @@ class Channel(models.Model):
     kind = models.CharField(max_length=20, choices=KIND, default=TEXT)
     order = models.PositiveIntegerField(default=1_000_000)
 
+    def save(self, *args, **kwargs):
+        created = getattr(self, 'pk', None) is None
+        super().save(*args, **kwargs)
+        if created:
+            config = ChannelConfiguration.objects.create(
+                role = self.room.default_role,
+                channel = self
+            )
+            config.set_default_perms()
+            
     def __str__(self):
         return f'{self.room}: {self.name}'
 
@@ -97,20 +138,21 @@ class Role(models.Model):
     hierarchy = models.IntegerField(default=10)
     room = models.ForeignKey(Room, related_name='roles', on_delete=models.CASCADE, null=True)
     color = models.CharField(default='#e0dbd1', max_length=7)
+    permissions = models.ManyToManyField(Permission)
 
-    can_create_message = models.BooleanField(default=True)
-    can_delete_lower_message = models.BooleanField(default=False)
-    can_delete_higher_message = models.BooleanField(default=False)
-    
-    can_edit_lower_message = models.BooleanField(default=False)
-    can_edit_higher_message = models.BooleanField(default=False)
+    def set_default_perms(self):
+        self.permissions.set(Permission.objects.filter(
+            Q(codename='add_message')
+            | Q(codename='view_message')
 
-    can_create_channel = models.BooleanField(default=False)
-    can_edit_channel = models.BooleanField(default=False)
-    can_delete_channel = models.BooleanField(default=False)
+            | Q(codename='view_channel')
 
-    can_view_channels = models.ManyToManyField(Channel, related_name='viewable_by_roles', blank=True)
+            | Q(codename='add_reaction')
 
+            | Q(codename='attach_image')
+
+            | Q(codename='change_nickname')
+        ))
 
 # *Member
 class Member(models.Model):
@@ -119,6 +161,13 @@ class Member(models.Model):
     room = models.ForeignKey(Room, related_name='members', on_delete=models.CASCADE, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=30, blank=True)
+
+    class Meta:
+        permissions = [
+            ('change_nickname', 'Can change nickname'),
+            ('manage_nickname', 'Can manage nickname')
+        ]
+
     
     def __str__(self):
         return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
@@ -153,6 +202,11 @@ class Message(models.Model):
 
     class Meta:
         ordering = ('date_added',)
+        
+        permissions = [
+            ('pin_message', 'Can pin message'),
+            ('attach_image', 'Can attach image')
+        ]
     
     def display_date(self):
         return self.date_added.strftime("%H:%M:%S")
@@ -224,3 +278,28 @@ class Reaction(models.Model):
     
     def image(self):
         return self.emote.image
+    
+# *ChannelConfig
+class ChannelConfiguration(models.Model):
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='channels_configs')
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='configs')
+    permissions = models.ManyToManyField(Permission)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['role', 'channel'], 
+                name='Channel Config')
+        ]
+
+    def set_default_perms(self):
+        self.permissions.set(Permission.objects.filter(
+            Q(codename='add_message')
+            | Q(codename='view_message')
+
+            | Q(codename='view_channel')
+
+            | Q(codename='add_reaction')
+
+            | Q(codename='attach_image')
+        ))
