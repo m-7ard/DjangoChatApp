@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
 
 from users.models import CustomUser
 
@@ -15,11 +16,12 @@ from users.models import CustomUser
 # *Room
 class Room(models.Model):
     name = models.CharField(max_length=50)
-    description = models.CharField(max_length=60, blank=True)
+    description = models.CharField(max_length=500, blank=True)
     owner = models.ForeignKey(CustomUser, related_name='servers_owned', null=True, on_delete=models.SET_NULL)
     image = models.ImageField(default='blank.png', max_length=500)
     date_added = models.DateTimeField(auto_now_add=True)
     default_role = models.OneToOneField('Role', on_delete=models.CASCADE, related_name='+', null=True)
+    public = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         created = getattr(self, 'pk', None) is None
@@ -154,6 +156,18 @@ class Role(models.Model):
             | Q(codename='change_nickname')
         ))
 
+    def __str__(self):
+        return self.name
+
+
+class MemberQuerySet(models.QuerySet):
+    def online(self):
+        return self.filter(user__status='online')
+    
+    def offline(self):
+        return self.filter(user__status='offline')
+    
+
 # *Member
 class Member(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='memberships')
@@ -161,6 +175,8 @@ class Member(models.Model):
     room = models.ForeignKey(Room, related_name='members', on_delete=models.CASCADE, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=30, blank=True)
+
+    objects = MemberQuerySet.as_manager()
 
     class Meta:
         permissions = [
@@ -283,13 +299,13 @@ class Reaction(models.Model):
 class ChannelConfiguration(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='channels_configs')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='configs')
-    permissions = models.ManyToManyField(Permission)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['role', 'channel'], 
-                name='Channel Config')
+                name='Channel Config'
+            )
         ]
 
     def set_default_perms(self):
@@ -303,3 +319,22 @@ class ChannelConfiguration(models.Model):
 
             | Q(codename='attach_image')
         ))
+
+"""
+
+    NOTE: make default ChannelConfigurationPermissions for 
+    ChannelConfiguration, maybe make it generic(?)
+
+"""
+
+
+# *ChannelPermission
+class ChannelConfigurationPermission(models.Model):
+    CHOICES = (
+        (True, 'True'),
+        (False, 'False'),
+        (None, 'None')
+    )
+    permission = models.ForeignKey(Permission, on_delete=models.CASCADE, related_name='+')
+    channel_config = models.ForeignKey(ChannelConfiguration, on_delete=models.CASCADE, related_name='permissions')
+    value = models.CharField(max_length=20, choices=CHOICES, null=True, blank=True)

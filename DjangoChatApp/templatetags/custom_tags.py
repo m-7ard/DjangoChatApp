@@ -83,3 +83,4 @@ def chain_arg(*args):
 @register.filter(name='member_has_permission')
 def member_has_permission(member, permission):
     return utils.member_has_permission(member, permission)
+

@@ -5,10 +5,11 @@ from typing import Any, Dict
 from pathlib import Path
 
 from django.db import models
+from django.db.models.query import QuerySet
 from django.forms.forms import BaseForm
 from django.forms.models import BaseModelForm
 
-from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View
+from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -32,7 +33,7 @@ from utils import (
     send_to_group, 
     get_rendered_html,
     member_has_permission,
-
+    member_channel_permissions,
 )
 
 
@@ -48,6 +49,16 @@ class RoomView(DetailView):
     template_name = 'rooms/room.html'
     model = Room
     context_object_name = 'room'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(kwargs)
+        room = self.object
+        member = Member.objects.get(
+            room=room,
+            user=self.request.user
+        )
+        context['member'] = member
+        return context
 
     def get_object(self):
         return Room.objects.get(pk=self.kwargs['room'])
@@ -73,7 +84,7 @@ class ChannelView(DetailView):
         if member_has_permission(member, 'view_message'):
             messages = channel.messages.all()
         else:
-            messages = channel.messages.all().filter(member=member)
+            messages = channel.messages.all().filter(member=member, channel=channel)
         
         logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
 
@@ -81,7 +92,10 @@ class ChannelView(DetailView):
             chain(messages, logs),
             key=lambda obj: obj.date_added
         )
-        context['room'] = kwargs['object'].room
+        context['room'] = channel.room
+        context['permissions'] = member_channel_permissions(member, channel)
+        context['member'] = member
+
         return context
 
 
@@ -316,3 +330,14 @@ class JoinRoom(View):
                 send_to_group(f'channel_{channel.pk}', send_data)
 
         return redirect('room', room=room.pk)
+    
+
+class RoomListView(ListView):
+    model = Room
+    template_name = 'rooms/explore-rooms.html'
+    context_object_name = 'rooms'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(public=True)
+        return queryset

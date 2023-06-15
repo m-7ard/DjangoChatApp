@@ -4,22 +4,24 @@
 	</div>
 	<div class="container__subheader has-shadow">
         {% if user|is_member:room and user != room.owner %}
-        <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="leave-room">
-			<i class="material-symbols-outlined">
-				door_open
-			</i>
-		</span>
+            <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="leave-room">
+                <i class="material-symbols-outlined">
+                    door_open
+                </i>
+            </span>
         {% endif %}
 		<span class="icon icon--small icon--hoverable right">
 			<i class="material-symbols-outlined">
 				notifications
 			</i>
 		</span>
+        {% if member|member_has_permission:'edit_channel' %}
 		<span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="update-room">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
 		</span>
+        {% endif %}
 	</div>
 	<div class="room-card">
 		<span class="avatar avatar--large has-shadow">
@@ -34,10 +36,10 @@
 					{{ room.description }}
 				</div>
                 {% if not user|is_member:room %}
-                {% csrf_token %}
-				<button class="room-card__join bottom">
-					Join
-                </button>
+                    {% csrf_token %}
+                    <button class="room-card__join bottom" type="submit">
+                        Join
+                    </button>
                 {% endif %}
 			</form>
 		</span>

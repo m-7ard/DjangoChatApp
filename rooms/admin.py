@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+
 from .models import (
     Room, 
     Channel, 
@@ -12,34 +14,17 @@ from .models import (
     ChannelCategory,
     ChannelConfiguration,
 )
+from users.models import CustomUser
 
-class RoleInline(admin.StackedInline):
-    model = Role
-    extra = 0
-
-    fieldsets = (
-        (None, {
-            'fields': (('name', 'room', 'hierarchy'))
-            }),
-        (None, {
-            'fields': (('can_create_message', 'can_delete_lower_message', 'can_delete_higher_message'),)
-            }),
-		(None, {
-            'fields': (('can_edit_lower_message', 'can_edit_higher_message'),)
-            }),
-		(None, {
-            'fields': (('can_create_channel', 'can_edit_channel', 'can_delete_channel'),)
-            }),
-        (None, {
-            'fields': ('can_view_channels',)
-            }),
-    )
-
+class RoomForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['default_role'].queryset = Role.objects.filter(room=self.instance)
+        self.fields['owner'].queryset = CustomUser.objects.filter(pk__in=self.instance.members.values_list('user'))
 
 class RoomAdmin(admin.ModelAdmin):
-    inlines = [RoleInline]
-    list_display = ('id', 'name', 'description', 'owner')
-    
+    list_display = ('pk', 'name', 'description', 'owner')
+    form = RoomForm
 
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Channel)

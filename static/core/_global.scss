@@ -1723,3 +1723,98 @@ $light-secondary: $battleship-grey;
         color: $light-primary;
     }
 }
+
+.explorer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: row dense;
+    padding: $padding-large;
+    gap: $gap-large;
+}
+
+.result {
+    @include flex-column(0, 0);
+    overflow: hidden;
+    border-radius: 4px;
+    max-height: 12rem;
+    height: fit-content;
+    box-shadow: $shadow-dimensions $night;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        box-shadow: $shadow-dimensions $eerie-black;
+        transform: scale(1.01);
+    }
+
+    &__header {
+        display: grid;
+        gap: $gap-medium;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        background-color: $eerie-black;
+        padding: $padding-medium;
+        z-index: 1;
+        box-shadow: $shadow-dimensions $night;
+    }
+
+    &__avatar {
+        grid-row: 1 / -1;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+    &__title {
+        @include ellipsis;
+        font-size: $text-primary-small;
+        font-weight: bold;
+    }
+
+    &__info {
+        @include flex-row(0, $gap-medium);
+    }
+
+    &__members {
+        font-size: $text-secondary-small;
+    }
+
+    &__description {
+        font-size: $text-secondary-medium;
+        padding: $padding-medium;
+        overflow: auto;
+        background-color: $black-chestnut-oak;
+		word-wrap: break-word;
+    }
+
+    &__footer {
+        @include flex-row($padding-medium, 0);
+        justify-content: space-between;
+        align-items: center;
+        background-color: $charcoal-grey;
+    }
+
+    &__report {
+        color: $vermillion;
+        font-size: $text-secondary-medium;
+    }
+
+    &__button {
+        @include flex-row($padding-small, $gap-small);
+        font-size: $text-secondary-medium;
+        overflow: hidden;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+
+        &--join {
+            background-color: $pakistan-green;
+
+            &:hover {
+                background-color: $office-green;
+            }
+        }
+
+        &--profile {
+            background-color: $amethyst;
+        }
+    }
+}

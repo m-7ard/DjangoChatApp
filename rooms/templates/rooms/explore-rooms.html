@@ -1,0 +1,90 @@
+{% extends "rooms/app.html" %}
+{% load static %}
+
+
+{% block app__main %}
+<div class="container container--fill">
+	<div class="container__header">
+		Room Explorer
+	</div>
+    <div class="container__subheader has-shadow">
+		<span class="icon icon--small left">
+			<i class="material-symbols-outlined">
+				first_page
+			</i>
+		</span>
+		<span class="left right">
+			{{ channel.description }}
+		</span>
+		<span class="icon icon--small right">
+			<i class="material-symbols-outlined">
+				last_page
+			</i>
+		</span>
+	</div>
+    <div class="wrapper--remaining-space">
+        <div class="container__content">
+            <div class="explorer">
+                {% for room in rooms %}
+                    <div class="result">
+                        <div class="result__header">
+                            <div class="result__avatar">
+                                <div class="avatar avatar--medium">
+                                    <img src="{{ room.image.url }}" alt="">
+                                </div>
+                            </div>
+                            <div class="result__title">
+                                {{ room.name }}
+                            </div>
+                            <div class="result__info">
+                                <span class="result__members">
+                                    {{ room.members.all.count }} Members
+                                </span>
+                                <span class="result__members">
+                                    {{ room.members.all.online.count }} Online
+                                </span>
+                            </div>
+                        </div>
+                        <div class="result__description">
+                            {{ room.description }}
+                        </div>
+                        <div class="result__footer">
+                            <div class="result__report">
+                                Report
+                            </div>
+                            {% if user|is_member:room %}
+                                <a href="{% url 'room' room=room.pk %}" class="result__button result__button--profile">
+                                    <span>
+                                        Profile
+                                    </span>
+                                    <span class="icon icon--tiny">
+                                        <i class="material-symbols-outlined">
+                                            location_away
+                                        </i>
+                                    </span>           
+                                </a> 
+                            {% else %}
+                                <form method="POST" action="{% url 'join-room' room=room.pk %}">
+                                    {% csrf_token %}
+                                    <button class="result__button result__button--join" type="submit">
+                                        <span>
+                                            Join
+                                        </span>
+                                        <span class="icon icon--tiny">
+                                            <i class="material-symbols-outlined">
+                                                input
+                                            </i>
+                                        </span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

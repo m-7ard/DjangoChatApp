@@ -61,13 +61,13 @@ const chatSocketReceiveHandlers = {
         else if (kind == 'accept') {
             let userGroup = document.querySelector(`.user-group__content[data-category="${category}"]`);
             let friendship = document.querySelector(objectSelector(frienship));
-            let friend = friendship.closest('.friend');
+            let friend = friendship.closest('[data-model="CustomUser"]');
             friend.innerHTML = parseHTML(html).innerHTML;
             userGroup.appendChild(friend);
         }
         else if (['reject', 'remove', 'cancel'].includes(kind)) {
             let friendship = document.querySelector(objectSelector(frienship));
-            let friend = friendship.closest('.friend');
+            let friend = friendship.closest('[data-model="CustomUser"]');
             friend.remove();
         };
     },

@@ -59,8 +59,18 @@ def object_to_dict(self):
 
 
 def member_has_permission(member, permission):
+    if member.user == member.room.owner:
+        return True
+    
     for role in sorted(member.roles.all(), key=lambda object_: object_.hierarchy):
         if permission in role.permissions.all().values_list('codename'):
             return True
     
     return False
+
+def member_channel_permissions(member, channel):
+    member_roles = member.roles.all().values_list('pk', flat=True)
+    permissions = set(channel.configs.filter(role__pk__in=member_roles).values_list('permissions__codename', flat=True))
+    
+    return permissions
+    
