@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django import forms
+from django.contrib.auth.models import Permission
 
 from .models import (
     Room, 
@@ -13,19 +14,23 @@ from .models import (
     Emote, 
     ChannelCategory,
     ChannelConfiguration,
+    ChannelConfigurationPermission
 )
 from users.models import CustomUser
 
 class RoomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['default_role'].queryset = Role.objects.filter(room=self.instance)
-        self.fields['owner'].queryset = CustomUser.objects.filter(pk__in=self.instance.members.values_list('user'))
+        if getattr(self.instance, 'pk', None):
+            self.fields['owner'].queryset = CustomUser.objects.filter(pk__in=self.instance.members.values_list('user'))
+
 
 class RoomAdmin(admin.ModelAdmin):
+    readonly_fields = ('default_role',)
     list_display = ('pk', 'name', 'description', 'owner')
     form = RoomForm
 
+admin.site.register(Permission)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Channel)
 admin.site.register(Message)
@@ -37,3 +42,4 @@ admin.site.register(Reaction)
 admin.site.register(Emote)
 admin.site.register(ChannelCategory)
 admin.site.register(ChannelConfiguration)
+admin.site.register(ChannelConfigurationPermission)

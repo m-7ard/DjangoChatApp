@@ -59,9 +59,6 @@ def object_to_dict(self):
 
 
 def member_has_permission(member, permission):
-    if member.user == member.room.owner:
-        return True
-    
     for role in sorted(member.roles.all(), key=lambda object_: object_.hierarchy):
         if permission in role.permissions.all().values_list('codename'):
             return True

@@ -15,18 +15,20 @@
 				notifications
 			</i>
 		</span>
-        {% if member|member_has_permission:'edit_channel' %}
-		<span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="update-room">
+
+        <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="update-room">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
 		</span>
-        {% endif %}
+
 	</div>
 	<div class="room-card">
-		<span class="avatar avatar--large has-shadow">
-			<img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
-		</span>
+        <div class="room-card__avatar has-shadow">
+            <span class="avatar avatar--large">
+                <img src="{{ MEDIA_URL }}{{ room.image.url }}" alt="">
+            </span>
+        </div>
 		<span class="wrapper--remaining-space">
 			<form class="room-card__body" method="POST" action="{% url 'join-room' room=room.pk %}">
 				<div class="room-card__name">

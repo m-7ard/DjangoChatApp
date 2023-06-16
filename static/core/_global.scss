@@ -166,7 +166,7 @@ $light-secondary: $battleship-grey;
 }
 
 .has-shadow {
-	box-shadow: $shadow-dimensions $vampire-black;
+	box-shadow: $shadow-dimensions $anthracite;
 }
 
 .text {
@@ -1305,8 +1305,16 @@ $light-secondary: $battleship-grey;
 		background-color: $saturated-titanium-yellow;
 		color: $charcoal-grey;
 		box-shadow: $shadow-dimensions $saturated-titanium-yellow;
+        border-radius: 4px;
 		cursor: pointer;
 	}
+
+    &__avatar {
+        overflow: hidden;
+        border-radius: 4px;
+        background-color: $black-chestnut-oak;
+        padding: $padding-medium;
+    }
 
 	&__description {
 		color: $online-secondary;

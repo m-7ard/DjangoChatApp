@@ -23,6 +23,13 @@ class Room(models.Model):
     default_role = models.OneToOneField('Role', on_delete=models.CASCADE, related_name='+', null=True)
     public = models.BooleanField(default=False)
 
+    class Meta:
+        permissions = [
+            ('kick_user', 'Can kick user'),
+            ('ban_user', 'Can ban user'),
+            ('read_logs', 'Can read logs')
+        ]
+
     def save(self, *args, **kwargs):
         created = getattr(self, 'pk', None) is None
         super().save(*args, **kwargs)
@@ -112,7 +119,6 @@ class Channel(models.Model):
                 role = self.room.default_role,
                 channel = self
             )
-            config.set_default_perms()
             
     def __str__(self):
         return f'{self.room}: {self.name}'
@@ -140,21 +146,48 @@ class Role(models.Model):
     hierarchy = models.IntegerField(default=10)
     room = models.ForeignKey(Room, related_name='roles', on_delete=models.CASCADE, null=True)
     color = models.CharField(default='#e0dbd1', max_length=7)
-    permissions = models.ManyToManyField(Permission)
+    admin = models.BooleanField(default=False)
+    permissions = models.ManyToManyField(Permission, limit_choices_to={'codename__in': [
+        'add_message', 
+        'delete_message',
+        'view_message', 
+        'view_channel', 
+        'add_reaction', 
+        'attach_image', 
+        'change_nickname',
+        'manage_nickname',
+        'manage_channel',
+        'manage_role',
+        'change_room',
+        'mention_all',
+        'pin_message',
+        'kick_user', 
+        'ban_user',
+        'read_logs',
+    ]})
+
+    class Meta:
+        permissions = [
+            ('manage_role', 'Can manage role'),
+            ('mention_all', 'Can mention @all')
+        ]
+
+    def save(self, *args, **kwargs):
+        created = getattr(self, 'pk', None) is None
+        super().save(*args, **kwargs)
+        if created:
+            self.set_default_perms()
 
     def set_default_perms(self):
-        self.permissions.set(Permission.objects.filter(
-            Q(codename='add_message')
-            | Q(codename='view_message')
-
-            | Q(codename='view_channel')
-
-            | Q(codename='add_reaction')
-
-            | Q(codename='attach_image')
-
-            | Q(codename='change_nickname')
-        ))
+        allowed_perms = [
+            'add_message', 
+            'view_message', 
+            'view_channel', 
+            'add_reaction', 
+            'attach_image', 
+            'change_nickname'
+        ]
+        self.permissions.set(Permission.objects.filter(codename__in=allowed_perms))
 
     def __str__(self):
         return self.name
@@ -307,28 +340,34 @@ class ChannelConfiguration(models.Model):
                 name='Channel Config'
             )
         ]
+        permissions = [
+            ('manage_channel', 'Can manage channel'),
+        ]
+
+    def save(self, *args, **kwargs):
+        created = getattr(self, 'pk', None) is None
+        super().save(*args, **kwargs)
+        if created:
+            self.set_default_perms()
 
     def set_default_perms(self):
-        self.permissions.set(Permission.objects.filter(
-            Q(codename='add_message')
-            | Q(codename='view_message')
-
-            | Q(codename='view_channel')
-
-            | Q(codename='add_reaction')
-
-            | Q(codename='attach_image')
-        ))
-
-"""
-
-    NOTE: make default ChannelConfigurationPermissions for 
-    ChannelConfiguration, maybe make it generic(?)
-
-"""
+        default_permissions = {
+            'add_message': None,
+            'view_message': None,
+            'view_channel': None,
+            'add_reaction': None,
+            'attach_image': None,
+            'manage_role': None,
+        }
+        for codename, value in default_permissions.items():
+            ChannelConfigurationPermission.objects.create(
+                permission=Permission.objects.get(codename=codename),
+                channel_config=self,
+                value=value
+            )
 
 
-# *ChannelPermission
+# *ChannelConfigurationPermission
 class ChannelConfigurationPermission(models.Model):
     CHOICES = (
         (True, 'True'),

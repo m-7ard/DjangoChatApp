@@ -67,7 +67,7 @@
 }
 
 .has-shadow {
-  box-shadow: 0px 0px 4px 1px #080808;
+  box-shadow: 0px 0px 4px 1px #0E0D0C;
 }
 
 .text-bold {
@@ -1088,7 +1088,14 @@
   background-color: #d6d018;
   color: #131313;
   box-shadow: 0px 0px 4px 1px #d6d018;
+  border-radius: 4px;
   cursor: pointer;
+}
+.room-card__avatar {
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #1E1D1C;
+  padding: 0.5rem;
 }
 .room-card__description {
   color: #cbc83e;

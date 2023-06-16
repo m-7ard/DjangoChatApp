@@ -51,12 +51,9 @@ class RoomView(DetailView):
     context_object_name = 'room'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(kwargs)
+        context = super().get_context_data(**kwargs)
         room = self.object
-        member = Member.objects.get(
-            room=room,
-            user=self.request.user
-        )
+        member = get_object_or_none(Member, room=room, user=self.request.user)
         context['member'] = member
         return context
 
@@ -93,7 +90,6 @@ class ChannelView(DetailView):
             key=lambda obj: obj.date_added
         )
         context['room'] = channel.room
-        context['permissions'] = member_channel_permissions(member, channel)
         context['member'] = member
 
         return context
@@ -308,6 +304,12 @@ class JoinRoom(View):
         room = Room.objects.get(pk=kwargs.get('room'))
         user = request.user
         member, created = Member.objects.get_or_create(room=room, user=user)
+        """
+        
+        TODO: TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+        fix this error when joining room through the explorer
+        
+        """
 
         if created:
             action = Action.objects.get(name='join')
