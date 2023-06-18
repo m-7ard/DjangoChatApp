@@ -34,7 +34,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.loop = asyncio.get_event_loop()
         self.user = self.scope.get('user')
-        self.room, self.channel = None, None
+        self.room = None
+        self.channel = None
         
         room_pk = self.scope['url_route']['kwargs'].get('room')
         channel_pk = self.scope['url_route']['kwargs'].get('channel')
@@ -88,43 +89,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         print('accepted')
 
-        # Ping to see if the user is online
-        # self.ping_task = asyncio.create_task(self.send_ping())
-        # await self.update_user_status(self.user, 'online')
-
     async def disconnect(self, response_code=None):
-        # if hasattr(self, 'ping_task'):
-        #     self.ping_task.cancel()
-        
-        # user = await sync_to_async(User.objects.get)(pk=self.user.pk)
-        # self.loop.create_task(self.async_user_check(user))
-        # If I wanted to use it on the other thread
-        # users_to_check.append(user)
-
         print('disconnect', response_code)
 
-        if self.room:
+        if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
 
-        if self.channel:
+        if hasattr(self, 'channel_group_name'):
             await self.channel_layer.group_discard(
                 self.channel_group_name,
                 self.channel_name
             )
 
-        if self.user:
+        if hasattr(self, 'user_group_name'):
             await self.channel_layer.group_discard(
                 self.user_group_name,
                 self.channel_name
             )
 
-            await self.channel_layer.group_discard(
-                'online_users',
-                self.channel_name,
-            )
+        await self.channel_layer.group_discard(
+            'online_users',
+            self.channel_name,
+        )
 
     async def receive(self, text_data):
         handlers = {
@@ -156,21 +145,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def send_to_JS(self, event):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
-    
-    """
-    async def send_ping(self):
-        while True:
-            await self.send(text_data=json.dumps({'action': 'ping'}))
-            await asyncio.sleep(10)
-            if not self.ping:
-                await self.disconnect()
-                return
-            
-    async def receive_ping(self, data):
-        await self.update_user_last_ping()
-        print(f'ping updated at {self.user.profile.last_ping}')
-        self.ping = True
-    """
+
 
     @database_sync_to_async
     def delete_backlog(self, data):
@@ -208,7 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             send_data['receiver'] = member.display_name()
             send_data['action_display'] = log.action.display_name
             
-            self.task_group_send(send_data, self.channel_group_name)
+            self.task_group_send(send_data, f'room_{room.pk}')
 
 
     @database_sync_to_async
@@ -263,6 +238,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         ))
 
+
     @database_sync_to_async
     def send_message(self, data):
         member = get_object_or_none(Member, user=self.user, room=self.room)
@@ -291,6 +267,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 send_data['html'] = message_html
                 self.task_group_send(send_data, self.channel_group_name)
                 
+
     @database_sync_to_async
     def edit_message(self, data):
         member = get_object_or_none(Member, user=self.user, room=self.room)
@@ -320,6 +297,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 )
+
 
     @database_sync_to_async
     def delete_message(self, data):
@@ -390,6 +368,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
     
     Checks whether the user has completely left the site
+    NOTE: not in use
 
     """
     async def async_user_check(self, user):
@@ -430,34 +409,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
             **send_data
             }
         ))
-
-
-"""
-# Define a function to run in another thread
-def my_thread_function():
-    global users_to_check
-    # Create an event loop for the thread
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Run the event loop indefinitely
-    while True:
-        # Get the argument for the async function from a queue or some other source
-        user_list_length = len(users_to_check)
-        users = users_to_check[:user_list_length]
-        users_to_check = users_to_check[user_list_length:]
-
-        for user in users:
-            task = loop.create_task(async_user_check(user))
-            # Alternatively, you can use loop.create_task(task) instead of ensure_future
-            # to schedule the task on the event loop
-
-        # Run the event loop to process the tasks asynchronously
-        loop.run_until_complete(asyncio.sleep(0))
-
-
-# Create a new thread and start it
-users_to_check = []
-thread = threading.Thread(target=my_thread_function)
-thread.start()
-"""

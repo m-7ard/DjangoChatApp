@@ -1313,10 +1313,11 @@ $light-secondary: $battleship-grey;
         overflow: hidden;
         border-radius: 4px;
         background-color: $black-chestnut-oak;
-        padding: $padding-medium;
+        padding: $padding-small;
     }
 
 	&__description {
+        border-bottom: $padding-medium solid transparent;
 		color: $online-secondary;
 		font-size: $text-secondary-medium;
 		overflow: overlay;

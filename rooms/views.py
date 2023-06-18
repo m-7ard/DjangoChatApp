@@ -18,7 +18,7 @@ from django.contrib import messages
 
 
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message
+from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission
 from .forms import (
     ChannelCreationForm,
     ChannelEditForm,
@@ -74,14 +74,15 @@ class ChannelView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         channel = self.object
-        member = Member.objects.get(
-            room=channel.room,
-            user=self.request.user
-        )
-        if member_has_permission(member, 'view_message'):
-            messages = channel.messages.all()
+        member = get_object_or_none(Member, room=channel.room, user=self.request.user)
+        messages = channel.messages.all()
+        if not member:
+            can_view_channel = channel.room.guests_can_view_channels
+            if not can_view_channel:
+                return redirect('room', room=channel.room.pk)
         else:
-            messages = channel.messages.all().filter(member=member, channel=channel)
+            pass
+
         
         logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
 
@@ -305,10 +306,8 @@ class JoinRoom(View):
         user = request.user
         member, created = Member.objects.get_or_create(room=room, user=user)
         """
-        
-        TODO: TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
-        fix this error when joining room through the explorer
-        
+        NOTE: When this is called from the room explorer, it can (?)
+        cause a race condition it seems. Use lock in future (?)
         """
 
         if created:

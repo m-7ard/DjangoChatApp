@@ -1095,9 +1095,10 @@
   overflow: hidden;
   border-radius: 4px;
   background-color: #1E1D1C;
-  padding: 0.5rem;
+  padding: 0.25rem;
 }
 .room-card__description {
+  border-bottom: 0.5rem solid transparent;
   color: #cbc83e;
   font-size: 0.8125rem;
   overflow: overlay;

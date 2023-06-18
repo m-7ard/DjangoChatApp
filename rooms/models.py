@@ -22,12 +22,13 @@ class Room(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     default_role = models.OneToOneField('Role', on_delete=models.CASCADE, related_name='+', null=True)
     public = models.BooleanField(default=False)
+    guests_can_view_channels = models.BooleanField(default=True)
 
     class Meta:
         permissions = [
             ('kick_user', 'Can kick user'),
             ('ban_user', 'Can ban user'),
-            ('read_logs', 'Can read logs')
+            ('read_logs', 'Can read logs'),
         ]
 
     def save(self, *args, **kwargs):
@@ -147,6 +148,8 @@ class Role(models.Model):
     room = models.ForeignKey(Room, related_name='roles', on_delete=models.CASCADE, null=True)
     color = models.CharField(default='#e0dbd1', max_length=7)
     admin = models.BooleanField(default=False)
+    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='role', null=True)
+    """
     permissions = models.ManyToManyField(Permission, limit_choices_to={'codename__in': [
         'add_message', 
         'delete_message',
@@ -165,6 +168,8 @@ class Role(models.Model):
         'ban_user',
         'read_logs',
     ]})
+    """
+    
 
     class Meta:
         permissions = [
@@ -177,17 +182,73 @@ class Role(models.Model):
         super().save(*args, **kwargs)
         if created:
             self.set_default_perms()
+    
+    def delete(self, *args, **kwargs):
+        cascade = kwargs.get('cascade', False)
+        if self != self.room.default_role:
+            self.permissions.delete(cascade=cascade)
+            super().delete(*args, **kwargs)
+            return
+
+        if cascade:
+            self.permissions.delete(cascade=cascade)
+            super().delete(*args, **kwargs)
+        else:
+            raise ValueError('Cannot delete default role without deleting Room')
+
+
+
 
     def set_default_perms(self):
-        allowed_perms = [
-            'add_message', 
-            'view_message', 
-            'view_channel', 
-            'add_reaction', 
-            'attach_image', 
-            'change_nickname'
-        ]
-        self.permissions.set(Permission.objects.filter(codename__in=allowed_perms))
+        # Only the first role requires explicit perms
+        if self.room.default_role:
+            default_permissions = {
+                'add_message': None, 
+                'delete_message': None,
+                'view_message': None, 
+                'view_channel': None, 
+                'add_reaction': None, 
+                'attach_image': None, 
+                'change_nickname': None,
+                'manage_nickname': None,
+                'manage_channel': None,
+                'manage_role': None,
+                'change_room': None,
+                'mention_all': None,
+                'pin_message': None,
+                'kick_user': None, 
+                'ban_user': None,
+                'read_logs': None,
+            }
+        else:
+             default_permissions = {
+                'add_message': True, 
+                'delete_message': True,
+                'view_message': True, 
+                'view_channel': True, 
+                'add_reaction': True, 
+                'attach_image': True, 
+                'change_nickname': True,
+                'manage_nickname': False,
+                'manage_channel': False,
+                'manage_role': False,
+                'change_room': False,
+                'mention_all': True,
+                'pin_message': False,
+                'kick_user': False, 
+                'ban_user': False,
+                'read_logs': False,
+            }
+
+        self.permissions = ModelPermissionGroup.objects.create()
+        for codename, value in default_permissions.items():
+            ModelPermission.objects.create(
+                permission=Permission.objects.get(codename=codename),
+                group=self.permissions,
+                value=value,
+            )
+
+        self.save()       
 
     def __str__(self):
         return self.name
@@ -216,11 +277,15 @@ class Member(models.Model):
             ('change_nickname', 'Can change nickname'),
             ('manage_nickname', 'Can manage nickname')
         ]
+    
+    def has_permission(self, permission, channel=None):
+        member_roles = sorted(self.roles.all(), key=lambda role: role.hierarchy)
+        for role in member_roles:
+            """
+            TODO: complete this function to check perms
+            """
+            permissions = ModelPermission.objects.get(group=role.permissions)
 
-    
-    def __str__(self):
-        return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
-    
     def joined_site(self):
         return self.user.joined_site()
     
@@ -238,6 +303,9 @@ class Member(models.Model):
     
     def bio(self):
         return self.user.bio
+
+    def __str__(self):
+            return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
 
 
 # *Message
@@ -332,6 +400,7 @@ class Reaction(models.Model):
 class ChannelConfiguration(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='channels_configs')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='configs')
+    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='channel_configuration', null=True)
 
     class Meta:
         constraints = [
@@ -359,21 +428,32 @@ class ChannelConfiguration(models.Model):
             'attach_image': None,
             'manage_role': None,
         }
+        self.permissions = ModelPermissionGroup.objects.create()
         for codename, value in default_permissions.items():
-            ChannelConfigurationPermission.objects.create(
+            ModelPermission.objects.create(
                 permission=Permission.objects.get(codename=codename),
-                channel_config=self,
-                value=value
+                group=self.permissions,
+                value=value,
             )
 
+        self.save()
+    
+    def __str__(self):
+        return f'channel {self.channel.pk} & role {self.role.pk}'
 
-# *ChannelConfigurationPermission
-class ChannelConfigurationPermission(models.Model):
+
+# *ModelPermission
+class ModelPermission(models.Model):
     CHOICES = (
         (True, 'True'),
         (False, 'False'),
         (None, 'None')
     )
-    permission = models.ForeignKey(Permission, on_delete=models.CASCADE, related_name='+')
-    channel_config = models.ForeignKey(ChannelConfiguration, on_delete=models.CASCADE, related_name='permissions')
+    permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
+    group = models.ForeignKey('ModelPermissionGroup', on_delete=models.CASCADE)
     value = models.CharField(max_length=20, choices=CHOICES, null=True, blank=True)
+
+
+# *ModelPermissionGroup
+class ModelPermissionGroup(models.Model):
+    pass

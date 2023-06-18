@@ -28,7 +28,13 @@ def get_object_or_none(obj, **kwargs):
 
 
 def send_to_group(group_name, data):
-    async_to_sync(channel_layer.group_send)(group_name, data)
+    try:
+        async_to_sync(channel_layer.group_send)(group_name, data)
+    except Exception as e:
+        # There seems to be a redis race condition error when joining
+        # a room through the explorer
+        
+        print(f'Exception occured in utils.send_to_group: {e}')
 
 
 def get_rendered_html(path, context_dict={}):
@@ -65,9 +71,10 @@ def member_has_permission(member, permission):
     
     return False
 
+
 def member_channel_permissions(member, channel):
     member_roles = member.roles.all().values_list('pk', flat=True)
     permissions = set(channel.configs.filter(role__pk__in=member_roles).values_list('permissions__codename', flat=True))
     
     return permissions
-    
+

@@ -14,9 +14,11 @@ from .models import (
     Emote, 
     ChannelCategory,
     ChannelConfiguration,
-    ChannelConfigurationPermission
+    ModelPermission,
+    ModelPermissionGroup
 )
 from users.models import CustomUser
+
 
 class RoomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -30,6 +32,7 @@ class RoomAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'description', 'owner')
     form = RoomForm
 
+
 admin.site.register(Permission)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Channel)
@@ -42,4 +45,5 @@ admin.site.register(Reaction)
 admin.site.register(Emote)
 admin.site.register(ChannelCategory)
 admin.site.register(ChannelConfiguration)
-admin.site.register(ChannelConfigurationPermission)
+admin.site.register(ModelPermission)
+admin.site.register(ModelPermissionGroup)
