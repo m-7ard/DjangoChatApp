@@ -2,7 +2,12 @@
 	<div class="container__header">
 		Room
 	</div>
-	<div class="container__subheader has-shadow">
+	<div class="container__subheader has-shadow" data-context='{
+        "objects": {
+            "member": {{ member|object_to_json }},
+            "room": {{ room|object_to_json }}
+        }
+    }'>
         {% if user|is_member:room and user != room.owner %}
             <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="leave-room">
                 <i class="material-symbols-outlined">
@@ -15,13 +20,11 @@
 				notifications
 			</i>
 		</span>
-
-        <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="update-room">
+        <span class="icon icon--small icon--hoverable tooltip__trigger" data-positioning='{"top": "100%", "left": "0px"}' data-target="room-menu">
 			<i class="material-symbols-outlined">
 				settings
 			</i>
 		</span>
-
 	</div>
 	<div class="room-card">
         <div class="room-card__avatar has-shadow">
@@ -47,6 +50,7 @@
 		</span>
 	</div>
 </div>
+{% if member %}
 <div class="container container--fill">
 	<div class="container__header">
 		Channels
@@ -84,6 +88,7 @@
 								{{ category.name }}
 							</span>
 						</span>
+                        {% if member|member_has_role_perm:'add_channel' %}
 						<span class="category__add right overlay__trigger" data-view-name="create-channel">
 							<div class="icon icon--tiny icon--hoverable">
 								<i class="material-symbols-outlined">
@@ -91,8 +96,9 @@
 								</i>
 							</div>
 						</span>
+                        {% endif %}
 					</li>
-					<ul class="category__channels dropdown__content dropdown__content--static dropdown__content--slide">
+					<ul class="category__channels dropdown__content dropdown__content--static">
 						{% for object in category.channels.all %}
 							{% include "./channel.html" %}
 						{% endfor %}
@@ -106,6 +112,7 @@
 		</div>
 	</div>
 </div>
+{% endif %}
 <div class="container container--fill">
 	<div class="container__header">
 		Members

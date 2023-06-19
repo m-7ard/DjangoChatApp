@@ -1,0 +1,18 @@
+<ul class="menu tooltip has-shadow" id="friend-menu" 
+data-context='{{ client_context }}'>
+    {% if member|member_has_role_perm:'edit_room' %}
+    <li class="menu__item tooltip__close overlay__trigger" data-view="update-room">
+        Update Room
+    </li>
+    {% endif %}
+    {% if member|member_has_role_perm:'manage_role' %}
+    <li class="menu__item tooltip__close overlay__trigger" data-view="manage-roles">
+        Manage Roles
+    </li>
+    {% endif %}
+    {% if member.user == room.owner %}
+    <li class="menu__item tooltip__close overlay__trigger" data-view="delete-room">
+        Delete Room
+    </li>
+    {% endif %}
+</ul>

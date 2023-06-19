@@ -32,8 +32,8 @@ from utils import (
     get_object_or_none, 
     send_to_group, 
     get_rendered_html,
-    member_has_permission,
-    member_channel_permissions,
+    member_has_role_perm,
+    member_has_channel_perm,
 )
 
 
@@ -60,6 +60,7 @@ class RoomView(DetailView):
     def get_object(self):
         return Room.objects.get(pk=self.kwargs['room'])
 
+
 class ChannelView(DetailView):
     template_name = 'rooms/channel.html'
     model = Channel
@@ -71,29 +72,30 @@ class ChannelView(DetailView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
         channel = self.object
         member = get_object_or_none(Member, room=channel.room, user=self.request.user)
         messages = channel.messages.all()
-        if not member:
-            can_view_channel = channel.room.guests_can_view_channels
-            if not can_view_channel:
-                return redirect('room', room=channel.room.pk)
-        else:
-            pass
-
-        
         logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
 
-        context['backlogs'] = sorted(
-            chain(messages, logs),
-            key=lambda obj: obj.date_added
-        )
-        context['room'] = channel.room
-        context['member'] = member
+        if not member:
+            return redirect('room', room=channel.room.pk)
 
-        return context
+        can_view_messages = (
+            member_has_role_perm(member, 'view_channel') 
+            and member_has_channel_perm(member, channel, 'view_channel')
+        )
+        messages = messages if can_view_messages else messages.filter(member=member)
+
+        context.update({
+            'backlogs': sorted(chain(messages, logs), key=lambda obj: obj.date_added), 
+            'room': channel.room,
+            'member': member,
+        })
+        
+        return self.render_to_response(context)
 
 
 class Alternative_ChannelCreateView(CreateView):
@@ -277,6 +279,7 @@ class LeaveRoom(TemplateView):
                 'html': log_html,
             }
             for channel in room.channels.filter(display_logs=action):
+                print(channel.pk, '------' * 10)
                 send_to_group(f'channel_{channel.pk}', send_data)
 
         return redirect('room', room=room.pk)

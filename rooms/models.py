@@ -22,7 +22,6 @@ class Room(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     default_role = models.OneToOneField('Role', on_delete=models.CASCADE, related_name='+', null=True)
     public = models.BooleanField(default=False)
-    guests_can_view_channels = models.BooleanField(default=True)
 
     class Meta:
         permissions = [
@@ -149,28 +148,7 @@ class Role(models.Model):
     color = models.CharField(default='#e0dbd1', max_length=7)
     admin = models.BooleanField(default=False)
     permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='role', null=True)
-    """
-    permissions = models.ManyToManyField(Permission, limit_choices_to={'codename__in': [
-        'add_message', 
-        'delete_message',
-        'view_message', 
-        'view_channel', 
-        'add_reaction', 
-        'attach_image', 
-        'change_nickname',
-        'manage_nickname',
-        'manage_channel',
-        'manage_role',
-        'change_room',
-        'mention_all',
-        'pin_message',
-        'kick_user', 
-        'ban_user',
-        'read_logs',
-    ]})
-    """
     
-
     class Meta:
         permissions = [
             ('manage_role', 'Can manage role'),
@@ -195,9 +173,6 @@ class Role(models.Model):
             super().delete(*args, **kwargs)
         else:
             raise ValueError('Cannot delete default role without deleting Room')
-
-
-
 
     def set_default_perms(self):
         # Only the first role requires explicit perms
@@ -248,10 +223,10 @@ class Role(models.Model):
                 value=value,
             )
 
-        self.save()       
+        self.save()   
 
     def __str__(self):
-        return self.name
+        return f'role: {self.pk}'
 
 
 class MemberQuerySet(models.QuerySet):
@@ -278,13 +253,6 @@ class Member(models.Model):
             ('manage_nickname', 'Can manage nickname')
         ]
     
-    def has_permission(self, permission, channel=None):
-        member_roles = sorted(self.roles.all(), key=lambda role: role.hierarchy)
-        for role in member_roles:
-            """
-            TODO: complete this function to check perms
-            """
-            permissions = ModelPermission.objects.get(group=role.permissions)
 
     def joined_site(self):
         return self.user.joined_site()
@@ -450,10 +418,16 @@ class ModelPermission(models.Model):
         (None, 'None')
     )
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
-    group = models.ForeignKey('ModelPermissionGroup', on_delete=models.CASCADE)
+    group = models.ForeignKey('ModelPermissionGroup', on_delete=models.CASCADE, related_name='items')
     value = models.CharField(max_length=20, choices=CHOICES, null=True, blank=True)
 
+    def __str__(self):
+        return f'{self.group.__str__()} |*| {self.permission.codename}: {self.value}'
 
 # *ModelPermissionGroup
 class ModelPermissionGroup(models.Model):
-    pass
+    def __str__(self):
+        if hasattr(self, 'role'):
+            return self.role.__str__()
+        elif hasattr(self, 'channel_configuration'):
+            return self.channel_configuration.__str__()

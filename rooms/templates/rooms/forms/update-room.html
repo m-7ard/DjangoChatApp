@@ -1,21 +1,5 @@
-<div class="formbox formbox--fixed switchable overlay">
-	<nav class="formbox__navigation">
-		<div class="formbox__button" data-command="switch-tab" data-target="#RoomEditForm">
-			Edit Room
-		</div>
-		<div class="formbox__button" data-command="switch-tab" data-target="#ChannelCategoryForm">
-			Manage Roles
-		</div>
-        <div class="formbox__button" data-command="switch-tab" data-target="#RoomDeleteForm">
-            Delete Room
-        </div>
-	</nav>
-
-
-
-
-
-	<form class="form switchable__content" action="{% url 'update-room' room=room.pk %}" method="POST" enctype="multipart/form-data" id="RoomEditForm">
+<div class="formbox formbox--fixed overlay has-shadow">
+	<form class="form" action="{% url 'update-room' room=room.pk %}" method="POST" enctype="multipart/form-data" id="RoomEditForm">
 		{% csrf_token %}
 		<input type="hidden" name="form" value="RoomEditForm">
 		<div class="form__header">
@@ -85,33 +69,6 @@
 			Submit
 		</button>
 	</form>
-    <form class="form switchable__content switchable__content--hidden" action="{% url 'delete-room' room=room.pk %}" method="POST" enctype="multipart/form-data" id="RoomDeleteForm">
-		{% csrf_token %}
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					Delete Room
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		<div class="form__field">
-			<div class="form__label form__label--danger">
-				Note that this action cannot be reversed 
-			</div>
-		</div>
-		<button class="form__delete bottom">
-			Delete
-		</button>
-	</form>
+
 	
 </div>

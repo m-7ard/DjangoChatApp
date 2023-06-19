@@ -55,32 +55,44 @@ def attribute_modifier(obj, json_string):
     else:
         return ''
 
+
 @register.filter(name="printInConsole")
 def printInConsole(self):
     print(self)
     return self
     
+
 @register.filter(name="get_member")
 def get_member(user, room):
     return room.members.all().filter(user=user).first()
+
 
 @register.filter(name="is_member")
 def is_member(user, room):
     return room.pk in user.memberships.all().values_list('room', flat=True)
 
+
 @register.filter(name='app_name')
 def app_name(self):
     return self._meta.app_label
+
 
 @register.filter(name='object_to_json')
 def object_to_json(self):
     return json.dumps(utils.object_to_dict(self))
 
+
 @register.filter(name='chain_arg')
-def chain_arg(*args):
-    return args
+def chain_arg(arg1, arg2):
+    return arg1, arg2
 
-@register.filter(name='member_has_permission')
-def member_has_permission(member, permission):
-    return utils.member_has_permission(member, permission)
 
+@register.filter(name='member_has_role_perm')
+def member_has_role_perm(member, codename):
+    return utils.member_has_role_perm(member, codename)
+
+
+@register.filter(name='member_has_channel_perm')
+def member_has_channel_perm(args, codename=None):
+    member, channel = args
+    return utils.member_has_channel_perm(member, channel, codename)

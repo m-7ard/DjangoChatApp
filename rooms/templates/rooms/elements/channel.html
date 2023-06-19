@@ -1,4 +1,4 @@
-<a class="channel" style="order: {{ object.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
+<a class="channel {% if object == channel %}channel--selected{% endif %}" style="order: {{ object.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
 	<span class="channel__kind">
 		{% if object.kind == 'text' %}
 		<div class="icon icon--small">
@@ -17,6 +17,7 @@
 	<span class="channel__name">
 		{{ object.name }}
 	</span>
+    {% if member|chain_arg:object|member_has_channel_perm:'manage_channel' %}
 	<span class="channel__settings right overlay__trigger" data-view-name="update-channel">
 		<div class="icon icon--tiny">
 			<i class="material-symbols-outlined">
@@ -24,4 +25,5 @@
 			</i>
 		</div>
 	</span>
+    {% endif %}
 </a>

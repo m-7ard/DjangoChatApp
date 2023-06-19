@@ -64,17 +64,41 @@ def object_to_dict(self):
     return parsed_object
 
 
-def member_has_permission(member, permission):
-    for role in sorted(member.roles.all(), key=lambda object_: object_.hierarchy):
-        if permission in role.permissions.all().values_list('codename'):
-            return True
+def member_has_role_perm(member, codename):
+    if not member:
+        return False
     
-    return False
+    member_roles = sorted(member.roles.all(), key=lambda role: role.hierarchy)
+    is_owner = member.user == member.room.owner
+    is_admin = any([role.admin for role in member_roles])
+    if is_admin or is_owner:
+        return True
+    
+    for role in member_roles:
+        role_permissions = role.permissions.items.all()
+        value = role_permissions.get(permission__codename=codename).value
+        if value != None:
+            return value
+    
+
+def member_has_channel_perm(member, channel, codename):
+    if not member:
+        return False
+    
+    member_roles = sorted(member.roles.all(), key=lambda role: role.hierarchy)
+    is_owner = member.user == member.room.owner
+    is_admin = any([role.admin for role in member_roles])
+    if is_admin or is_owner:
+        return True
+
+    channel_roles = sorted(channel.configs.all().filter(role__in=member_roles), key=lambda config: config.role.hierarchy)
+    for role in channel_roles:
+        role_permissions = role.permissions.items.all()
+        value = role_permissions.get(permission__codename=codename).value
+        if value != None:
+            return value
+
+    
 
 
-def member_channel_permissions(member, channel):
-    member_roles = member.roles.all().values_list('pk', flat=True)
-    permissions = set(channel.configs.filter(role__pk__in=member_roles).values_list('permissions__codename', flat=True))
-    
-    return permissions
 

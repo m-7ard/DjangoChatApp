@@ -1,4 +1,4 @@
-<div class="formbox formbox--fixed overlay">
+<div class="formbox formbox--fixed overlay has-shadow">
 	<form class="form" action="{% url 'create-channel' room=room %}" method="POST" enctype="multipart/form-data">
 		{% csrf_token %}
 		<div class="form__header">
@@ -20,81 +20,6 @@
 		</div>
 		<input type="hidden" name="category" value="{{ category.pk }}"></input>
 		{% for field in form %}
-            {% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
-                {% if field.label == 'Kind' %}
-                <fieldset class="form__field">
-                    <div class="form__label">
-                        {{ field.label }}
-                    </div>
-                    <div class="option option--round">
-                        <input type="radio" name="kind" value="text" required>
-                        <span class="option__kind">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    title
-                                </i>
-                            </div>
-                        </span>
-                        <span class="option__body">
-                            <div class="option__name">
-                                Text
-                            </div>
-                            <div class="option__description">
-                                Send messages and reactions
-                            </div>
-                        </span>
-                        <span class="option__select right">
-                            <div class="icon icon--small">
-                                <i class="material-symbols-outlined">
-                                    radio_button_unchecked
-                                </i>
-                            </div>
-                        </span>
-                    </div>
-                    <div class="option option--round">
-                        <input type="radio" name="kind" value="voice" required>
-                        <span class="option__kind">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    volume_up
-                                </i>
-                            </div>
-                        </span>
-                        <span class="option__body">
-                            <div class="option__name">
-                                Voice
-                            </div>
-                            <div class="option__description">
-                                Voice channels are yet to be implemented
-                            </div>
-                        </span>
-                        <span class="option__select right">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    radio_button_unchecked
-                                </i>
-                            </div>
-                        </span>
-                    </div>
-                </fieldset>
-                {% else %}
-                <div class="form__field {{ modifier }}">
-                    <div class="form__label">
-                        {{ field.label }}
-                    </div>
-                    <div class="form__input">
-                        {{ field }}
-                    </div>
-                    {% for error in field.errors %}
-                    <div class="form__error">
-                        {{ error }}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            {% endwith %}
-		{% endfor %}
-        {% for field in form %}
             {% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
                 {% if field.label == 'Kind' %}
                 <fieldset class="form__field">

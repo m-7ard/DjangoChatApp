@@ -1,3 +1,12 @@
+/*
+
+TODO: Get rid of overlay handlers althogether and use the same logic as 
+tooltips (?)
+
+goal is to get room-menu to work, have a bit of separation of interests
+
+*/
+
 const overlayHandlers = {
     'create-room': async ({trigger, viewName}) => {
         let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
