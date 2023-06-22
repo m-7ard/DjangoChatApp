@@ -1,31 +1,3 @@
-/* getModelData is not being used right now, probably unecessary */
-
-async function getModelData(app_label, model_name, pk, keys) {
-	const url = new URL(window.location.origin + '/RequestData/');
-	url.searchParams.append('model_name', model_name);
-	url.searchParams.append('app_label', app_label);
-	url.searchParams.append('pk', pk);
-	url.searchParams.append('keys', JSON.stringify(keys));
-	try {
-		const response = await fetch(url);
-		return await response.json();
-	} 
-	catch (error) {
-		console.error(error);
-		throw error;
-	};
-};
-
-async function getForm(form_path, kwargs) {
-	let url = new URL(form_path);
-	kwargs && Object.entries(kwargs).forEach(([key, value]) => url.searchParams.append(key, value));
-	const response = await fetch(url);
-	const formHtml = await response.text();
-	return formHtml;
-}
-
-
-
 /* getReverseUrl is not being used for now */
 
 async function getReverseUrl(name, parameters) {
@@ -135,27 +107,20 @@ function parseHTML(string) {
     return new DOMParser().parseFromString(string, "text/html").querySelector('body > *');
 };
 
-/* abstraction from tooltiphandlers['profile'], using fetch call in the 
-    windowclickhandler instead for now */
-
-async function requestElement({appLabel, modelName, pk, contextVariable, templateRoute}) {
-    let url = new URL(window.location.origin + '/GetHtmlElementFromModel/');
-    let getRequestData = {
-        appLabel: appLabel,
-        modelName: modelName,
-        pk: pk,
-        contextVariable: contextVariable,
-        templateRoute: templateRoute
-    };
-    Object.entries(getRequestData).forEach(([key, value]) => url.searchParams.append(key, value));
-    let request = await fetch(url);
-    let response = await request.text();
-};
-
 function objectSelector(data) {
     return `[data-model="${data.model}"][data-app="${data.app}"][data-pk="${data.pk}"]`
 }
 
 function randomID() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
+async function getView({name, kwargs}) {
+    let url = new URL(window.location.origin + '/GetViewByName/' + name);
+    if (kwargs) {
+        url.searchParams.append('kwargs', kwargs);
+    };
+    let request = await fetch(url);
+    let response = await request.text();
+    return response;
 }

@@ -14,7 +14,7 @@ const commandHandlers = {
 		let button = event.target.closest('[data-command="switch-tab"]');
 		let formbox = button.closest('.switchable');
 		let targetSelector = button.dataset.target;
-		let target = formbox.querySelector(targetSelector);
+		let target = formbox.getElementById(targetSelector);
 		formbox.querySelectorAll('.switchable__content').forEach((form) => form.classList.add('switchable__content--hidden'));
 		target.classList.remove('switchable__content--hidden');
 	},
@@ -111,9 +111,6 @@ const commandHandlers = {
         let input = inputParent.querySelector('[data-role="input"]');
         input.value += `:${trigger.dataset.name}:`;
     },
-    'open_profile': ({objectType, objectPk, emotePk}) => {
-        undefined
-    },
     'manage-friendship': (event) => {
         let trigger = event.target.closest('[data-command="manage-friendship"]');
         let contextObject = event.target.closest('[data-context]');
@@ -124,4 +121,49 @@ const commandHandlers = {
             kind: trigger.dataset.kind,
         }));
     },
+    'get-form': async (event) => {
+        event.preventDefault();
+        let trigger = event.target.closest('[data-command="get-form"]');
+        let formString = await getView({name: trigger.dataset.name, kwargs: trigger.dataset.kwargs});
+        let form = parseHTML(formString);
+        quickCreateElement('div', {
+            parent: document.body,
+            classList: ['layer'],
+            innerHTML: form.outerHTML,
+            eventListeners: {
+                'mouseup': (e) => {
+                    if (e.target.closest('.form__close')) {
+                        e.target.closest('.layer').remove();
+                    };
+                },
+            }
+        });
+    },
+    /*
+    'get-form': async (event) => {
+        event.preventDefault();
+        let trigger = event.target.closest('[data-command="get-form"]');
+        let target = trigger.dataset.target;
+        let contextObject = trigger.closest('[data-context]');
+        let url = new URL(window.location.origin + '/GetViewByName/' + target);
+        if (contextObject) {
+            url.searchParams.append('context', contextObject.dataset.context);
+        };
+        let request = await fetch(url);
+        let response = await request.text();
+        let form = parseHTML(response);
+        quickCreateElement('div', {
+            parent: document.body,
+            classList: ['layer'],
+            innerHTML: form.outerHTML,
+            eventListeners: {
+                'mouseup': (e) => {
+                    if (e.target.closest('.form__close')) {
+                        e.target.closest('.layer').remove();
+                    };
+                },
+            }
+        });
+    },
+    */
 };

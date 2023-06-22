@@ -1,15 +1,15 @@
-<div class="formbox formbox--fixed switchable overlay has-shadow">
+<div class="formbox switchable">
 	<nav class="formbox__navigation">
-		<div class="formbox__button" data-command="switch-tab" data-target="#ChannelEditForm">
+		<div class="formbox__button" data-command="switch-tab" data-target="ChannelEditForm">
 			Edit Channel
 		</div>
-		<div class="formbox__button" data-command="switch-tab" data-target="#ChannelCategoryForm">
+		<div class="formbox__button" data-command="switch-tab" data-target="ChannelCategoryForm">
 			Change Channel Category
 		</div>
-		<div class="formbox__button" data-command="switch-tab" data-target="#ChannelPermissionsForm">
-			Manage Channel Permissions
+		<div class="formbox__button" data-command="switch-tab" data-target="ChannelPermissionsForm">
+			Manage Channel Logs
 		</div>
-		<div class="formbox__button" data-command="switch-tab" data-target="#DeleteChannel">
+		<div class="formbox__button" data-command="switch-tab" data-target="DeleteChannel">
 			Delete Channel
 		</div>
 	</nav>
@@ -17,215 +17,215 @@
 
 
 
-
-	<form class="form switchable__content switchable__content" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelEditForm">
-		{% csrf_token %}
-		<input type="hidden" name="form" value="ChannelEditForm">
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					Edit Channel
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		{% for field in ChannelEditForm %}
-		{% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
-			<div class="form__field {{ modifier }}">
-				<div class="form__label">
-					{{ field.label }}
-				</div>
-				<div class="form__input">
-					{{ field }}
-				</div>
-				{% for error in field.errors %}
-				<div class="form__error">
-					{{ error }}
-				</div>
-				{% endfor %}
-			</div>
-		{% endwith %}
-		{% endfor %}
-		<button class="form__submit" type="submit">
-			Submit
-		</button>
-	</form>
-
-
-
-
-
-	<form class="form switchable__content switchable__content--hidden" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelCategoryForm">
-		{% csrf_token %}
-		<input type="hidden" name="form" value="ChannelCategoryForm">
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					Change Channel Category
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		{% with ChannelCategoryForm.category|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
-			<div class="form__field {{ modifier }}">
-				<div class="form__label">
-					{{ ChannelCategoryForm.category.label }}
-				</div>
-				<div class="select">
-					<div class="select__trigger option option--round">
-						<span class="option__name">
-							{{ category.name }}
-						</span>
-						<span class="option__expand right">
-							<div class="icon icon--small right">
-								<i class="material-symbols-outlined">
-									expand_more
-								</i>
-							</div>
-						</span>
-					</div>
-					<fieldset class="select__options">
-						<div class="option" data-command="select-option" data-value="None">
-							<input type="radio" name="category" value="">
-							<span class="option__name">
-								None
-							</span>
-						</div>
-						{% for object in channel.room.categories.all %}
-						<div class="option" data-command="select-option" data-value="{{ object.name }}">
-							<input type="radio" name="category" value="{{ object.pk }}">
-							<span class="option__name">
-								{{ object.name }}
-							</span>
-						</div>
-						{% endfor %}
-					</fieldset>
-				</div>
-				{% for error in ChannelCategoryForm.category.errors %}
-				<div class="form__error">
-					{{ error }}
-				</div>
-				{% endfor %}
-			</div>
-		{% endwith %}
-		<button class="form__submit" type="submit">
-			Submit
-		</button>
-	</form>	
+    
+    <form class="form switchable__content switchable__content" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelEditForm">
+        {% csrf_token %}
+        <input type="hidden" name="form" value="ChannelEditForm">
+        <div class="form__header">
+            <div>
+                <div class="form__title">
+                    Edit Channel
+                </div>
+                <div class="form__subtitle">
+                    {{ category.name }}
+                </div>
+            </div>
+            <div class="form__close overlay__close">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            </div>
+        </div>
+        {% for field in ChannelEditForm %}
+        {% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
+            <div class="form__field {{ modifier }}">
+                <div class="form__label">
+                    {{ field.label }}
+                </div>
+                <div class="form__input">
+                    {{ field }}
+                </div>
+                {% for error in field.errors %}
+                <div class="form__error">
+                    {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endwith %}
+        {% endfor %}
+        <button class="form__submit" type="submit">
+            Submit
+        </button>
+    </form>
 
 
 
 
 
-	<form class="form switchable__content switchable__content--hidden" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelPermissionsForm">
-		{% csrf_token %}
-		<input type="hidden" name="form" value="ChannelPermissionsForm">
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					Manage Channel Permissions
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		<div class="form__field wrapper--remaining-space">
-			<div class="form__label">
-				{{ ChannelPermissionsForm.display_logs.label }}
-			</div>
-			<div class="wrapper--remaining-space">
-				<div class="form__content">
-					{% for action in actions %}
-					<div class="checkbox">
-						<div class="checkbox__header">
-							<div class="checkbox__label">
-								{{ action.name|capfirst }}
-							</div>
-							<div class="switch">
-								
-								{% if action in channel.display_logs.all %}
-								<input type="checkbox" name="display_logs" value="{{ action.pk }}" checked="checked">
-								{% else %}
-								<input type="checkbox" name="display_logs" value="{{ action.pk }}">
-								{% endif %}
-								<div class="switch__edge switch__edge--left switch__element">
-									<div></div>
-								</div>
-								<div class="switch__body switch__element">
-									<div></div>
-								</div>
-								<div class="switch__edge switch__edge--right switch__element">
-									<div></div>
-								</div>
-								<div class="switch__slider"></div>
-							</div>
-						</div>
-						<div class="checkbox__description">
-							{{ action.description }}
-						</div>
-					</div>
-					{% endfor %}
-				</div>
-			</div>
-		</div>
-		<button class="form__submit" type="submit">
-			Submit
-		</button>
-	</form>
+    <form class="form switchable__content switchable__content--hidden" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelCategoryForm">
+        {% csrf_token %}
+        <input type="hidden" name="form" value="ChannelCategoryForm">
+        <div class="form__header">
+            <div>
+                <div class="form__title">
+                    Change Channel Category
+                </div>
+                <div class="form__subtitle">
+                    {{ category.name }}
+                </div>
+            </div>
+            <div class="form__close overlay__close">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            </div>
+        </div>
+        {% with ChannelCategoryForm.category|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
+            <div class="form__field {{ modifier }}">
+                <div class="form__label">
+                    {{ ChannelCategoryForm.category.label }}
+                </div>
+                <div class="select">
+                    <div class="select__trigger option option--round">
+                        <span class="option__name">
+                            {{ category.name }}
+                        </span>
+                        <span class="option__expand right">
+                            <div class="icon icon--small right">
+                                <i class="material-symbols-outlined">
+                                    expand_more
+                                </i>
+                            </div>
+                        </span>
+                    </div>
+                    <fieldset class="select__options">
+                        <div class="option" data-command="select-option" data-value="None">
+                            <input type="radio" name="category" value="">
+                            <span class="option__name">
+                                None
+                            </span>
+                        </div>
+                        {% for object in channel.room.categories.all %}
+                            <div class="option" data-command="select-option" data-value="{{ object.name }}">
+                                <input type="radio" name="category" value="{{ object.pk }}">
+                                <span class="option__name">
+                                    {{ object.name }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+                {% for error in ChannelCategoryForm.category.errors %}
+                <div class="form__error">
+                    {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+        {% endwith %}
+        <button class="form__submit" type="submit">
+            Submit
+        </button>
+    </form>	
 
 
-	<form class="form switchable__content switchable__content--hidden" action="{% url 'delete-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="DeleteChannel">
-		{% csrf_token %}
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					Delete Channel
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		<div class="form__field">
-			<div class="form__label form__label--danger">
-				Note that this action cannot be reversed 
-			</div>
-		</div>
-		<button class="form__delete bottom">
-			Delete
-		</button>
-	</form>
+
+
+
+    <form class="form switchable__content switchable__content--hidden" action="{% url 'update-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="ChannelPermissionsForm">
+        {% csrf_token %}
+        <input type="hidden" name="form" value="ChannelPermissionsForm">
+        <div class="form__header">
+            <div>
+                <div class="form__title">
+                    Manage Channel Permissions
+                </div>
+                <div class="form__subtitle">
+                    {{ category.name }}
+                </div>
+            </div>
+            <div class="form__close overlay__close">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="form__field wrapper--remaining-space">
+            <div class="form__label">
+                {{ ChannelPermissionsForm.display_logs.label }}
+            </div>
+            <div class="wrapper--remaining-space">
+                <div class="form__content">
+                    {% for action in actions %}
+                    <div class="checkbox">
+                        <div class="checkbox__header">
+                            <div class="checkbox__label">
+                                {{ action.name|capfirst }}
+                            </div>
+                            <div class="switch">
+                                
+                                {% if action in channel.display_logs.all %}
+                                <input type="checkbox" name="display_logs" value="{{ action.pk }}" checked="checked">
+                                {% else %}
+                                <input type="checkbox" name="display_logs" value="{{ action.pk }}">
+                                {% endif %}
+                                <div class="switch__edge switch__edge--left switch__element">
+                                    <div></div>
+                                </div>
+                                <div class="switch__body switch__element">
+                                    <div></div>
+                                </div>
+                                <div class="switch__edge switch__edge--right switch__element">
+                                    <div></div>
+                                </div>
+                                <div class="switch__slider"></div>
+                            </div>
+                        </div>
+                        <div class="checkbox__description">
+                            {{ action.description }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <button class="form__submit" type="submit">
+            Submit
+        </button>
+    </form>
+
+
+    <form class="form switchable__content switchable__content--hidden" action="{% url 'delete-channel' channel=channel.pk %}" method="POST" enctype="multipart/form-data" id="DeleteChannel">
+        {% csrf_token %}
+        <div class="form__header">
+            <div>
+                <div class="form__title">
+                    Delete Channel
+                </div>
+                <div class="form__subtitle">
+                    {{ category.name }}
+                </div>
+            </div>
+            <div class="form__close overlay__close">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="form__field">
+            <div class="form__label form__label--danger">
+                Note that this action cannot be reversed 
+            </div>
+        </div>
+        <button class="form__delete bottom">
+            Delete
+        </button>
+    </form>
 </div>

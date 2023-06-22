@@ -1,29 +1,33 @@
-<a class="channel {% if object == channel %}channel--selected{% endif %}" style="order: {{ object.order }};" data-pk="{{ object.pk }}" href="{% url 'channel' room=room.pk channel=object.pk %}">
+<a class="channel {% if object == channel %}channel--selected{% endif %}" style="order: {{ object.order }};" 
+data-model="{{ object|classname }}" 
+data-app="{{ object|app_name }}" 
+data-pk="{{ object.pk }}"
+href="{% url 'channel' room=room.pk channel=object.pk %}">
 	<span class="channel__kind">
 		{% if object.kind == 'text' %}
-		<div class="icon icon--small">
-			<i class="material-symbols-outlined">
-				tag
-			</i>
-		</div>
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    tag
+                </i>
+            </div>
 		{% elif object.kind == 'voice' %}
-		<div class="icon icon--small">
-			<i class="material-symbols-outlined">
-				volume_up
-			</i>
-		</div>
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    volume_up
+                </i>
+            </div>
 		{% endif %}
 	</span>
 	<span class="channel__name">
 		{{ object.name }}
 	</span>
     {% if member|chain_arg:object|member_has_channel_perm:'manage_channel' %}
-	<span class="channel__settings right overlay__trigger" data-view-name="update-channel">
-		<div class="icon icon--tiny">
-			<i class="material-symbols-outlined">
-				settings
-			</i>
-		</div>
-	</span>
+        <span class="channel__settings right" data-command="get-form" data-name="manage-channel" data-kwargs='{"pk": {{ object.pk }}}'>
+            <div class="icon icon--tiny">
+                <i class="material-symbols-outlined">
+                    settings
+                </i>
+            </div>
+        </span>
     {% endif %}
 </a>

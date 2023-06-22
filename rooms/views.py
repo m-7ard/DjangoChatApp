@@ -21,8 +21,7 @@ from core.models import News
 from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission
 from .forms import (
     ChannelCreationForm,
-    ChannelEditForm,
-    ChannelCategoryForm,
+    ChannelUpdateForm,
     ChannelPermissionsForm, 
     RoomCreationForm,
     RoomEditForm,
@@ -144,47 +143,38 @@ class ChannelCreateView(FormView):
         return redirect('dashboard')
 
 
-class ChannelUpdateView(TemplateView):
-    template_name = 'rooms/forms/update-channel.html'
-    
+class ChannelManageView(TemplateView):
+    template_name = 'core/dynamic-form.html'
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        channel = Channel.objects.get(pk=kwargs['channel'])
-        context['category'] = channel.category
-        context['channel'] = channel
-        context['actions'] = Action.objects.all()
-        context['ChannelEditForm'] = ChannelEditForm(instance=channel)
-        context['ChannelCategoryForm'] = ChannelCategoryForm(instance=channel)
-        context['ChannelPermissionsForm'] = ChannelPermissionsForm(instance=channel)
+        channel = Channel.objects.get(pk=kwargs['pk'])
+        context['forms'] = []
+
+        context['forms'].extend([
+            {
+                'title': 'Update Channel',
+                'subtitle': channel.category.name,
+                'fields': ChannelUpdateForm(instance=channel),
+                'url': reverse('update-channel', kwargs={'pk': channel.pk})
+            },
+            {
+                'title': 'Delete Channel',
+                'subtitle': channel.category.name,
+                'warning': 'This action is not reversible',
+                'url': reverse('delete-channel', kwargs={'pk': channel.pk})
+            },
+        ])
         
-        return self.render_to_response(context)
+        return render(request, self.template_name, context=context)
+
+
+class ChannelUpdateView(UpdateView):
+    model = Channel
+
+    def get_success_url(self):
+        return reverse('room', kwargs={'room': self.object.room.pk})
     
-    def post(self, request, *args, **kwargs):
-        form_name = request.POST.get('form')
-        if form_name == 'ChannelEditForm':
-            form = ChannelEditForm
-        elif form_name == 'ChannelCategoryForm':
-            form = ChannelCategoryForm
-        elif form_name == 'ChannelPermissionsForm':
-            form = ChannelPermissionsForm
-        
-        channel_form = form(
-            instance=Channel.objects.get(pk=kwargs['channel']),
-            data=request.POST
-        )
-
-        if channel_form.is_valid():
-            channel = channel_form.save(commit=False)
-            if form_name == 'ChannelPermissionsForm':
-                channel.display_logs.set(Action.objects.filter(pk__in=request.POST.getlist('display_logs')))
-
-            channel.save()
-
-            return redirect('channel', room=channel.room.pk, channel=channel.pk)
-
-        return redirect('dashboard')
-
-
 class ChannelDeleteView(DeleteView):
     model = Channel
 
@@ -250,11 +240,6 @@ class RoomUpdateView(TemplateView):
 class LeaveRoom(TemplateView):
     template_name = 'rooms/forms/leave-room.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['room'] = Room.objects.get(pk=kwargs.get('room'))
-        return context
-
     def post(self, request, *args, **kwargs):
         room = Room.objects.get(pk=kwargs.get('room'))
         user = request.user
@@ -279,7 +264,6 @@ class LeaveRoom(TemplateView):
                 'html': log_html,
             }
             for channel in room.channels.filter(display_logs=action):
-                print(channel.pk, '------' * 10)
                 send_to_group(f'channel_{channel.pk}', send_data)
 
         return redirect('room', room=room.pk)

@@ -13,7 +13,7 @@ from django.utils.html import escape
 
 from django.template import Template, RequestContext, Context
 from django.http import HttpResponse
-
+from django.forms import ModelForm
 
 from users.models import Friendship, CustomUser
 from rooms.models import Log, Message, Reaction, Room
@@ -70,79 +70,75 @@ class GetTooltip(View):
             context_dict=template_context
         )
         return HttpResponse(html)
+    
+
+class GetOverlay(View):
+    def get(self, request, *args, **kwargs):
+        overlay_id = kwargs.get('id')
+        client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
+        objects = client_context.get('objects', {})
+        variables = client_context.get('variables', {})
         
+        template_context = {
+            'client_context': request.GET.get('context'),
+            'user': request.user
+        }
+
+        for context_variable, values in objects.items():
+            template_context[context_variable] = dict_to_object(values)
+
+        for context_variable, value in variables.items():
+            template_context[context_variable] = value
+
+        return render(request, Path(__file__).parent / f'templates/core/overlays/{overlay_id}.html', context=template_context) 
+
+
+def _(request, *args, **kwargs):
+    client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
+    forms = client_context.get('forms', {})
+    if not forms:
+        return
+    
+    template_context = {
+        'client_context': request.GET.get('context'),
+        'user': request.user,
+        'forms': []
+    }
+    for form in forms:
+        model_name = form.get('model')
+        app_label = form.get('app')
+        pk = form.get('pk')
+        fields = form.get('fields')
+        model = apps.get_model(app_label=app_label, model_name=model_name)
+
+        class Form(ModelForm):
+            nonlocal model
+            nonlocal fields   
+
+            class Meta:
+                model = None
+                fields = None
+            
+            Meta.model = model
+            Meta.fields = fields
+
+        title = form.get('title')
+        subtitle = form.get('subtitle')
         
+        template_context['forms'].append({
+            'title': title,
+            'subtitle': subtitle,
+            'fields': Form(instance=get_object_or_none(model, pk=pk))
+        })
+
+    return render(request, 'core/dynamic-form.html', context=template_context)
+
+
+
 def GetViewByName(request, name, *args, **kwargs):
-    # parameters, as in .../room/<int:room>/ url parameters
-    parameters = request.GET.get('parameters', {})
-    get_data = request.GET.get('getData', {})
-
-
-    if parameters:
-        parameters = json.loads(parameters)
-
-    if get_data:
-        get_data = json.loads(get_data)
-        get_data = urllib.parse.urlencode(get_data)
-
-    url = reverse(name, kwargs=parameters)
-    url += f'?{get_data}'
+    kwargs = json.loads(request.GET.get('kwargs')) if request.GET.get('kwargs') else {}
+    url = reverse(name, kwargs=kwargs)
 
     return redirect(url)
-
-
-class GetHtmlElementFromData(View):
-    """ 
-    Both GetHtmlElementFromData and GetHtmlElementFromModel retrieve a
-    html element given an app label and element path;
-    GetHtmlElementFromData will however populate it with the manually
-    provided data, while GetHtmlElementFromModel will populate it with
-    model data, by passing it as a context variable.
-    """
-    def get(self, request):
-        app_label = request.GET.get('appLabel')
-        template_route = request.GET.get('templateRoute')
-        context_data = request.GET.get('contextData', {})
-        element_path = Path().resolve().parent / app_label / template_route
-        
-        with open(element_path, 'r') as f:
-            plain_html = f.read()
-            
-        template = Template(plain_html)
-        context = Context(context_data)
-
-        return HttpResponse(template.render(context))
-    
-
-
-class GetHtmlElementFromModel(View):
-    """
-    GetHtmlElementFromModel will populate the element with
-    model data, by passing it as a context variable. Requires
-    a pk, app label and model name.
-    """
-    def get(self, request):
-        app_label = request.GET.get('appLabel')
-        template_route = request.GET.get('templateRoute')
-        context_data = json.loads(request.GET.get('contextData', '{}'))
-        element_path = Path().resolve() / app_label / template_route
-        model_name = request.GET.get('modelName')
-        pk = request.GET.get('pk')
-        context_variable = request.GET.get('contextVariable', 'object')
-
-        model = apps.get_model(app_label=app_label, model_name=model_name)
-        instance = model.objects.get(pk=pk)
-        context_data[context_variable] = instance
-
-        with open(element_path, 'r') as f:
-            plain_html = f.read()
-            
-        template = Template(plain_html)
-        context = Context(context_data)
-
-        return HttpResponse(template.render(context))
-    
-
-
 
 

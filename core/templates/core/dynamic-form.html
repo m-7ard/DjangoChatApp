@@ -1,0 +1,88 @@
+<div class="formbox switchable">
+	<nav class="formbox__navigation">
+        {% for form in forms %}
+            <div class="formbox__button" data-command="switch-tab" data-target="{{ form.title }}">
+                {{ form.title }}
+            </div>
+        {% endfor %}
+	</nav>
+    <div class="formbox__forms">
+        {% for form in forms %}
+            <form class="form switchable__content {% if forloop.first %}switchable__content--active{% endif %}" action="{{ url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+                {% csrf_token %}
+                <div class="form__header">
+                    <div>
+                        <div class="form__title">
+                            {{ form.title }}
+                        </div>
+                        {% if form.subtitle %}
+                        <div class="form__subtitle">
+                            {{ form.subtitle }}
+                        </div>
+                        {% endif %}
+                        {% if form.warning %}
+                            <div class="form__warning">
+                                {{ form.warning }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% for field in form.fields %}
+                    {% if field.field.widget.input_type == 'text' or field.field.widget.input_type == 'number' %}
+                        <div class="form__field">
+                            <div class="form__label">
+                                {{ field.label }}
+                            </div>
+                            <div class="form__input form__input--{{ field.field.widget.input_type }}">
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% elif field.field.widget.input_type == 'select' %}
+                        <div class="form__field">
+                            <div class="form__label">
+                                {{ field.label }}
+                            </div>
+                            <ul class="form__select">
+                                <li class="form__option" data-command="select-option">
+                                    <span class="form__value">
+                                        {{ label }}
+                                    </span>
+                                    <span class="icon icon--small">
+                                        <i class="material-symbols-outlined">
+                                            arrow_forward_ios
+                                        </i>
+                                    </span>
+                                </li>
+                                <ul class="form__choices">
+                                    {% for v in field.field.choices %}
+                                        {{ v|printInConsole }}
+                                    {% endfor %}
+                                    {% for value, label in field.field.choices %}
+                                        <div class="form__option">
+                                            <input type="radio" name="{{ field.html_name }}" value="{{ field.value}}">
+                                            <span class="form__value">
+                                                {{ value.name }}
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                </ul>
+
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <button class="form__submit" type="submit">
+                    Submit
+                </button>
+            </form>
+        {% endfor %}
+        <div class="formbox__close">
+            <div class="icon icon--large">
+                <i class="material-symbols-outlined">
+                    cancel
+                </i>
+            </div>
+        </div>
+    </div>
+    
+</div>

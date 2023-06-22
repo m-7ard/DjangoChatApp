@@ -1,18 +1,22 @@
-<ul class="menu tooltip has-shadow" id="friend-menu" 
-data-context='{{ client_context }}'>
-    {% if member|member_has_role_perm:'edit_room' %}
-    <li class="menu__item tooltip__close overlay__trigger" data-view="update-room">
-        Update Room
-    </li>
+<ul class="menu tooltip has-shadow" id="friend-menu" data-context='{{ client_context }}'>
+    {% if member %}
+        {% if member|member_has_role_perm:'edit_room' %}
+            <li class="menu__item tooltip__close" data-command="get-form" data-target="rooms/update-room">
+                Update Room
+            </li>
+        {% endif %}
+        {% if member|member_has_role_perm:'manage_role' %}
+            <li class="menu__item tooltip__close" data-command="get-form" data-target="rooms/manage-roles">
+                Manage Roles
+            </li>
+        {% endif %}
+        {% if member.user == room.owner %}
+            <li class="menu__item tooltip__close" data-command="get-form" data-target="rooms/delete-room">
+                Delete Room
+            </li>
+        {% endif %}
     {% endif %}
-    {% if member|member_has_role_perm:'manage_role' %}
-    <li class="menu__item tooltip__close overlay__trigger" data-view="manage-roles">
-        Manage Roles
+    <li class="menu__item tooltip__close" data-command="get-form" data-target="rooms/report-room">
+        Report Room
     </li>
-    {% endif %}
-    {% if member.user == room.owner %}
-    <li class="menu__item tooltip__close overlay__trigger" data-view="delete-room">
-        Delete Room
-    </li>
-    {% endif %}
 </ul>

@@ -65,17 +65,4 @@ const overlayHandlers = {
         /**************/
 		return layer
 	},
-    'leave-room': async ({trigger, viewName}) => {
-        let pk = roomPk;
-        let url = new URL(window.location.origin + '/GetViewByName/' + viewName + '/');
-        url.searchParams.append('parameters', JSON.stringify({
-			'room': pk,
-		}));
-		let request = await fetch(url);
-		let response = await request.text();
-        let layer = quickCreateElement('div', {
-            innerHTML: response,
-        });
-        return layer
-    },
 }

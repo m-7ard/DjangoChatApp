@@ -8,23 +8,27 @@
             "room": {{ room|object_to_json }}
         }
     }'>
-        {% if user|is_member:room and user != room.owner %}
-            <span class="icon icon--small icon--hoverable overlay__trigger" data-view-name="leave-room">
+        {% if member and user != room.owner %}
+            <span class="icon icon--small icon--hoverable overlay__trigger" data-target="leave-room">
                 <i class="material-symbols-outlined">
                     door_open
                 </i>
             </span>
         {% endif %}
-		<span class="icon icon--small icon--hoverable right">
-			<i class="material-symbols-outlined">
-				notifications
-			</i>
-		</span>
-        <span class="icon icon--small icon--hoverable tooltip__trigger" data-positioning='{"top": "100%", "left": "0px"}' data-target="room-menu">
-			<i class="material-symbols-outlined">
-				settings
-			</i>
-		</span>
+        <span class="wrapper--flex right">
+            {% if member %}
+                <span class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        notifications
+                    </i>
+                </span>
+            {% endif %}
+            <span class="icon icon--small icon--hoverable tooltip__trigger" data-positioning='{"top": "100%", "left": "0px"}' data-target="room-menu">
+                <i class="material-symbols-outlined">
+                    settings
+                </i>
+            </span>
+        </span>
 	</div>
 	<div class="room-card">
         <div class="room-card__avatar has-shadow">

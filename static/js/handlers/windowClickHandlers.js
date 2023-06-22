@@ -6,6 +6,7 @@ const windowClickHandlers = {
 		dropdownContent.classList.toggle('dropdown__content--hidden');
 	},
 	'[data-command]': (event) => {
+        event.preventDefault();
 		let trigger = event.target.closest('[data-command]');
         let command = trigger.dataset.command;
         let handler = commandHandlers[command];
@@ -43,19 +44,33 @@ const windowClickHandlers = {
         tooltipLayer.appendChild(tooltip);
         fitFixedContainer(tooltip);
 	},
-	'.overlay__trigger': async (event) => {
-		event.preventDefault();
+    '.overlay__trigger': async (event) => {
+        event.preventDefault();
 		let trigger = event.target.closest('.overlay__trigger');
-		let viewName = trigger.dataset.viewName;		
-		let overlayLayer = await overlayHandlers[viewName]({trigger, viewName});
-		editClassList(overlayLayer, {add: ['layer', 'layer--overlay']});
-        overlayLayer.addEventListener('click', (e) => {
-            if (!(e.target.closest('.overlay')) || (e.target.closest('.overlay__close'))) {
-                overlayLayer.remove();
-            };
+        let target = trigger.dataset.target;
+        let contextObject = trigger.closest('[data-context]');
+        let url = new URL(window.location.origin + '/overlay/' + target);
+        if (contextObject) {
+            url.searchParams.append('context', contextObject.dataset.context);
+        };
+        let request = await fetch(url);
+        let overlay = await request.text();
+        let overlayLayer = quickCreateElement('div', {
+            classList: ['layer', 'layer--overlay'],
+            innerHTML: overlay,
+            parent: document.body,
+            eventListeners: {
+                'mouseup': (e) => {
+                    if (!(e.target.closest('.overlay')) || (e.target.closest('.overlay__close'))) {
+                        overlayLayer.remove();
+                    };
+                },
+            },
         });
-        document.body.appendChild(overlayLayer);
-	},
+        if (Object.keys(overlayHandlers).includes(target)) {
+            overlayHandlers[target]({trigger, overlayLayer});
+        };
+    },
 	'.select__trigger': function toggleSelect(event) {
 		let trigger = event.target.closest('.select__trigger');
 		let select = trigger.closest('.select');
@@ -69,42 +84,4 @@ const windowClickHandlers = {
 			select?.classList.remove('select--active');
 		}, {once: true});
 	},
-		'send-message': function submitMessage(event) {
-			if (!(event.key == "Enter") || (event.key === "Enter" && event.shiftKey)) {
-				return;
-			};
-			event.preventDefault();
-			chatSocket.send(JSON.stringify({
-				'action': 'send-message',
-				'content': chatbarInput.value.trim()
-			}));
-			chatbarInput.value = '';
-		},
-		'delete-message': function deleteMessageDB({messagePk}) {
-			chatSocket.send(JSON.stringify({
-				'action': 'delete-message',
-				'messagePk': messagePk
-			}));
-		},
-		'react-message': ({emotePk, messagePk}) => {
-            /* Parameter check for the sake of making debugging easier */
-            if (!emotePk || !messagePk) {
-                let missing = [];
-                if (!emotePk) { missing.push('emotePk') };
-                if (!messagePk) { missing.push('messagePk') };
-                throw Error(`chatSocketSendHandlers['react-message'] is missing ${missing}`);
-            };
-			chatSocket.send(JSON.stringify({
-				'action': 'react-message',
-				'emotePk': emotePk,
-				'messagePk': messagePk
-			}));
-		},
-		'edit-message': function editMessageDB({messagePk, content}) {
-			chatSocket.send(JSON.stringify({
-				'action': 'edit-message',
-				'messagePk': messagePk,
-				'content': content
-			}));
-		},
 };

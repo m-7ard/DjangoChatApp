@@ -124,6 +124,9 @@ $light-secondary: $battleship-grey;
 		position: relative;
 		flex: 1;
 	}
+    &--flex {
+        display: flex;
+    }
 }
 
 .has-shadow {
@@ -794,9 +797,11 @@ $light-secondary: $battleship-grey;
 
 .form {
 	@include flex-column($padding-large, $gap-medium);
-	width: 26rem;
 	color: $chalk-white;
 	overflow: overlay;
+    flex: 1;
+    background-color: $apollo-grey;
+    max-width: 35rem;
 
 	&__header {
 		@include flex-row(0, $gap-medium);
@@ -822,7 +827,7 @@ $light-secondary: $battleship-grey;
 	&__field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: $gap-small;
 
 		&--error {
 			.form__label {
@@ -836,6 +841,7 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__label {
+        margin-left: $padding-small;
 		font-weight: bold;
 		font-size: $text-secondary-medium;
 
@@ -845,17 +851,55 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__input {
-		input:not([type="file"]) {
+		&--text input, &--number input {
 			width: 100%;
-			padding: 0.5rem;
-			box-sizing: border-box;
-			border-radius: 4px;
-	
-			font-size: $text-primary-large;
+			padding: $padding-small;
+            color: inherit;
+			font-size: $text-primary-medium;
 			color-scheme: dark; // changes the icon and popup color
-			background-color: $black-grey;
+			background-color: $charcoal-grey;
+            border-radius: 4px;
+
+            &:focus {
+                background-color: $eerie-black;
+            }
 		}
 	}
+
+    &__select {
+        position: relative;
+
+        .form__option:first-child {
+            border-radius: 4px 4px 0px 0px;
+        }
+    }
+
+    &__choices {
+        position: absolute;
+        top: 100%;
+        width: 100%;
+        max-height: 600%;
+        border-radius: 4px;
+    }
+
+    &__option {
+        @include flex-row($padding-small, $gap-large);
+        justify-content: space-between;
+        position: relative;
+        box-sizing: border-box;
+        color: inherit;
+        font-size: $text-primary-medium;
+        background-color: $charcoal-grey;
+
+        input {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+        }
+    }
 
 	&__error {
 		font-size: $text-secondary-small;
@@ -867,17 +911,22 @@ $light-secondary: $battleship-grey;
 		} 
 	}
 
+    &__footer {
+        @include flex-row(0, $gap-large);
+        align-items: center;
+        margin-top: auto;
+    }
+
 	&__submit {
 		@include flex-row($padding-medium, 0);
 		justify-content: center;
 		align-items: center;
-		margin-top: auto;
 		font-weight: bold;
 
-		font-size: $text-primary-large;
+		font-size: $text-primary-medium;
 		color: $light-secondary;
 		background-color: $pakistan-green;
-		border-radius: 0.25rem;
+		border-radius: 4px;
 		transition: background-color 0.2s, color 0.2s;
 
 		&:hover {
@@ -900,11 +949,6 @@ $light-secondary: $battleship-grey;
 		&:hover {
 			background-color: $vermillion;
 		}
-	}
-
-	&__close {
-		cursor: pointer;
-		height: fit-content;
 	}
 
 	&__content {
@@ -1060,34 +1104,33 @@ $light-secondary: $battleship-grey;
 			color: $offline-secondary;
 		}
 
-		&__select {
-			color: $acapulco-aqua;
-		}
+
 	}
 }
 
 .formbox {
 	@include flex-row(0, 0);
-	border-radius: 0.25rem;
-	background-color: $black-chestnut-oak;
-	max-width: 100vw;
-	max-height: 100vh;
+    height: 100%;
+    width: 100%;
+    background-color: $apollo-grey;
 
-    &--fixed {
-        height: 30rem;
+    &__forms {
+        @include flex-row($padding-large, 0);
+        justify-content: space-between;
+        flex: 1;
     }
 
-    &--relative {
-        min-height: 75%;
+    &__close {
+        color: $battleship-grey;
     }
 
 	&__navigation {
 		@include flex-column($padding-large, $gap-medium);
-		border-right: 1px solid $charcoal-grey;
-		overflow: overlay;
+        background-color: $charcoal-grey;
 	}
 
 	&__button {
+        @include ellipsis;
 		@include flex-row($padding-medium, $gap-medium);
 		justify-content: space-between;
 		align-items: center;
@@ -1377,10 +1420,10 @@ $light-secondary: $battleship-grey;
 }
 
 .menu {
-	@include flex-column($padding-medium, 0);
+	@include flex-column($padding-small, 0);
 	background-color: $apollo-grey;
 	overflow: hidden;
-	border-radius: 0.25rem;
+	border-radius: 4px;
 
 	&__item {
 		@include flex-row($padding-medium, $gap-large);
@@ -1389,7 +1432,7 @@ $light-secondary: $battleship-grey;
         white-space: nowrap;
 		font-size: $text-secondary-medium;
 		color: $light-secondary;
-		border-radius: 0.25rem;
+		border-radius: 4px;
 		cursor: pointer;
 		transition: color 0.2s, background-color 0.2s;
 
@@ -1404,12 +1447,16 @@ $light-secondary: $battleship-grey;
 	position: relative;
 
 	&--active {
-		.select__options {
+		.select__choices {
 			display: block;
 		}
 	}
 
-	&__options {
+    &__option {
+        position: relative;
+    }
+
+	&__choices {
 		display: none;
 		position: absolute;
 		top: 100%;
@@ -1421,9 +1468,12 @@ $light-secondary: $battleship-grey;
 
 .switchable {
 	&__content {
-		&--hidden {
-			display: none;
-		}
+        &:not(.switchable__content--active) {
+            display: none;
+        }
+        &--active {
+            display: null !important;
+        }
 	}
 }
 

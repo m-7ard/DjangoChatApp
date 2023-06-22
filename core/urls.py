@@ -1,18 +1,15 @@
 from django.urls import path
 from .views import (
     FrontpageView, 
-    RequestData, 
     GetViewByName, 
-    GetHtmlElementFromModel, 
     GetTooltip,
+    GetOverlay,
 )
 
 
 urlpatterns = [
 	path('', FrontpageView.as_view(), name='frontpage'),
-    path('RequestData/', RequestData.as_view(), name='RequestData'),
     path('GetViewByName/<str:name>/', GetViewByName),
-    path('GetHtmlElementFromModel/', GetHtmlElementFromModel.as_view()),
     path('tooltip/<str:id>/', GetTooltip.as_view()),
-
+    path('overlay/<str:id>/', GetOverlay.as_view()),
 ]

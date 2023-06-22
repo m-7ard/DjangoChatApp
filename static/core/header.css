@@ -30,6 +30,9 @@
   position: relative;
   flex: 1;
 }
+.wrapper--flex {
+  display: flex;
+}
 
 .has-shadow {
   box-shadow: 0px 0px 4px 1px #0E0D0C;
@@ -628,9 +631,11 @@
   flex-direction: column;
   padding: 1rem;
   gap: 0.5rem;
-  width: 26rem;
   color: #e0dbd1;
   overflow: overlay;
+  flex: 1;
+  background-color: #181818;
+  max-width: 35rem;
 }
 .form__header {
   display: flex;
@@ -663,20 +668,56 @@
   border: 1px solid #6B2A2A;
 }
 .form__label {
+  margin-left: 0.25rem;
   font-weight: bold;
   font-size: 0.8125rem;
 }
 .form__label--danger {
   color: #FF3D3D;
 }
-.form__input input:not([type=file]) {
+.form__input--text input, .form__input--number input {
   width: 100%;
-  padding: 0.5rem;
-  box-sizing: border-box;
-  border-radius: 4px;
-  font-size: 1.125rem;
+  padding: 0.25rem;
+  color: inherit;
+  font-size: 1rem;
   color-scheme: dark;
-  background-color: #101010;
+  background-color: #131313;
+  border-radius: 4px;
+}
+.form__input--text input:focus, .form__input--number input:focus {
+  background-color: #212120;
+}
+.form__select {
+  position: relative;
+}
+.form__select .form__option:first-child {
+  border-radius: 4px 4px 0px 0px;
+}
+.form__choices {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  max-height: 600%;
+  border-radius: 4px;
+}
+.form__option {
+  display: flex;
+  padding: 0.25rem;
+  gap: 1rem;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
+  color: inherit;
+  font-size: 1rem;
+  background-color: #131313;
+}
+.form__option input {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
 }
 .form__error {
   font-size: 0.75rem;
@@ -685,18 +726,24 @@
 .form__error::before {
   content: "- ";
 }
+.form__footer {
+  display: flex;
+  padding: 0;
+  gap: 1rem;
+  align-items: center;
+  margin-top: auto;
+}
 .form__submit {
   display: flex;
   padding: 0.5rem;
   gap: 0;
   justify-content: center;
   align-items: center;
-  margin-top: auto;
   font-weight: bold;
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #8D8A84;
   background-color: #11450C;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   transition: background-color 0.2s, color 0.2s;
 }
 .form__submit:hover {
@@ -718,11 +765,6 @@
 }
 .form__delete:hover {
   background-color: #FF3D3D;
-}
-.form__close {
-  cursor: pointer;
-  height: -moz-fit-content;
-  height: fit-content;
 }
 .form__content {
   position: absolute;
@@ -852,34 +894,36 @@
 .form .option__kind {
   color: #62777e;
 }
-.form .option__select {
-  color: #80a4a3;
-}
 
 .formbox {
   display: flex;
   padding: 0;
   gap: 0;
-  border-radius: 0.25rem;
-  background-color: #1E1D1C;
-  max-width: 100vw;
-  max-height: 100vh;
+  height: 100%;
+  width: 100%;
+  background-color: #181818;
 }
-.formbox--fixed {
-  height: 30rem;
+.formbox__forms {
+  display: flex;
+  padding: 1rem;
+  gap: 0;
+  justify-content: space-between;
+  flex: 1;
 }
-.formbox--relative {
-  min-height: 75%;
+.formbox__close {
+  color: #8D8A84;
 }
 .formbox__navigation {
   display: flex;
   flex-direction: column;
   padding: 1rem;
   gap: 0.5rem;
-  border-right: 1px solid #131313;
-  overflow: overlay;
+  background-color: #131313;
 }
 .formbox__button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   display: flex;
   padding: 0.5rem;
   gap: 0.5rem;
@@ -1181,11 +1225,11 @@
 .menu {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem;
+  padding: 0.25rem;
   gap: 0;
   background-color: #181818;
   overflow: hidden;
-  border-radius: 0.25rem;
+  border-radius: 4px;
 }
 .menu__item {
   display: flex;
@@ -1196,7 +1240,7 @@
   white-space: nowrap;
   font-size: 0.8125rem;
   color: #8D8A84;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   cursor: pointer;
   transition: color 0.2s, background-color 0.2s;
 }
@@ -1208,10 +1252,13 @@
 .select {
   position: relative;
 }
-.select--active .select__options {
+.select--active .select__choices {
   display: block;
 }
-.select__options {
+.select__option {
+  position: relative;
+}
+.select__choices {
   display: none;
   position: absolute;
   top: 100%;
@@ -1220,8 +1267,11 @@
   overflow: overlay;
 }
 
-.switchable__content--hidden {
+.switchable__content:not(.switchable__content--active) {
   display: none;
+}
+.switchable__content--active {
+  display: !important;
 }
 
 .switch {

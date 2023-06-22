@@ -10,16 +10,17 @@ class ChannelCreationForm(forms.ModelForm):
         fields = ['name', 'description', 'kind', 'order']
         
 
-class ChannelEditForm(forms.ModelForm):
-    class Meta:
-        model = Channel
-        fields = ['name', 'description', 'order']
+"""
+
+    TODO: Override form fields with custom widget
+
+"""
 
 
-class ChannelCategoryForm(forms.ModelForm):
+class ChannelUpdateForm(forms.ModelForm):
     class Meta:
         model = Channel
-        fields = ['category']
+        fields = ['name', 'description', 'order', 'category']
         
 
 class ChannelPermissionsForm(forms.ModelForm):

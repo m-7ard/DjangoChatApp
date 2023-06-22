@@ -88,7 +88,7 @@ of them on the window.
 
 */
 
-window.addEventListener('click', (event) => {
+window.addEventListener('mouseup', (event) => {
 	// Note: this does not handle dropdown open logic, only closing / hiding, for open logic see windowClickHandlers['.dropdown__trigger']
 	let eventTrigger = event.target.closest('.dropdown__trigger');
 	dropdownContentContainers.forEach((content) => {
@@ -106,7 +106,7 @@ window.addEventListener('click', (event) => {
 });
 
 
-window.addEventListener('click', (event) => {
+window.addEventListener('mouseup', (event) => {
 	let tooltip = event.target.closest('.tooltip');
 	let trigger = event.target.closest('.tooltip__trigger');
     let close = event.target.closest('.tooltip__close');

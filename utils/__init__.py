@@ -14,6 +14,7 @@ channel_layer = get_channel_layer()
 def get_object_or_none(obj, **kwargs):
     return obj.objects.filter(**kwargs).first()
 
+
 def create_send_to_group(group_name, data):
     async def send_to_group():
         await channel_layer.group_send(group_name, data)
@@ -22,6 +23,7 @@ def create_send_to_group(group_name, data):
     sync_send_to_group = async_to_sync(send_to_group)
     
     return sync_send_to_group
+
 
 def get_object_or_none(obj, **kwargs):
     return obj.objects.filter(**kwargs).first()
@@ -48,6 +50,9 @@ def get_rendered_html(path, context_dict={}):
 
 
 def dict_to_object(json_dict):
+    if not json_dict:
+        return
+
     model_name = json_dict['model']
     app_label = json_dict['app']
     pk = json_dict['pk']
@@ -56,6 +61,9 @@ def dict_to_object(json_dict):
 
 
 def object_to_dict(self):
+    if not self:
+        return
+    
     parsed_object = {
         "pk": self.pk,
         "model": self.__class__.__name__,
