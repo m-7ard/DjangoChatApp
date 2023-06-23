@@ -1,3 +1,15 @@
+$light: (
+    primary: #e0dbd1,
+    secondary: #8D8A84,
+);
+
+/* 
+
+TODO: make more themes using maps (?)
+
+*/
+
+
 
 $chalk-white: #e0dbd1;
 $soft-grey: #D2D0C8;
@@ -16,21 +28,31 @@ $saturated-titanium-yellow: #d6d018;
 
 $deep-burgundy: #3d2b3c;
 
-$vampire-black: #080808;
-$black-grey: #101010;
+$black-olive: #403D39;
+$eerie-black: #212120;
 $charcoal-grey: #131313;
-$anthracite: #0E0D0C;
 $night: #161615;
 $black-chestnut-oak: #1E1D1C;
 $apollo-grey: #181818;
-$eerie-black: #212120;
-$black-olive: #403D39;
+$black-grey: #101010;
+$vampire-black: #080808;
+$anthracite: #0E0D0C;
 
 $pakistan-green: #11450C;
 $office-green: #158308;
 
 $garnet: #6B2A2A;
 $vermillion: #FF3D3D;
+
+$green-theme-1: (
+    "green-1": #284026,
+    "green-2": #2B4D29,
+    "green-3": #2E5A2C,
+
+    "light-1": map-get($light, secondary),
+    "light-2": map-get($light, secondary),
+    "light-3": map-get($light, primary),
+);
 
 /* Shadow Dimensions */
 $shadow-dimensions: 0px 0px 4px 1px;
@@ -137,22 +159,18 @@ $light-secondary: $battleship-grey;
 	position: relative;
 
 	&__content {
-
-		&--slide {
-			overflow: hidden;
-			transition: max-height 0.25s;
-		}
-
-		&--hidden {
-			&.dropdown__content--slide {
-				max-height: 0px !important;
-			}
-
-			&:not(.dropdown__content--slide) {
-				display: none;
-			}	
-		}
+        &:not(.dropdown__content--open) {
+            display: none;
+        }
 	}
+
+    &:has(.dropdown__content--open) &__marker {
+        transform: rotate(90deg);
+    }
+
+    &__marker {
+        transform: rotate(0deg);
+    }
 }
 
 .icon {
@@ -796,7 +814,7 @@ $light-secondary: $battleship-grey;
 }
 
 .form {
-	@include flex-column($padding-large, $gap-medium);
+	@include flex-column($padding-large, $gap-large);
 	color: $chalk-white;
 	overflow: overlay;
     flex: 1;
@@ -825,29 +843,12 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__field {
-		display: flex;
-		flex-direction: column;
-		gap: $gap-small;
-
-		&--error {
-			.form__label {
-				color: $vermillion;
-			}
-
-			.form__input input:not([type="file"]) {
-				border: 1px solid $garnet;
-			}
-		}
+		@include flex-column(0, $gap-small);
 	}
 
 	&__label {
-        margin-left: $padding-small;
 		font-weight: bold;
 		font-size: $text-secondary-medium;
-
-		&--danger {
-			color: $vermillion;
-		}
 	}
 
 	&__input {
@@ -869,7 +870,7 @@ $light-secondary: $battleship-grey;
     &__select {
         position: relative;
 
-        .form__option:first-child {
+        > .form__option:first-of-type {
             border-radius: 4px 4px 0px 0px;
         }
     }
@@ -879,18 +880,29 @@ $light-secondary: $battleship-grey;
         top: 100%;
         width: 100%;
         max-height: 600%;
-        border-radius: 4px;
+        border-radius: 0px 0px 4px 4px;
+        overflow: hidden;
     }
 
     &__option {
         @include flex-row($padding-small, $gap-large);
         justify-content: space-between;
+        align-items: center;
         position: relative;
-        box-sizing: border-box;
         color: inherit;
         font-size: $text-primary-medium;
         background-color: $charcoal-grey;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        
+        &:hover {
+            background-color: $black-chestnut-oak;
+        }
 
+        &:has(:checked) {
+            background-color: $eerie-black;
+        }
+        
         input {
             position: absolute;
             top: 0;
@@ -898,39 +910,39 @@ $light-secondary: $battleship-grey;
             left: 0;
             right: 0;
             opacity: 0;
+            cursor: pointer;
         }
     }
 
-	&__error {
-		font-size: $text-secondary-small;
+    &__reset {
+        color: $light-primary;
+        font-size: $text-secondary-large;
+        cursor: pointer;
 
-		color: $vermillion;
-
-		&::before {
-			content: "- ";
-		} 
-	}
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 
     &__footer {
-        @include flex-row(0, $gap-large);
+        @include flex-row($padding-medium, $gap-large);
+        background-color: $charcoal-grey;
         align-items: center;
+        justify-content: flex-end;
         margin-top: auto;
+        border-radius: 4px;
     }
 
 	&__submit {
 		@include flex-row($padding-medium, 0);
-		justify-content: center;
-		align-items: center;
-		font-weight: bold;
-
-		font-size: $text-primary-medium;
-		color: $light-secondary;
-		background-color: $pakistan-green;
+		font-size: $text-secondary-large;
+		color: map-get($green-theme-1, light-3);
+		background-color: map-get($green-theme-1, green-1);
 		border-radius: 4px;
 		transition: background-color 0.2s, color 0.2s;
 
 		&:hover {
-			background-color: $office-green;
+            background-color: map-get($green-theme-1, green-3);
 			color: $light-primary;
 		}
 	}
@@ -1121,7 +1133,11 @@ $light-secondary: $battleship-grey;
     }
 
     &__close {
-        color: $battleship-grey;
+        color: $light-secondary;
+
+        &:hover {
+            color: $light-primary;
+        }
     }
 
 	&__navigation {
@@ -1440,29 +1456,6 @@ $light-secondary: $battleship-grey;
 			color: $light-primary;
 			background-color: $eerie-black;
 		}
-	}
-}
-
-.select {
-	position: relative;
-
-	&--active {
-		.select__choices {
-			display: block;
-		}
-	}
-
-    &__option {
-        position: relative;
-    }
-
-	&__choices {
-		display: none;
-		position: absolute;
-		top: 100%;
-		max-height: 600%;
-		width: 100%;
-		overflow: overlay;
 	}
 }
 

@@ -8,20 +8,21 @@ class ChannelCreationForm(forms.ModelForm):
     class Meta:
         model = Channel
         fields = ['name', 'description', 'kind', 'order']
-        
-
-"""
-
-    TODO: Override form fields with custom widget
-
-"""
 
 
 class ChannelUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)        
+        self.fields['category'].queryset = self.instance.room.categories.all()
+        self.fields['category'].selected = self.instance.category
+
     class Meta:
         model = Channel
         fields = ['name', 'description', 'order', 'category']
-        
+    
+
+    
+
 
 class ChannelPermissionsForm(forms.ModelForm):
     class Meta:

@@ -149,28 +149,27 @@ class ChannelManageView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         channel = Channel.objects.get(pk=kwargs['pk'])
-        context['forms'] = []
-
-        context['forms'].extend([
+        context['forms'] = [
             {
                 'title': 'Update Channel',
-                'subtitle': channel.category.name,
+                'subtitle': channel.category and channel.category.name,
                 'fields': ChannelUpdateForm(instance=channel),
                 'url': reverse('update-channel', kwargs={'pk': channel.pk})
             },
             {
                 'title': 'Delete Channel',
-                'subtitle': channel.category.name,
+                'subtitle': channel.category and channel.category.name,
                 'warning': 'This action is not reversible',
                 'url': reverse('delete-channel', kwargs={'pk': channel.pk})
             },
-        ])
+        ]
         
         return render(request, self.template_name, context=context)
 
 
 class ChannelUpdateView(UpdateView):
     model = Channel
+    form_class = ChannelUpdateForm
 
     def get_success_url(self):
         return reverse('room', kwargs={'room': self.object.room.pk})

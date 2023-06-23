@@ -3,10 +3,9 @@ const windowClickHandlers = {
 	'.dropdown__trigger': (event) => {
 		let dropdown = event.target.closest('.dropdown');
 		let dropdownContent = dropdown.querySelector('.dropdown__content');
-		dropdownContent.classList.toggle('dropdown__content--hidden');
+		dropdownContent.classList.toggle('dropdown__content--open');
 	},
 	'[data-command]': (event) => {
-        event.preventDefault();
 		let trigger = event.target.closest('[data-command]');
         let command = trigger.dataset.command;
         let handler = commandHandlers[command];

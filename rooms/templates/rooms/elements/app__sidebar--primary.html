@@ -82,9 +82,9 @@
 					<li class="category__header">
 						<span class="category__name dropdown__trigger">
 							<span class="category__expand">
-								<div class="icon icon--tiny">
+								<div class="icon icon--tiny dropdown__marker">
 									<i class="material-symbols-outlined">
-										expand_more
+										chevron_right
 									</i>
 								</div>
 							</span>
@@ -102,7 +102,7 @@
 						</span>
                         {% endif %}
 					</li>
-					<ul class="category__channels dropdown__content dropdown__content--static">
+					<ul class="category__channels dropdown__content dropdown__content--open dropdown__content--static">
 						{% for object in category.channels.all %}
 							{% include "./channel.html" %}
 						{% endfor %}

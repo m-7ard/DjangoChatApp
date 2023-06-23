@@ -8,7 +8,7 @@
 	</nav>
     <div class="formbox__forms">
         {% for form in forms %}
-            <form class="form switchable__content {% if forloop.first %}switchable__content--active{% endif %}" action="{{ url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+            <form class="form switchable__content {% if forloop.first %}switchable__content--active{% endif %}" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
                 {% csrf_token %}
                 <div class="form__header">
                     <div>
@@ -16,9 +16,9 @@
                             {{ form.title }}
                         </div>
                         {% if form.subtitle %}
-                        <div class="form__subtitle">
-                            {{ form.subtitle }}
-                        </div>
+                            <div class="form__subtitle">
+                                {{ form.subtitle }}
+                            </div>
                         {% endif %}
                         {% if form.warning %}
                             <div class="form__warning">
@@ -42,47 +42,55 @@
                             <div class="form__label">
                                 {{ field.label }}
                             </div>
-                            <ul class="form__select">
-                                <li class="form__option" data-command="select-option">
-                                    <span class="form__value">
-                                        {{ label }}
-                                    </span>
-                                    <span class="icon icon--small">
-                                        <i class="material-symbols-outlined">
-                                            arrow_forward_ios
-                                        </i>
+                            <ul class="form__select dropdown select">
+                                <li class="form__option dropdown__trigger">
+                                    <div class="select__value">
+                                        {% firstof field.field.selected.name 'None' %}
+                                    </div>
+                                    <span class="dropdown__marker">
+                                        <div class="icon icon--tiny">
+                                            <i class="material-symbols-outlined">
+                                                chevron_right
+                                            </i>
+                                        </div>
                                     </span>
                                 </li>
-                                <ul class="form__choices">
-                                    {% for v in field.field.choices %}
-                                        {{ v|printInConsole }}
-                                    {% endfor %}
-                                    {% for value, label in field.field.choices %}
-                                        <div class="form__option">
-                                            <input type="radio" name="{{ field.html_name }}" value="{{ field.value}}">
-                                            <span class="form__value">
-                                                {{ value.name }}
-                                            </span>
-                                        </div>
+                                <ul class="form__choices dropdown__content">
+                                    <li class="form__option dropdown__close"
+                                    data-command="select-option" 
+                                    data-value="None">
+                                        <input type="radio" name="{{ field.name }}" value="" {% if field.field.selected == None %} checked {% endif %}>
+                                        None
+                                    </li>
+                                    {% for choice in field.field.queryset %}
+                                        <li class="form__option dropdown__close" 
+                                        data-command="select-option" 
+                                        data-value="{{ choice.name }}">
+                                            <input type="radio" name="{{ field.name }}" value="{{ choice.pk}}" {% if choice.pk == field.field.selected.pk %} checked {% endif %}>
+                                            {{ choice.name }}
+                                        </li>
                                     {% endfor %}
                                 </ul>
-
                             </ul>
                         </div>
                     {% endif %}
                 {% endfor %}
-                <button class="form__submit" type="submit">
-                    Submit
-                </button>
+                <div class="form__footer">
+                    <div class="form__reset">
+                        Reset
+                    </div>
+                    <button class="form__submit" type="submit">
+                        Submit Changes
+                    </button>
+                </div>
             </form>
         {% endfor %}
         <div class="formbox__close">
-            <div class="icon icon--large">
+            <div class="icon icon--medium icon--hoverable">
                 <i class="material-symbols-outlined">
                     cancel
                 </i>
             </div>
         </div>
     </div>
-    
 </div>

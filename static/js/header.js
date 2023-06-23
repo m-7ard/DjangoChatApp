@@ -66,43 +66,42 @@ window.addEventListener('click', function delegateClick(event) {
 	});
 });
 
-/* Slides need a fixed maxHeight */
-document.querySelectorAll('.dropdown__content--slide').forEach((content) => {
-	content.style.maxHeight = content.offsetHeight + "px";
-});
-
-/*
-
-1) Check if the event target is a dropdown trigger and save it to eventTrigger
-2) Iterate over all dropdown__content elements that are:
-	-not "static" (meant to stay open / only be closed by their own 
-	dropdown__trigger being clicked).
-	-not "semistatic" (meant to only close / be hidden through clicking off the content,
-	or clicking a trigger).
-3) If the dropdown__content's trigger is the same as the event target trigger (if there is
-	one at all) it will not be hidden, and the default behaviour of triggerDropdown will
-	trigger instead.
-
-This will ensure that non-static dropdown__content will be hidden when a click occurs outside
-of them on the window.
-
-*/
-
 window.addEventListener('mouseup', (event) => {
-	// Note: this does not handle dropdown open logic, only closing / hiding, for open logic see windowClickHandlers['.dropdown__trigger']
-	let eventTrigger = event.target.closest('.dropdown__trigger');
-	dropdownContentContainers.forEach((content) => {
-		let contentTrigger = content.closest('.dropdown').querySelector('.dropdown__trigger');
-		if (content.classList.contains('dropdown__content--static') || eventTrigger == contentTrigger) {
-			return;
-		};
-		if (content.classList.contains('dropdown__content--semistatic') && 
-			content.closest('.dropdown') == event.target.closest('.dropdown')) {
-				return;
-		};
-		
-		content.classList.add('dropdown__content--hidden');
-	});
+	const eventDropdownContent = event.target.closest('.dropdown__content');
+    const trigger = event.target.closest('.dropdown__trigger');
+    const close = event.target.closest('.dropdown__close');
+    let eventType;
+    if (!trigger && !eventDropdownContent) {
+        eventType = 'window click';
+    }
+    else if (eventDropdownContent) {
+        eventType = 'dropdown click';
+    };
+
+    //
+    if (eventType == 'window click' || close) {
+        closeDropdowns();
+    };
+
+    if (eventType == 'dropdown click') {
+        closeDropdowns(eventDropdownContent);
+    }
+
+    function closeDropdowns(skipElement) {
+        let openDropdownContent = document.querySelectorAll('.dropdown__content--open');
+        openDropdownContent.forEach((dropdownContent) => {
+            if (dropdownContent == skipElement) {
+                return;
+            }
+            
+            if (dropdownContent.classList.contains('dropdown__content--static')) {
+                return;
+            }
+            else {
+                dropdownContent.classList.remove('dropdown__content--open');
+            };
+        });
+    };
 });
 
 

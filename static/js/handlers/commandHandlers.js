@@ -3,12 +3,11 @@ const commandHandlers = {
 		event.target.closest('.error').remove();
 	},
 	'select-option': (event) => {
-		let option = event.target.closest('.option');
-		let select = option.closest('.select');
-		let selectTrigger = select.querySelector('.select__trigger');
-		let triggerName = selectTrigger.querySelector('.option__name');
-		triggerName.innerText = option.dataset.value;
-		select.classList.remove('select--active');
+		let trigger = event.target.closest('[data-command="select-option"]');
+        let select = trigger.closest('.select');
+        let value = trigger.dataset.value;
+        let root = select.querySelector('.select__value');
+        root.textContent = value;
 	},
 	'switch-tab': (event) => {
 		let button = event.target.closest('[data-command="switch-tab"]');
@@ -132,7 +131,7 @@ const commandHandlers = {
             innerHTML: form.outerHTML,
             eventListeners: {
                 'mouseup': (e) => {
-                    if (e.target.closest('.form__close')) {
+                    if (e.target.closest('.formbox__close')) {
                         e.target.closest('.layer').remove();
                     };
                 },
