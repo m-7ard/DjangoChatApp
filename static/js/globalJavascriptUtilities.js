@@ -124,3 +124,60 @@ async function getView({name, kwargs}) {
     let response = await request.text();
     return response;
 }
+
+async function processForm(event) {
+    event.preventDefault();
+    let form = event.target.closest('form');
+    let request = await fetch(form.action, {
+        method: form.method,
+        body: new FormData(form)
+    });
+    let response = await request.json();
+    // Remove old errors
+    form.querySelectorAll('.form__error')?.forEach((error) => error.remove());
+    // Remove old response
+    form.querySelector('.form__response')?.remove();
+    let responseMessage;
+    if (response.status == 200) {
+        responseMessage = quickCreateElement('div', {
+            classList: ['form__response', 'form__response--success'],
+            innerHTML: `
+                <div>
+                    Form was saved successfully.
+                </div>
+                <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            `,
+        });
+    }
+    else if (response.status == 400) {
+        responseMessage = quickCreateElement('div', {
+            classList: ['form__response', 'form__response--error'],
+            innerHTML: `
+                <div>
+                    Form could not be saved.
+                </div>
+                <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            `,
+        });
+        Object.entries(response.errors).forEach(([fieldName, errorList]) => {
+            let field = form.querySelector(`[data-name="${fieldName}"]`);
+            errorList.forEach((error) => {
+                let {code, message} = error;
+                quickCreateElement('div', {
+                    classList: ['form__error'],
+                    innerHTML: message,
+                    parent: field
+                });
+            });
+        });
+    };
+    form.prepend(responseMessage);
+}

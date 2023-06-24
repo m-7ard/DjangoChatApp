@@ -125,44 +125,19 @@ const commandHandlers = {
         let trigger = event.target.closest('[data-command="get-form"]');
         let formString = await getView({name: trigger.dataset.name, kwargs: trigger.dataset.kwargs});
         let form = parseHTML(formString);
-        quickCreateElement('div', {
+        let layer = quickCreateElement('div', {
             parent: document.body,
             classList: ['layer'],
             innerHTML: form.outerHTML,
             eventListeners: {
-                'mouseup': (e) => {
-                    if (e.target.closest('.formbox__close')) {
-                        e.target.closest('.layer').remove();
-                    };
-                },
+                'submit': processForm,
             }
         });
     },
-    /*
-    'get-form': async (event) => {
-        event.preventDefault();
-        let trigger = event.target.closest('[data-command="get-form"]');
-        let target = trigger.dataset.target;
-        let contextObject = trigger.closest('[data-context]');
-        let url = new URL(window.location.origin + '/GetViewByName/' + target);
-        if (contextObject) {
-            url.searchParams.append('context', contextObject.dataset.context);
-        };
-        let request = await fetch(url);
-        let response = await request.text();
-        let form = parseHTML(response);
-        quickCreateElement('div', {
-            parent: document.body,
-            classList: ['layer'],
-            innerHTML: form.outerHTML,
-            eventListeners: {
-                'mouseup': (e) => {
-                    if (e.target.closest('.form__close')) {
-                        e.target.closest('.layer').remove();
-                    };
-                },
-            }
-        });
-    },
-    */
+    'remove-closest': (event) => {
+        let trigger = event.target.closest('[data-command="remove-closest"]');
+        let targetSelector = trigger.dataset.target;
+        let target = trigger.closest(targetSelector);
+        target.remove();
+    }
 };

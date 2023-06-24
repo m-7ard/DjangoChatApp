@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from users.models import CustomUser
 
@@ -109,7 +110,7 @@ class Channel(models.Model):
     display_logs = models.ManyToManyField('Action', blank=True)
     category = models.ForeignKey('ChannelCategory', on_delete=models.SET_NULL, related_name='channels', null=True, blank=True)
     kind = models.CharField(max_length=20, choices=KIND, default=TEXT)
-    order = models.PositiveIntegerField(default=1_000_000)
+    order = models.PositiveIntegerField(default=100, validators=[MaxValueValidator(1_000_000), MinValueValidator(1)])
 
     def save(self, *args, **kwargs):
         created = getattr(self, 'pk', None) is None

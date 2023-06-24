@@ -1,3 +1,8 @@
+/* 
+
+TODO: make more themes using maps (?)
+
+*/
 /* Shadow Dimensions */
 .bottom {
   margin-top: auto !important;
@@ -635,6 +640,7 @@
   flex: 1;
   background-color: #181818;
   max-width: 35rem;
+  position: relative;
 }
 .form__header {
   display: flex;
@@ -647,10 +653,6 @@
   color: #e0dbd1;
   font-weight: bold;
 }
-.form__info {
-  font-size: 0.875rem;
-  color: #e0dbd1;
-}
 .form__subtitle {
   font-size: 0.8125rem;
   color: #8D8A84;
@@ -661,12 +663,17 @@
   padding: 0;
   gap: 0.25rem;
 }
+.form__error {
+  font-size: 0.75rem;
+  color: #FF3D3D;
+}
 .form__label {
   font-weight: bold;
   font-size: 0.8125rem;
 }
 .form__input--text input, .form__input--number input {
   width: 100%;
+  box-sizing: border-box;
   padding: 0.25rem;
   color: inherit;
   font-size: 1rem;
@@ -742,7 +749,6 @@
   padding: 0.5rem;
   gap: 0;
   font-size: 0.875rem;
-  color: #e0dbd1;
   background-color: #284026;
   border-radius: 4px;
   transition: background-color 0.2s, color 0.2s;
@@ -767,133 +773,22 @@
 .form__delete:hover {
   background-color: #FF3D3D;
 }
-.form__content {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  overflow: auto;
-}
-.form .checkbox {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  gap: 0.25rem;
-  border-bottom: 1px solid #131313;
-}
-.form .checkbox__header {
-  display: flex;
-  padding: 0;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: space-between;
-}
-.form .checkbox__label {
-  font-size: 0.9375rem;
-  color: #e0dbd1;
-}
-.form .checkbox__description {
-  font-size: 0.875rem;
-  color: #8D8A84;
-}
-.form .checkbox .switch {
-  height: 1rem;
-  width: 2.25rem;
-}
-.form .checkbox .switch input {
-  min-height: calc(100% + 0.5rem);
-  min-width: calc(100% + 0.5rem);
-}
-.form .checkbox .switch:has(input:not(:checked)) .switch__slider {
-  left: 0%;
-  background-color: #e0dbd1;
-}
-.form .checkbox .switch:has(input:not(:checked)) .switch__element div {
-  background-color: #403D39;
-}
-.form .checkbox .switch:has(input:checked) .switch__slider {
-  left: calc(100% - 1rem);
-  background-color: #e0dbd1;
-}
-.form .checkbox .switch:has(input:checked) .switch__element div {
-  background-color: #11450C;
-}
-.form .checkbox .switch__element div {
-  padding: 0.25rem;
-}
-.form .checkbox .switch__slider {
-  height: 1rem;
-  width: 1rem;
-}
-.form .checkbox .switch__edge {
-  height: 1rem;
-  width: 1rem;
-}
-.form .checkbox .switch__body {
-  height: 1rem;
-}
-.form .checkbox .switch__slider {
-  height: 1rem;
-  width: 1rem;
-}
-.form .option {
+.form__response {
   display: flex;
   padding: 0.5rem;
-  gap: 0.5rem;
-  background-color: #101010;
-  align-items: center;
-  transition: background-color 0.2s;
-}
-.form .option:hover {
-  background-color: #131313;
-}
-.form .option:hover .option__kind {
-  color: #e0dbd1;
-}
-.form .option:hover .option__select {
-  color: #e0dbd1;
-}
-.form .option:hover .option__name {
-  color: #e0dbd1;
-}
-.form .option:has(input:checked) {
-  background-color: #161615;
-}
-.form .option:has(input:checked) .option__kind {
-  color: #e0dbd1;
-}
-.form .option:has(input:checked) .option__select {
-  color: #e0dbd1;
-}
-.form .option:has(input:checked) .option__name {
-  color: #e0dbd1;
-}
-.form .option:has(input:checked) .option__select {
-  border-radius: 50%;
-  background-color: #e0dbd1;
-}
-.form .option__body {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  gap: 0;
+  gap: 1rem;
   justify-content: space-between;
-}
-.form .option__name {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-x: clip;
-  color: #D2D0C8;
+  height: -moz-fit-content;
+  height: fit-content;
+  border-radius: 4px;
   font-size: 0.9375rem;
+  font-weight: bold;
 }
-.form .option__description {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-x: clip;
-  color: #80a4a3;
-  font-size: 0.8125rem;
+.form__response--success {
+  background-color: #2E5A2C;
 }
-.form .option__kind {
-  color: #62777e;
+.form__response--error {
+  background-color: #6B2A2A;
 }
 
 .formbox {

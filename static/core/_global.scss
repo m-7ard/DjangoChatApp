@@ -49,9 +49,9 @@ $green-theme-1: (
     "green-2": #2B4D29,
     "green-3": #2E5A2C,
 
-    "light-1": map-get($light, secondary),
-    "light-2": map-get($light, secondary),
-    "light-3": map-get($light, primary),
+    "white-1": map-get($light, secondary),
+    "white-2": map-get($light, secondary),
+    "white-3": map-get($light, primary),
 );
 
 /* Shadow Dimensions */
@@ -820,6 +820,7 @@ $light-secondary: $battleship-grey;
     flex: 1;
     background-color: $apollo-grey;
     max-width: 35rem;
+    position: relative;
 
 	&__header {
 		@include flex-row(0, $gap-medium);
@@ -832,11 +833,6 @@ $light-secondary: $battleship-grey;
 		font-weight: bold;
 	}
 
-    &__info {
-        font-size: $text-secondary-large;
-        color: $chalk-white;
-    }
-
 	&__subtitle {
 		font-size: $text-secondary-medium;
 		color: $light-secondary;
@@ -846,6 +842,11 @@ $light-secondary: $battleship-grey;
 		@include flex-column(0, $gap-small);
 	}
 
+    &__error {
+        font-size: $text-secondary-small;
+        color: $vermillion;
+    }
+
 	&__label {
 		font-weight: bold;
 		font-size: $text-secondary-medium;
@@ -854,6 +855,7 @@ $light-secondary: $battleship-grey;
 	&__input {
 		&--text input, &--number input {
 			width: 100%;
+            box-sizing: border-box;
 			padding: $padding-small;
             color: inherit;
 			font-size: $text-primary-medium;
@@ -963,161 +965,22 @@ $light-secondary: $battleship-grey;
 		}
 	}
 
-	&__content {
-		@include absolute-box(100%, 100%);
-		overflow: auto;
-	}
+    &__response {
+        @include flex-row($padding-medium, $gap-large);
+        justify-content: space-between;
+        height: fit-content;
+        border-radius: 4px;
+        font-size: $text-primary-small;
+        font-weight: bold;     
 
-	.checkbox {
-		@include flex-column($padding-large, $gap-small);
-		border-bottom: 1px solid $charcoal-grey;
+        &--success {
+            background-color: map-get($green-theme-1, green-3);
+        }
 
-		&__header {
-			@include flex-row(0, $gap-medium);
-			align-items: center;
-			justify-content: space-between;
-		}
-
-		&__label {
-			font-size: $text-primary-small;
-			color: $light-primary;
-		}
-
-		&__description {
-			font-size: $text-secondary-large;
-			color: $light-secondary;
-		}
-
-		.switch {
-			$bg: $vampire-black;
-			$height: 1rem;
-			height: $height;
-			width: 2.25rem;
-
-			input {
-				min-height: calc(100% + $padding-small * 2);
-				min-width: calc(100% + $padding-small * 2);
-			}
-
-			&:has(input:not(:checked)) {
-				.switch__slider {
-					left: calc(0%);
-					background-color: $light-primary;
-				}
-
-				.switch__element {
-					div {
-						background-color: $black-olive;
-					}
-				}
-			}
-
-			&:has(input:checked) {
-				.switch__slider {
-					left: calc(100% - $height);
-					background-color: $light-primary;
-				}
-
-				.switch__element {
-					div {
-						background-color: $pakistan-green
-					}
-				}
-			}
-
-			&__element {
-				div {
-					padding: $padding-small;
-				}
-			}
-
-			&__slider {
-				height: $height;
-				width: $height;
-			}
-
-			&__edge {
-				height: $height;
-				width: $height;
-			}
-
-			&__body {
-				height: $height;
-			}
-
-			&__slider {
-				height: $height;
-				width: $height;
-			}
-		}
-	}
-
-	.option {
-		@include flex-row($padding-medium, $gap-medium);
-		background-color: $black-grey;
-		align-items: center;
-		transition: background-color 0.2s;
-
-		&:hover {
-			background-color: $charcoal-grey;
-
-			.option__kind {
-				color: $light-primary;
-			}
-
-			.option__select {
-				color: $light-primary;
-			}
-
-			.option__name {
-				color: $light-primary;
-			}
-		}
-
-		&:has(input:checked) {
-			background-color: $night;
-
-			.option__kind {
-				color: $light-primary;
-			}
-
-			.option__select {
-				color: $light-primary;
-			}
-
-			.option__name {
-				color: $light-primary;
-			}
-
-			.option__select {
-				border-radius: 50%;
-				background-color: $light-primary;
-			}
-		}
-
-		&__body {
-			@include flex-column(0, 0);
-			justify-content: space-between;
-		}
-
-		&__name {
-			@include ellipsis;
-			color: $soft-grey;
-			font-size: $text-primary-small;
-		}
-
-		&__description {
-			@include ellipsis;
-			color: $acapulco-aqua;
-			font-size: $text-secondary-medium;
-		}
-
-		&__kind {
-			color: $offline-secondary;
-		}
-
-
-	}
+        &--error {
+            background-color: $garnet;
+        }
+    }
 }
 
 .formbox {

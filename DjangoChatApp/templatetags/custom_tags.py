@@ -58,7 +58,9 @@ def attribute_modifier(obj, json_string):
 
 @register.filter(name="printInConsole")
 def printInConsole(self):
+
     print(self)
+
     return self
     
 

@@ -12,7 +12,7 @@ from django.forms.models import BaseModelForm
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse 
 from django.template import Template, RequestContext
 from django.contrib import messages
 
@@ -171,9 +171,13 @@ class ChannelUpdateView(UpdateView):
     model = Channel
     form_class = ChannelUpdateForm
 
-    def get_success_url(self):
-        return reverse('room', kwargs={'room': self.object.room.pk})
-    
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({'status': 200})
+        
 class ChannelDeleteView(DeleteView):
     model = Channel
 

@@ -66,6 +66,8 @@ window.addEventListener('click', function delegateClick(event) {
 	});
 });
 
+
+// Close dropdowns
 window.addEventListener('mouseup', (event) => {
 	const eventDropdownContent = event.target.closest('.dropdown__content');
     const trigger = event.target.closest('.dropdown__trigger');
@@ -105,6 +107,7 @@ window.addEventListener('mouseup', (event) => {
 });
 
 
+// Close tooltips
 window.addEventListener('mouseup', (event) => {
 	let tooltip = event.target.closest('.tooltip');
 	let trigger = event.target.closest('.tooltip__trigger');
