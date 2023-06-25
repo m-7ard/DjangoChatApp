@@ -1,2 +1,4 @@
 .envmedia /
 media/
+node_modules/
+media/
