@@ -25,6 +25,7 @@ from .forms import (
     ChannelPermissionsForm, 
     RoomCreationForm,
     RoomEditForm,
+    ChannelDeleteForm,
 )
 
 from utils import (
@@ -154,13 +155,16 @@ class ChannelManageView(TemplateView):
                 'title': 'Update Channel',
                 'subtitle': channel.category and channel.category.name,
                 'fields': ChannelUpdateForm(instance=channel),
-                'url': reverse('update-channel', kwargs={'pk': channel.pk})
+                'url': reverse('update-channel', kwargs={'pk': channel.pk}),
+                'type': 'update'
             },
             {
                 'title': 'Delete Channel',
                 'subtitle': channel.category and channel.category.name,
                 'warning': 'This action is not reversible',
-                'url': reverse('delete-channel', kwargs={'pk': channel.pk})
+                'fields': ChannelDeleteForm(instance=channel),
+                'url': reverse('delete-channel', kwargs={'pk': channel.pk}),
+                'type': 'delete'
             },
         ]
         
@@ -180,22 +184,16 @@ class ChannelUpdateView(UpdateView):
         
 class ChannelDeleteView(DeleteView):
     model = Channel
+    form_class = ChannelDeleteForm
 
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data(), 'message': 'Could not delete channel'})
 
-        channel = self.kwargs.get('channel')
-
-        return queryset.get(pk=channel)
-
-    def delete(self, *args, **kwargs):
-        self.object = self.get_object()
-        super().delete(*args, **kwargs)
-        
-    def get_success_url(self):
-        return reverse('room', kwargs={'room': self.object.room.pk})
-
+    def form_valid(self, form):
+        success_url = reverse('room', kwargs={'room': self.object.room.pk})
+        self.object.delete()
+        return JsonResponse({'status': 400, 'redirect': success_url})
+    
 
 class RoomCreateView(FormView):
     form_class = RoomCreationForm

@@ -9,13 +9,15 @@ const commandHandlers = {
         let root = select.querySelector('.select__value');
         root.textContent = value;
 	},
-	'switch-tab': (event) => {
-		let button = event.target.closest('[data-command="switch-tab"]');
-		let formbox = button.closest('.switchable');
-		let targetSelector = button.dataset.target;
-		let target = formbox.getElementById(targetSelector);
-		formbox.querySelectorAll('.switchable__content').forEach((form) => form.classList.add('switchable__content--hidden'));
-		target.classList.remove('switchable__content--hidden');
+	'switch-content': (event) => {
+		let trigger = event.target.closest('[data-command="switch-content"]');
+		let container = trigger.closest('.switchable');
+		let target = document.getElementById(trigger.dataset.target);
+		assignSoleClass({
+            className: 'switchable__content--active', 
+            container: container, 
+            target: target
+        });
 	},
     'delete-backlog': ({objectType, objectPk}) => {
         chatSocket.send(JSON.stringify({

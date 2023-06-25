@@ -10,6 +10,17 @@ class ChannelCreationForm(forms.ModelForm):
         fields = ['name', 'description', 'kind', 'order']
 
 
+class ChannelDeleteForm(forms.ModelForm):
+    confirm = forms.BooleanField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)        
+        self.fields['confirm'].label = f'I confirm that I wish to delete "{self.instance.name}"'
+
+    class Meta:
+        model = Channel
+        fields = ['confirm']
+
 class ChannelUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)        

@@ -3,11 +3,7 @@ $light: (
     secondary: #8D8A84,
 );
 
-/* 
 
-TODO: make more themes using maps (?)
-
-*/
 
 
 
@@ -53,6 +49,17 @@ $green-theme-1: (
     "white-2": map-get($light, secondary),
     "white-3": map-get($light, primary),
 );
+
+$red-theme-1: (
+    "red-1": #552224,
+    "red-2": #6A1E1F,
+    "red-3": #80191B,
+
+    "white-1": map-get($light, secondary),
+    "white-2": map-get($light, secondary),
+    "white-3": map-get($light, primary),
+);
+
 
 /* Shadow Dimensions */
 $shadow-dimensions: 0px 0px 4px 1px;
@@ -838,18 +845,106 @@ $light-secondary: $battleship-grey;
 		color: $light-secondary;
 	}
 
-	&__field {
-		@include flex-column(0, $gap-small);
+    &__row {
+        @include flex-row(0, 0);
+        justify-content: space-between;
+    }
+
+    &__warning {
+        color: $vermillion;
+        font-size: $text-primary-small;
+        font-weight: bold;
+    }
+
+    &__reset {
+        color: $light-primary;
+        font-size: $text-secondary-large;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__footer {
+        @include flex-row($padding-medium, $gap-large);
+        background-color: $charcoal-grey;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: auto;
+        border-radius: 4px;
+    }
+
+	&__submit {
+		@include flex-row($padding-medium, 0);
+		font-size: $text-secondary-large;
+		border-radius: 4px;
+		transition: background-color 0.2s, color 0.2s;
+
+        &--update {
+            color: map-get($green-theme-1, white-1);
+		    background-color: map-get($green-theme-1, green-1);
+        }
+
+        &--update:hover {
+            background-color: map-get($green-theme-1, green-3);
+			color: map-get($green-theme-1, white-3);
+		}
+
+        &--delete {
+            color: map-get($red-theme-1, white-1);
+		    background-color: map-get($red-theme-1, red-1);
+        }
+
+        &--delete:hover {
+            background-color: map-get($red-theme-1, red-3);
+			color: map-get($red-theme-1, white-3);
+		}
 	}
+
+    &__response {
+        @include flex-row($padding-medium, $gap-large);
+        justify-content: space-between;
+        height: fit-content;
+        border-radius: 4px;
+        font-size: $text-primary-small;
+        font-weight: bold;     
+
+        &--success {
+            background-color: map-get($green-theme-1, green-3);
+        }
+
+        &--error {
+            background-color: $garnet;
+        }
+    }
+}
+
+.field {
+    @include flex-column(0, $gap-small);
+
+    &:has(.form__error) .form__name  {
+        color: $vermillion;
+    }
+
+    &__row {
+        @include flex-row(0, $gap-small);
+        justify-content: space-between;
+        align-items: center;
+    }
 
     &__error {
         font-size: $text-secondary-small;
         color: $vermillion;
     }
 
-	&__label {
+	&__name {
 		font-weight: bold;
 		font-size: $text-secondary-medium;
+	}
+
+    &__label {
+		font-size: $text-secondary-large;
 	}
 
 	&__input {
@@ -868,6 +963,42 @@ $light-secondary: $battleship-grey;
             }
 		}
 	}
+
+    &__checkbox {
+        position: relative;
+        width: fit-content;
+        border-radius: 4px;
+        transition: background-color 0.2s, color 0.2s;
+        overflow: hidden;
+
+        &:has(:not(:checked)) {
+            background-color: transparent;
+            color: transparent;
+            border: 2px solid map-get($green-theme-1, green-1);
+        }
+
+        &:hover {
+            border: 2px solid map-get($green-theme-1, green-2);
+            color: map-get($green-theme-1, white-2);
+        }
+
+        &:has(:checked) {
+            background-color: map-get($green-theme-1, green-3);
+            color: map-get($green-theme-1, white-3);
+            border: 2px solid map-get($green-theme-1, green-3);
+
+        }
+
+        input {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
 
     &__select {
         position: relative;
@@ -913,72 +1044,6 @@ $light-secondary: $battleship-grey;
             right: 0;
             opacity: 0;
             cursor: pointer;
-        }
-    }
-
-    &__reset {
-        color: $light-primary;
-        font-size: $text-secondary-large;
-        cursor: pointer;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    &__footer {
-        @include flex-row($padding-medium, $gap-large);
-        background-color: $charcoal-grey;
-        align-items: center;
-        justify-content: flex-end;
-        margin-top: auto;
-        border-radius: 4px;
-    }
-
-	&__submit {
-		@include flex-row($padding-medium, 0);
-		font-size: $text-secondary-large;
-		color: map-get($green-theme-1, light-3);
-		background-color: map-get($green-theme-1, green-1);
-		border-radius: 4px;
-		transition: background-color 0.2s, color 0.2s;
-
-		&:hover {
-            background-color: map-get($green-theme-1, green-3);
-			color: $light-primary;
-		}
-	}
-
-	&__delete {
-		@include flex-row($padding-medium, 0);
-		border-radius: 0.25rem;
-		font-size: $text-primary-large;
-		font-weight: bold;
-		background-color: $garnet;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: background-color 0.2s;
-
-		&:hover {
-			background-color: $vermillion;
-		}
-	}
-
-    &__response {
-        @include flex-row($padding-medium, $gap-large);
-        justify-content: space-between;
-        height: fit-content;
-        border-radius: 4px;
-        font-size: $text-primary-small;
-        font-weight: bold;     
-
-        &--success {
-            background-color: map-get($green-theme-1, green-3);
-        }
-
-        &--error {
-            background-color: $garnet;
         }
     }
 }

@@ -134,16 +134,22 @@ async function processForm(event) {
     });
     let response = await request.json();
     // Remove old errors
-    form.querySelectorAll('.form__error')?.forEach((error) => error.remove());
+    form.querySelectorAll('.field__error')?.forEach((error) => error.remove());
     // Remove old response
     form.querySelector('.form__response')?.remove();
     let responseMessage;
+    if (response.redirect) {
+        window.location.replace(response.redirect);
+    }
+
     if (response.status == 200) {
+        // Success
+
         responseMessage = quickCreateElement('div', {
             classList: ['form__response', 'form__response--success'],
             innerHTML: `
                 <div>
-                    Form was saved successfully.
+                ${response.message || 'Form was saved successfully'}
                 </div>
                 <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
                     <i class="material-symbols-outlined">
@@ -154,11 +160,13 @@ async function processForm(event) {
         });
     }
     else if (response.status == 400) {
+        // Error
+
         responseMessage = quickCreateElement('div', {
             classList: ['form__response', 'form__response--error'],
             innerHTML: `
                 <div>
-                    Form could not be saved.
+                    ${response.message || 'Form could not be saved'}
                 </div>
                 <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
                     <i class="material-symbols-outlined">
@@ -172,7 +180,7 @@ async function processForm(event) {
             errorList.forEach((error) => {
                 let {code, message} = error;
                 quickCreateElement('div', {
-                    classList: ['form__error'],
+                    classList: ['field__error'],
                     innerHTML: message,
                     parent: field
                 });
@@ -180,4 +188,10 @@ async function processForm(event) {
         });
     };
     form.prepend(responseMessage);
+}
+
+function assignSoleClass({className, container, target}) {
+    let otherElements = Array.from(container.getElementsByClassName(className));
+    otherElements.forEach((element) => element.classList.remove(className));
+    target.classList.add(className);
 }

@@ -1,7 +1,7 @@
 <div class="formbox switchable">
 	<nav class="formbox__navigation">
         {% for form in forms %}
-            <div class="formbox__button" data-command="switch-tab" data-target="{{ form.title }}">
+            <div class="formbox__button" data-command="switch-content" data-target="{{ form.title }}">
                 {{ form.title }}
             </div>
         {% endfor %}
@@ -20,33 +20,52 @@
                                 {{ form.subtitle }}
                             </div>
                         {% endif %}
-                        {% if form.warning %}
-                            <div class="form__warning">
-                                {{ form.warning }}
-                            </div>
-                        {% endif %}
                     </div>
                 </div>
+                {% if form.warning %}
+                    <div class="form__warning">
+                        {{ form.warning }}
+                    </div>
+                {% endif %}
                 {% for field in form.fields %}
-                    <div class="form__field" data-name="{{ field.name }}">
-                        <div class="form__label">
-                            {{ field.label }}
-                        </div>
-                        {% if field.field.widget.input_type == 'text' or field.field.widget.input_type == 'number' %}
-                            <div class="form__input form__input--{{ field.field.widget.input_type }}">
+                    {% if field.field.widget.input_type == 'text' or field.field.widget.input_type == 'number' %}
+                        <div class="field" data-name="{{ field.name }}">
+                            <div class="field__name">
+                                {{ field.name|title }}
+                            </div>
+                            <div class="field__input field__input--{{ field.field.widget.input_type }}">
                                 {{ field }}
                             </div>
-                        {% elif field.field.widget.input_type == 'select' %}
-                            {% include "./elements/form-select.html" %}
-                        {% endif %}
-                    </div>
+                       </div>
+                    {% elif field.field.widget.input_type == 'select' %}
+                        {% include "./elements/form-select.html" %}
+                    {% elif field.field.widget.input_type == 'checkbox' %}
+                        <div class="field" data-name="{{ field.name }}">
+                            <div class="field__name">
+                                {{ field.name|title }}
+                            </div>
+                            <div class="field__row">
+                                <span class="field__label">
+                                    {{ field.label }}
+                                </span>
+                                <span class="field__checkbox">
+                                    <div class="icon icon--small">
+                                        <i class="material-symbols-outlined">
+                                            check
+                                        </i>
+                                    </div>
+                                    <input type="checkbox" name="{{ field.name }}">
+                                </span>
+                            </div>
+                        </div>                            
+                    {% endif %}
                 {% endfor %}
                 <div class="form__footer">
                     <div class="form__reset">
                         Reset
                     </div>
-                    <button class="form__submit" type="submit">
-                        Submit Changes
+                    <button class="form__submit form__submit--{{ form.type }}" type="submit">
+                        {{ form.title }}
                     </button>
                 </div>
             </form>

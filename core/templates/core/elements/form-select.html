@@ -1,30 +1,35 @@
-<ul class="form__select dropdown select">
-    <li class="form__option dropdown__trigger">
-        <div class="select__value">
-            {% firstof field.field.selected.name 'None' %}
-        </div>
-        <span class="dropdown__marker">
-            <div class="icon icon--tiny">
-                <i class="material-symbols-outlined">
-                    chevron_right
-                </i>
+<div class="field" data-name="{{ field.name }}">
+    <div class="field__name">
+        {{ field.name }}
+    </div>
+    <ul class="field__select dropdown select">
+        <li class="field__option dropdown__trigger">
+            <div class="select__value">
+                {% firstof field.field.selected.name 'None' %}
             </div>
-        </span>
-    </li>
-    <ul class="form__choices dropdown__content">
-        <li class="form__option dropdown__close"
-        data-command="select-option" 
-        data-value="None">
-            <input type="radio" name="{{ field.name }}" value="" {% if field.field.selected == None %} checked {% endif %}>
-            None
+            <span class="dropdown__marker">
+                <div class="icon icon--tiny">
+                    <i class="material-symbols-outlined">
+                        chevron_right
+                    </i>
+                </div>
+            </span>
         </li>
-        {% for choice in field.field.queryset %}
-            <li class="form__option dropdown__close" 
+        <ul class="field__choices dropdown__content">
+            <li class="field__option dropdown__close"
             data-command="select-option" 
-            data-value="{{ choice.name }}">
-                <input type="radio" name="{{ field.name }}" value="{{ choice.pk}}" {% if choice.pk == field.field.selected.pk %} checked {% endif %}>
-                {{ choice.name }}
+            data-value="None">
+                <input type="radio" name="{{ field.name }}" value="" {% if field.field.selected == None %} checked {% endif %}>
+                None
             </li>
-        {% endfor %}
+            {% for choice in field.field.queryset %}
+                <li class="field__option dropdown__close" 
+                data-command="select-option" 
+                data-value="{{ choice.name }}">
+                    <input type="radio" name="{{ field.name }}" value="{{ choice.pk}}" {% if choice.pk == field.field.selected.pk %} checked {% endif %}>
+                    {{ choice.name }}
+                </li>
+            {% endfor %}
+        </ul>
     </ul>
-</ul>
+</div>
