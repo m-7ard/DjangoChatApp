@@ -125,11 +125,15 @@ const commandHandlers = {
     'get-form': async (event) => {
         event.preventDefault();
         let trigger = event.target.closest('[data-command="get-form"]');
-        let formString = await getView({name: trigger.dataset.name, kwargs: trigger.dataset.kwargs});
+        let formString = await getView({
+            name: trigger.dataset.name, 
+            kwargs: trigger.dataset.kwargs,
+            query: trigger.dataset.query,
+        });
         let form = parseHTML(formString);
         let layer = quickCreateElement('div', {
             parent: document.body,
-            classList: ['layer'],
+            classList: ['layer', 'layer--form'],
             innerHTML: form.outerHTML,
             eventListeners: {
                 'submit': processForm,

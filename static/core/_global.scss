@@ -40,6 +40,16 @@ $office-green: #158308;
 $garnet: #6B2A2A;
 $vermillion: #FF3D3D;
 
+$theme__lime--dark: (
+    "lime--DARK": #2B3215,
+    "lime--NEUTRAL": #3D4B13, 
+    "lime--LIGHT": #506510,
+
+    "light--DARK": map-get($light, secondary),
+    "light--NEUTRAL": map-get($light, secondary),
+    "light--LIGHT": map-get($light, primary),
+);
+
 $green-theme-1: (
     "green-1": #284026,
     "green-2": #2B4D29,
@@ -249,8 +259,15 @@ $light-secondary: $battleship-grey;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background-color: rgba(0, 0, 0, 0.299);
+		background-color: rgba(0, 0, 0, 0.3);
 	}
+
+    &--form {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+		background-color: rgba(0, 0, 0, 0.3);
+    }
 }
 
 .container {
@@ -828,6 +845,8 @@ $light-secondary: $battleship-grey;
     background-color: $apollo-grey;
     max-width: 35rem;
     position: relative;
+    background-color: $apollo-grey;
+    border-radius: 4px;
 
 	&__header {
 		@include flex-row(0, $gap-medium);
@@ -900,6 +919,16 @@ $light-secondary: $battleship-grey;
             background-color: map-get($red-theme-1, red-3);
 			color: map-get($red-theme-1, white-3);
 		}
+
+        &--create {
+            color: map-get($theme__lime--dark, light--DARK);
+		    background-color: map-get($theme__lime--dark, lime--DARK);
+        }
+
+        &--create:hover {
+            color: map-get($theme__lime--dark, light--LIGHT);
+		    background-color: map-get($theme__lime--dark, lime--LIGHT);
+		}
 	}
 
     &__response {
@@ -919,6 +948,120 @@ $light-secondary: $battleship-grey;
         }
     }
 }
+
+.channel-kind-select {
+    @include flex-column(0, $gap-small);
+    $self: &;
+
+    &__option {
+        position: relative;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: 1fr 1fr;
+        padding: $padding-medium;
+        gap: 0 $gap-medium;
+        border-radius: 4px;
+        align-items: center;
+        overflow: hidden;
+        transition: background-color 0.2s, color 0.2s;
+
+        &:has(:not(:checked)) {
+            background-color: $charcoal-grey;
+            color: $light-secondary;
+    
+            #{$self}__checkbox {
+                color: transparent;
+            }
+        }
+    
+        &:hover {
+            background-color: $black-chestnut-oak;
+            color: $light-secondary;
+    
+            #{$self}__checkbox {
+                color: $light-secondary;
+            }
+        }
+    
+        &:has(:checked) {
+            background-color: $eerie-black;
+            color: $light-primary;
+    
+            #{$self}__checkbox {
+                color: $light-primary;
+            }
+        }
+    
+        input[type="radio"] {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        #{$self}__icon {
+            grid-row: 1 / -1;
+        }
+    
+        #{$self}__title {
+            grid-row: 1 / 2;
+            font-size: $text-primary-small;
+        }
+    
+        #{$self}__subtitle {
+            grid-row: 2 / 3;
+            font-size: $text-secondary-medium;
+        }
+    
+        #{$self}__checkbox {
+            grid-row: 1 / -1;
+        }
+    }
+}
+    
+
+
+
+.avatar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr auto;
+
+    .widget__image {
+        grid-row: 1 / -1;
+        width: 10rem;
+        height: 10rem;
+        border-radius: 9999px;
+        overflow: hidden;
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    }
+
+    .widget__title {
+        grid-row: 1 / 2;
+        font-size: $text-primary-small;
+    }
+
+    .widget__button {
+        @include flex-row($padding-medium, 0);
+        grid-row: 2 / 3;
+        font-size: $text-secondary-medium;
+        background-color: map-get($theme__lime--dark, lime--DARK);
+        color: map-get($theme__lime--dark, light--DARK);
+
+        &:hover {
+            background-color: map-get($theme__lime--dark, lime--LIGHT);
+            color: map-get($theme__lime--dark, light--LIGHT);
+        }
+    }
+}
+
 
 .field {
     @include flex-column(0, $gap-small);
@@ -948,7 +1091,7 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__input {
-		&--text input, &--number input {
+		&--chars input {
 			width: 100%;
             box-sizing: border-box;
 			padding: $padding-small;
@@ -1268,7 +1411,7 @@ $light-secondary: $battleship-grey;
 	}
 
 	&__channels {
-        @include flex-column(0, 0);
+        @include flex-column(0, 2px);
 		padding-left: $padding-medium;
 	}
 }

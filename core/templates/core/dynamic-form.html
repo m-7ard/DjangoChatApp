@@ -28,36 +28,47 @@
                     </div>
                 {% endif %}
                 {% for field in form.fields %}
-                    {% if field.field.widget.input_type == 'text' or field.field.widget.input_type == 'number' %}
+                    {% if field.field.widget.input_type == 'hidden' %}
+                        {{ field }}
+                    {% else %}
                         <div class="field" data-name="{{ field.name }}">
                             <div class="field__name">
                                 {{ field.name|title }}
                             </div>
-                            <div class="field__input field__input--{{ field.field.widget.input_type }}">
-                                {{ field }}
-                            </div>
-                       </div>
-                    {% elif field.field.widget.input_type == 'select' %}
-                        {% include "./elements/form-select.html" %}
-                    {% elif field.field.widget.input_type == 'checkbox' %}
-                        <div class="field" data-name="{{ field.name }}">
-                            <div class="field__name">
-                                {{ field.name|title }}
-                            </div>
-                            <div class="field__row">
-                                <span class="field__label">
-                                    {{ field.label }}
-                                </span>
-                                <span class="field__checkbox">
-                                    <div class="icon icon--small">
-                                        <i class="material-symbols-outlined">
-                                            check
-                                        </i>
+                            {% if field.field.widget.input_type in 'number text'|split %}
+                                <div class="field__input field__input--chars">
+                                    {{ field }}
+                                </div>
+                            {% elif field.field.widget.input_type in 'select'|split %}
+                                {% include "./elements/form-select.html" %}
+                            {% elif field.field.widget.input_type in 'image'|split %}
+                                <div class="widget widget--avatar">
+                                    <div class="widget__image">
+                                        <img src="{{ field.value.url }}">
                                     </div>
-                                    <input type="checkbox" name="{{ field.name }}">
-                                </span>
-                            </div>
-                        </div>                            
+                                    <div class="widget__title">
+                                        {{ field.label }}
+                                    </div>
+                                    <div class="widget__button">
+                                        Submit
+                                    </div>
+                                </div>
+                            {% elif widget.input_type == 'checkbox' %}
+                                <div class="field__row">
+                                    <span class="field__label">
+                                        {{ field.label }}
+                                    </span>
+                                    <span class="field__checkbox">
+                                        <div class="icon icon--small">
+                                            <i class="material-symbols-outlined">
+                                                check
+                                            </i>
+                                        </div>
+                                        <input type="checkbox" name="{{ field.name }}">
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endif %}
                 {% endfor %}
                 <div class="form__footer">

@@ -1,101 +1,60 @@
-<div class="formbox formbox--fixed overlay has-shadow">
-	<form class="form" action="{% url 'create-channel' room=room %}" method="POST" enctype="multipart/form-data">
-		{% csrf_token %}
-		<div class="form__header">
-			<div>
-				<div class="form__title">
-					{{ title }}
-				</div>
-				<div class="form__subtitle">
-					{{ category.name }}
-				</div>
-			</div>
-			<div class="form__close overlay__close">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">
-						close
-					</i>
-				</div>
-			</div>
-		</div>
-		<input type="hidden" name="category" value="{{ category.pk }}"></input>
-		{% for field in form %}
-            {% with field|attribute_modifier:'{"attribute": "errors", "on_success": "form__field--error"}' as modifier %}
-                {% if field.label == 'Kind' %}
-                <fieldset class="form__field">
-                    <div class="form__label">
-                        {{ field.label }}
-                    </div>
-                    <div class="option option--round">
-                        <input type="radio" name="kind" value="text" required>
-                        <span class="option__kind">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    title
-                                </i>
-                            </div>
-                        </span>
-                        <span class="option__body">
-                            <div class="option__name">
-                                Text
-                            </div>
-                            <div class="option__description">
-                                Send messages and reactions
-                            </div>
-                        </span>
-                        <span class="option__select right">
-                            <div class="icon icon--small">
-                                <i class="material-symbols-outlined">
-                                    radio_button_unchecked
-                                </i>
-                            </div>
-                        </span>
-                    </div>
-                    <div class="option option--round">
-                        <input type="radio" name="kind" value="voice" required>
-                        <span class="option__kind">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    volume_up
-                                </i>
-                            </div>
-                        </span>
-                        <span class="option__body">
-                            <div class="option__name">
-                                Voice
-                            </div>
-                            <div class="option__description">
-                                Voice channels are yet to be implemented
-                            </div>
-                        </span>
-                        <span class="option__select right">
-                            <div class="icon icon--small right">
-                                <i class="material-symbols-outlined">
-                                    radio_button_unchecked
-                                </i>
-                            </div>
-                        </span>
-                    </div>
-                </fieldset>
-                {% else %}
-                <div class="form__field {{ modifier }}">
-                    <div class="form__label">
-                        {{ field.label }}
-                    </div>
-                    <div class="form__input">
+<form class="form" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+    {% csrf_token %}
+    <div class="form__header">
+        <div>
+            <div class="form__title">
+                {{ form.title }}
+            </div>
+            {% if form.subtitle %}
+                <div class="form__subtitle">
+                    {{ form.subtitle }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if form.warning %}
+        <div class="form__warning">
+            {{ form.warning }}
+        </div>
+    {% endif %}
+    {% for field in form.fields %}
+        {% if field.field.widget|classname == 'HiddenInput' %}
+            {{ field }}
+        {% else %}
+            <div class="field" data-name="{{ field.name }}">
+                <div class="field__name">
+                    {{ field.name|title }}
+                </div>
+                {% if field.field.widget|classname in 'TextInput'|split %}
+                    <div class="field__input field__input--chars">
                         {{ field }}
                     </div>
-                    {% for error in field.errors %}
-                    <div class="form__error">
-                        {{ error }}
+                {% elif field.field.widget|classname == 'ChannelKindSelect' %}
+                    {{ field }}
+                {% elif widget.input_type == 'checkbox' %}
+                    <div class="field__row">
+                        <span class="field__label">
+                            {{ field.label }}
+                        </span>
+                        <span class="field__checkbox">
+                            <div class="icon icon--small">
+                                <i class="material-symbols-outlined">
+                                    check
+                                </i>
+                            </div>
+                            <input type="checkbox" name="{{ field.name }}">
+                        </span>
                     </div>
-                    {% endfor %}
-                </div>
                 {% endif %}
-            {% endwith %}
-		{% endfor %}
-		<button class="form__submit" type="submit">
-			Submit
-		</button>
-	</form>	
-</div>
+            </div>
+        {% endif %}
+    {% endfor %}
+    <div class="form__footer">
+        <div class="form__reset">
+            Reset
+        </div>
+        <button class="form__submit form__submit--{{ form.type }}" type="submit">
+            {{ form.title }}
+        </button>
+    </div>
+</form>

@@ -98,3 +98,7 @@ def member_has_role_perm(member, codename):
 def member_has_channel_perm(args, codename=None):
     member, channel = args
     return utils.member_has_channel_perm(member, channel, codename)
+
+@register.filter(name='split')
+def split(string, split_at=' '):
+    return string.split(split_at)

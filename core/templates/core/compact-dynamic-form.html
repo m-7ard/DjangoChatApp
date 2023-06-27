@@ -1,0 +1,63 @@
+<form class="form" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+    {% csrf_token %}
+    <div class="form__header">
+        <div>
+            <div class="form__title">
+                {{ form.title }}
+            </div>
+            {% if form.subtitle %}
+                <div class="form__subtitle">
+                    {{ form.subtitle }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if form.warning %}
+        <div class="form__warning">
+            {{ form.warning }}
+        </div>
+    {% endif %}
+    {% for field in form.fields %}
+        {% if field.field.widget.input_type in "text, number"|split %}
+            <div class="field" data-name="{{ field.name }}">
+                <div class="field__name">
+                    {{ field.name|title }}
+                </div>
+                <div class="field__input field__input--chars">
+                    {{ field }}
+                </div>
+            </div>
+        {% elif field.field.widget.input_type == 'select' %}
+            {% include "./elements/form-select.html" %}
+        {% elif field.field.widget.input_type == 'checkbox' %}
+            <div class="field" data-name="{{ field.name }}">
+                <div class="field__name">
+                    {{ field.name|title }}
+                </div>
+                <div class="field__row">
+                    <span class="field__label">
+                        {{ field.label }}
+                    </span>
+                    <span class="field__checkbox">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                check
+                            </i>
+                        </div>
+                        <input type="checkbox" name="{{ field.name }}">
+                    </span>
+                </div>
+            </div>  
+        {% elif field.field.widget.input_type == 'hidden' %}
+            {{ field }} 
+        {% endif %}
+    {% endfor %}
+    <div class="form__footer">
+        <div class="form__reset">
+            Reset
+        </div>
+        <button class="form__submit form__submit--{{ form.type }}" type="submit">
+            {{ form.title }}
+        </button>
+    </div>
+</form>

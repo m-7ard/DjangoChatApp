@@ -1,20 +1,3 @@
-/* getReverseUrl is not being used for now */
-
-async function getReverseUrl(name, parameters) {
-	let fetchUrl = new URL(
-		window.location.origin 
-		+ '/get_reverse_url/' 
-		+ name
-		+ '/'
-	);
-
-	fetchUrl.searchParams.append('parameters', JSON.stringify(parameters))
-	const response = await fetch(fetchUrl);
-	const viewUrl = await response.text();
-	return viewUrl
-}
-
-
 function positionFixedContainer(element, reference, positioning) {
 	// positioning arg needs to be a dict / object. Use JSON.parse on the data-positioning.
 	let referenceDimensions = reference.getBoundingClientRect();
@@ -115,10 +98,13 @@ function randomID() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
-async function getView({name, kwargs}) {
+async function getView({name, kwargs, query}) {
     let url = new URL(window.location.origin + '/GetViewByName/' + name);
     if (kwargs) {
         url.searchParams.append('kwargs', kwargs);
+    };
+    if (query) {
+        url.searchParams.append('query', query);
     };
     let request = await fetch(url);
     let response = await request.text();

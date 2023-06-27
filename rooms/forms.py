@@ -3,11 +3,23 @@ from .models import Room, Channel, Message, ChannelCategory, Action
 from utils import get_object_or_none
 
 from core.widgets import AvatarInput
+from .widgets import ChannelKindSelect
+from .models import Channel
 
-class ChannelCreationForm(forms.ModelForm):
+class ChannelCreateForm(forms.ModelForm):
+    kind = forms.ChoiceField(widget=ChannelKindSelect())
+
+    def __init__(self, category=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['kind'].choices = Channel.KIND
+
+        if category:
+            self.fields['category'].initial = category.pk
+            self.fields['category'].widget = self.fields['category'].hidden_widget()
+
     class Meta:
         model = Channel
-        fields = ['name', 'description', 'kind', 'order']
+        fields = ['name', 'description', 'kind', 'category']
 
 
 class ChannelDeleteForm(forms.ModelForm):
@@ -57,7 +69,7 @@ class RoomCreationForm(forms.ModelForm):
             return self.initial.get('image')
         
 
-class RoomEditForm(forms.ModelForm):
+class RoomUpdateForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['name', 'description', 'image']

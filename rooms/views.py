@@ -20,11 +20,11 @@ from django.contrib import messages
 from core.models import News
 from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission
 from .forms import (
-    ChannelCreationForm,
+    ChannelCreateForm,
     ChannelUpdateForm,
     ChannelPermissionsForm, 
     RoomCreationForm,
-    RoomEditForm,
+    RoomUpdateForm,
     ChannelDeleteForm,
 )
 
@@ -98,50 +98,52 @@ class ChannelView(DetailView):
         return self.render_to_response(context)
 
 
-class Alternative_ChannelCreateView(CreateView):
-    form_class = ChannelCreationForm
-    model = Channel
+class ChannelCreateView(CreateView):
+    form_class = ChannelCreateForm
     template_name = 'rooms/forms/create-channel.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        category_pk = request.GET.get('category')
+        category = ChannelCategory.objects.get(pk=category_pk) if category_pk else None
+        context = self.get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Channel',
+            'subtitle': category and category.name,
+            'fields': ChannelCreateForm(category=category),
+            'url': reverse('create-channel', kwargs={'pk': kwargs.get('pk')}),
+            'type': 'create'
+        }
+        
+        return render(request, self.template_name, context=context)
     
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
     def form_valid(self, form):
-        form.instance.room = Room.objects.get(pk=self.kwargs['room'])
-        form.instance.category = get_object_or_none(ChannelCategory, pk=self.request.POST.get('category'))
-        return super().form_valid(form)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['category'] = self.request.GET.get('category')
-        context['room'] = self.kwargs.get('room')
-        return context
+        channel = form.save(commit=False)
+        channel.room = Room.objects.get(pk=self.kwargs.get('pk'))
+        channel.save()
+        success_url = reverse('channel', kwargs={'channel': channel.pk, 'room': channel.room.pk})
+        return JsonResponse({'status': 400, 'redirect': success_url})
 
-    def get_success_url(self):
-        return reverse('channel', kwargs={'room': self.object.room.pk, 'channel': self.object.pk})
+class RoomManageView(TemplateView):
+    template_name = 'core/dynamic-form.html'
 
-
-
-class ChannelCreateView(FormView):
-    form_class = ChannelCreationForm
-    template_name = 'rooms/forms/create-channel.html'
-    
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['category'] = get_object_or_none(ChannelCategory, pk=request.GET.get('category'))
-        context['title'] = 'Create Channel'
-        return self.render_to_response(context)
+        room = Room.objects.get(pk=kwargs['pk'])
+        context['forms'] = [
+            {
+                'title': 'Update Room',
+                'subtitle': room.name,
+                'fields': RoomUpdateForm(),
+                'url': reverse('update-room', kwargs={'pk': room.pk}),
+                'type': 'update'
+            },
+        ]
     
-    def post(self, request, *args, **kwargs):
-        channel_form = ChannelCreationForm(data=request.POST)
-
-        if channel_form.is_valid():
-            channel = channel_form.save(commit=False)
-            channel.room = Room.objects.get(pk=kwargs['room'])
-            channel.category = get_object_or_none(ChannelCategory, pk=request.POST.get('category'))
-            channel.save()
-                
-            return redirect('channel', room=channel.room.pk, channel=channel.pk)
-        
-        messages.add_message(request, messages.ERROR, 'Something went wrong.')
-        return redirect('dashboard')
+        return render(request, self.template_name, context=context)
 
 
 class ChannelManageView(TemplateView):
@@ -182,6 +184,7 @@ class ChannelUpdateView(UpdateView):
         self.object = form.save()
         return JsonResponse({'status': 200})
         
+
 class ChannelDeleteView(DeleteView):
     model = Channel
     form_class = ChannelDeleteForm
@@ -210,32 +213,15 @@ class RoomCreateView(FormView):
         return render(request, self.template_name, {'form': room_form})
     
 
-class RoomUpdateView(TemplateView):
-    template_name = 'rooms/forms/update-room.html'
-    
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        room = Room.objects.get(pk=kwargs['room'])
-        context['room'] = room
-        context['RoomEditForm'] = RoomEditForm(instance=room)
-        
-        return self.render_to_response(context)
-    
-    def post(self, request, *args, **kwargs):
-        form_name = request.POST.get('form')
-        if form_name == 'RoomEditForm':
-            form = RoomEditForm
-        
-        room_form = form(
-            instance=Room.objects.get(pk=kwargs['room']),
-            data=request.POST,
-            files=request.FILES
-        )
+class RoomUpdateView(UpdateView):
+    model = Room
 
-        if room_form.is_valid():
-            room = room_form.save()
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
-            return redirect('room', room=room.pk)
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({'status': 400})
 
 
 class LeaveRoom(TemplateView):

@@ -1,0 +1,48 @@
+<div class="channel-kind-select">
+    <div class="channel-kind-select__option">
+        <div class="channel-kind-select__icon">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    title
+                </i>
+            </div>
+        </div>
+        <div class="channel-kind-select__title">
+            Text Channel
+        </div>
+        <div class="channel-kind-select__subtitle">
+            Send messages, emotes, images and more
+        </div>
+        <div class="channel-kind-select__checkbox">
+            <div class="icon icon--small">
+                <span class="material-symbols-outlined">
+                    radio_button_checked
+                </span>
+            </div>
+        </div>
+        <input type="radio" name="{{ widget.name }}" value="text" {% if widget.attrs.required %} required {% endif %}>
+    </div>
+    <div class="channel-kind-select__option">
+        <div class="channel-kind-select__icon">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    volume_up
+                </i>
+            </div>
+        </div>
+        <div class="channel-kind-select__title">
+            Voice Channel
+        </div>
+        <div class="channel-kind-select__subtitle">
+            Speak with other people in real time
+        </div>
+        <div class="channel-kind-select__checkbox">
+            <div class="icon icon--small">
+                <span class="material-symbols-outlined">
+                    radio_button_checked
+                </span>
+            </div>
+        </div>
+        <input type="radio" name="{{ widget.name }}" value="voice" {% if widget.attrs.required %} required {% endif %}>
+    </div>
+</div>

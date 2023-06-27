@@ -58,7 +58,7 @@ chatSocket.onopen = function() {
 }
 
 
-window.addEventListener('click', function delegateClick(event) {
+window.addEventListener('mouseup', function delegateClick(event) {
 	Object.entries(windowClickHandlers).forEach(([selector, handler]) => {
 		if (event.target.closest(selector)) {
 			handler(event);

@@ -1,5 +1,5 @@
 import json
-import urllib.parse
+from urllib.parse import urlencode
 from pathlib import Path
 
 
@@ -137,7 +137,8 @@ def _(request, *args, **kwargs):
 
 def GetViewByName(request, name, *args, **kwargs):
     kwargs = json.loads(request.GET.get('kwargs')) if request.GET.get('kwargs') else {}
-    url = reverse(name, kwargs=kwargs)
+    query = json.loads(request.GET.get('query')) if request.GET.get('query') else {}
+    url = reverse(name, kwargs=kwargs) + '?' + urlencode(query)
 
     return redirect(url)
 

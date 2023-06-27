@@ -93,7 +93,7 @@
 							</span>
 						</span>
                         {% if member|member_has_role_perm:'add_channel' %}
-						<span class="category__add right overlay__trigger" data-view-name="create-channel">
+						<span class="category__add right" data-command="get-form" data-name="create-channel" data-kwargs='{"pk": {{ room.pk }}}' data-query='{"category": {{ category.pk }}}'>
 							<div class="icon icon--tiny icon--hoverable">
 								<i class="material-symbols-outlined">
 									add
