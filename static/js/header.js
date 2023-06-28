@@ -57,8 +57,8 @@ chatSocket.onopen = function() {
 	}))
 }
 
-
-window.addEventListener('mouseup', function delegateClick(event) {
+/* TODO: use click event to catch link clicks */
+window.addEventListener('click', function delegateClick(event) {
 	Object.entries(windowClickHandlers).forEach(([selector, handler]) => {
 		if (event.target.closest(selector)) {
 			handler(event);

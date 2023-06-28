@@ -3,16 +3,16 @@ from .models import Room, Channel, Message, ChannelCategory, Action
 from utils import get_object_or_none
 
 from core.widgets import AvatarInput
-from .widgets import ChannelKindSelect
+from commons.widgets import ChannelKindSelect, FormTextInput, FormNumberInput, FormSelect
 from .models import Channel
 
 class ChannelCreateForm(forms.ModelForm):
-    kind = forms.ChoiceField(widget=ChannelKindSelect())
+    kind = forms.ChoiceField(widget=ChannelKindSelect(), choices=Channel.KIND)
+    name = forms.CharField(widget=FormTextInput())
+    description = forms.CharField(widget=FormTextInput())
 
     def __init__(self, category=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['kind'].choices = Channel.KIND
-
         if category:
             self.fields['category'].initial = category.pk
             self.fields['category'].widget = self.fields['category'].hidden_widget()
@@ -34,17 +34,20 @@ class ChannelDeleteForm(forms.ModelForm):
         fields = ['confirm']
 
 class ChannelUpdateForm(forms.ModelForm):
+    name = forms.CharField(widget=FormTextInput())
+    description = forms.CharField(widget=FormTextInput())
+    order =  forms.CharField(widget=FormNumberInput())
+    category = forms.ModelChoiceField(widget=FormSelect(), queryset=None)
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)        
+        super().__init__(*args, **kwargs)
         self.fields['category'].queryset = self.instance.room.categories.all()
         self.fields['category'].selected = self.instance.category
+        self.fields['category'].widget.field = self.fields['category']
 
     class Meta:
         model = Channel
         fields = ['name', 'description', 'order', 'category']
-    
-
-    
 
 
 class ChannelPermissionsForm(forms.ModelForm):

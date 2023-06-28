@@ -100,7 +100,7 @@ class ChannelView(DetailView):
 
 class ChannelCreateView(CreateView):
     form_class = ChannelCreateForm
-    template_name = 'rooms/forms/create-channel.html'
+    template_name = 'commons/forms/compact-dynamic-form.html'
 
     def get(self, request, *args, **kwargs):
         self.object = None
@@ -128,7 +128,7 @@ class ChannelCreateView(CreateView):
         return JsonResponse({'status': 400, 'redirect': success_url})
 
 class RoomManageView(TemplateView):
-    template_name = 'core/dynamic-form.html'
+    template_name = 'commons/forms/full-dynamic-form.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -147,7 +147,7 @@ class RoomManageView(TemplateView):
 
 
 class ChannelManageView(TemplateView):
-    template_name = 'core/dynamic-form.html'
+    template_name = 'commons/forms/full-dynamic-form.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)

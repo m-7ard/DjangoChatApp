@@ -739,6 +739,20 @@
   background-color: #6B2A2A;
 }
 
+.form-text-input input, .form-number-input input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: inherit;
+  color-scheme: dark;
+  background-color: #131313;
+}
+.form-text-input input:focus, .form-number-input input:focus {
+  background-color: #212120;
+}
+
 .channel-kind-select {
   display: flex;
   flex-direction: column;
@@ -862,19 +876,6 @@
 }
 .field__label {
   font-size: 0.875rem;
-}
-.field__input--chars input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.25rem;
-  color: inherit;
-  font-size: 1rem;
-  color-scheme: dark;
-  background-color: #131313;
-  border-radius: 4px;
-}
-.field__input--chars input:focus {
-  background-color: #212120;
 }
 .field__checkbox {
   position: relative;

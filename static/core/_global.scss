@@ -949,6 +949,23 @@ $light-secondary: $battleship-grey;
     }
 }
 
+.form-text-input, .form-number-input {
+    input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: $padding-small;
+        border-radius: 4px;
+        font-size: $text-primary-medium;
+        color: inherit;
+        color-scheme: dark;
+        background-color: $charcoal-grey;
+    
+        &:focus {
+            background-color: $eerie-black;
+        }
+    }
+}
+
 .channel-kind-select {
     @include flex-column(0, $gap-small);
     $self: &;
@@ -1088,23 +1105,6 @@ $light-secondary: $battleship-grey;
 
     &__label {
 		font-size: $text-secondary-large;
-	}
-
-	&__input {
-		&--chars input {
-			width: 100%;
-            box-sizing: border-box;
-			padding: $padding-small;
-            color: inherit;
-			font-size: $text-primary-medium;
-			color-scheme: dark; // changes the icon and popup color
-			background-color: $charcoal-grey;
-            border-radius: 4px;
-
-            &:focus {
-                background-color: $eerie-black;
-            }
-		}
 	}
 
     &__checkbox {

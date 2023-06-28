@@ -1,7 +1,7 @@
 <ul class="field__select dropdown select">
     <li class="field__option dropdown__trigger">
         <div class="select__value">
-            {% firstof field.field.selected.name 'None' %}
+            {{ field.selected.name }}
         </div>
         <span class="dropdown__marker">
             <div class="icon icon--tiny">
@@ -15,14 +15,14 @@
         <li class="field__option dropdown__close"
         data-command="select-option" 
         data-value="None">
-            <input type="radio" name="{{ field.name }}" value="" {% if field.field.selected == None %} checked {% endif %}>
+            <input type="radio" name="{{ widget.name }}" value="" {% if field.selected == None %} checked {% endif %}>
             None
         </li>
-        {% for choice in field.field.queryset %}
+        {% for choice in field.queryset %}
             <li class="field__option dropdown__close" 
             data-command="select-option" 
             data-value="{{ choice.name }}">
-                <input type="radio" name="{{ field.name }}" value="{{ choice.pk}}" {% if choice.pk == field.field.selected.pk %} checked {% endif %}>
+                <input type="radio" name="{{ widget.name }}" value="{{ choice.pk}}" {% if choice.pk == field.selected.pk %} checked {% endif %}>
                 {{ choice.name }}
             </li>
         {% endfor %}
