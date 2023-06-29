@@ -8,7 +8,6 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.forms.forms import BaseForm
 from django.forms.models import BaseModelForm
-
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -167,6 +166,12 @@ class ChannelManageView(TemplateView):
                 'fields': ChannelDeleteForm(instance=channel),
                 'url': reverse('delete-channel', kwargs={'pk': channel.pk}),
                 'type': 'delete'
+            },
+            {
+                'title': 'Manage Channel Permissions',
+                'prerender': get_rendered_html('rooms/forms/manage-channel-permissions.html', {
+                    'channel': channel
+                }),
             },
         ]
         

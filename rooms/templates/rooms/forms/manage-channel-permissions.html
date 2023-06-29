@@ -1,0 +1,34 @@
+<div class="form switchable__content" id="Manage Channel Permissions">
+    <div class="form__header">
+        <div>
+            <div class="form__title">
+                Manage Channel Permissions
+            </div>
+            {% if channel.category %}
+                <div class="form__subtitle">
+                    {{ channel.category.name }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="field">
+        <div class="field__name">
+            {{ field.name }}
+        </div>
+        <div class="permissions">
+            <div class="permissions__navigation">
+                <div class="field__name">
+                    Roles
+                </div>
+                {% for config in channel.configs.all %}
+                    <div class="permissions__role">
+                        <div class="permissions__role-color" style="background-color: {{ config.role.color }};"></div>
+                        <div>
+                            {{ config.role.name }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

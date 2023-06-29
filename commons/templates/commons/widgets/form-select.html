@@ -1,5 +1,5 @@
-<ul class="field__select dropdown select">
-    <li class="field__option dropdown__trigger">
+<ul class="form-select dropdown select">
+    <li class="form-select__option dropdown__trigger">
         <div class="select__value">
             {{ field.selected.name }}
         </div>
@@ -11,15 +11,15 @@
             </div>
         </span>
     </li>
-    <ul class="field__choices dropdown__content">
-        <li class="field__option dropdown__close"
+    <ul class="form-select__choices dropdown__content">
+        <li class="form-select__option dropdown__close"
         data-command="select-option" 
         data-value="None">
             <input type="radio" name="{{ widget.name }}" value="" {% if field.selected == None %} checked {% endif %}>
             None
         </li>
         {% for choice in field.queryset %}
-            <li class="field__option dropdown__close" 
+            <li class="form-select__option dropdown__close" 
             data-command="select-option" 
             data-value="{{ choice.name }}">
                 <input type="radio" name="{{ widget.name }}" value="{{ choice.pk}}" {% if choice.pk == field.selected.pk %} checked {% endif %}>

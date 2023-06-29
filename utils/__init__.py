@@ -7,6 +7,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync, sync_to_async
 from django.template import Template, Context
 from django.http import HttpResponse
+from django.template import loader
 
 channel_layer = get_channel_layer()
 
@@ -39,14 +40,14 @@ def send_to_group(group_name, data):
         print(f'Exception occured in utils.send_to_group: {e}')
 
 
-def get_rendered_html(path, context_dict={}):
-    with open(path, 'r') as f:
-        html_string = f.read()
-
-    template = Template(html_string)
+def get_rendered_html(template_path, context_dict={}):
+    """
+        template_path name needs to be in template_name format like app/.../template.html
+        rather than using a path constructed using Path, os etc
+    """ 
+    template = loader.get_template(template_path)
     context = Context(context_dict)
-    
-    return template.render(context)
+    return template.render(context_dict)
 
 
 def dict_to_object(json_dict):

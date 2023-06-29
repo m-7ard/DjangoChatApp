@@ -3,7 +3,13 @@ from .models import Room, Channel, Message, ChannelCategory, Action
 from utils import get_object_or_none
 
 from core.widgets import AvatarInput
-from commons.widgets import ChannelKindSelect, FormTextInput, FormNumberInput, FormSelect
+from commons.widgets import (
+    ChannelKindSelect, 
+    FormTextInput, 
+    FormNumberInput, 
+    FormSelect,
+    FormCheckbox,
+)
 from .models import Channel
 
 class ChannelCreateForm(forms.ModelForm):
@@ -23,11 +29,12 @@ class ChannelCreateForm(forms.ModelForm):
 
 
 class ChannelDeleteForm(forms.ModelForm):
-    confirm = forms.BooleanField()
+    confirm = forms.BooleanField(widget=FormCheckbox())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)        
         self.fields['confirm'].label = f'I confirm that I wish to delete "{self.instance.name}"'
+        self.fields['confirm'].widget.field = self.fields['confirm']
 
     class Meta:
         model = Channel

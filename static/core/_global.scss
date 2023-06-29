@@ -949,6 +949,54 @@ $light-secondary: $battleship-grey;
     }
 }
 
+.form-select {
+    $self: &;
+    position: relative;
+
+    > #{$self}__option:first-of-type {
+        border-radius: 4px 4px 0px 0px;
+    }
+
+    &__choices {
+        position: absolute;
+        top: 100%;
+        width: 100%;
+        max-height: 600%;
+        border-radius: 0px 0px 4px 4px;
+        overflow: hidden;
+    }
+
+    &__option {
+        @include flex-row($padding-small, $gap-large);
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        color: inherit;
+        font-size: $text-primary-medium;
+        background-color: $charcoal-grey;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        
+        &:hover {
+            background-color: $black-chestnut-oak;
+        }
+
+        &:has(:checked) {
+            background-color: $eerie-black;
+        }
+        
+        input {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
+}
+
 .form-text-input, .form-number-input {
     input {
         width: 100%;
@@ -1039,7 +1087,73 @@ $light-secondary: $battleship-grey;
     }
 }
     
+.form-checkbox {
+    position: relative;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
 
+    &:has(:not(:checked)) {
+        color: transparent;
+        background-color: transparent;
+        border: 2px solid map-get($green-theme-1, green-1);
+    }
+
+    &:hover {
+        color: map-get($green-theme-1, white-2);
+        background-color: map-get($green-theme-1, green-2);
+        border: 2px solid map-get($green-theme-1, green-2);
+    }
+
+    &:has(:checked) {
+        color: map-get($green-theme-1, white-3);
+        background-color: map-get($green-theme-1, green-3);
+        border: 2px solid map-get($green-theme-1, green-3);
+    }
+
+    input {
+        position: absolute;
+        top: -2px;
+        bottom: -2px;
+        left: -2px;
+        right: -2px;
+        opacity: 0;
+        cursor: pointer;
+    }
+}
+
+.permissions {
+    @include flex-row(0, 0);
+
+    &__navigation {
+		@include flex-column($padding-medium, $gap-small);
+        background-color: $charcoal-grey;
+        border-radius: 4px;
+        overflow: hidden;
+        width: 10rem;
+    }
+
+    &__role {
+        @include flex-row($padding-small $padding-medium, $gap-medium);
+        align-items: center;
+        color: $light-secondary;
+        font-size: $text-primary-small;
+        transition: background-color 0.2s, color 0.2s;
+        cursor: pointer;
+        border-radius: 4px;
+
+        &:hover {
+            color: $light-primary;
+            background-color: $black-chestnut-oak;
+        }
+    }
+
+    &__role-color {
+        padding: $padding-small;
+        border-radius: 9999px;
+    }
+}
 
 
 .avatar {
@@ -1083,7 +1197,7 @@ $light-secondary: $battleship-grey;
 .field {
     @include flex-column(0, $gap-small);
 
-    &:has(.form__error) .form__name  {
+    &:has(.form__error) .field__name  {
         color: $vermillion;
     }
 
@@ -1104,7 +1218,7 @@ $light-secondary: $battleship-grey;
 	}
 
     &__label {
-		font-size: $text-secondary-large;
+		font-size: $text-primary-small;
 	}
 
     &__checkbox {
@@ -1138,53 +1252,6 @@ $light-secondary: $battleship-grey;
             right: 0;
             top: 0;
             bottom: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-    }
-
-    &__select {
-        position: relative;
-
-        > .form__option:first-of-type {
-            border-radius: 4px 4px 0px 0px;
-        }
-    }
-
-    &__choices {
-        position: absolute;
-        top: 100%;
-        width: 100%;
-        max-height: 600%;
-        border-radius: 0px 0px 4px 4px;
-        overflow: hidden;
-    }
-
-    &__option {
-        @include flex-row($padding-small, $gap-large);
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-        color: inherit;
-        font-size: $text-primary-medium;
-        background-color: $charcoal-grey;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        
-        &:hover {
-            background-color: $black-chestnut-oak;
-        }
-
-        &:has(:checked) {
-            background-color: $eerie-black;
-        }
-        
-        input {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
             opacity: 0;
             cursor: pointer;
         }
