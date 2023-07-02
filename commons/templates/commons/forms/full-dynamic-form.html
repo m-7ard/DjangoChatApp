@@ -1,7 +1,15 @@
 <div class="formbox switchable">
-	<nav class="formbox__navigation">
+	<nav class="formbox__navigation switchable__navigation">
         {% for form in forms %}
-            <div class="formbox__button" data-command="switch-content" data-target="{{ form.title }}">
+            <div class="formbox__button" 
+            data-command="switch-content" 
+            data-target="{{ form.title|replaceWhitespace }}"
+            {% if forloop.first %}
+            data-state="active"
+            {% else %}
+            data-state="inactive"
+            {% endif %}
+            >
                 {{ form.title }}
             </div>
         {% endfor %}
@@ -11,7 +19,7 @@
             {% if 'prerender' in form %}
                 {{ form.prerender }}
             {% else %}
-                <form class="form switchable__content {% if forloop.first %}switchable__content--active{% endif %}" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+                <form class="form switchable__content {% if forloop.first %}switchable__content--active{% endif %}" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title|replaceWhitespace }}">
                     {% csrf_token %}
                     <div class="form__header">
                         <div>

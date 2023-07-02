@@ -63,7 +63,10 @@ class ChannelPermissionsForm(forms.ModelForm):
         fields = ['display_logs']
         
     
-class RoomCreationForm(forms.ModelForm):
+class RoomCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=FormTextInput())
+    description = forms.CharField(widget=FormTextInput())
+
     class Meta:
         model = Room
         fields = ['name', 'description', 'image']

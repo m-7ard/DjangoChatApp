@@ -41,10 +41,7 @@ class Room(models.Model):
                 order=0,
             )
 
-
-            default_role = Role.objects.create(room=self, name='all', color='#e0dbd1')
-            self.default_role = default_role
-
+            self.default_role = Role.objects.create(room=self, name='all', color='#e0dbd1')
 
             default_channel = Channel.objects.create(
                 room=self,
@@ -54,9 +51,8 @@ class Room(models.Model):
             )
             default_channel.display_logs.set(Action.objects.all())
 
-
             owner_member = Member.objects.create(user=self.owner, room=self)
-            owner_member.roles.add(default_role)
+            owner_member.roles.add(self.default_role)
 
             super().save(*args, **kwargs)
     
@@ -148,7 +144,7 @@ class Role(models.Model):
     room = models.ForeignKey(Room, related_name='roles', on_delete=models.CASCADE, null=True)
     color = models.CharField(default='#e0dbd1', max_length=7)
     admin = models.BooleanField(default=False)
-    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='role', null=True)
+    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='role', null=True, blank=True)
     
     class Meta:
         permissions = [
@@ -179,41 +175,41 @@ class Role(models.Model):
         # Only the first role requires explicit perms
         if self.room.default_role:
             default_permissions = {
-                'add_message': None, 
-                'delete_message': None,
-                'view_message': None, 
-                'view_channel': None, 
-                'add_reaction': None, 
-                'attach_image': None, 
-                'change_nickname': None,
-                'manage_nickname': None,
-                'manage_channel': None,
-                'manage_role': None,
-                'change_room': None,
-                'mention_all': None,
-                'pin_message': None,
-                'kick_user': None, 
-                'ban_user': None,
-                'read_logs': None,
+                'add_message': 'Null', 
+                'delete_message': 'Null',
+                'view_message': 'Null', 
+                'view_channel': 'Null', 
+                'add_reaction': 'Null', 
+                'attach_image': 'Null', 
+                'change_nickname': 'Null',
+                'manage_nickname': 'Null',
+                'manage_channel': 'Null',
+                'manage_role': 'Null',
+                'change_room': 'Null',
+                'mention_all': 'Null',
+                'pin_message': 'Null',
+                'kick_user': 'Null', 
+                'ban_user': 'Null',
+                'read_logs': 'Null',
             }
         else:
              default_permissions = {
-                'add_message': True, 
-                'delete_message': True,
-                'view_message': True, 
-                'view_channel': True, 
-                'add_reaction': True, 
-                'attach_image': True, 
-                'change_nickname': True,
-                'manage_nickname': False,
-                'manage_channel': False,
-                'manage_role': False,
-                'change_room': False,
-                'mention_all': True,
-                'pin_message': False,
-                'kick_user': False, 
-                'ban_user': False,
-                'read_logs': False,
+                'add_message': 'True', 
+                'delete_message': 'True',
+                'view_message': 'True', 
+                'view_channel': 'True', 
+                'add_reaction': 'True', 
+                'attach_image': 'True', 
+                'change_nickname': 'True',
+                'manage_nickname': 'False',
+                'manage_channel': 'False',
+                'manage_role': 'False',
+                'change_room': 'False',
+                'mention_all': 'True',
+                'pin_message': 'False',
+                'kick_user': 'False', 
+                'ban_user': 'False',
+                'read_logs': 'False',
             }
 
         self.permissions = ModelPermissionGroup.objects.create()
@@ -274,7 +270,7 @@ class Member(models.Model):
         return self.user.bio
 
     def __str__(self):
-            return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
+        return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
 
 
 # *Message
@@ -369,7 +365,7 @@ class Reaction(models.Model):
 class ChannelConfiguration(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='channels_configs')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='configs')
-    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='channel_configuration', null=True)
+    permissions = models.OneToOneField('ModelPermissionGroup', on_delete=models.CASCADE, related_name='channel_configuration', null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -390,12 +386,12 @@ class ChannelConfiguration(models.Model):
 
     def set_default_perms(self):
         default_permissions = {
-            'add_message': None,
-            'view_message': None,
-            'view_channel': None,
-            'add_reaction': None,
-            'attach_image': None,
-            'manage_role': None,
+            'add_message': 'Null',
+            'view_message': 'Null',
+            'view_channel': 'Null',
+            'add_reaction': 'Null',
+            'attach_image': 'Null',
+            'manage_role': 'Null',
         }
         self.permissions = ModelPermissionGroup.objects.create()
         for codename, value in default_permissions.items():
@@ -414,21 +410,23 @@ class ChannelConfiguration(models.Model):
 # *ModelPermission
 class ModelPermission(models.Model):
     CHOICES = (
-        (True, 'True'),
-        (False, 'False'),
-        (None, 'None')
+        ('True', 'True'),
+        ('False', 'False'),
+        ('Null', 'Null')
     )
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
     group = models.ForeignKey('ModelPermissionGroup', on_delete=models.CASCADE, related_name='items')
     value = models.CharField(max_length=20, choices=CHOICES, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.group.__str__()} |*| {self.permission.codename}: {self.value}'
+        return self.permission.name
 
 # *ModelPermissionGroup
 class ModelPermissionGroup(models.Model):
     def __str__(self):
         if hasattr(self, 'role'):
-            return self.role.__str__()
+            return f'For: role {self.role.pk}'
         elif hasattr(self, 'channel_configuration'):
-            return self.channel_configuration.__str__()
+            return f'For channel configuration {self.channel_configuration.pk}'
+        else: 
+            return 'Misconfigured Permission Group'

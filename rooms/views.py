@@ -4,25 +4,22 @@ from itertools import chain
 from typing import Any, Dict
 from pathlib import Path
 
-from django.db import models
-from django.db.models.query import QuerySet
-from django.forms.forms import BaseForm
-from django.forms.models import BaseModelForm
+
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse 
-from django.template import Template, RequestContext
 from django.contrib import messages
+from django.template.loader import render_to_string
 
 
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission
+from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission, ModelPermissionGroup
 from .forms import (
     ChannelCreateForm,
     ChannelUpdateForm,
     ChannelPermissionsForm, 
-    RoomCreationForm,
+    RoomCreateForm,
     RoomUpdateForm,
     ChannelDeleteForm,
 )
@@ -55,9 +52,6 @@ class RoomView(DetailView):
         member = get_object_or_none(Member, room=room, user=self.request.user)
         context['member'] = member
         return context
-
-    def get_object(self):
-        return Room.objects.get(pk=self.kwargs['room'])
 
 
 class ChannelView(DetailView):
@@ -169,9 +163,15 @@ class ChannelManageView(TemplateView):
             },
             {
                 'title': 'Manage Channel Permissions',
-                'prerender': get_rendered_html('rooms/forms/manage-channel-permissions.html', {
-                    'channel': channel
-                }),
+                'prerender': render_to_string(
+                    request=request, 
+                    template_name='rooms/forms/manage-channel-permissions.html', 
+                    context= {
+                        'title': 'Manage Channel Permissions',
+                        'channel': channel,
+                        'type': 'update'
+                    }
+                ),
             },
         ]
         
@@ -203,19 +203,31 @@ class ChannelDeleteView(DeleteView):
         return JsonResponse({'status': 400, 'redirect': success_url})
     
 
-class RoomCreateView(FormView):
-    form_class = RoomCreationForm
-    template_name = 'rooms/forms/create-room.html'
-    
-    def post(self, request, *args, **kwargs):
-        room_form = RoomCreationForm(data=request.POST, files=request.FILES)
-        if room_form.is_valid():
-            room = room_form.save(commit=False)
-            room.owner = request.user
-            room.save()
-            return redirect('room', room=room.pk)
+class RoomCreateView(CreateView):
+    form_class = RoomCreateForm
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        context = self.get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Room',
+            'fields': RoomCreateForm(),
+            'url': reverse('create-room'),
+            'type': 'create'
+        }
         
-        return render(request, self.template_name, {'form': room_form})
+        return render(request, self.template_name, context=context)
+    
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+    def form_valid(self, form):
+        room = form.save(commit=False)
+        room.owner = self.request.user
+        room.save()
+        success_url = reverse('room', kwargs={'pk': room.pk})
+        return JsonResponse({'status': 400, 'redirect': success_url})
     
 
 class RoomUpdateView(UpdateView):
@@ -321,3 +333,14 @@ class RoomListView(ListView):
         queryset = super().get_queryset()
         queryset = queryset.filter(public=True)
         return queryset
+    
+
+class ModelPermissionGroupUpdateView(View):
+    def post(self, request, *args, **kwargs):
+        print(request.POST)
+        model_permissions_group = ModelPermissionGroup.objects.get(pk=kwargs.get('pk'))
+        for model_permission in model_permissions_group.items.all():
+            model_permission.value = request.POST[model_permission.permission.codename]
+            model_permission.save()
+        
+        return JsonResponse({'status': 200})

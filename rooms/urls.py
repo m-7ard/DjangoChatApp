@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
 	path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
-	path('<int:room>/', views.RoomView.as_view(), name='room'),
+	path('<int:pk>/', views.RoomView.as_view(), name='room'),
     path('<int:room>/leave/', views.LeaveRoom.as_view(), name='leave-room'),
     path('<int:room>/join/', views.JoinRoom.as_view(), name='join-room'),
 	path('<int:room>/<int:channel>/', views.ChannelView.as_view(), name='channel'),
@@ -21,4 +21,5 @@ urlpatterns = [
     path('delete/room/<int:pk>/', views.DeleteRoom.as_view(), name='delete-room'),
     path('explore/', views.RoomListView.as_view(), name='explore-rooms'),
     
+    path('update/permissions/<int:pk>', views.ModelPermissionGroupUpdateView.as_view(), name='update-model-permissions'),
 ]

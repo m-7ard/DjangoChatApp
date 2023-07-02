@@ -11,13 +11,21 @@ const commandHandlers = {
 	},
 	'switch-content': (event) => {
 		let trigger = event.target.closest('[data-command="switch-content"]');
-		let container = trigger.closest('.switchable');
-		let target = document.getElementById(trigger.dataset.target);
-		assignSoleClass({
-            className: 'switchable__content--active', 
-            container: container, 
-            target: target
+        let navigation = trigger.closest('.switchable__navigation')
+		navigation.querySelectorAll('[data-command="switch-content"]').forEach((contentSwitch) => {
+            contentSwitch.dataset.state = 'inactive';
         });
+        trigger.dataset.state = 'active';
+        
+        let target = document.getElementById(trigger.dataset.target);
+		let container = trigger.closest('.switchable');
+        
+        container.querySelectorAll('.switchable__content').forEach((content) => {
+            if (content.closest('.switchable') == container) {
+                content.classList.remove('switchable__content--active')
+            };
+        });
+        target.classList.add('switchable__content--active');
 	},
     'delete-backlog': ({objectType, objectPk}) => {
         chatSocket.send(JSON.stringify({

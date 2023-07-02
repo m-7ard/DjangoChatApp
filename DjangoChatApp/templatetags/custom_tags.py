@@ -100,3 +100,7 @@ def member_has_channel_perm(args, codename=None):
 @register.filter(name='split')
 def split(string, split_at=' '):
     return string.split(split_at)
+
+@register.filter(name='replaceWhitespace')
+def split(string, replace_with='_'):
+    return string.replace(' ', replace_with)

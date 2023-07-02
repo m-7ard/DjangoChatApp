@@ -177,7 +177,7 @@ async function processForm(event) {
 }
 
 function assignSoleClass({className, container, target}) {
-    let otherElements = Array.from(container.getElementsByClassName(className));
+    let otherElements = container.querySelector(className);
     otherElements.forEach((element) => element.classList.remove(className));
     target.classList.add(className);
 }

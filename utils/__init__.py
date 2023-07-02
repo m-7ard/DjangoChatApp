@@ -5,9 +5,10 @@ from pathlib import Path
 from django.apps import apps
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync, sync_to_async
-from django.template import Template, Context
+from django.template import Template, Context, RequestContext
 from django.http import HttpResponse
 from django.template import loader
+from django.shortcuts import render
 
 channel_layer = get_channel_layer()
 
@@ -40,14 +41,8 @@ def send_to_group(group_name, data):
         print(f'Exception occured in utils.send_to_group: {e}')
 
 
-def get_rendered_html(template_path, context_dict={}):
-    """
-        template_path name needs to be in template_name format like app/.../template.html
-        rather than using a path constructed using Path, os etc
-    """ 
-    template = loader.get_template(template_path)
-    context = Context(context_dict)
-    return template.render(context_dict)
+def get_rendered_html(template_path, request, context_dict={}):
+    return render(request, template_path, context_dict)
 
 
 def dict_to_object(json_dict):

@@ -40,7 +40,17 @@ $office-green: #158308;
 $garnet: #6B2A2A;
 $vermillion: #FF3D3D;
 
-$theme__lime--dark: (
+$blue-theme--DARK: (
+    "blue--DARK": #151532,
+    "blue--NEUTRAL": #13134B, 
+    "blue--LIGHT": #101065,
+
+    "light--DARK": map-get($light, secondary),
+    "light--NEUTRAL": map-get($light, secondary),
+    "light--LIGHT": map-get($light, primary),
+);
+
+$lime-theme--DARK: (
     "lime--DARK": #2B3215,
     "lime--NEUTRAL": #3D4B13, 
     "lime--LIGHT": #506510,
@@ -50,24 +60,24 @@ $theme__lime--dark: (
     "light--LIGHT": map-get($light, primary),
 );
 
-$green-theme-1: (
-    "green-1": #284026,
-    "green-2": #2B4D29,
-    "green-3": #2E5A2C,
+$green-theme--DARK: (
+    "green--DARK": #284026,
+    "green--NEUTRAL": #2B4D29,
+    "green--LIGHT": #2E5A2C,
 
-    "white-1": map-get($light, secondary),
-    "white-2": map-get($light, secondary),
-    "white-3": map-get($light, primary),
+    "white--DARK": map-get($light, secondary),
+    "white--NEUTRAL": map-get($light, secondary),
+    "white--LIGHT": map-get($light, primary),
 );
 
-$red-theme-1: (
-    "red-1": #552224,
-    "red-2": #6A1E1F,
-    "red-3": #80191B,
+$red-theme--DARK: (
+    "red--DARK": #552224,
+    "red--NEUTRAL": #6A1E1F,
+    "red--LIGHT": #80191B,
 
-    "white-1": map-get($light, secondary),
-    "white-2": map-get($light, secondary),
-    "white-3": map-get($light, primary),
+    "white--DARK": map-get($light, secondary),
+    "white--NEUTRAL": map-get($light, secondary),
+    "white--LIGHT": map-get($light, primary),
 );
 
 
@@ -901,33 +911,33 @@ $light-secondary: $battleship-grey;
 		transition: background-color 0.2s, color 0.2s;
 
         &--update {
-            color: map-get($green-theme-1, white-1);
-		    background-color: map-get($green-theme-1, green-1);
+            color: map-get($green-theme--DARK, white-1);
+		    background-color: map-get($green-theme--DARK, green--DARK);
         }
 
         &--update:hover {
-            background-color: map-get($green-theme-1, green-3);
-			color: map-get($green-theme-1, white-3);
+            background-color: map-get($green-theme--DARK, green--LIGHT);
+			color: map-get($green-theme--DARK, white-3);
 		}
 
         &--delete {
-            color: map-get($red-theme-1, white-1);
-		    background-color: map-get($red-theme-1, red-1);
+            color: map-get($red-theme--DARK, white-1);
+		    background-color: map-get($red-theme--DARK, red--DARK);
         }
 
         &--delete:hover {
-            background-color: map-get($red-theme-1, red-3);
-			color: map-get($red-theme-1, white-3);
+            background-color: map-get($red-theme--DARK, red--LIGHT);
+			color: map-get($red-theme--DARK, white-3);
 		}
 
         &--create {
-            color: map-get($theme__lime--dark, light--DARK);
-		    background-color: map-get($theme__lime--dark, lime--DARK);
+            color: map-get($lime-theme--DARK, light--DARK);
+		    background-color: map-get($lime-theme--DARK, lime--DARK);
         }
 
         &--create:hover {
-            color: map-get($theme__lime--dark, light--LIGHT);
-		    background-color: map-get($theme__lime--dark, lime--LIGHT);
+            color: map-get($lime-theme--DARK, light--LIGHT);
+		    background-color: map-get($lime-theme--DARK, lime--LIGHT);
 		}
 	}
 
@@ -940,7 +950,7 @@ $light-secondary: $battleship-grey;
         font-weight: bold;     
 
         &--success {
-            background-color: map-get($green-theme-1, green-3);
+            background-color: map-get($green-theme--DARK, green--LIGHT);
         }
 
         &--error {
@@ -1097,19 +1107,19 @@ $light-secondary: $battleship-grey;
     &:has(:not(:checked)) {
         color: transparent;
         background-color: transparent;
-        border: 2px solid map-get($green-theme-1, green-1);
+        border: 2px solid map-get($green-theme--DARK, green--DARK);
     }
 
     &:hover {
-        color: map-get($green-theme-1, white-2);
-        background-color: map-get($green-theme-1, green-2);
-        border: 2px solid map-get($green-theme-1, green-2);
+        color: map-get($green-theme--DARK, white-2);
+        background-color: map-get($green-theme--DARK, green--NEUTRAL);
+        border: 2px solid map-get($green-theme--DARK, green--NEUTRAL);
     }
 
     &:has(:checked) {
-        color: map-get($green-theme-1, white-3);
-        background-color: map-get($green-theme-1, green-3);
-        border: 2px solid map-get($green-theme-1, green-3);
+        color: map-get($green-theme--DARK, white-3);
+        background-color: map-get($green-theme--DARK, green--LIGHT);
+        border: 2px solid map-get($green-theme--DARK, green--LIGHT);
     }
 
     input {
@@ -1124,7 +1134,7 @@ $light-secondary: $battleship-grey;
 }
 
 .permissions {
-    @include flex-row(0, 0);
+    @include flex-row(0, $gap-medium);
 
     &__navigation {
 		@include flex-column($padding-medium, $gap-small);
@@ -1134,24 +1144,168 @@ $light-secondary: $battleship-grey;
         width: 10rem;
     }
 
+    &__header {
+        @include flex-row($padding-small $padding-medium, $gap-medium);
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__label {
+        color: $light-secondary;
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+    }
+
+    &__add {
+        color: $light-secondary;
+
+        &:hover {
+            color: $light-primary;
+        }
+    }
+
     &__role {
         @include flex-row($padding-small $padding-medium, $gap-medium);
         align-items: center;
-        color: $light-secondary;
-        font-size: $text-primary-small;
+        font-size: $text-secondary-large;
         transition: background-color 0.2s, color 0.2s;
         cursor: pointer;
         border-radius: 4px;
 
+        &[data-state="inactive"] {
+            background-color: $charcoal-grey;
+            color: $light-secondary;
+        }
+
         &:hover {
             color: $light-primary;
-            background-color: $black-chestnut-oak;
+            background-color: $apollo-grey;
+        }
+
+        &[data-state="active"] {
+            background-color: $eerie-black;
+            color: $light-primary;
+        }
+
+        div {
+            @include ellipsis;
         }
     }
 
     &__role-color {
         padding: $padding-small;
         border-radius: 9999px;
+    }
+
+    &__config {
+		@include flex-column($padding-large, $gap-medium);
+        background-color: $charcoal-grey;
+        border-radius: 4px;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    &__field {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto auto;
+        gap: $gap-small;
+        align-items: center;
+    }
+
+    &__name {
+        grid-column: 1;
+        font-size: $text-secondary-large;
+        color: $light-primary;
+    }
+
+    &__choices {
+        @include flex-row(3px, $gap-small);
+        grid-column: 3;
+        background-color: $charcoal-grey;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    &__option {
+        transition: background-color 0.2s, color 0.2s;
+        position: relative;
+        padding: $padding-small $padding-medium;
+
+        input {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        &--false {
+            &:has(:not(:checked)) {
+                background-color: $apollo-grey;
+                color: $light-secondary;
+            }
+
+            &:hover {
+                background-color: $apollo-grey;
+                color: $light-primary;
+            }
+
+            &:has(:checked) {
+                background-color: map-get($red-theme--DARK, red--LIGHT);
+                color: map-get($red-theme--DARK, white--LIGHT);
+            }
+        }
+
+        &--null {
+            &:has(:not(:checked)) {
+                background-color: $apollo-grey;
+                color: $light-secondary;
+            }
+
+            &:hover {
+                background-color: $apollo-grey;
+                color: $light-primary;
+            }
+
+            &:has(:checked) {
+                background-color: $eerie-black;
+                color: $light-primary;
+            }
+        }
+
+        &--true {
+            &:has(:not(:checked)) {
+                background-color: $apollo-grey;
+                color: $light-secondary;
+            }
+
+            &:hover {
+                background-color: $apollo-grey;
+                color: $light-primary;
+            }
+
+            &:has(:checked) {
+                background-color: map-get($green-theme--DARK, green--LIGHT);
+                color: map-get($green-theme--DARK, white--LIGHT);
+            }
+        }
+    }
+
+    &__description {
+        grid-column: 1 / -1;
+        font-size: $text-secondary-medium;
+        color: $light-secondary;
+    }
+
+    &__footer {
+        @include flex-row(0, $gap-large);
+        margin-top: $gap-large;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
     }
 }
 
@@ -1183,12 +1337,12 @@ $light-secondary: $battleship-grey;
         @include flex-row($padding-medium, 0);
         grid-row: 2 / 3;
         font-size: $text-secondary-medium;
-        background-color: map-get($theme__lime--dark, lime--DARK);
-        color: map-get($theme__lime--dark, light--DARK);
+        background-color: map-get($lime-theme--DARK, lime--DARK);
+        color: map-get($lime-theme--DARK, light--DARK);
 
         &:hover {
-            background-color: map-get($theme__lime--dark, lime--LIGHT);
-            color: map-get($theme__lime--dark, light--LIGHT);
+            background-color: map-get($lime-theme--DARK, lime--LIGHT);
+            color: map-get($lime-theme--DARK, light--LIGHT);
         }
     }
 }
@@ -1231,19 +1385,18 @@ $light-secondary: $battleship-grey;
         &:has(:not(:checked)) {
             background-color: transparent;
             color: transparent;
-            border: 2px solid map-get($green-theme-1, green-1);
+            border: 2px solid map-get($green-theme--DARK, green--DARK);
         }
 
         &:hover {
-            border: 2px solid map-get($green-theme-1, green-2);
-            color: map-get($green-theme-1, white-2);
+            border: 2px solid map-get($green-theme--DARK, green--NEUTRAL);
+            color: map-get($green-theme--DARK, white-2);
         }
 
         &:has(:checked) {
-            background-color: map-get($green-theme-1, green-3);
-            color: map-get($green-theme-1, white-3);
-            border: 2px solid map-get($green-theme-1, green-3);
-
+            background-color: map-get($green-theme--DARK, green--LIGHT);
+            color: map-get($green-theme--DARK, white-3);
+            border: 2px solid map-get($green-theme--DARK, green--LIGHT);
         }
 
         input {
@@ -1272,6 +1425,7 @@ $light-secondary: $battleship-grey;
 
     &__close {
         color: $light-secondary;
+        height: fit-content;
 
         &:hover {
             color: $light-primary;

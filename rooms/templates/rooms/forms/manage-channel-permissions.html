@@ -1,8 +1,8 @@
-<div class="form switchable__content" id="Manage Channel Permissions">
+<div class="form switchable__content" id="{{ title|replaceWhitespace }}">
     <div class="form__header">
         <div>
             <div class="form__title">
-                Manage Channel Permissions
+                {{ title }}
             </div>
             {% if channel.category %}
                 <div class="form__subtitle">
@@ -15,13 +15,30 @@
         <div class="field__name">
             {{ field.name }}
         </div>
-        <div class="permissions">
-            <div class="permissions__navigation">
-                <div class="field__name">
-                    Roles
+        <div class="permissions switchable">
+            <div class="permissions__navigation switchable__navigation">
+                <div class="permissions__header">
+                    <div class="permissions__label">
+                        Roles
+                    </div>
+                    <div class="permissions__add">
+                        <div class="icon icon--tiny icon--hoverable">
+                            <i class="material-symbols-outlined">
+                                add
+                            </i>
+                        </div>
+                    </div>
                 </div>
                 {% for config in channel.configs.all %}
-                    <div class="permissions__role">
+                    <div class="permissions__role" 
+                    data-command="switch-content" 
+                    data-target="config-{{ config.pk }}"
+                    {% if forloop.first %}
+                    data-state="active"
+                    {% else %}
+                    data-state="inactive"
+                    {% endif %}
+                    >
                         <div class="permissions__role-color" style="background-color: {{ config.role.color }};"></div>
                         <div>
                             {{ config.role.name }}
@@ -29,6 +46,75 @@
                     </div>
                 {% endfor %}
             </div>
+            {% for config in channel.configs.all %}
+                <form class="permissions__config switchable__content {% if forloop.first %} switchable__content--active {% endif %}" id="config-{{ config.pk }}" method="POST" action="{% url 'update-model-permissions' pk=config.permissions.pk %}">
+                    {% csrf_token %}
+                    {% for model_permission in config.permissions.items.all %}
+                        <div class="permissions__field">
+                            <div class="permissions__name">                            
+                                {{ model_permission.permission.name }}
+                            </div>
+                            <div class="permissions__choices">
+                                <div class="permissions__option permissions__option--false">
+                                    <div class="icon icon--tiny">
+                                        <i class="material-symbols-outlined">
+                                            close
+                                        </i>
+                                    </div>
+                                    <input type="radio" 
+                                    name="{{ model_permission.permission.codename }}" 
+                                    value="False"
+                                    {% if model_permission.value == "False" %}
+                                    checked
+                                    {% endif %}
+                                    >
+                                </div>
+                                <div class="permissions__option permissions__option--null">
+                                    <div class="icon icon--tiny">
+                                        <i class="material-symbols-outlined">
+                                            check_indeterminate_small
+                                        </i>
+                                    </div>
+                                    <input type="radio" 
+                                    name="{{ model_permission.permission.codename }}"
+                                    value="Null"
+                                    {% if model_permission.value == "Null" %}
+                                    checked
+                                    {% endif %}
+                                    >
+                                </div>
+                                <div class="permissions__option permissions__option--true">
+                                    <div class="icon icon--tiny">
+                                        <i class="material-symbols-outlined">
+                                            done
+                                        </i>
+                                    </div>
+                                    <input type="radio" 
+                                    name="{{ model_permission.permission.codename }}" 
+                                    value="True" 
+                                    {% if model_permission.value == "True" %}
+                                    checked
+                                    {% endif %}
+                                    >
+                                </div>
+                            </div>
+                            {% comment %}
+                            <div class="permissions__description">
+                                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                            </div>
+                            {% endcomment %}
+                        </div>
+                    {% endfor %}
+                    <div class="permissions__footer">
+                        <div class="form__reset">
+                            Reset
+                        </div>
+                        <button class="form__submit form__submit--{{ type }}" type="submit">
+                            Update Permissions
+                        </button>
+                    </div>
+                </form>
+            {% endfor %}
         </div>
     </div>
 </div>
