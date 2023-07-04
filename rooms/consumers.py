@@ -12,6 +12,7 @@ from django.template import Template, Context
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
+from django.db.models import Q
 
 from DjangoChatApp.templatetags.custom_tags import convert_reactions
 from .forms import MessageForm
@@ -315,54 +316,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         client_context = json.loads(data.pop('context'))
         objects = client_context['objects']
         
-        kind = data['kind']
-        friendship = dict_to_object(objects['friendship'])
         friend = dict_to_object(objects['friend'])
+        friendship = Friendship.objects.filter(Q(sender=friend) | Q(receiver=friend)).first()
         
-        send_data = {
-            **data,
-            'frienship': objects['friendship'],
-        }
+        kind = data['kind']
 
-        user_send_data = {**send_data}
-        friend_send_data = {**send_data}
-
-        if kind == 'create':
+        if kind == 'send-friendship':
             friendship, created = Friendship.objects.get_or_create(sender=self.user, receiver=friend, status='pending')
-            # avoid duplicates in html
-            if not created:
-                return
-            
-            user_send_data['html'] = get_rendered_html(
-                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'friend': friend, 'friendship': friendship}
-            )
-            friend_send_data['html'] = get_rendered_html(
-                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'friend': self.user, 'friendship': friendship}
-            )
-            user_send_data['category'] = 'outgoing'
-            friend_send_data['category'] = 'incoming'
-        elif kind == 'accept':
+        elif kind == 'accept-friendship':
+            friendship = Friendship.objects.get(sender=friend, receiver=self.user)
             friendship.status = 'accepted'
             friendship.save()
-            friend_send_data['html'] = get_rendered_html(
-                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'friend': self.user, 'friendship': friendship}
-            )
-            user_send_data['html'] = get_rendered_html(
-                Path(__file__).parent / 'templates/rooms/elements/friend.html', 
-                {'friend': friend, 'friendship': friendship}
-            )
-            friend_send_data['category'] = 'accepted'
-            user_send_data['category'] = 'accepted'
-        elif kind in ['reject', 'remove', 'cancel']:
+        elif kind in ['reject-friendship', 'delete-friendship', 'cancel-friendship']:
+            friendship = Friendship.objects.filter(Q(sender=friend) | Q(receiver=friend)).first()
             friendship.delete()
-        else:
-            raise ValueError('Invalid action. Valid actions are: "accept", "reject", "remove", "create", "cancel"')
             
-        self.task_group_send(user_send_data, self.user_group_name)
-        self.task_group_send(friend_send_data, f'user_{friend.pk}')
         
     
     """

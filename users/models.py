@@ -74,9 +74,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
-
-    def display_name(self):
-        return self.username
     
     def joined_site(self):
         return self.date_joined.strftime("%d %B %Y")
@@ -95,8 +92,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 name='Verify unique username ID'
             )
         ]
-    
-
 
 
 class Profile(models.Model):
@@ -138,6 +133,9 @@ class FriendshipQuerySet(models.QuerySet):
     
     def accepted(self):
         return self.filter(status='accepted')
+    
+    def users(self):
+        return {user for friendship in self for user in friendship.users()}
     
 
 class Friendship(models.Model):

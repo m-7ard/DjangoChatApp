@@ -2,14 +2,9 @@
 	<div class="container__header">
 		Room
 	</div>
-	<div class="container__subheader has-shadow" data-context='{
-        "objects": {
-            "member": {{ member|object_to_json }},
-            "room": {{ room|object_to_json }}
-        }
-    }'>
+	<div class="container__subheader has-shadow">
         {% if member and user != room.owner %}
-            <span class="icon icon--small icon--hoverable overlay__trigger" data-target="leave-room">
+            <span class="icon icon--small icon--hoverable" data-command="get-form" data-name="leave-room" data-kwargs='{"pk": {{ room.pk }}}'>
                 <i class="material-symbols-outlined">
                     door_open
                 </i>
@@ -23,7 +18,7 @@
                     </i>
                 </span>
             {% endif %}
-            <span class="icon icon--small icon--hoverable tooltip__trigger" data-positioning='{"top": "100%", "left": "0px"}' data-target="room-menu">
+            <span class="icon icon--small icon--hoverable tooltip__trigger" data-positioning='{"top": "100%", "left": "0px"}' data-target="rooms/tooltips/room-menu.html">
                 <i class="material-symbols-outlined">
                     settings
                 </i>
@@ -37,7 +32,7 @@
             </span>
         </div>
 		<span class="wrapper--remaining-space">
-			<form class="room-card__body" method="POST" action="{% url 'join-room' room=room.pk %}">
+			<form class="room-card__body" method="POST" action="{% url 'join-room' pk=room.pk %}">
 				<div class="room-card__name">
 					{{ room.name }}
 				</div>

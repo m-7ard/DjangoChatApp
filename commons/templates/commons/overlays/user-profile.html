@@ -1,0 +1,97 @@
+<!--
+
+TODO: 
+
+    BUILD FRIEND MENU AND GET AROUND TO DMS
+
+
+-->
+<div class="profile profile--overlay overlay has-shadow">
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar has-shadow">
+            <div class="avatar avatar--large">
+                <img src="{{ user.image }}" alt="">
+            </div>
+        </div>
+        <div class="profile__header-group">
+            {% if user != request.user and user not in request.user.friendships.users %}
+                <div class="profile__button profile__button--main"
+                data-command="manage-friendship" 
+                data-kind="send-friendship"
+                data-context='{
+                    "objects": {
+                        "friend": {{ user|object_to_json }}
+                }}'>
+                    Add Friend
+                </div>
+            {% elif user != request.user %}
+                <div class="profile__button profile__button--main">
+                    Send Message
+                </div>
+            {% endif %}
+            <div class="profile__open-menu tooltip__trigger" data-template-name="commons/tooltips/user-profile-menu.html" data-context='{"objects": {"user": {{ user|object_to_json }}}}' data-positioning='{"left": "0px", "top": "100%"}'>
+                <div class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        more_vert
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="profile__body">
+        <div class="profile__field">
+            <div class="profile__display-name">
+                {{ user.display_name }}
+            </div>
+            <div class="profile__username">
+                {{ user.full_name }}
+            </div>
+        </div>
+        <div class="profile__section switchable">
+            <div class="profile__navigation switchable__navigation">
+                <div class="profile__switch" data-command="switch-content" data-target="User_Info" data-state="active">
+                    User Info
+                </div>
+                {% if user != request.user %}
+                    <div class="profile__switch" data-command="switch-content" data-target="Mutual_Servers" data-state="inactive">
+                        Mutual Servers
+                    </div>
+                    <div class="profile__switch" data-command="switch-content" data-target="Mutual_Friends" data-state="inactive">
+                        Mutual Friends
+                    </div>
+                {% endif %}
+            </div>
+            <div class="profile__sections switchable__content switchable__content--active" id="User_Info">
+                {% if user.bio %}
+                    <div class="profile__field">
+                        <div class="profile__label">
+                            Bio
+                        </div>
+                        <div class="profile__bio">
+                            {{ user.bio }}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="profile__field">
+                    <div class="profile__label">
+                        Account Created
+                    </div>
+                    <div class="profile__date">
+                        {{ user.joined_site }}
+                    </div>
+                </div>
+            </div>
+            {% if user != request.user %}
+                <div class="profile__section switchable__content" id="Mutual_Servers">
+
+                </div>
+                <div class="profile__section switchable__content" id="Mutual_Friends">
+
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

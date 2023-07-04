@@ -15,7 +15,7 @@ from .models import Channel
 class ChannelCreateForm(forms.ModelForm):
     kind = forms.ChoiceField(widget=ChannelKindSelect(), choices=Channel.KIND)
     name = forms.CharField(widget=FormTextInput())
-    description = forms.CharField(widget=FormTextInput())
+    description = forms.CharField(widget=FormTextInput(), required=False)
 
     def __init__(self, category=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,9 +42,9 @@ class ChannelDeleteForm(forms.ModelForm):
 
 class ChannelUpdateForm(forms.ModelForm):
     name = forms.CharField(widget=FormTextInput())
-    description = forms.CharField(widget=FormTextInput())
+    description = forms.CharField(widget=FormTextInput(), required=False)
     order =  forms.CharField(widget=FormNumberInput())
-    category = forms.ModelChoiceField(widget=FormSelect(), queryset=None)
+    category = forms.ModelChoiceField(widget=FormSelect(), queryset=None, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

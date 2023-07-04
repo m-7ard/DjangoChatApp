@@ -14,10 +14,11 @@ from django.utils.html import escape
 from django.template import Template, RequestContext, Context
 from django.http import HttpResponse
 from django.forms import ModelForm
+from django.template.loader import render_to_string
 
 from users.models import Friendship, CustomUser
 from rooms.models import Log, Message, Reaction, Room
-from utils import get_rendered_html, get_object_or_none, dict_to_object
+from utils import get_object_or_none, dict_to_object
 
 class FrontpageView(TemplateView):
     template_name = 'core/frontpage.html'
@@ -47,16 +48,15 @@ class RequestData(View):
         return JsonResponse(data)
     
 
-class GetTooltip(View):
+class GetTemplate(View):
     def get(self, request, *args, **kwargs):
-        tooltip_id = kwargs.get('id')
+        template_name = request.GET.get('template-name')
         client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
         objects = client_context.get('objects', {})
         variables = client_context.get('variables', {})
         
         template_context = {
             'client_context': request.GET.get('context'),
-            'user': request.user
         }
 
         for context_variable, values in objects.items():
@@ -64,75 +64,8 @@ class GetTooltip(View):
 
         for context_variable, value in variables.items():
             template_context[context_variable] = value
-
-        html = get_rendered_html(
-            path=Path(__file__).parent / f'templates/core/tooltips/{tooltip_id}.html', 
-            context_dict=template_context
-        )
-        return HttpResponse(html)
-    
-
-class GetOverlay(View):
-    def get(self, request, *args, **kwargs):
-        overlay_id = kwargs.get('id')
-        client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
-        objects = client_context.get('objects', {})
-        variables = client_context.get('variables', {})
         
-        template_context = {
-            'client_context': request.GET.get('context'),
-            'user': request.user
-        }
-
-        for context_variable, values in objects.items():
-            template_context[context_variable] = dict_to_object(values)
-
-        for context_variable, value in variables.items():
-            template_context[context_variable] = value
-
-        return render(request, Path(__file__).parent / f'templates/core/overlays/{overlay_id}.html', context=template_context) 
-
-
-def _(request, *args, **kwargs):
-    client_context = json.loads(request.GET.get('context')) if request.GET.get('context') else {}
-    forms = client_context.get('forms', {})
-    if not forms:
-        return
-    
-    template_context = {
-        'client_context': request.GET.get('context'),
-        'user': request.user,
-        'forms': []
-    }
-    for form in forms:
-        model_name = form.get('model')
-        app_label = form.get('app')
-        pk = form.get('pk')
-        fields = form.get('fields')
-        model = apps.get_model(app_label=app_label, model_name=model_name)
-
-        class Form(ModelForm):
-            nonlocal model
-            nonlocal fields   
-
-            class Meta:
-                model = None
-                fields = None
-            
-            Meta.model = model
-            Meta.fields = fields
-
-        title = form.get('title')
-        subtitle = form.get('subtitle')
-        
-        template_context['forms'].append({
-            'title': title,
-            'subtitle': subtitle,
-            'fields': Form(instance=get_object_or_none(model, pk=pk))
-        })
-
-    return render(request, 'core/dynamic-form.html', context=template_context)
-
+        return HttpResponse(render_to_string(request=request, template_name=template_name, context=template_context))
 
 
 def GetViewByName(request, name, *args, **kwargs):

@@ -181,3 +181,15 @@ function assignSoleClass({className, container, target}) {
     otherElements.forEach((element) => element.classList.remove(className));
     target.classList.add(className);
 }
+
+async function getTemplate({templateName, context}) {
+    let url = new URL(window.location.origin + '/GetTemplate/');
+    url.searchParams.append('template-name', templateName);
+    if (context) {
+        url.searchParams.append('context', context);
+    };
+    let request = await fetch(url);
+    let response = await request.text();
+    let template = parseHTML(response);
+    return template;
+}

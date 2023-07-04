@@ -10,6 +10,9 @@ const tooltipContainers = document.querySelectorAll('.tooltip');
 // Tooltip context
 const tooltipContext = {};
 
+// Misc
+const debug = true;
+
 
 let websocketUrl = 'ws://' + window.location.host;
 if (roomPk) {
@@ -33,32 +36,42 @@ window.onbeforeunload = function() {
 chatSocket.onmessage = function(event) {
 	let data = JSON.parse(event.data);
 	let action = data.action;
-	console.log(action)
-	console.log(data)
-	console.log('--------------------------------------')
+
+    if (debug) {
+        console.log(action)
+        console.log(data)
+        console.log('--------------------------------------')
+    }
+
 	let handler = chatSocketReceiveHandlers[action];
 	handler(data);
 };
 
 chatSocket.onclose = function(event) {
-	console.log('onclose');
+    if (debug) {
+        console.log('onclose');
+    }
 };
 
 chatSocket.onopen = function() {
-	/*
-	NOTE: server hangs for some reason on some connections, 
-		reason not clear
-	NOTE-2: seems to be related to the way offline tracking was
-		handled in the consumer, specific reason unclears
-	*/
-	console.log('opened')
+    if (debug) {
+        console.log('opened')
+    }
 	chatSocket.send(JSON.stringify({
 		'action': 'requestServerResponse'
 	}))
 }
 
-/* TODO: use click event to catch link clicks */
-window.addEventListener('click', function delegateClick(event) {
+window.addEventListener('click', function preventRedirect(event) {
+    if (event.target.closest('[data-prevent-redirect]')) {
+        event.preventDefault();
+    };
+});
+
+window.addEventListener('mouseup', function delegateClick(event) {
+    if (!(event.button == 0)) {
+        return;
+    };
 	Object.entries(windowClickHandlers).forEach(([selector, handler]) => {
 		if (event.target.closest(selector)) {
 			handler(event);
@@ -109,6 +122,10 @@ window.addEventListener('mouseup', (event) => {
 
 // Close tooltips
 window.addEventListener('mouseup', (event) => {
+    if (!(event.button == 0)) {
+        return;
+    };
+    
 	let tooltip = event.target.closest('.tooltip');
 	let trigger = event.target.closest('.tooltip__trigger');
     let close = event.target.closest('.tooltip__close');

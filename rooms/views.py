@@ -3,6 +3,7 @@ import json
 from itertools import chain
 from typing import Any, Dict
 from pathlib import Path
+from django import http
 
 
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
@@ -198,7 +199,7 @@ class ChannelDeleteView(DeleteView):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data(), 'message': 'Could not delete channel'})
 
     def form_valid(self, form):
-        success_url = reverse('room', kwargs={'room': self.object.room.pk})
+        success_url = reverse('room', kwargs={'pk': self.object.room.pk})
         self.object.delete()
         return JsonResponse({'status': 400, 'redirect': success_url})
     
@@ -242,23 +243,30 @@ class RoomUpdateView(UpdateView):
 
 
 class LeaveRoom(TemplateView):
-    template_name = 'rooms/forms/leave-room.html'
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Leave Room',
+            'fields': {},
+            'url': reverse('leave-room', kwargs={'pk': kwargs.get('pk')}),
+            'type': 'delete'
+        }
+
+        return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
-        room = Room.objects.get(pk=kwargs.get('room'))
+        room = Room.objects.get(pk=kwargs.get('pk'))
         user = request.user
         member = get_object_or_none(Member, room=room, user=user)
         if member:
             action = Action.objects.get(name='leave')
             log = Log.objects.create(action=action, receiver=user, room=room)
-            context = {
-                'object': log, 
+            log_html = render_to_string(request=request, template_name='rooms/elements/log.html', context={
+                'log': log, 
                 'room': room
-            }
-            log_html = get_rendered_html(
-                path=Path(__file__).parent / 'templates/rooms/elements/log.html', 
-                context_dict=context
-            )
+            })
 
             member.delete()
 
@@ -270,7 +278,7 @@ class LeaveRoom(TemplateView):
             for channel in room.channels.filter(display_logs=action):
                 send_to_group(f'channel_{channel.pk}', send_data)
 
-        return redirect('room', room=room.pk)
+        return JsonResponse({'status': 200, 'redirect': reverse('room', kwargs={'pk': room.pk})})
     
 
 class DeleteRoom(DeleteView):
@@ -293,7 +301,7 @@ class DeleteRoom(DeleteView):
 
 class JoinRoom(View):
     def post(self, request, *args, **kwargs):
-        room = Room.objects.get(pk=kwargs.get('room'))
+        room = Room.objects.get(pk=kwargs.get('pk'))
         user = request.user
         member, created = Member.objects.get_or_create(room=room, user=user)
         """
@@ -304,14 +312,10 @@ class JoinRoom(View):
         if created:
             action = Action.objects.get(name='join')
             log = Log.objects.create(action=action, receiver=user, room=room)
-            context = {
-                'object': log, 
+            log_html = render_to_string(request=request, template_name='rooms/elements/log.html', context={
+                'log': log, 
                 'room': room
-            }
-            log_html = get_rendered_html(
-                path=Path(__file__).parent / 'templates/rooms/elements/log.html', 
-                context_dict=context
-            )
+            })
             send_data = {
                 'type': 'send_to_JS',
                 'action': 'join-room',
@@ -321,7 +325,7 @@ class JoinRoom(View):
             for channel in room.channels.filter(display_logs=action):
                 send_to_group(f'channel_{channel.pk}', send_data)
 
-        return redirect('room', room=room.pk)
+        return redirect('room', pk=room.pk)
     
 
 class RoomListView(ListView):
@@ -337,7 +341,6 @@ class RoomListView(ListView):
 
 class ModelPermissionGroupUpdateView(View):
     def post(self, request, *args, **kwargs):
-        print(request.POST)
         model_permissions_group = ModelPermissionGroup.objects.get(pk=kwargs.get('pk'))
         for model_permission in model_permissions_group.items.all():
             model_permission.value = request.POST[model_permission.permission.codename]

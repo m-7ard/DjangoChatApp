@@ -2,7 +2,8 @@
 data-model="{{ object|classname }}" 
 data-app="{{ object|app_name }}" 
 data-pk="{{ object.pk }}"
-href="{% url 'channel' room=room.pk channel=object.pk %}">
+href="{% url 'channel' room=room.pk channel=object.pk %}"
+>
 	<span class="channel__kind">
 		{% if object.kind == 'text' %}
             <div class="icon icon--small">
@@ -22,7 +23,7 @@ href="{% url 'channel' room=room.pk channel=object.pk %}">
 		{{ object.name }}
 	</span>
     {% if member|chain_arg:object|member_has_channel_perm:'manage_channel' %}
-        <span class="channel__settings right" data-command="get-form" data-name="manage-channel" data-kwargs='{"pk": {{ object.pk }}}'>
+        <span class="channel__settings right" data-command="get-form" data-name="manage-channel" data-kwargs='{"pk": {{ object.pk }}}' data-prevent-redirect>
             <div class="icon icon--tiny">
                 <i class="material-symbols-outlined">
                     settings

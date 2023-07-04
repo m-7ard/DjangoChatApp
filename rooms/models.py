@@ -280,7 +280,7 @@ class Message(models.Model):
     user = models.ForeignKey(CustomUser, related_name='messages', on_delete=models.SET_NULL, null=True, blank=True)
     channel = models.ForeignKey(Channel, related_name='messages', on_delete=models.CASCADE, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
-    reactions = GenericRelation('Reaction', 'target_pk', 'target_type')
+    reactions = models.ForeignKey('ReactionGroup', on_delete=models.CASCADE, related_name='message', null=True)
 
     class Meta:
         ordering = ('date_added',)
@@ -315,7 +315,7 @@ class Log(models.Model):
     receiver = models.ForeignKey(CustomUser, related_name='received_actions', on_delete=models.SET_NULL, null=True)
     sender = models.ForeignKey(CustomUser, related_name='sent_actions', on_delete=models.SET_NULL, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True, null=True)
-    reactions = GenericRelation('Reaction', 'target_pk', 'target_type')
+    reactions = models.ForeignKey('ReactionGroup', on_delete=models.CASCADE, related_name='log', null=True)
 
     class Meta:
         ordering = ('date_added',)
@@ -343,12 +343,9 @@ class Emote(models.Model):
 
 # *Reaction
 class Reaction(models.Model):
-    target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    target_pk = models.PositiveIntegerField(null=True)
-    target_object = GenericForeignKey('target_type', 'target_pk')
-
     emote = models.ForeignKey(Emote, on_delete=models.CASCADE, null=True)
     users = models.ManyToManyField(CustomUser, blank=True)
+    group = models.ForeignKey('ReactionGroup', on_delete=models.CASCADE, related_name='items')
     
     def add_user(self, user):
         self.users.add(user)
@@ -360,6 +357,11 @@ class Reaction(models.Model):
     
     def image(self):
         return self.emote.image
+    
+
+# *ReactionGroup
+class ReactionGroup(models.Model):
+    pass
     
 # *ChannelConfig
 class ChannelConfiguration(models.Model):

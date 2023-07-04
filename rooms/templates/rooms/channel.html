@@ -24,20 +24,24 @@
 	</div>
 	<div class="wrapper--remaining-space">
 		<ul class="container__content" id="app-messages">
-			{% for object in backlogs %}
-                {% ifchanged object.date_added|date:'D' %}
+			{% for backlog in backlogs %}
+                {% ifchanged backlog.date_added|date:'D' %}
                 <li class="backlog">
                     <div class="backlog__divider">
                         <span></span>
-                        <span class="backlog__timestamp">{{ object.date_added|date:'d M Y' }}</span>
+                        <span class="backlog__timestamp">{{ backlog.date_added|date:'d M Y' }}</span>
                         <span></span>
                     </div>
                 </li>
                 {% endifchanged %}
-				{% if object|classname == 'Message' %}
-					{% include "./elements/message.html" %}
-				{% elif object|classname == 'Log' %}
-                    {% include "./elements/log.html" %}
+				{% if backlog|classname == 'Message' %}
+                    {% with message=backlog %}
+                        {% include "./elements/message.html" %}
+                    {% endwith %}
+                {% elif backlog|classname == 'Log' %}
+                    {% with log=backlog %}
+                        {% include "./elements/log.html" %}
+                    {% endwith %}
 				{% endif %}
 			{% endfor %}
 		</ul>
@@ -77,11 +81,10 @@
 {% endblock %}
 
 {% block left-sidebar %}
-	{% include "./elements/app__sidebar--primary.html" %}
+	{% include "./elements/room-sidebar.html" %}
 {% endblock %}
 
 
 {% block scripts %}
-{{ block.super }}
-<script src="{% static 'js/channel.js' %}"></script>
+
 {% endblock %}

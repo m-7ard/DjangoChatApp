@@ -1,11 +1,11 @@
 <li class="backlog" 
-data-model="{{ object|classname }}" 
-data-app="{{ object|app_name }}" 
-data-pk="{{ object.pk }}" 
+data-model="{{ log|classname }}" 
+data-app="{{ log|app_name }}" 
+data-pk="{{ log.pk }}" 
 data-context='
 {
     "objects": {
-        "object": {{ object|object_to_json }},
+        "log": {{ log|object_to_json }},
         "room": {{ room|object_to_json }}
     },
     "variables": {
@@ -15,7 +15,7 @@ data-context='
     <div class="backlog__icon">
         <div class="icon icon--small">
             <i class="material-symbols-outlined">
-                {{ object.action.icon }}
+                {{ log.action.icon }}
             </i>
         </div>
     </div>
@@ -27,46 +27,46 @@ data-context='
     
     {% endcomment %}
     <div class="backlog__header">
-        {% if object.sender %}
+        {% if log.sender %}
             <span class="backlog__user">
-                {% with membership=object.sender|get_member:room %}
+                {% with membership=log.sender|get_member:room %}
                     {% if membership %}
                         {{ membership.display_name }}
                     {% else %}
-                        {{ object.sender.username }}
+                        {{ log.sender.username }}
                     {% endif %}
                 {% endwith %}
             </span>
             <span class="backlog__action-name">
-                {{ object.action.display_name }}
+                {{ log.action.display_name }}
             </span>
             <span class="backlog__user">
-                {% with membership=object.receiver|get_member:room %}
+                {% with membership=log.receiver|get_member:room %}
                     {% if membership %}
                         {{ membership.display_name }}
                     {% else %}
-                        {{ object.receiver.username }}
+                        {{ log.receiver.username }}
                     {% endif %}
                 {% endwith %}
             </span>
             <span class="backlog__timestamp">
-                {{ object.display_date }}
+                {{ log.display_date }}
             </span>
         {% else %}
             <span class="backlog__user">
-                {% with membership=object.receiver|get_member:room %}
+                {% with membership=log.receiver|get_member:room %}
                     {% if membership %}
                         {{ membership.display_name }}
                     {% else %}
-                        {{ object.receiver.username }}
+                        {{ log.receiver.username }}
                     {% endif %}
                 {% endwith %}
             </span>
             <span class="backlog__action-name">
-                {{ object.action.display_name }}
+                {{ log.action.display_name }}
             </span>
             <span class="backlog__timestamp">
-                {{ object.display_date }}
+                {{ log.display_date }}
             </span>
         {% endif %}
     </div>

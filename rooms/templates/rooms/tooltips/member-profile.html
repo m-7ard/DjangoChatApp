@@ -1,0 +1,71 @@
+<div class="profile profile--tooltip tooltip has-shadow" data-context='{
+    "objects": {
+        "user": {{ member.user|object_to_json }}
+    }
+}'>
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar overlay__trigger tooltip__close has-shadow" data-template-name="commons/overlays/user-profile.html">
+            <div class="avatar avatar--large">
+                <img src="{{ member.image }}" alt="">
+            </div>
+            <div class="on-hover"></div>
+        </div>
+    </div>
+    <div class="profile__body">
+        <div class="profile__field">
+            <div class="profile__display-name">
+                {{ member.display_name }}
+            </div>
+            <div class="profile__username">
+                {{ member.full_name }}
+            </div>
+        </div>
+        <div class="profile__divider">
+
+        </div>
+        {% if member.bio %}
+            <div class="profile__field">
+                <div class="profile__label">
+                    Bio
+                </div>
+                <div class="profile__bio">
+                    {{ member.bio }}
+                </div>
+            </div>
+        {% endif %}
+        <div class="profile__field">
+            <div class="profile__label">
+                Account Created
+            </div>
+            <div class="profile__date">
+                {{ member.joined_site }}
+            </div>
+        </div>
+        <div class="profile__field">
+            <div class="profile__label">
+                Joined Room
+            </div>
+            <div class="profile__date">
+                {{ member.joined_room }}
+            </div>
+        </div>
+        <div class="profile__field">
+            <div class="profile__label">
+                Roles
+            </div>
+            {% for role in member.roles.all %}
+                <div class="role">
+                    <div class="role__color" style="background-color: {{ role.color }};">
+
+                    </div>
+                    <div class="role__name">
+                        {{ role.name }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="profile profile--tooltip tooltip has-shadow" data-context='{
+    "objects": {
+        "user": {{ user|object_to_json }}
+    }
+}'>
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar overlay__trigger tooltip__close has-shadow" data-template-name="commons/overlays/user-profile.html">
+            <div class="avatar avatar--large">
+                <img src="{{ user.image.url }}" alt="">
+            </div>
+            <div class="on-hover"></div>
+        </div>
+    </div>
+    <div class="profile__body">
+        <div class="profile__field">
+            <div class="profile__display-name">
+                {{ user.username }}
+            </div>
+            <div class="profile__username">
+                {{ user.full_name }}
+            </div>
+        </div>
+        <div class="profile__divider">
+
+        </div>
+        {% if user.bio %}
+            <div class="profile__field">
+                <div class="profile__label">
+                    Bio
+                </div>
+                <div class="profile__bio">
+                    {{ user.bio }}
+                </div>
+            </div>
+        {% endif %}
+        <div class="profile__field">
+            <div class="profile__label">
+                Account Created
+            </div>
+            <div class="profile__date">
+                {{ user.joined_site }}
+            </div>
+        </div>
+    </div>
+</div>

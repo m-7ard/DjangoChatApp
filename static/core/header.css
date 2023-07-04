@@ -1,3 +1,9 @@
+/*
+
+idea - use this as primary F5F3F0 and primary and secondary into
+secondary and tertiary
+
+*/
 /* Shadow Dimensions */
 .bottom {
   margin-top: auto !important;
@@ -106,6 +112,7 @@
   z-index: 1000;
 }
 .layer--tooltips {
+  z-index: 1001;
   background-color: transparent;
   pointer-events: none;
 }
@@ -526,7 +533,7 @@
 }
 
 .profile {
-  background-color: #1E1D1C;
+  background-color: #181818;
   overflow: hidden;
   border-radius: 4px;
 }
@@ -534,13 +541,27 @@
   width: 20rem;
 }
 .profile--overlay {
-  width: 50rem;
+  width: 40rem;
 }
-.profile .avatar {
+.profile__avatar {
   padding: 0.5rem;
-  background-color: #1E1D1C;
+  background-color: #181818;
   overflow: hidden;
   border-radius: 4px;
+  position: relative;
+}
+.profile__avatar .on-hover {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: #131313;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.profile__avatar:hover .on-hover {
+  opacity: 50;
 }
 .profile__field {
   display: flex;
@@ -556,13 +577,22 @@
   justify-content: space-between;
   position: relative;
 }
+.profile__header-group {
+  display: flex;
+  padding: 0;
+  gap: 0.5rem;
+  align-items: center;
+}
+.profile__open-menu {
+  color: #e0dbd1;
+}
 .profile__banner {
   position: absolute;
   top: 0;
-  bottom: 50%;
+  bottom: 25%;
   left: 0;
   right: 0;
-  background-color: #403D39;
+  background-color: #212120;
   z-index: -1;
 }
 .profile__body {
@@ -571,7 +601,7 @@
   padding: 0.5rem;
   gap: 0.5rem;
   margin: 0.5rem;
-  background-color: #161615;
+  background-color: #131313;
   overflow: hidden;
   border-radius: 4px;
 }
@@ -609,6 +639,56 @@
   font-size: 0.75rem;
   color: #8D8A84;
 }
+.profile__section {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0.5rem;
+}
+.profile__navigation {
+  display: flex;
+  padding: 0;
+  gap: 1rem;
+  border-bottom: 1px solid #212120;
+}
+.profile__switch {
+  font-size: 0.8125rem;
+  font-weight: bold;
+  padding-bottom: 1rem;
+  transition: border 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.profile__switch[data-state=inactive] {
+  color: #8D8A84;
+  border-bottom: 0.25rem solid transparent;
+}
+.profile__switch:hover {
+  color: #e0dbd1;
+  border-bottom: 0.25rem solid #e0dbd1;
+}
+.profile__switch[data-state=active] {
+  color: #e0dbd1;
+  border-bottom: 0.25rem solid #e0dbd1;
+}
+.profile__button {
+  display: flex;
+  padding: 0.5rem 1rem;
+  gap: 0;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+.profile__button--main {
+  border-radius: 4px;
+  background-color: #284026;
+  color: #e0dbd1;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.profile__button--main:hover {
+  background-color: #2E5A2C;
+  color: #e0dbd1;
+}
 
 .account {
   position: absolute;
@@ -642,7 +722,6 @@
   background-color: #181818;
   max-width: 35rem;
   position: relative;
-  background-color: #181818;
   border-radius: 4px;
 }
 .form__header {
@@ -660,14 +739,8 @@
   font-size: 0.8125rem;
   color: #8D8A84;
 }
-.form__row {
-  display: flex;
-  padding: 0;
-  gap: 0;
-  justify-content: space-between;
-}
 .form__warning {
-  color: #FF3D3D;
+  color: #CC0505;
   font-size: 0.9375rem;
   font-weight: bold;
 }
@@ -702,12 +775,15 @@
 }
 .form__submit--update:hover {
   background-color: #2E5A2C;
+  color: #e0dbd1;
 }
 .form__submit--delete {
+  color: #8D8A84;
   background-color: #552224;
 }
 .form__submit--delete:hover {
   background-color: #80191B;
+  color: #e0dbd1;
 }
 .form__submit--create {
   color: #8D8A84;
@@ -733,6 +809,14 @@
 }
 .form__response--error {
   background-color: #6B2A2A;
+}
+.form__close {
+  color: #8D8A84;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+.form__close:hover {
+  color: #e0dbd1;
 }
 
 .form-select {
@@ -864,14 +948,19 @@
 }
 .form-checkbox:has(:not(:checked)) {
   color: transparent;
-  background-color: transparent;
-  border: 2px solid #284026;
+  background-color: #552224;
+  border: 2px solid transparent;
 }
 .form-checkbox:hover {
+  color: #8D8A84;
   background-color: #2B4D29;
   border: 2px solid #2B4D29;
 }
+.form-checkbox:hover::before {
+  opacity: 0;
+}
 .form-checkbox:has(:checked) {
+  color: #e0dbd1;
   background-color: #2E5A2C;
   border: 2px solid #2E5A2C;
 }
@@ -1085,7 +1174,7 @@
   padding: 0;
   gap: 0.25rem;
 }
-.field:has(.form__error) .field__name {
+.field:has(.field__error) .field__name {
   color: #FF3D3D;
 }
 .field__row {
@@ -1124,6 +1213,7 @@
 }
 .field__checkbox:has(:checked) {
   background-color: #2E5A2C;
+  color: #e0dbd1;
   border: 2px solid #2E5A2C;
 }
 .field__checkbox input {
@@ -1183,15 +1273,25 @@
 }
 .formbox__button:hover {
   color: #e0dbd1;
-  background-color: #131313;
+}
+.formbox__button[data-state=active] {
+  color: #e0dbd1;
+  background-color: #212120;
 }
 
 .user {
   display: flex;
   padding: 0.5rem;
   gap: 0.5rem;
-  transition: background-color 0.2s;
+  align-items: center;
   cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  transition: background-color 0.2s;
+}
+.user:hover {
+  background-color: #212120;
 }
 .user--online .user__username {
   color: #eff688;
@@ -1205,6 +1305,14 @@
 .user--offline .user__status {
   color: #62777e;
 }
+.user__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+  flex: 1;
+}
 .user__username {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1217,13 +1325,6 @@
   text-overflow: ellipsis;
   overflow-x: clip;
   font-size: 0.75rem;
-}
-.user__body {
-  display: flex;
-  flex-direction: column;
-}
-.user:hover {
-  background-color: #212120;
 }
 
 .membership {
@@ -1479,7 +1580,7 @@
 }
 .menu__item {
   display: flex;
-  padding: 0.5rem;
+  padding: 0.25rem 1rem;
   gap: 1rem;
   justify-content: space-between;
   align-items: center;
@@ -1716,11 +1817,10 @@
 }
 
 .explorer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-flow: row dense;
-  padding: 1rem;
-  gap: 1rem;
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .result {
@@ -1731,13 +1831,12 @@
   overflow: hidden;
   border-radius: 4px;
   max-height: 12rem;
+  width: 15rem;
   height: -moz-fit-content;
   height: fit-content;
-  box-shadow: 0px 0px 4px 1px #161615;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 .result:hover {
-  box-shadow: 0px 0px 4px 1px #212120;
   transform: scale(1.01);
 }
 .result__header {
@@ -1748,18 +1847,18 @@
   background-color: #212120;
   padding: 0.5rem;
   z-index: 1;
-  box-shadow: 0px 0px 4px 1px #161615;
 }
 .result__avatar {
   grid-row: 1/-1;
   overflow: hidden;
   border-radius: 4px;
+  background-color: #131313;
 }
 .result__title {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-x: clip;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: bold;
 }
 .result__info {
@@ -1770,12 +1869,19 @@
 .result__members {
   font-size: 0.75rem;
 }
+.result__members::before {
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: #eff688;
+  border-radius: 9999px;
+}
 .result__description {
   font-size: 0.8125rem;
   padding: 0.5rem;
   overflow: auto;
-  background-color: #1E1D1C;
+  background-color: #181818;
   word-wrap: break-word;
+  border-bottom: 1px solid #131313;
 }
 .result__footer {
   display: flex;
@@ -1783,7 +1889,7 @@
   gap: 0;
   justify-content: space-between;
   align-items: center;
-  background-color: #131313;
+  background-color: #181818;
 }
 .result__report {
   color: #FF3D3D;
@@ -1792,21 +1898,23 @@
 .result__button {
   display: flex;
   padding: 0.25rem;
-  gap: 0.25rem;
-  font-size: 0.8125rem;
-  overflow: hidden;
+  gap: 0.5rem;
+  font-size: 0.75rem;
   border-radius: 4px;
   transition: background-color 0.2s;
   cursor: pointer;
 }
 .result__button--join {
-  background-color: #11450C;
+  background-color: #284026;
 }
 .result__button--join:hover {
-  background-color: #158308;
+  background-color: #2E5A2C;
 }
 .result__button--profile {
-  background-color: #9966cc;
+  background-color: #151532;
+}
+.result__button--profile:hover {
+  background-color: #101065;
 }
 
 html {

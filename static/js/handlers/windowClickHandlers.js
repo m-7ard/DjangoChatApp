@@ -24,20 +24,14 @@ const windowClickHandlers = {
                 openTooltip.remove();
             };
         };
-        let target = trigger.dataset.target;
-        let contextObject = trigger.closest('[data-context]');
-        let tooltipLayer = document.querySelector('.layer--tooltips');
-        let url = new URL(window.location.origin + '/tooltip/' + target);
-        if (contextObject) {
-            url.searchParams.append('context', contextObject.dataset.context);
-        };
-        let request = await fetch(url);
-        let response = await request.text();
-        let tooltip = parseHTML(response);
+        let tooltip = await getTemplate({
+            templateName: trigger.dataset.templateName,
+            context: trigger.dataset.context,
+        });
         let sharedID = randomID()
         tooltip.setAttribute('data-random-id', sharedID)
         trigger.setAttribute('data-random-id', sharedID)
-
+        let tooltipLayer = document.querySelector('.layer--tooltips');
         let positioning = JSON.parse(trigger.dataset.positioning);
         positionFixedContainer(tooltip, trigger, positioning);
         tooltipLayer.appendChild(tooltip);
@@ -46,41 +40,22 @@ const windowClickHandlers = {
     '.overlay__trigger': async (event) => {
         event.preventDefault();
 		let trigger = event.target.closest('.overlay__trigger');
-        let target = trigger.dataset.target;
         let contextObject = trigger.closest('[data-context]');
-        let url = new URL(window.location.origin + '/overlay/' + target);
-        if (contextObject) {
-            url.searchParams.append('context', contextObject.dataset.context);
-        };
-        let request = await fetch(url);
-        let overlay = await request.text();
+        let overlay = await getTemplate({
+            templateName: trigger.dataset.templateName,
+            context: contextObject.dataset.context,
+        });
         let overlayLayer = quickCreateElement('div', {
             classList: ['layer', 'layer--overlay'],
-            innerHTML: overlay,
+            innerHTML: overlay.outerHTML,
             parent: document.body,
             eventListeners: {
                 'mouseup': (e) => {
-                    if (!(e.target.closest('.overlay')) || (e.target.closest('.overlay__close'))) {
+                    if (!(e.target.closest('.overlay'))) {
                         overlayLayer.remove();
                     };
                 },
             },
         });
-        if (Object.keys(overlayHandlers).includes(target)) {
-            overlayHandlers[target]({trigger, overlayLayer});
-        };
     },
-	'.select__trigger': function toggleSelect(event) {
-		let trigger = event.target.closest('.select__trigger');
-		let select = trigger.closest('.select');
-		select.classList.toggle('select--active');
-		window.addEventListener('click', (newEvent) => {
-			let newSelect = newEvent.target.closest('.select');
-			if (newSelect == select) {
-				return
-			}
-
-			select?.classList.remove('select--active');
-		}, {once: true});
-	},
 };

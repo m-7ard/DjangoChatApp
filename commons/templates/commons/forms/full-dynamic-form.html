@@ -51,9 +51,11 @@
                         {% endif %}
                     {% endfor %}
                     <div class="form__footer">
-                        <div class="form__reset">
-                            Reset
-                        </div>
+                        {% if form.fields %}
+                            <div class="form__reset">
+                                Reset
+                            </div>
+                        {% endif %}
                         <button class="form__submit form__submit--{{ form.type }}" type="submit">
                             {{ form.title }}
                         </button>
@@ -62,9 +64,9 @@
             {% endif %}
         {% endfor %}
         <div class="formbox__close" data-command="remove-closest" data-target=".layer">
-            <div class="icon icon--medium icon--hoverable">
+            <div class="icon icon--small icon--hoverable">
                 <i class="material-symbols-outlined">
-                    cancel
+                    close
                 </i>
             </div>
         </div>

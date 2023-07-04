@@ -26,7 +26,7 @@
         <div class="container__content">
             <div class="explorer">
                 {% for room in rooms %}
-                    <div class="result">
+                    <div class="result has-shadow">
                         <div class="result__header">
                             <div class="result__avatar">
                                 <div class="avatar avatar--medium">
@@ -53,7 +53,7 @@
                                 Report
                             </div>
                             {% if user|is_member:room %}
-                                <a href="{% url 'room' room=room.pk %}" class="result__button result__button--profile">
+                                <a href="{% url 'room' pk=room.pk %}" class="result__button result__button--profile">
                                     <span>
                                         Profile
                                     </span>
@@ -64,7 +64,7 @@
                                     </span>           
                                 </a> 
                             {% else %}
-                                <form method="POST" action="{% url 'join-room' room=room.pk %}">
+                                <form method="POST" action="{% url 'join-room' pk=room.pk %}">
                                     {% csrf_token %}
                                     <button class="result__button result__button--join" type="submit">
                                         <span>

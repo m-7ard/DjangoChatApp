@@ -5,8 +5,8 @@ from . import views
 urlpatterns = [
 	path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 	path('<int:pk>/', views.RoomView.as_view(), name='room'),
-    path('<int:room>/leave/', views.LeaveRoom.as_view(), name='leave-room'),
-    path('<int:room>/join/', views.JoinRoom.as_view(), name='join-room'),
+    path('<int:pk>/leave/', views.LeaveRoom.as_view(), name='leave-room'),
+    path('<int:pk>/join/', views.JoinRoom.as_view(), name='join-room'),
 	path('<int:room>/<int:channel>/', views.ChannelView.as_view(), name='channel'),
 	path('create/room/', views.RoomCreateView.as_view(), name="create-room"),
 	

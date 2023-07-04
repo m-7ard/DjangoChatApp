@@ -3,7 +3,12 @@ $light: (
     secondary: #8D8A84,
 );
 
+/*
 
+idea - use this as primary F5F3F0 and primary and secondary into
+secondary and tertiary
+
+*/
 
 
 
@@ -40,45 +45,7 @@ $office-green: #158308;
 $garnet: #6B2A2A;
 $vermillion: #FF3D3D;
 
-$blue-theme--DARK: (
-    "blue--DARK": #151532,
-    "blue--NEUTRAL": #13134B, 
-    "blue--LIGHT": #101065,
 
-    "light--DARK": map-get($light, secondary),
-    "light--NEUTRAL": map-get($light, secondary),
-    "light--LIGHT": map-get($light, primary),
-);
-
-$lime-theme--DARK: (
-    "lime--DARK": #2B3215,
-    "lime--NEUTRAL": #3D4B13, 
-    "lime--LIGHT": #506510,
-
-    "light--DARK": map-get($light, secondary),
-    "light--NEUTRAL": map-get($light, secondary),
-    "light--LIGHT": map-get($light, primary),
-);
-
-$green-theme--DARK: (
-    "green--DARK": #284026,
-    "green--NEUTRAL": #2B4D29,
-    "green--LIGHT": #2E5A2C,
-
-    "white--DARK": map-get($light, secondary),
-    "white--NEUTRAL": map-get($light, secondary),
-    "white--LIGHT": map-get($light, primary),
-);
-
-$red-theme--DARK: (
-    "red--DARK": #552224,
-    "red--NEUTRAL": #6A1E1F,
-    "red--LIGHT": #80191B,
-
-    "white--DARK": map-get($light, secondary),
-    "white--NEUTRAL": map-get($light, secondary),
-    "white--LIGHT": map-get($light, primary),
-);
 
 
 /* Shadow Dimensions */
@@ -113,6 +80,65 @@ $offline-secondary: $blue-bayoux;
 $light-primary: $chalk-white;
 $light-secondary: $battleship-grey;
 
+
+$grey-theme-1: (
+    "dark-bg": $charcoal-grey,
+    "neutral-bg": $apollo-grey,
+    "light-bg": $eerie-black,
+
+    "light-fg": $light-primary,
+    "dark-fg": $light-secondary,
+);
+
+$blue-theme--DARK: (
+    "blue--DARK": #151532,
+    "blue--NEUTRAL": #13134B, 
+    "blue--LIGHT": #101065,
+
+    "light--DARK": map-get($light, secondary),
+    "light--NEUTRAL": map-get($light, secondary),
+    "light--LIGHT": map-get($light, primary),
+);
+
+$lime-theme--DARK: (
+    "lime--DARK": #2B3215,
+    "lime--NEUTRAL": #3D4B13, 
+    "lime--LIGHT": #506510,
+
+    "light--DARK": map-get($light, secondary),
+    "light--NEUTRAL": map-get($light, secondary),
+    "light--LIGHT": map-get($light, primary),
+);
+
+$green-theme--DARK: (
+    "dark-bg": #284026,
+    "neutral-bg": #2B4D29,
+    "light-bg": #2E5A2C,
+
+    "dark-fg": map-get($light, secondary),
+    "light-fg": map-get($light, primary),
+);
+
+$red-theme--DARK: (
+    "dark-bg": #552224,
+    "neutral-bg": #6A1E1F,
+    "light-bg": #80191B,
+
+    "white--DARK": map-get($light, secondary),
+    "white--NEUTRAL": map-get($light, secondary),
+    "white--LIGHT": map-get($light, primary),
+);
+
+$red-theme--NEUTRAL: (
+    "dark-bg": #B20808,
+    "neutral-bg": #CC0505,
+    "light-bg": #E50303,
+
+    "white--DARK": map-get($light, secondary),
+    "white--NEUTRAL": map-get($light, secondary),
+    "white--LIGHT": map-get($light, primary),
+);
+
 // mixins 
 @mixin modelbox {
 	display: flex;
@@ -145,6 +171,13 @@ $light-secondary: $battleship-grey;
 	overflow-x: clip;
 }
 
+@mixin absolute-boundary($top, $right, $bottom, $left) {
+    position: absolute;
+    top: $top;
+    left: $left;
+    right: $right;
+    bottom: $bottom;
+}
 
 
 .bottom { margin-top: auto !important; }
@@ -261,6 +294,7 @@ $light-secondary: $battleship-grey;
 	z-index: 1000;
 
 	&--tooltips {
+        z-index: 1001;
 		background-color: transparent;
 		pointer-events: none;
 	}
@@ -734,23 +768,40 @@ $light-secondary: $battleship-grey;
 }
 
 .profile {
-    background-color: $black-chestnut-oak;
+    background-color: map-get($grey-theme-1, neutral-bg);
     overflow: hidden;
     border-radius: 4px;
+    $outer-padding: $padding-medium;
     
     &--tooltip {
         width: 20rem;
     }
 
     &--overlay {
-        width: 50rem;
+        width: 40rem;
     }
 
-    .avatar {
+    &__avatar {
         padding: $padding-medium;
-        background-color: $black-chestnut-oak;
+        background-color: map-get($grey-theme-1, neutral-bg);
         overflow: hidden;
         border-radius: 4px;
+        position: relative;
+
+        .on-hover {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: map-get($grey-theme-1, dark-bg);
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        &:hover .on-hover {
+            opacity: 50;
+        }
     }
 
     &__field {
@@ -758,26 +809,35 @@ $light-secondary: $battleship-grey;
     }
 
     &__header {
-        @include flex-row($padding-medium, $gap-medium);
+        @include flex-row($outer-padding, $gap-medium);
         align-items: end;
         justify-content: space-between;
         position: relative;
     }
 
+    &__header-group {
+        @include flex-row(0, $gap-medium);
+        align-items: center;
+    }
+
+    &__open-menu {
+        color: map-get($grey-theme-1, light-fg);
+    }
+
     &__banner {
         position: absolute;
         top: 0;
-        bottom: 50%;
+        bottom: 25%;
         left: 0;
         right: 0;
-        background-color: $black-olive;
+        background-color: map-get($grey-theme-1, light-bg);
         z-index: -1;
     }
 
     &__body {
         @include flex-column($padding-medium, $gap-medium);
-        margin: $padding-medium;
-        background-color: $night;
+        margin: $outer-padding;
+        background-color: map-get($grey-theme-1, dark-bg);
         overflow: hidden;
         border-radius: 4px;
     }
@@ -820,6 +880,58 @@ $light-secondary: $battleship-grey;
         font-size: $text-secondary-small;
         color: $battleship-grey;
     }
+
+    &__section {
+        @include flex-column(0, $gap-medium);
+    }
+
+    &__navigation {
+        @include flex-row(0, $gap-large);
+        border-bottom: 1px solid map-get($grey-theme-1, light-bg);
+    }
+
+    &__switch {
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+        padding-bottom: $padding-large;
+        transition: border 0.2s, color 0.2s;
+        cursor: pointer;
+
+        &[data-state="inactive"] {
+            color: $light-secondary;
+            border-bottom: $padding-small solid transparent;
+        }
+
+        &:hover {
+            color: $light-primary;
+            border-bottom: $padding-small solid $light-primary;
+        }
+
+        &[data-state="active"] {
+            color: $light-primary;
+            border-bottom: $padding-small solid $light-primary;
+        }
+    }
+
+    &__button {
+        @include flex-row($padding-medium $padding-large, 0);
+        justify-content: center;
+        align-items: center;
+        font-size: $text-secondary-medium;
+
+        &--main {
+            border-radius: 4px;
+            background-color: map-get($green-theme--DARK, dark-bg);
+            color: map-get($green-theme--DARK, light-fg);
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+
+            &:hover {
+                background-color: map-get($green-theme--DARK, light-bg);
+                color: map-get($green-theme--DARK, light-fg);
+            }
+        }
+    }
 }
 
 .account {
@@ -855,7 +967,6 @@ $light-secondary: $battleship-grey;
     background-color: $apollo-grey;
     max-width: 35rem;
     position: relative;
-    background-color: $apollo-grey;
     border-radius: 4px;
 
 	&__header {
@@ -874,13 +985,8 @@ $light-secondary: $battleship-grey;
 		color: $light-secondary;
 	}
 
-    &__row {
-        @include flex-row(0, 0);
-        justify-content: space-between;
-    }
-
     &__warning {
-        color: $vermillion;
+        color: map-get($red-theme--NEUTRAL, neutral-bg);
         font-size: $text-primary-small;
         font-weight: bold;
     }
@@ -911,23 +1017,23 @@ $light-secondary: $battleship-grey;
 		transition: background-color 0.2s, color 0.2s;
 
         &--update {
-            color: map-get($green-theme--DARK, white-1);
-		    background-color: map-get($green-theme--DARK, green--DARK);
+            color: map-get($green-theme--DARK, white--DARK);
+		    background-color: map-get($green-theme--DARK, dark-bg);
         }
 
         &--update:hover {
-            background-color: map-get($green-theme--DARK, green--LIGHT);
-			color: map-get($green-theme--DARK, white-3);
+            background-color: map-get($green-theme--DARK, light-bg);
+			color: map-get($green-theme--DARK, light-fg);
 		}
 
         &--delete {
-            color: map-get($red-theme--DARK, white-1);
-		    background-color: map-get($red-theme--DARK, red--DARK);
+            color: map-get($red-theme--DARK, white--DARK);
+		    background-color: map-get($red-theme--DARK, dark-bg);
         }
 
         &--delete:hover {
-            background-color: map-get($red-theme--DARK, red--LIGHT);
-			color: map-get($red-theme--DARK, white-3);
+            background-color: map-get($red-theme--DARK, light-bg);
+			color: map-get($red-theme--DARK, white--LIGHT);
 		}
 
         &--create {
@@ -950,11 +1056,20 @@ $light-secondary: $battleship-grey;
         font-weight: bold;     
 
         &--success {
-            background-color: map-get($green-theme--DARK, green--LIGHT);
+            background-color: map-get($green-theme--DARK, light-bg);
         }
 
         &--error {
             background-color: $garnet;
+        }
+    }
+
+    &__close {
+        color: $light-secondary;
+        height: fit-content;
+
+        &:hover {
+            color: $light-primary;
         }
     }
 }
@@ -1106,20 +1221,24 @@ $light-secondary: $battleship-grey;
 
     &:has(:not(:checked)) {
         color: transparent;
-        background-color: transparent;
-        border: 2px solid map-get($green-theme--DARK, green--DARK);
+        background-color: map-get($red-theme--DARK, dark-bg);
+        border: 2px solid transparent;
     }
 
     &:hover {
-        color: map-get($green-theme--DARK, white-2);
-        background-color: map-get($green-theme--DARK, green--NEUTRAL);
-        border: 2px solid map-get($green-theme--DARK, green--NEUTRAL);
+        color: map-get($green-theme--DARK, dark-fg);
+        background-color: map-get($green-theme--DARK, neutral-bg);
+        border: 2px solid map-get($green-theme--DARK, neutral-bg);
+
+        &::before {
+            opacity: 0;
+        }
     }
 
     &:has(:checked) {
-        color: map-get($green-theme--DARK, white-3);
-        background-color: map-get($green-theme--DARK, green--LIGHT);
-        border: 2px solid map-get($green-theme--DARK, green--LIGHT);
+        color: map-get($green-theme--DARK, light-fg);
+        background-color: map-get($green-theme--DARK, light-bg);
+        border: 2px solid map-get($green-theme--DARK, light-bg);
     }
 
     input {
@@ -1254,7 +1373,7 @@ $light-secondary: $battleship-grey;
             }
 
             &:has(:checked) {
-                background-color: map-get($red-theme--DARK, red--LIGHT);
+                background-color: map-get($red-theme--DARK, light-bg);
                 color: map-get($red-theme--DARK, white--LIGHT);
             }
         }
@@ -1288,8 +1407,8 @@ $light-secondary: $battleship-grey;
             }
 
             &:has(:checked) {
-                background-color: map-get($green-theme--DARK, green--LIGHT);
-                color: map-get($green-theme--DARK, white--LIGHT);
+                background-color: map-get($green-theme--DARK, light-bg);
+                color: map-get($green-theme--DARK, light-fg);
             }
         }
     }
@@ -1351,7 +1470,7 @@ $light-secondary: $battleship-grey;
 .field {
     @include flex-column(0, $gap-small);
 
-    &:has(.form__error) .field__name  {
+    &:has(.field__error) .field__name  {
         color: $vermillion;
     }
 
@@ -1385,18 +1504,18 @@ $light-secondary: $battleship-grey;
         &:has(:not(:checked)) {
             background-color: transparent;
             color: transparent;
-            border: 2px solid map-get($green-theme--DARK, green--DARK);
+            border: 2px solid map-get($green-theme--DARK, dark-bg);
         }
 
         &:hover {
-            border: 2px solid map-get($green-theme--DARK, green--NEUTRAL);
-            color: map-get($green-theme--DARK, white-2);
+            border: 2px solid map-get($green-theme--DARK, neutral-bg);
+            color: map-get($green-theme--DARK, white--NEUTRAL);
         }
 
         &:has(:checked) {
-            background-color: map-get($green-theme--DARK, green--LIGHT);
-            color: map-get($green-theme--DARK, white-3);
-            border: 2px solid map-get($green-theme--DARK, green--LIGHT);
+            background-color: map-get($green-theme--DARK, light-bg);
+            color: map-get($green-theme--DARK, light-fg);
+            border: 2px solid map-get($green-theme--DARK, light-bg);
         }
 
         input {
@@ -1450,17 +1569,27 @@ $light-secondary: $battleship-grey;
 
 		&:hover {
 			color: $light-primary;
-			background-color: $charcoal-grey;
 		}
+
+        &[data-state="active"] {
+            color: $light-primary;
+            background-color: $eerie-black
+        }
 	}
 }
 
 .user {
-	@include modelbox;
-    $self: &;
-	transition: background-color 0.2s;
+    @include flex-row($padding-medium, $gap-medium);
+    align-items: center;
 	cursor: pointer;
-	
+	user-select: none;
+	transition: background-color 0.2s;
+    $self: &;
+
+    &:hover {
+		background-color: $eerie-black;
+	}
+    
 	&--online {
 		#{$self}__username {
 			color: $online-primary;
@@ -1479,6 +1608,12 @@ $light-secondary: $battleship-grey;
 		}
 	}
 
+    &__body {
+        @include flex-column(0, 0);
+        justify-content: center;
+        flex: 1;
+    }
+
 	&__username {
 		@include ellipsis;
 		font-size: $text-primary-small;
@@ -1488,15 +1623,6 @@ $light-secondary: $battleship-grey;
 	&__status {
 		@include ellipsis;
 		font-size: $text-secondary-small;
-	}
-
-	&__body {
-		display: flex;
-		flex-direction: column;
-	}
-
-	&:hover {
-		background-color: $eerie-black;
 	}
 }
 
@@ -1734,7 +1860,7 @@ $light-secondary: $battleship-grey;
 	border-radius: 4px;
 
 	&__item {
-		@include flex-row($padding-medium, $gap-large);
+		@include flex-row($padding-small $padding-large, $gap-large);
 		justify-content: space-between;
 		align-items: center;
         white-space: nowrap;
@@ -1975,11 +2101,8 @@ $light-secondary: $battleship-grey;
 }
 
 .explorer {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-flow: row dense;
-    padding: $padding-large;
-    gap: $gap-large;
+    @include flex-row($padding-medium, $gap-medium);
+    flex-wrap: wrap;
 }
 
 .result {
@@ -1987,12 +2110,11 @@ $light-secondary: $battleship-grey;
     overflow: hidden;
     border-radius: 4px;
     max-height: 12rem;
+    width: 15rem;
     height: fit-content;
-    box-shadow: $shadow-dimensions $night;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s;
 
     &:hover {
-        box-shadow: $shadow-dimensions $eerie-black;
         transform: scale(1.01);
     }
 
@@ -2001,21 +2123,21 @@ $light-secondary: $battleship-grey;
         gap: $gap-medium;
         grid-template-columns: auto minmax(0, 1fr);
         grid-template-rows: auto auto auto;
-        background-color: $eerie-black;
+        background-color: map-get($grey-theme-1, light-bg);
         padding: $padding-medium;
         z-index: 1;
-        box-shadow: $shadow-dimensions $night;
     }
 
     &__avatar {
         grid-row: 1 / -1;
         overflow: hidden;
         border-radius: 4px;
+        background-color: map-get($grey-theme-1, dark-bg);
     }
 
     &__title {
         @include ellipsis;
-        font-size: $text-primary-small;
+        font-size: $text-secondary-large;
         font-weight: bold;
     }
 
@@ -2025,21 +2147,29 @@ $light-secondary: $battleship-grey;
 
     &__members {
         font-size: $text-secondary-small;
+
+        &::before {
+            width: $text-secondary-small;
+            height: $text-secondary-small;
+            background-color: $online-primary;
+            border-radius: 9999px;
+        }
     }
 
     &__description {
         font-size: $text-secondary-medium;
         padding: $padding-medium;
         overflow: auto;
-        background-color: $black-chestnut-oak;
+        background-color: map-get($grey-theme-1, neutral-bg);
 		word-wrap: break-word;
+        border-bottom: 1px solid map-get($grey-theme-1, dark-bg);
     }
 
     &__footer {
         @include flex-row($padding-medium, 0);
         justify-content: space-between;
         align-items: center;
-        background-color: $charcoal-grey;
+        background-color: map-get($grey-theme-1, neutral-bg);
     }
 
     &__report {
@@ -2048,23 +2178,26 @@ $light-secondary: $battleship-grey;
     }
 
     &__button {
-        @include flex-row($padding-small, $gap-small);
-        font-size: $text-secondary-medium;
-        overflow: hidden;
+        @include flex-row($padding-small, $gap-medium);
+        font-size: $text-secondary-small;
         border-radius: 4px;
         transition: background-color 0.2s;
         cursor: pointer;
 
         &--join {
-            background-color: $pakistan-green;
+            background-color: map-get($green-theme--DARK, dark-bg);
 
             &:hover {
-                background-color: $office-green;
+                background-color: map-get($green-theme--DARK, light-bg);
             }
         }
 
         &--profile {
-            background-color: $amethyst;
+            background-color: map-get($blue-theme--DARK, blue--DARK);
+
+            &:hover {
+                background-color: map-get($blue-theme--DARK, blue--LIGHT);
+            }
         }
     }
 }

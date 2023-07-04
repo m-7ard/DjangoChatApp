@@ -1,0 +1,23 @@
+<div class="menu tooltip has-shadow">
+    {% if user != request.user and user not in request.user.friendships.users %}
+        <div class="menu__item tooltip__close">
+            Block
+        </div>
+        <div class="menu__item tooltip__close">
+            Message
+        </div>
+    {% elif user != request.user %}
+        <div class="menu__item tooltip__close"
+        data-command="manage-friendship"
+        data-kind="delete-friendship"
+        data-context='{
+            "objects": {
+                "friend": {{ user|object_to_json }},
+        }}'>
+            Remove Friend
+        </div>
+        <div class="menu__item tooltip__close">
+            Block
+        </div>
+    {% endif %}
+</div>

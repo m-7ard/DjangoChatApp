@@ -153,5 +153,5 @@ const commandHandlers = {
         let targetSelector = trigger.dataset.target;
         let target = trigger.closest(targetSelector);
         target.remove();
-    }
+    },
 };

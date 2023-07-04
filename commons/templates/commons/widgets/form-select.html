@@ -1,7 +1,7 @@
 <ul class="form-select dropdown select">
     <li class="form-select__option dropdown__trigger">
         <div class="select__value">
-            {{ field.selected.name }}
+            {% firstof field.selected.name 'None' %}
         </div>
         <span class="dropdown__marker">
             <div class="icon icon--tiny">
