@@ -316,10 +316,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         client_context = json.loads(data.pop('context'))
         objects = client_context['objects']
         
-        friend = dict_to_object(objects['friend'])
-        friendship = Friendship.objects.filter(Q(sender=friend) | Q(receiver=friend)).first()
-        
-        kind = data['kind']
+        friend = dict_to_object(objects['user'])
+        kind = data.get('kind')
 
         if kind == 'send-friendship':
             friendship, created = Friendship.objects.get_or_create(sender=self.user, receiver=friend, status='pending')
@@ -327,7 +325,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             friendship = Friendship.objects.get(sender=friend, receiver=self.user)
             friendship.status = 'accepted'
             friendship.save()
-        elif kind in ['reject-friendship', 'delete-friendship', 'cancel-friendship']:
+        elif kind in {'reject-friendship', 'delete-friendship', 'cancel-friendship'}:
             friendship = Friendship.objects.filter(Q(sender=friend) | Q(receiver=friend)).first()
             friendship.delete()
             

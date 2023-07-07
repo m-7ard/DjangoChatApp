@@ -395,7 +395,9 @@ secondary and tertiary
 
 .chatbar {
   z-index: 1;
-  padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: 4px;
+  overflow: hidden;
 }
 .chatbar__body {
   display: flex;
@@ -510,29 +512,33 @@ secondary and tertiary
   gap: 0.5rem;
   align-self: center;
 }
-.friendship__accept {
-  color: #11450C;
+.friendship__button {
   cursor: pointer;
 }
-.friendship__accept:hover {
-  color: #158308;
+.friendship__button--accept {
+  color: #284026;
 }
-.friendship__reject {
-  color: #6B2A2A;
-  cursor: pointer;
+.friendship__button--accept:hover {
+  color: #2E5A2C;
 }
-.friendship__reject:hover {
-  color: #FF3D3D;
+.friendship__button--reject {
+  color: #552224;
 }
-.friendship__manage {
+.friendship__button--reject:hover {
+  color: #80191B;
+}
+.friendship__button--manage {
   color: #8D8A84;
-  cursor: pointer;
 }
-.friendship__manage:hover {
+.friendship__button--manage:hover {
   color: #e0dbd1;
 }
 
 .profile {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
   background-color: #181818;
   overflow: hidden;
   border-radius: 4px;
@@ -542,6 +548,10 @@ secondary and tertiary
 }
 .profile--overlay {
   width: 40rem;
+}
+.profile--sidebar {
+  flex: 1;
+  background-color: #131313;
 }
 .profile__avatar {
   padding: 0.5rem;
@@ -592,7 +602,7 @@ secondary and tertiary
   bottom: 25%;
   left: 0;
   right: 0;
-  background-color: #212120;
+  background-color: #181818;
   z-index: -1;
 }
 .profile__body {
@@ -601,9 +611,12 @@ secondary and tertiary
   padding: 0.5rem;
   gap: 0.5rem;
   margin: 0.5rem;
-  background-color: #131313;
   overflow: hidden;
   border-radius: 4px;
+  background-color: #131313;
+}
+.profile__body--neutral {
+  background-color: #181818;
 }
 .profile__display-name {
   font-size: 1rem;
@@ -674,20 +687,39 @@ secondary and tertiary
   display: flex;
   padding: 0.5rem 1rem;
   gap: 0;
-  justify-content: center;
-  align-items: center;
   font-size: 0.8125rem;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
 }
 .profile__button--main {
+  justify-content: center;
+  align-items: center;
   border-radius: 4px;
   background-color: #284026;
   color: #e0dbd1;
-  transition: background-color 0.2s, color 0.2s;
-  cursor: pointer;
 }
 .profile__button--main:hover {
   background-color: #2E5A2C;
   color: #e0dbd1;
+}
+.profile__button--sidebar {
+  height: -moz-fit-content;
+  height: fit-content;
+  flex: 1;
+  background-color: #181818;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile__button--sidebar:hover {
+  background-color: #212120;
+}
+.profile__sidebar-group {
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.5rem;
+}
+.profile__sidebar-group > :nth-child(n+1) {
+  border-top: #131313;
 }
 
 .account {
@@ -1580,7 +1612,7 @@ secondary and tertiary
 }
 .menu__item {
   display: flex;
-  padding: 0.25rem 1rem;
+  padding: 0.5rem 1rem;
   gap: 1rem;
   justify-content: space-between;
   align-items: center;

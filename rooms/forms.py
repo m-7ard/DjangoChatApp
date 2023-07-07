@@ -60,7 +60,7 @@ class ChannelUpdateForm(forms.ModelForm):
 class ChannelPermissionsForm(forms.ModelForm):
     class Meta:
         model = Channel
-        fields = ['display_logs']
+        fields = '__all__'
         
     
 class RoomCreateForm(forms.ModelForm):
@@ -98,6 +98,4 @@ class RoomUpdateForm(forms.ModelForm):
             return self.initial.get('image')
 
 class MessageForm(forms.ModelForm):
-    class Meta:
-        model = Message
-        fields = ['content', 'user', 'channel', 'member']
+    pass

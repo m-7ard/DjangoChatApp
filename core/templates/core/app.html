@@ -2,17 +2,13 @@
 {% load static %}
 {% load custom_tags %}
 
-{% block extrahead %}
-<link rel="stylesheet" type="text/css" href="{% static 'rooms/app.css' %}">
-{% endblock %}
-
 {% block content %}
 <div class="app">
 	<div class="app__sidebar app__sidebar--primary">
 		{% block left-sidebar %}{% endblock %}
 	</div>
 	<div class="app__main">
-		{% block app__main %}{% endblock %}
+		{% block main %}{% endblock %}
 	</div>
 	<div class="app__sidebar app__sidebar--secondary">
 		<div class="container container--fill">
@@ -49,7 +45,7 @@
                         <ul class="user-group__content">
                             {% for friendship in user.received_friendships.pending %}
                                 {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "./elements/friend.html" %}
+                                    {% include "../commons/elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}                          
                         </ul>
@@ -63,7 +59,7 @@
                         <ul class="user-group__content" data-category="accepted">
                             {% for friendship in user.friendships.accepted %}
                                 {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "./elements/friend.html" %}
+                                    {% include "../commons/elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}
                         </ul>
@@ -77,7 +73,7 @@
                         <ul class="user-group__content">
                             {% for friendship in user.sent_friendships.pending %}
                                 {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "./elements/friend.html" %}
+                                    {% include "../commons/elements/friend.html" %}
                                 {% endwith %}
                             {% endfor %}                          
                         </ul>
@@ -126,7 +122,7 @@
 				<ul class="container__content">
 					{% for membership in user.memberships.all %}
                         {% with membership.room as object %}
-                            {% include "./elements/membership.html" %}
+                            {% include "../commons/elements/membership.html" %}
                         {% endwith %}
 					{% endfor %}
 				</ul>

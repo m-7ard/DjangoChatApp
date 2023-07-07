@@ -1,8 +1,8 @@
-{% extends "rooms/app.html" %}
+{% extends "core/app.html" %}
 {% load static %}
 
 
-{% block app__main %}
+{% block main %}
 <div class="container container--fill">
 	<div class="container__header">
 		{{ channel.name }}
@@ -46,16 +46,7 @@
 			{% endfor %}
 		</ul>
 	</div>
-	<div class="chatbar" id="chatbar" data-context='
-    {
-        "objects": {
-            "room": {{ room|object_to_json }}
-        },
-        "variables": {
-            "emoteCommand": "emote-to-text",
-            "inputParent": "#chatbar"
-        }
-    }'>
+	<div class="chatbar">
         <div class="chatbar__body has-shadow">
             <span class="chatbar__button">
                 <div class="icon icon--small">
@@ -65,9 +56,11 @@
                 </div>
             </span>
             <span class="wrapper--remaining-space">
-                <textarea class="chatbar__input secondary-text secondary-text--large" data-role="input"></textarea>
+                <textarea class="chatbar__input secondary-text secondary-text--large" id="chatbar-input">
+
+                </textarea>
             </span>
-            <span class="chatbar__button tooltip__trigger" data-target="emotes" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar">
+            <span class="chatbar__button tooltip__trigger" data-positioning='{"bottom": "-100%", "right": "0px"}'>
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">
                         sentiment_satisfied
@@ -86,5 +79,14 @@
 
 
 {% block scripts %}
+<script>
+    const chatbarInput = document.getElementById('chatbar-input');
+    chatbarInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            commandHandlers['send-message'](event);
 
+        };
+    });
+</script>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "rooms/app.html" %}
+{% extends "core/app.html" %}
 {% load static %}
 {% load custom_tags %}
 
@@ -6,7 +6,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'rooms/app.css' %}">
 {% endblock %}
 
-{% block app__sidebar--primary %}
+{% block left-sidebar %}
 <div class="container container--fill">
 	<div class="container__header has-shadow">
 		News
@@ -28,7 +28,7 @@
 </div>
 {% endblock %}
 
-{% block app__main %}
+{% block main %}
 
 {% endblock %}
 

@@ -619,7 +619,9 @@ $red-theme--NEUTRAL: (
 
 .chatbar {
 	z-index: 1;
-    padding: $padding-medium;
+    margin: $padding-medium;
+    border-radius: 4px;
+    overflow: hidden;
 
     &__body {
         @include flex-row(0, 0);
@@ -748,30 +750,45 @@ $red-theme--NEUTRAL: (
 	@include flex-row(0, $gap-medium);
 	align-self: center;
 
-	&__accept {
-		color: $pakistan-green;
+	&__button {
 		cursor: pointer;
-		&:hover { color: $office-green; }
-	}
 
-	&__reject {
-		color: $garnet;
-		cursor: pointer;
-		&:hover { color: $vermillion; }
-	}
+        &--accept {
+            $theme: $green-theme--DARK;
+            color: map-get($theme, dark-bg);
 
-	&__manage {
-		color: $light-secondary;
-		cursor: pointer;
-		&:hover { color: $light-primary; }
-	}
+            &:hover { 
+                color: map-get($theme, light-bg);
+            }
+        }
+    
+        &--reject {
+            $theme: $red-theme--DARK;
+            color: map-get($theme, dark-bg);
+
+            &:hover { 
+                color: map-get($theme, light-bg);
+            }
+        }
+    
+        &--manage {
+            $theme: $grey-theme-1;
+            color: map-get($theme, dark-fg);
+
+            &:hover { 
+                color: map-get($theme, light-fg);
+            }
+        }
+    }
 }
 
 .profile {
+    @include flex-column(0, 0);
     background-color: map-get($grey-theme-1, neutral-bg);
     overflow: hidden;
     border-radius: 4px;
     $outer-padding: $padding-medium;
+    $self: &;
     
     &--tooltip {
         width: 20rem;
@@ -779,6 +796,11 @@ $red-theme--NEUTRAL: (
 
     &--overlay {
         width: 40rem;
+    }
+
+    &--sidebar {
+        flex: 1;
+        background-color: map-get($grey-theme-1, dark-bg);
     }
 
     &__avatar {
@@ -830,16 +852,20 @@ $red-theme--NEUTRAL: (
         bottom: 25%;
         left: 0;
         right: 0;
-        background-color: map-get($grey-theme-1, light-bg);
+        background-color: map-get($grey-theme-1, neutral-bg);
         z-index: -1;
     }
 
     &__body {
         @include flex-column($padding-medium, $gap-medium);
         margin: $outer-padding;
-        background-color: map-get($grey-theme-1, dark-bg);
         overflow: hidden;
         border-radius: 4px;
+        background-color: map-get($grey-theme-1, dark-bg);
+
+        &--neutral {
+            background-color: map-get($grey-theme-1, neutral-bg);
+        }
     }
 
     &__display-name {
@@ -915,21 +941,43 @@ $red-theme--NEUTRAL: (
 
     &__button {
         @include flex-row($padding-medium $padding-large, 0);
-        justify-content: center;
-        align-items: center;
         font-size: $text-secondary-medium;
+        transition: background-color 0.2s, color 0.2s;
+        cursor: pointer;
 
         &--main {
+            justify-content: center;
+            align-items: center;
             border-radius: 4px;
             background-color: map-get($green-theme--DARK, dark-bg);
             color: map-get($green-theme--DARK, light-fg);
-            transition: background-color 0.2s, color 0.2s;
-            cursor: pointer;
 
             &:hover {
                 background-color: map-get($green-theme--DARK, light-bg);
                 color: map-get($green-theme--DARK, light-fg);
             }
+        }
+
+        &--sidebar {
+            height: fit-content;
+            flex: 1;
+            background-color: map-get($grey-theme-1, neutral-bg);
+            align-items: center;
+            justify-content: space-between;
+            
+            &:hover {
+                background-color: map-get($grey-theme-1, light-bg);
+            }
+        }
+    }
+
+    &__sidebar-group {
+        border-radius: 4px;
+        overflow: hidden;
+        margin: $outer-padding;
+        
+        & > :nth-child(n+1) {
+            border-top: map-get($grey-theme-1, dark-bg);
         }
     }
 }
@@ -1860,7 +1908,7 @@ $red-theme--NEUTRAL: (
 	border-radius: 4px;
 
 	&__item {
-		@include flex-row($padding-small $padding-large, $gap-large);
+		@include flex-row($padding-medium $padding-large, $gap-large);
 		justify-content: space-between;
 		align-items: center;
         white-space: nowrap;
@@ -1869,7 +1917,7 @@ $red-theme--NEUTRAL: (
 		border-radius: 4px;
 		cursor: pointer;
 		transition: color 0.2s, background-color 0.2s;
-
+        
 		&:hover {
 			color: $light-primary;
 			background-color: $eerie-black;

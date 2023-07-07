@@ -12,10 +12,20 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse 
 from django.contrib import messages
 from django.template.loader import render_to_string
+from django.db.models import Q
 
-
+from users.models import CustomUser
 from core.models import News
-from .models import Room, Channel, Log, ChannelCategory, Action, Member, Message, ModelPermission, ModelPermissionGroup
+from .models import (
+    Room, 
+    Channel, 
+    Log, 
+    ChannelCategory, 
+    Action, 
+    Message, 
+    PrivateChat,
+    BacklogGroup,
+)
 from .forms import (
     ChannelCreateForm,
     ChannelUpdateForm,
@@ -23,14 +33,6 @@ from .forms import (
     RoomCreateForm,
     RoomUpdateForm,
     ChannelDeleteForm,
-)
-
-from utils import (
-    get_object_or_none, 
-    send_to_group, 
-    get_rendered_html,
-    member_has_role_perm,
-    member_has_channel_perm,
 )
 
 
@@ -47,12 +49,6 @@ class RoomView(DetailView):
     model = Room
     context_object_name = 'room'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        room = self.object
-        member = get_object_or_none(Member, room=room, user=self.request.user)
-        context['member'] = member
-        return context
 
 
 class ChannelView(DetailView):
@@ -67,29 +63,7 @@ class ChannelView(DetailView):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        channel = self.object
-        member = get_object_or_none(Member, room=channel.room, user=self.request.user)
-        messages = channel.messages.all()
-        logs = channel.room.logs.all().filter(action__in=channel.display_logs.all())
-
-        if not member:
-            return redirect('room', room=channel.room.pk)
-
-        can_view_messages = (
-            member_has_role_perm(member, 'view_channel') 
-            and member_has_channel_perm(member, channel, 'view_channel')
-        )
-        messages = messages if can_view_messages else messages.filter(member=member)
-
-        context.update({
-            'backlogs': sorted(chain(messages, logs), key=lambda obj: obj.date_added), 
-            'room': channel.room,
-            'member': member,
-        })
-        
-        return self.render_to_response(context)
+        pass
 
 
 class ChannelCreateView(CreateView):
@@ -257,28 +231,7 @@ class LeaveRoom(TemplateView):
         return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
-        room = Room.objects.get(pk=kwargs.get('pk'))
-        user = request.user
-        member = get_object_or_none(Member, room=room, user=user)
-        if member:
-            action = Action.objects.get(name='leave')
-            log = Log.objects.create(action=action, receiver=user, room=room)
-            log_html = render_to_string(request=request, template_name='rooms/elements/log.html', context={
-                'log': log, 
-                'room': room
-            })
-
-            member.delete()
-
-            send_data = {
-                'type': 'send_to_JS',
-                'action': 'leave-room',
-                'html': log_html,
-            }
-            for channel in room.channels.filter(display_logs=action):
-                send_to_group(f'channel_{channel.pk}', send_data)
-
-        return JsonResponse({'status': 200, 'redirect': reverse('room', kwargs={'pk': room.pk})})
+        pass
     
 
 class DeleteRoom(DeleteView):
@@ -301,31 +254,7 @@ class DeleteRoom(DeleteView):
 
 class JoinRoom(View):
     def post(self, request, *args, **kwargs):
-        room = Room.objects.get(pk=kwargs.get('pk'))
-        user = request.user
-        member, created = Member.objects.get_or_create(room=room, user=user)
-        """
-        NOTE: When this is called from the room explorer, it can (?)
-        cause a race condition it seems. Use lock in future (?)
-        """
-
-        if created:
-            action = Action.objects.get(name='join')
-            log = Log.objects.create(action=action, receiver=user, room=room)
-            log_html = render_to_string(request=request, template_name='rooms/elements/log.html', context={
-                'log': log, 
-                'room': room
-            })
-            send_data = {
-                'type': 'send_to_JS',
-                'action': 'join-room',
-                'html': log_html,
-            }
-
-            for channel in room.channels.filter(display_logs=action):
-                send_to_group(f'channel_{channel.pk}', send_data)
-
-        return redirect('room', pk=room.pk)
+        pass
     
 
 class RoomListView(ListView):
@@ -340,10 +269,28 @@ class RoomListView(ListView):
     
 
 class ModelPermissionGroupUpdateView(View):
-    def post(self, request, *args, **kwargs):
-        model_permissions_group = ModelPermissionGroup.objects.get(pk=kwargs.get('pk'))
-        for model_permission in model_permissions_group.items.all():
-            model_permission.value = request.POST[model_permission.permission.codename]
-            model_permission.save()
+    pass
+    
+
+
+class PrivateChatView(TemplateView):
+    template_name = 'rooms/private-chat.html'
+    
+    def get(self, request, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        counterparty = CustomUser.objects.get(pk=kwargs.get('pk'))
+        if counterparty == request.user:
+            return HttpResponseRedirect('frontpage')
+
+        print(private_chat, request.user, counterparty)
+        if not private_chat:
+            private_chat = PrivateChat.objects.create()
+            private_chat.backlogs = BacklogGroup.objects.create()
+            private_chat.users.set([request.user, counterparty])
+            private_chat.save()
+
+        context['private_chat'] = private_chat
+        context['counterparty'] = counterparty
         
-        return JsonResponse({'status': 200})
+        return self.render_to_response(context)
+        

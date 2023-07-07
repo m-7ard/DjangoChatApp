@@ -60,7 +60,7 @@ chatSocket.onopen = function() {
 	chatSocket.send(JSON.stringify({
 		'action': 'requestServerResponse'
 	}))
-}
+};
 
 window.addEventListener('click', function preventRedirect(event) {
     if (event.target.closest('[data-prevent-redirect]')) {
@@ -72,11 +72,12 @@ window.addEventListener('mouseup', function delegateClick(event) {
     if (!(event.button == 0)) {
         return;
     };
-	Object.entries(windowClickHandlers).forEach(([selector, handler]) => {
-		if (event.target.closest(selector)) {
+    for ([selector, handler] of Object.entries(windowClickHandlers)) {
+        if (event.target.closest(selector)) {
 			handler(event);
+            return
 		};
-	});
+    };
 });
 
 

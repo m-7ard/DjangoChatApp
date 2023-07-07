@@ -1,0 +1,157 @@
+{% extends "core/app.html" %}
+{% load static %}
+
+{% block left-sidebar %}
+<div class="container container--fill">
+    <div class="container__header">
+        User
+    </div>
+    <div class="container__subheader has-shadow">
+        <span class="icon icon--small">
+            <i class="material-symbols-outlined">
+                search
+            </i>
+        </span>
+        <span class="wrapper--remaining-space">
+            <input type="text" class="container__search">
+        </span>
+    </div>
+    <div class="profile profile--sidebar">
+        <div class="profile__header">
+            <div class="profile__banner profile__banner--dark">
+    
+            </div>
+            <div class="profile__avatar overlay__trigger has-shadow" data-template-name="commons/overlays/user-profile.html">
+                <div class="avatar avatar--large">
+                    <img src="{{ counterparty.image.url }}" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="profile__body profile__body--neutral">
+            <div class="profile__field">
+                <div class="profile__display-name">
+                    {{ counterparty.username }}
+                </div>
+                <div class="profile__username">
+                    {{ counterparty.full_name }}
+                </div>
+            </div>
+            <div class="profile__divider">
+    
+            </div>
+            {% if counterparty.bio %}
+                <div class="profile__field">
+                    <div class="profile__label">
+                        Bio
+                    </div>
+                    <div class="profile__bio">
+                        {{ counterparty.bio }}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="profile__field">
+                <div class="profile__label">
+                    Account Created
+                </div>
+                <div class="profile__date">
+                    {{ counterparty.joined_site }}
+                </div>
+            </div>
+        </div>
+        <div class="profile__sidebar-group">
+            <div class="profile__button profile__button--sidebar">
+                <div>
+                    Mutual Servers
+                </div>
+                <div class="icon icon--tiny">
+                    <i class="material-symbols-outlined">
+                        chevron_right
+                    </i>
+                </div>
+            </div>
+            <div class="profile__button profile__button--sidebar">
+                <div>
+                    Mutual Friends
+                </div>
+                <div class="icon icon--tiny">
+                    <i class="material-symbols-outlined">
+                        chevron_right
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="container container--fill">
+	<div class="container__header">
+		Message
+	</div>
+	<div class="container__subheader has-shadow">
+		<span class="icon icon--small left">
+			<i class="material-symbols-outlined">
+				first_page
+			</i>
+		</span>
+		<span class="left right">
+			{{ channel.description }}
+		</span>
+		<span class="icon icon--small right">
+			<i class="material-symbols-outlined">
+				last_page
+			</i>
+		</span>
+	</div>
+	<div class="wrapper--remaining-space">
+		<ul class="container__content" id="app-messages">
+            {% for backlog in private_chat.backlogs.items %}
+                {% ifchanged backlog.date_added|date:'D' %}
+                    <li class="backlog">
+                        <div class="backlog__divider">
+                            <span></span>
+                            <span class="backlog__timestamp">{{ backlog.date_added|date:'d M Y' }}</span>
+                            <span></span>
+                        </div>
+                    </li>
+                {% endifchanged %}
+                {% if backlog|classname == 'Message' %}
+                    {% with message=backlog %}
+                        {% include "./elements/message.html" %}
+                    {% endwith %}
+                {% elif backlog|classname == 'Log' %}
+                    {% with log=backlog %}
+                        {% include "./elements/log.html" %}
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+		</ul>
+	</div>
+	<div class="chatbar has-shadow">
+        <div class="chatbar__body">
+            <span class="chatbar__button">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        attach_file
+                    </i>
+                </div>
+            </span>
+            <span class="wrapper--remaining-space">
+                <textarea class="chatbar__input secondary-text secondary-text--large" id="chatbar-input" autofocus></textarea>
+            </span>
+            <span class="chatbar__button tooltip__trigger" data-target="emotes" data-positioning='{"bottom": "-100%", "right": "0px"}' data-kind="chatbar">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        sentiment_satisfied
+                    </i>
+                </div>
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/handlers/chatbarListener.js' %}"></script>
+{% endblock %}

@@ -21,5 +21,6 @@ urlpatterns = [
     path('delete/room/<int:pk>/', views.DeleteRoom.as_view(), name='delete-room'),
     path('explore/', views.RoomListView.as_view(), name='explore-rooms'),
     
-    path('update/permissions/<int:pk>', views.ModelPermissionGroupUpdateView.as_view(), name='update-model-permissions'),
+    path('update/permissions/<int:pk>/', views.ModelPermissionGroupUpdateView.as_view(), name='update-model-permissions'),
+    path('private-chat/<int:pk>/', views.PrivateChatView.as_view(), name='private-chat'),
 ]

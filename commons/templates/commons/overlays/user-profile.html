@@ -1,11 +1,3 @@
-<!--
-
-TODO: 
-
-    BUILD FRIEND MENU AND GET AROUND TO DMS
-
-
--->
 <div class="profile profile--overlay overlay has-shadow">
     <div class="profile__header">
         <div class="profile__banner">
@@ -23,14 +15,14 @@ TODO:
                 data-kind="send-friendship"
                 data-context='{
                     "objects": {
-                        "friend": {{ user|object_to_json }}
+                        "user": {{ user|object_to_json }}
                 }}'>
                     Add Friend
                 </div>
             {% elif user != request.user %}
-                <div class="profile__button profile__button--main">
+                <a class="profile__button profile__button--main" href="{% url 'private-chat' pk=user.pk %}">
                     Send Message
-                </div>
+                </a>
             {% endif %}
             <div class="profile__open-menu tooltip__trigger" data-template-name="commons/tooltips/user-profile-menu.html" data-context='{"objects": {"user": {{ user|object_to_json }}}}' data-positioning='{"left": "0px", "top": "100%"}'>
                 <div class="icon icon--small icon--hoverable">

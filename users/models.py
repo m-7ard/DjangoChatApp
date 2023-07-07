@@ -147,4 +147,3 @@ class Friendship(models.Model):
         return {self.sender, self.receiver}
     
     objects = FriendshipQuerySet.as_manager()
-

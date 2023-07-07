@@ -51,5 +51,3 @@ class SigninView(LoginView):
 
 class SignoutView(LogoutView):
     success_url = reverse_lazy('core:frontpage')
-        
-

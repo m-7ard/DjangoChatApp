@@ -1,13 +1,8 @@
-import asyncio
-import json
 from pathlib import Path
 
 from django.apps import apps
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync, sync_to_async
-from django.template import Template, Context, RequestContext
-from django.http import HttpResponse
-from django.template import loader
+from asgiref.sync import async_to_sync
 from django.shortcuts import render
 
 channel_layer = get_channel_layer()
@@ -66,43 +61,6 @@ def object_to_dict(self):
         "app": self._meta.app_label
     }
     return parsed_object
-
-
-def member_has_role_perm(member, codename):
-    if not member:
-        return False
-    
-    member_roles = sorted(member.roles.all(), key=lambda role: role.hierarchy)
-    is_owner = member.user == member.room.owner
-    is_admin = any([role.admin for role in member_roles])
-    if is_admin or is_owner:
-        return True
-    
-    for role in member_roles:
-        role_permissions = role.permissions.items.all()
-        value = role_permissions.get(permission__codename=codename).value
-        if value != None:
-            return value
-    
-
-def member_has_channel_perm(member, channel, codename):
-    if not member:
-        return False
-    
-    member_roles = sorted(member.roles.all(), key=lambda role: role.hierarchy)
-    is_owner = member.user == member.room.owner
-    is_admin = any([role.admin for role in member_roles])
-    if is_admin or is_owner:
-        return True
-
-    channel_roles = sorted(channel.configs.all().filter(role__in=member_roles), key=lambda config: config.role.hierarchy)
-    for role in channel_roles:
-        role_permissions = role.permissions.items.all()
-        value = role_permissions.get(permission__codename=codename).value
-        if value != None:
-            return value
-
-    
 
 
 
