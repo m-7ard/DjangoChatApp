@@ -1,21 +1,15 @@
 from django import forms
-from .models import Room, Channel, Message, ChannelCategory, Action
+from .models import Channel
 from utils import get_object_or_none
 
 from core.widgets import AvatarInput
-from commons.widgets import (
-    ChannelKindSelect, 
-    FormTextInput, 
-    FormNumberInput, 
-    FormSelect,
-    FormCheckbox,
-)
-from .models import Channel
+from commons import widgets
+from .models import Channel, GroupChat
 
 class ChannelCreateForm(forms.ModelForm):
-    kind = forms.ChoiceField(widget=ChannelKindSelect(), choices=Channel.KIND)
-    name = forms.CharField(widget=FormTextInput())
-    description = forms.CharField(widget=FormTextInput(), required=False)
+    kind = forms.ChoiceField(widget=widgets.ChannelKindSelect(), choices=((),))
+    name = forms.CharField(widget=widgets.FormTextInput())
+    description = forms.CharField(widget=widgets.FormTextInput(), required=False)
 
     def __init__(self, category=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,11 +19,11 @@ class ChannelCreateForm(forms.ModelForm):
 
     class Meta:
         model = Channel
-        fields = ['name', 'description', 'kind', 'category']
+        fields = ['name', 'description', 'kind']
 
 
 class ChannelDeleteForm(forms.ModelForm):
-    confirm = forms.BooleanField(widget=FormCheckbox())
+    confirm = forms.BooleanField(widget=widgets.FormSlider())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)        
@@ -41,10 +35,10 @@ class ChannelDeleteForm(forms.ModelForm):
         fields = ['confirm']
 
 class ChannelUpdateForm(forms.ModelForm):
-    name = forms.CharField(widget=FormTextInput())
-    description = forms.CharField(widget=FormTextInput(), required=False)
-    order =  forms.CharField(widget=FormNumberInput())
-    category = forms.ModelChoiceField(widget=FormSelect(), queryset=None, required=False)
+    name = forms.CharField(widget=widgets.FormTextInput())
+    description = forms.CharField(widget=widgets.FormTextInput(), required=False)
+    order =  forms.CharField(widget=widgets.FormNumberInput())
+    category = forms.ModelChoiceField(widget=widgets.FormSelect(), queryset=None, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,26 +56,16 @@ class ChannelPermissionsForm(forms.ModelForm):
         model = Channel
         fields = '__all__'
         
+
+class GroupChatCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormTextInput())
+    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='')
     
-class RoomCreateForm(forms.ModelForm):
-    name = forms.CharField(widget=FormTextInput())
-    description = forms.CharField(widget=FormTextInput())
-
     class Meta:
-        model = Room
-        fields = ['name', 'description', 'image']
+        model = GroupChat
+        fields = ['name', 'public']
         
-    def clean_image(self):
-        image = self.cleaned_data.get('image')
-
-        if image:
-            return image
-        else:
-            # Keep the current image at the time of editing
-            # if none provided
-            return self.initial.get('image')
-        
-
+"""
 class RoomUpdateForm(forms.ModelForm):
     class Meta:
         model = Room
@@ -99,3 +83,5 @@ class RoomUpdateForm(forms.ModelForm):
 
 class MessageForm(forms.ModelForm):
     pass
+
+"""

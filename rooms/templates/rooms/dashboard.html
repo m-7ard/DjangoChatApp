@@ -1,34 +1,93 @@
 {% extends "core/app.html" %}
-{% load static %}
-{% load custom_tags %}
 
-{% block extrahead %}
-<link rel="stylesheet" type="text/css" href="{% static 'rooms/app.css' %}">
+{% block app-sidebar-header %}
+    <input class="sidebar__searchbar sidebar__searchbar--main" placeholder="Search Private Chat">
 {% endblock %}
 
-{% block left-sidebar %}
-<div class="container container--fill">
-	<div class="container__header has-shadow">
-		News
-	</div>
-	<div class="wrapper--remaining-space">
-		<ul class="container__content">
-			{% for object in news %}
-				<li class="news">
-					<span class="news__date">
-						{{ object.display_date }}
-					</span>
-					<a class="news__title">
-						{{ object.title }}
-					</a>
-				</li>
-			{% endfor %}
-		</ul>
-	</div>
-</div>
+{% block app-sidebar-body %}
+    <div class="sidebar__lead-in">
+        <div class="sidebar__label">
+            Private Chats
+        </div>
+        <div class="app__icon">
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--tiny icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        add
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for private_chat in '1234567890123456789' %}
+        {% include "./elements/user.html" %}
+    {% endfor %}
 {% endblock %}
 
-{% block main %}
-
+{% block main-header %}
+    <div class="app__icon">
+        <div class="icon icon--medium">
+            <i class="material-symbols-outlined">
+                history
+            </i>
+        </div>
+    </div>
+    <div class="app__title">
+        Dashboard
+    </div>
+    <div class="app__button app__button--header" data-state="selected">
+        All
+    </div>
+    <div class="app__button app__button--header">
+        News
+    </div>
+    <div class="app__button app__button--header">
+        Announcements
+    </div>
 {% endblock %}
 
+{% block main-content %}
+ 
+{% endblock %}
+
+
+{% block main-content-sidebar %}
+    <div class="sidebar__lead-in">
+        <div class="sidebar__label">
+            Mods
+        </div>
+        <div class="sidebar__label">
+            123
+        </div>
+        <div class="sidebar__role-icon app__icon">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    group
+                </i>
+            </div>
+        </div>
+    </div>
+
+    {% for private_chat in '123412341234' %}
+        {% include "./elements/user.html" %}
+    {% endfor %}
+    <div class="sidebar__lead-in">
+        <div class="sidebar__label">
+            VIPs
+        </div>
+        <div class="sidebar__label">
+            59
+        </div>
+        <div class="sidebar__role-icon app__icon">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    group
+                </i>
+            </div>
+        </div>
+    </div>
+    {% for private_chat in '123412341234' %}
+        {% include "./elements/user.html" %}
+    {% endfor %}
+
+{% endblock %}

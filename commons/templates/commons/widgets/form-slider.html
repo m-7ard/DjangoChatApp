@@ -1,13 +1,12 @@
 <div class="field__row">
     <div class="field__label">
-        {{ field.label }}
+        {{ widget.attrs.label }}
     </div>
-    <div class="form-checkbox">
-        <div class="icon icon--small">
-            <i class="material-symbols-outlined">
-                done
-            </i>
+    <div class="form-slider">
+        <div class="form-slider__marker">
+            
         </div>
         <input type="checkbox" name="{{ widget.name }}" {% if widget.required %} required {% endif %}>
     </div>
+    
 </div>

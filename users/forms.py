@@ -3,27 +3,34 @@ from dateutil.relativedelta import relativedelta
 
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, CustomUser
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.utils.text import capfirst
+
+
+from .models import CustomUser
+from commons import widgets
 
 
 class SignupForm(UserCreationForm):
-    email = forms.EmailField()
+    email = forms.EmailField(
+        widget=widgets.FormEmailInput()
+    )
     birthday = forms.DateTimeField(
         label="Birthday", 
         required=True, 
-        widget=forms.NumberInput(attrs={'type':'date'})
+        widget=widgets.FormDateInput(attrs={'type':'date'})
     )
     password1 = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput
+        widget=widgets.FormPasswordInput()
     )
     password2 = forms.CharField(
         label="Repeat password", 
-        widget=forms.PasswordInput,
+        widget=widgets.FormPasswordInput(),
     )
     username = forms.CharField(
         max_length=30,
+        widget=widgets.FormTextInput()
     )
 
     class Meta:
@@ -43,5 +50,7 @@ class SignupForm(UserCreationForm):
         
         return birthday
         
-        
-                
+
+class CustomisedAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(widget=widgets.FormTextInput())
+    password = forms.CharField(widget=widgets.FormPasswordInput())

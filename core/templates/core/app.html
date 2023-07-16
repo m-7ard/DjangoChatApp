@@ -4,131 +4,86 @@
 
 {% block content %}
 <div class="app">
-	<div class="app__sidebar app__sidebar--primary">
-		{% block left-sidebar %}{% endblock %}
-	</div>
-	<div class="app__main">
-		{% block main %}{% endblock %}
-	</div>
-	<div class="app__sidebar app__sidebar--secondary">
-		<div class="container container--fill">
-			<div class="container__header">
-				Friends
-			</div>
-			<div class="container__subheader has-shadow">
-				<span class="icon icon--small">
-					<i class="material-symbols-outlined">
-						search
-					</i>
-				</span>
-				<span class="wrapper--remaining-space">
-					<input type="text" class="container__search">
-				</span>
-				<span class="icon icon--small">
-					<i class="material-symbols-outlined">
-						patient_list
-					</i>
-				</span>
-				<span class="icon icon--small">
-					<i class="material-symbols-outlined">
-						person_add
-					</i>
-				</span>
-			</div>
-			<div class="wrapper--remaining-space">
-				<ul class="container__content">
-					<ul class="user-group" id="incoming-friendships">
-                        <li class="user-group__index">
-                            Incoming Friend Requests
-                        </li>
-                        {% spaceless %}
-                        <ul class="user-group__content">
-                            {% for friendship in user.received_friendships.pending %}
-                                {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "../commons/elements/friend.html" %}
-                                {% endwith %}
-                            {% endfor %}                          
-                        </ul>
-                        {% endspaceless %}
-					</ul>
-					<ul class="user-group">
-                        <li class="user-group__index">
-                            Friends
-                        </li>
-                        {% spaceless %}
-                        <ul class="user-group__content" data-category="accepted">
-                            {% for friendship in user.friendships.accepted %}
-                                {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "../commons/elements/friend.html" %}
-                                {% endwith %}
-                            {% endfor %}
-                        </ul>
-                        {% endspaceless %}
-					</ul>
-                    <ul class="user-group" data-friendship="outgoing">
-                        <li class="user-group__index">
-							Outgoing Friend Requests
-						</li>
-                        {% spaceless %}
-                        <ul class="user-group__content">
-                            {% for friendship in user.sent_friendships.pending %}
-                                {% with user|get_friendship_friend:friendship as friend %}
-                                    {% include "../commons/elements/friend.html" %}
-                                {% endwith %}
-                            {% endfor %}                          
-                        </ul>
-                        {% endspaceless %}
-					</ul>
-				</ul>
-			</div>
-		</div>
-		<div class="container container--fill">
-			<div class="container__header has-shadow">
-				Events
-			</div>
-			<div class="wrapper--remaining-space">
-				<div class="container__content">
-
-				</div>
-			</div>
-		</div>
-		<div class="container container--fill">
-			<div class="container__header">
-				Rooms			
-			</div>
-			<div class="container__subheader has-shadow">
-				<span class="icon icon--small icon__hoverable">
-					<i class="material-symbols-outlined">
-						search
-					</i>
-				</span>
-				<span class="wrapper--remaining-space">
-					<input type="text" class="container__search">
-				</span>
-				<span class="icon icon--small icon--hoverable" data-command="get-form" data-name="create-room">
-					<i class="material-symbols-outlined">
-						list_alt_add
-					</i>
-				</span>
-                <a href="{% url 'explore-rooms' %}">
-                    <div class="icon icon--small icon--hoverable">
-                        <i class="material-symbols-outlined">
-                            travel_explore
-                        </i>
+    <div class="sidebar sidebar--groupchats" data-state="closed" id="groupchats">
+        <div class="sidebar__body">
+            {% for groupchat in '123456789012' %}   
+                {% include './elements/groupchat.html' %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="sidebar sidebar--main">
+        <div class="app__header">
+            {% block app-sidebar-header %}{% endblock %}
+        </div>
+        <div class="sidebar__body">
+            {% block app-sidebar-body %}{% endblock %}
+        </div>
+        <div class="user-container">
+            <div class="user-container__user">
+                <div class="user-container__avatar">
+                    <div class="avatar avatar--small">
+                        <img src="" alt="">
                     </div>
-                </a>
-			</div>
-			<div class="wrapper--remaining-space">
-				<ul class="container__content">
-					{% for membership in user.memberships.all %}
-                        {% with membership.room as object %}
-                            {% include "../commons/elements/membership.html" %}
-                        {% endwith %}
-					{% endfor %}
-				</ul>
-			</div>
-		</div>
-	</div>
+                </div>
+                <div class="user-container__name">
+                    Admin
+                </div>
+                <div class="user-container__status">
+                    Online
+                </div>
+            </div>
+            <div class="app__icon right">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        alternate_email
+                    </i>
+                </div>
+            </div>
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        settings
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="app__main">
+        <div class="app__header app__header--main">
+            {% block main-header %}{% endblock %}
+            <div class="sidebar__pin app__icon app__icon--hoverable right" data-command="toggle-sidebar" data-target="groupchats" data-state="closed">
+                <div class="icon icon--medium icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        last_page
+                    </i>
+                </div>
+            </div>
+            <div class="sidebar__pin app__icon app__icon--hoverable">
+                <div class="icon icon--medium icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        inbox
+                    </i>
+                </div>
+            </div>
+            <div class="sidebar__pin app__icon app__icon--hoverable" data-command="toggle-sidebar" data-target="main-content-sidebar" data-state="open">
+                <div class="icon icon--medium icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        first_page
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="app__body">
+            <div class="app__content">
+                {% block main-content %}{% endblock %}
+            </div>
+            <div class="sidebar sidebar--content" id="main-content-sidebar" data-state="open">
+                <div class="sidebar__body">
+                    {% block main-content-sidebar %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

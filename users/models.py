@@ -39,8 +39,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    username_id = models.PositiveIntegerField(null=True)
-    username = models.CharField(max_length=30, null=True)
+    username_id = models.PositiveIntegerField()
+    username = models.CharField(max_length=30)
 
     image = models.ImageField(default='blank.png')
     
@@ -93,39 +93,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             )
         ]
 
-
-class Profile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
-    username_id = models.PositiveIntegerField(null=True)
-    username = models.CharField(max_length=30, null=True)
-
-    image = models.ImageField(default='blank.png')
-    
-    bio = models.TextField(max_length=50, blank=True)
-    birthday = models.DateField(blank=False, null=True)
-    last_ping = models.DateTimeField(auto_now_add=True)
-    
-    twitter = models.CharField(max_length=500, blank=True)
-    steam = models.CharField(max_length=500, blank=True)
-    twitch = models.CharField(max_length=500, blank=True)
-    spotify = models.CharField(max_length=500, blank=True)
-    
-    premium = models.BooleanField(default=False, blank=True)
-        
-    ONLINE = 'online'
-    OFFLINE = 'offline'
-    STATUS = (
-        (ONLINE, 'On-line'),
-        (OFFLINE, 'Off-line'),
-    )
-    status = models.CharField(max_length=10, choices=STATUS, default=ONLINE)
-
-    def friendships(self):
-        return Friendship.objects.filter(Q(sender=self.user) | Q(receiver=self.user))
-
-    def __str__(self):
-        return self.user.username
-    
 
 class FriendshipQuerySet(models.QuerySet):
     def pending(self):

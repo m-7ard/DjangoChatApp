@@ -1,7 +1,5 @@
 // JSON elements
-const channelPk = JSON.parse(document.getElementById('channel-pk').textContent) || null;
-const roomPk = JSON.parse(document.getElementById('room-pk').textContent) || null;
-const userPk = JSON.parse(document.getElementById('user-id').textContent) || null;
+const websocketRoute = JSON.parse(document.querySelector('#websocket-route').textContent) || '';
 
 // DOM elements
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
@@ -14,19 +12,9 @@ const tooltipContext = {};
 const debug = true;
 
 
-let websocketUrl = 'ws://' + window.location.host;
-if (roomPk) {
-    websocketUrl += '/ws/chat/' + String(roomPk) + '/';
+let websocketURL = 'ws://' + window.location.host + '/ws/app/' + websocketRoute;
 
-    if (channelPk) {
-        websocketUrl += String(channelPk) + '/';
-    };
-}
-else {
-    websocketUrl += '/ws/app/';
-}
-
-chatSocket = new WebSocket(websocketUrl);
+chatSocket = new WebSocket(websocketURL);
 
 window.onbeforeunload = function() {
     chatSocket.onclose = function () {};

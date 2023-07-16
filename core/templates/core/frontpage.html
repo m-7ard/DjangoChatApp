@@ -1,84 +1,73 @@
 {% extends "core/header.html" %}
 {% load static %}
 
-{% block extrahead %}
-<link rel="stylesheet" type="text/css" href="{% static 'core/frontpage.css' %}">
-{% endblock %}
-
 {% block content %}
 <div class="frontpage">
-	<div class="frontpage__header">
-		<div class="frontpage__logo">
-			ChatApp
-		</div>
-		<div class="frontpage__header-section right">
-			{% if user.is_authenticated %}
-			<div class="frontpage__header-button">
-				Open Djangochat
-			</div>
-			<a class="frontpage__header-button" href="{% url 'signout' %}">
-				Sign out
-			</a>
-			{% else %}
-			<a class="frontpage__header-button" href="{% url 'signin' %}">
-				Sign in
-			</a>
-			{% endif %}
-		</div>
-	</div>
-	<div class="frontpage__info">
-		<div class="frontpage__title">
-			A Django-Based Chat Application
-		</div>
-		<ul class="frontpage__description">
-			<li class="frontpage__description-element frontpage__description-element--highlight">
-				Featuring
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Users
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Messages
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Rooms
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Roles
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Announcements
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Friends
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Events
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--normal">
-				Commands
-			</li>
-			<li class="frontpage__description-element frontpage__description-element--highlight">
-				And more...
-			</li>
-		</ul>
-		<div class="frontpage__join">
-			{% if user.is_authenticated %}
-			<a class="frontpage__join-button frontpage__join-button--enter" href="{% url 'dashboard' %}">
-				Open Djangochat
-			</a>
-			{% else %}
-			<a class="frontpage__join-button frontpage__join-button--signup" href="{% url 'signup' %}">
-				Sign Up
-			</a>
-			<a class="frontpage__join-button frontpage__join-button--signin" href="{% url 'signin' %}">
-				Sign In
-			</a>
-			{% endif %}
-		</div>
-	</div>
-	<div>
-		
-	</div>
+    <div class="frontpage__header">
+        <div class="frontpage__navigation">
+            <div class="frontpage__logo">
+                Django Chat App
+            </div>
+            <div class="frontpage__link">
+                Premium
+            </div>
+            <div class="frontpage__link">
+                Contact
+            </div>
+            {% if not user.is_authenticated %}
+                <div class="frontpage__button frontpage__button--small" data-command="get-form" data-name="signin">
+                    Sign In
+                </div>
+            {% else %}
+                <a href="{% url 'signout' %}" class="frontpage__button frontpage__button--small">
+                    Sign Out
+                </a>
+            {% endif %}
+
+        </div>
+    </div>
+    <div class="frontpage__body">
+        <div class="frontpage__introduction">
+            <div class="frontpage__title">
+                A Django-Based Chat Application
+            </div>
+            <div class="frontpage__description">
+                Real time chatting through Django Channels, Javascript Ajax functionalities and more
+            </div>
+        </div>
+        <div class="frontpage__showcase">
+            <div class="frontpage__sidebar">
+                <div class="frontpage__switch" data-state="active">
+                    Group Chats
+                </div>
+                <div class="frontpage__switch" data-state="inactive">
+                    Private Messaging
+                </div>
+                <div class="frontpage__switch" data-state="inactive">
+                    Roles
+                </div>
+                <div class="frontpage__switch" data-state="inactive">
+                    Permissions
+                </div>
+                <div class="frontpage__switch" data-state="inactive">
+                    Friendships
+                </div>
+            </div>
+        </div>
+        <div class="frontpage__footer">
+            {% if not user.is_authenticated %}
+                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get-form" data-name="signup">
+                    Signup
+                </div>
+                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get-form" data-name="signin">
+                    Signin            
+                </div>
+            {% else %}
+                <a href="{% url 'dashboard' %}" class="frontpage__button frontpage__button--footer frontpage__button--large">
+                    Go To Dashboard            
+                </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

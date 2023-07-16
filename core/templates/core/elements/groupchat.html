@@ -1,0 +1,55 @@
+{% if forloop.first %} 
+    <div class="groupchat">
+        <div class="groupchat__avatar">
+            <div class="avatar avatar--medium">
+                <i class="material-symbols-outlined">
+                    supervisor_account
+                </i>
+            </div>
+        </div>
+        <div class="groupchat__body">
+            <div class="groupchat__title">
+                To Dashboard
+            </div>
+        </div>
+    </div>
+    <div class="sidebar__divider">
+
+    </div>
+{% endif %}
+<div class="groupchat">
+    <div class="groupchat__avatar">
+        <div class="avatar avatar--medium">
+            <img src="" alt="">
+        </div>
+    </div>
+    <div class="groupchat__body">
+        <div class="groupchat__title">
+            some namesome namesome namesome namesome namesome namesome namesome namesome name
+        </div>
+        <div class="groupchat__subtitle">
+            <div>
+                100 / 1000 online
+            </div>
+        </div>
+    </div>
+</div>
+{% if forloop.last %} 
+    <div class="sidebar__divider">
+
+    </div>
+    <div class="groupchat" data-command="get-form" data-name="create-group-chat">
+        <div class="groupchat__avatar">
+            <div class="avatar avatar--medium">
+                <i class="material-symbols-outlined">
+                    add
+                </i>
+            </div>
+        </div>
+        <div class="groupchat__body">
+            <div class="groupchat__title">
+                New Groupchat
+            </div>
+        </div>
+    </div>
+{% endif %}

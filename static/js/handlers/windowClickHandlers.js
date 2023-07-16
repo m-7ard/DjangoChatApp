@@ -4,7 +4,7 @@ const windowClickHandlers = {
 		let trigger = event.target.closest('[data-command]');
         let command = trigger.dataset.command;
         let handler = commandHandlers[command];
-        handler(event);
+        handler({trigger, event});
 	},
     '.dropdown__trigger': (event) => {
 		let dropdown = event.target.closest('.dropdown');

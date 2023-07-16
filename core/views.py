@@ -17,7 +17,6 @@ from django.forms import ModelForm
 from django.template.loader import render_to_string
 
 from users.models import Friendship, CustomUser
-from rooms.models import Log, Message, Reaction, Room
 from utils import get_object_or_none, dict_to_object
 
 class FrontpageView(TemplateView):

@@ -4,6 +4,7 @@ from itertools import chain
 from typing import Any, Dict
 from pathlib import Path
 from django import http
+from django.forms.models import BaseModelForm
 
 
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
@@ -17,33 +18,53 @@ from django.db.models import Q
 from users.models import CustomUser
 from core.models import News
 from .models import (
-    Room, 
     Channel, 
     Log, 
-    ChannelCategory, 
-    Action, 
     Message, 
     PrivateChat,
-    BacklogGroup,
 )
 from .forms import (
     ChannelCreateForm,
     ChannelUpdateForm,
-    ChannelPermissionsForm, 
-    RoomCreateForm,
-    RoomUpdateForm,
+
     ChannelDeleteForm,
+
+    GroupChatCreateForm,
 )
 
 
 class DashboardView(TemplateView):
     template_name = 'rooms/dashboard.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['news'] = News.objects.all()
-        return context
 
+class CreateGroupChat(CreateView):
+    form_class = GroupChatCreateForm
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get(self, *args, **kwargs):
+        self.object = None
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Group Chat',
+            'fields': self.form_class,
+            'url': reverse('create-group-chat'),
+            'type': 'create'
+        }
+
+        return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+    def form_valid(self, form):
+        group_chat = form.save()
+        success_url = reverse('group_chat', kwargs={'pk': group_chat-pk})
+        return JsonResponse({'status': 400, 'redirect': success_url})
+        
+
+
+    
+"""
 class RoomView(DetailView):
     template_name = 'rooms/room.html'
     model = Room
@@ -279,18 +300,14 @@ class PrivateChatView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         counterparty = CustomUser.objects.get(pk=kwargs.get('pk'))
-        if counterparty == request.user:
-            return HttpResponseRedirect('frontpage')
+        private_chat = PrivateChat.objects.filter(
+            Q(chatters__values__user=counterparty.pk) & Q(chatters__chatters__user=request.user.pk)
+        ).first()
 
-        print(private_chat, request.user, counterparty)
         if not private_chat:
             private_chat = PrivateChat.objects.create()
-            private_chat.backlogs = BacklogGroup.objects.create()
-            private_chat.users.set([request.user, counterparty])
-            private_chat.save()
-
-        context['private_chat'] = private_chat
-        context['counterparty'] = counterparty
+            Chatter.objects.create(user=request.user, group=private_chat.chatters)
+            Chatter.objects.create(user=counterparty, group=private_chat.chatters)
         
         return self.render_to_response(context)
-        
+"""

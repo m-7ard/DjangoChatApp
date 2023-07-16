@@ -1,16 +1,14 @@
 const commandHandlers = {
-	'close-error': (event) => {
+	'close-error': ({trigger, event}) => {
 		event.target.closest('.error').remove();
 	},
-	'select-option': (event) => {
-		let trigger = event.target.closest('[data-command="select-option"]');
+	'select-option': ({trigger, event}) => {
         let select = trigger.closest('.select');
         let value = trigger.dataset.value;
         let root = select.querySelector('.select__value');
         root.textContent = value;
 	},
-	'switch-content': (event) => {
-		let trigger = event.target.closest('[data-command="switch-content"]');
+	'switch-content': ({trigger, event}) => {
         let navigation = trigger.closest('.switchable__navigation')
 		navigation.querySelectorAll('[data-command="switch-content"]').forEach((contentSwitch) => {
             contentSwitch.dataset.state = 'inactive';
@@ -34,7 +32,7 @@ const commandHandlers = {
             'objectPk': objectPk
         }));
     },
-    'edit-message': (event) => {
+    'edit-message': ({trigger, event}) => {
         // Close any open editors
         let messagesWithOpenEditors = document.querySelectorAll('.backlog--editing');
         messagesWithOpenEditors?.forEach((openMessage) => stopEditing(openMessage));
@@ -103,7 +101,7 @@ const commandHandlers = {
             }));
         };
     },
-    'react': (event) => {
+    'react': ({trigger, event}) => {
         let contextObject = event.target.closest('[data-context]');
         let emoteObject = event.target.closest('[data-emote-pk]');
         chatSocket.send(JSON.stringify({
@@ -112,16 +110,14 @@ const commandHandlers = {
             emotePk: emoteObject.dataset.emotePk
         }));
     },
-    'emote-to-text': (event) => {
-        let trigger = event.target.closest('[data-command="emote-to-text"]');
+    'emote-to-text': ({trigger, event}) => {
         let contextObject = event.target.closest('[data-context]');
         let context = JSON.parse(contextObject.dataset.context);
         let inputParent = document.querySelector(context.variables.inputParent);
         let input = inputParent.querySelector('[data-role="input"]');
         input.value += `:${trigger.dataset.name}:`;
     },
-    'manage-friendship': (event) => {
-        let trigger = event.target.closest('[data-command="manage-friendship"]');
+    'manage-friendship': ({trigger, event}) => {
         let contextObject = event.target.closest('[data-context]');
         
         chatSocket.send(JSON.stringify({
@@ -130,9 +126,8 @@ const commandHandlers = {
             kind: trigger.dataset.kind,
         }));
     },
-    'get-form': async (event) => {
+    'get-form': async ({trigger, event}) => {
         event.preventDefault();
-        let trigger = event.target.closest('[data-command="get-form"]');
         let formString = await getView({
             name: trigger.dataset.name, 
             kwargs: trigger.dataset.kwargs,
@@ -148,10 +143,16 @@ const commandHandlers = {
             }
         });
     },
-    'remove-closest': (event) => {
-        let trigger = event.target.closest('[data-command="remove-closest"]');
+    'remove-closest': ({trigger, event}) => {
         let targetSelector = trigger.dataset.target;
         let target = trigger.closest(targetSelector);
         target.remove();
+    },
+    'toggle-sidebar': ({trigger, event}) => {
+        let sidebar = document.getElementById(trigger.dataset.target);
+        let currentState = sidebar.dataset.state;
+        let newState = (currentState == 'closed') ? 'open' : 'closed';
+        sidebar.dataset.state = newState;
+        trigger.dataset.state = newState;
     },
 };

@@ -9,84 +9,109 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from users.models import CustomUser
 
 
-# *ChatterGroup
-class ChatterGroup(models.Model):
-    pass
-
-
-# *RoleGroup
-class RoleGroup(models.Model):
-    pass
-
-
-# *BacklogGroup
-class BacklogGroup(models.Model):
-    def items(self):
-        return chain(self.logs.all(), self.messages.all())
-
-
-# *ReactionGroup
-class ReactionGroup(models.Model):
-    pass
-
-
-# *ChannelGroup
-class ChannelGroup(models.Model):
-    pass
-
-
-# *Chatter
-class Chatter(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='chatters', null=True)
-
-
-# *Role
-class Role(models.Model):
-    name = models.CharField(max_length=50, blank=False, default='Role')
-    hierarchy = models.IntegerField(default=10)
-    color = models.CharField(default='#e0dbd1', max_length=7)
-    admin = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f'role: {self.pk}'
-
-
-class ChatterProfileQuerySet(models.QuerySet):
-    def online(self):
-        return self.filter(user__status='online')
-    
-    def offline(self):
-        return self.filter(user__status='offline')
-    
-
-# *ChatterProfile
-class ChatterProfile(models.Model):
-    chatter = models.OneToOneField(Chatter, on_delete=models.CASCADE, related_name='profile')
-    roles = models.OneToOneField(RoleGroup, on_delete=models.PROTECT, related_name='+', null=True)
+class Chat(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    nickname = models.CharField(max_length=30, blank=True)
 
-    objects = ChatterProfileQuerySet.as_manager()
-
-    def __str__(self):
-        return f'{self.room.pk}: {self.user.__str__()}' +f'{self.nickname or ""}'
+    class Meta:
+        abstract = True
 
 
-# *Room
-class Room(models.Model):
+class GroupChat(Chat):
+    owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='groups_owned', null=True)
     name = models.CharField(max_length=50)
-    description = models.CharField(max_length=500, blank=True)
     image = models.ImageField(default='blank.png', max_length=500)
-    date_created = models.DateTimeField(auto_now_add=True)
     public = models.BooleanField(default=False)
 
-    owner = models.ForeignKey(Chatter, related_name='+', null=True, on_delete=models.SET_NULL)
-    default_role = models.OneToOneField(Role, on_delete=models.CASCADE, related_name='+', null=True)
-    chatters = models.OneToOneField(ChatterGroup, on_delete=models.PROTECT, related_name='room', null=True)
-    roles = models.OneToOneField(RoleGroup, on_delete=models.PROTECT, related_name='room', null=True)
-    channels = models.OneToOneField(ChannelGroup, on_delete=models.PROTECT, related_name='room', null=True)
+
+class PrivateChat(Chat):
+    pass
 
 
+class Membership(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class GroupChatMembership(Membership):
+    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
+
+    nickname = models.CharField(max_length=20, blank=True)
+
+
+class PrivateChatMembership(Membership):
+    chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
+
+
+class Channel(models.Model):    
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    KINDS = (
+        ('group_chat', 'Group Chat Channel'),
+        ('private_chat', 'Private Chat Channel')
+    )
+
+    kind = models.CharField(max_length=20, choices=KINDS)
+    pinned_messages = models.ManyToManyField('Message')
+    group_chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)
+    private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='channel', null=True)
+
+    def get_chat(self):
+        return getattr(self, self.kind)
+
+
+class Backlog(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    KINDS = (
+        ('message', 'Message'),
+        ('log', 'Log')
+    )
+
+    kind = models.CharField(max_length=20, choices=KINDS)
+    date_created = models.DateTimeField(auto_now_add=True)
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='backlogs')
+
+    def get_item(self):
+        return getattr(self, self.kind)
+
+
+class Message(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
+    backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
+
+
+class Log(models.Model):
+    ACTIONS = (
+        ('join', 'joined the chat'),
+        ('leave', 'left the chat'),
+    )
+
+    action = models.CharField(max_length=20, choices=ACTIONS)
+    receiver = models.ForeignKey(CustomUser, related_name='received_actions', on_delete=models.SET_NULL, null=True)
+    sender = models.ForeignKey(CustomUser, related_name='sent_actions', on_delete=models.SET_NULL, null=True, blank=True)
+    backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='log')
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=20)
+    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
+    memberships = models.ManyToManyField(GroupChatMembership, related_name='roles')
+
+
+
+
+
+
+
+
+
+
+
+"""
 # *RolePermissions
 class RolePermissions(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='permissions', null=True)
@@ -113,18 +138,6 @@ class RolePermissions(models.Model):
     read_logs = models.CharField(max_length=10, choices=CHOICES, default='False') 
 
 
-# *BacklogContainer
-class BacklogContainer(models.Model):
-    backlogs = models.OneToOneField(BacklogGroup, on_delete=models.PROTECT, related_name='container', null=True)
-    
-    class Meta:
-        abstract = True
-
-    def delete(self, *args, **kwargs):
-        self.backlogs.delete()
-        super().delete(*args, **kwargs)
-
-
 # *Emote
 class Emote(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='emotes', blank=True, null=True)
@@ -146,18 +159,10 @@ class Emote(models.Model):
 class Reaction(models.Model):
     emote = models.ForeignKey(Emote, on_delete=models.CASCADE, null=True)
     chatter = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reactions', null=True)
-    group = models.ForeignKey(ReactionGroup, on_delete=models.CASCADE, related_name='items', null=True)
+    group = models.ForeignKey(ReactionGroup, on_delete=models.CASCADE, related_name='reactions', null=True)
 
 
-# *Action
-class Action(models.Model):
-    name = models.CharField(max_length=20)
-    display_name = models.CharField(max_length=20)
-    description = models.CharField(max_length=200, blank=True)
-    icon = models.CharField(max_length=30, blank=True)
 
-    def __str__(self):
-        return f'{self.name}: {self.description}'
     
 
 # *Backlog
@@ -178,26 +183,18 @@ class Backlog(models.Model):
     def display_date(self):
         return self.date_added.strftime("%H:%M:%S")
 
+
 # *Message
 class Message(Backlog):
+    content = models.CharField(max_length=1000, blank=False)
     group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='messages', null=True)
     reactions = models.OneToOneField(ReactionGroup, on_delete=models.CASCADE, related_name='message', null=True)
-
-    content = models.CharField(max_length=1000, blank=False)
-    user = models.ForeignKey(CustomUser, related_name='messages', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, related_name='messages', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f'{self.pk} | user: {self.user} (pk: {self.user.pk}) | room: {self.channel.room.name} | channel: {self.channel.name}'
 
 
-# *Log
-class Log(Backlog):
-    group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='logs', null=True)
-    reactions = models.OneToOneField(ReactionGroup, on_delete=models.CASCADE, related_name='log', null=True)
-
-    action = models.ForeignKey(Action, related_name='logs', on_delete=models.SET_NULL, null=True)
-    receiver = models.ForeignKey(CustomUser, related_name='received_actions', on_delete=models.SET_NULL, null=True)
-    sender = models.ForeignKey(CustomUser, related_name='sent_actions', on_delete=models.SET_NULL, null=True, blank=True)
 
 
 
@@ -209,6 +206,22 @@ class ChannelCategory(models.Model):
     
     def __str__(self):
         return f'{self.room}: {self.name} | order: {self.order}'
+
+
+# *BacklogContainer
+class BacklogContainer(models.Model):
+    backlogs = models.OneToOneField(BacklogGroup, on_delete=models.PROTECT, related_name='container', null=True)
+    
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.backlogs = BacklogGroup.objects.create()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.backlogs.delete()
+        super().delete(*args, **kwargs)
 
 
 # *Channel
@@ -224,18 +237,16 @@ class Channel(BacklogContainer):
     category = models.ForeignKey(ChannelCategory, on_delete=models.SET_NULL, related_name='channels', null=True, blank=True)
     kind = models.CharField(max_length=20, choices=KIND, default=TEXT)
     order = models.PositiveIntegerField(default=20, validators=[MaxValueValidator(20), MinValueValidator(1)])
-    backlogs = models.OneToOneField(BacklogGroup, on_delete=models.CASCADE, related_name='channel')
-    group = models.ForeignKey(ChannelGroup, on_delete=models.PROTECT, related_name='channels', null=True)
-            
+    backlogs = models.OneToOneField(BacklogGroup, on_delete=models.PROTECT, related_name='channel', null=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='channels', null=True)
+
     def __str__(self):
         return f'{self.room}: {self.name}'
     
 
-# *PriveChat
-class PrivateChat(BacklogContainer):
-    chatters = models.OneToOneField(ChatterGroup, on_delete=models.PROTECT, related_name='private_chat', null=True)
+
     
-    
+
 # *ChannelConfiguration
 class ChannelConfiguration(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='channels_configs', null=True)
@@ -259,5 +270,5 @@ class ChannelConfigurationPermissions(models.Model):
     add_reaction = models.CharField(max_length=10, choices=CHOICES, default='Null')
     attach_image = models.CharField(max_length=10, choices=CHOICES, default='Null')
     manage_role = models.CharField(max_length=10, choices=CHOICES, default='Null')
-    
 
+"""

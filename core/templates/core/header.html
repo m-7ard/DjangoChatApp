@@ -12,7 +12,18 @@
 		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
         {% block extrahead %}{% endblock %}
-	</head>
+
+        <script src="{% static 'js/dist/main.js' %}"></script>
+        <script src="{% static 'js/handlers/chatSocketReceiveHandlers.js' %}"></script>
+        <script src="{% static 'js/handlers/chatSocketSendHandlers.js' %}"></script>
+        <script src="{% static 'js/handlers/commandHandlers.js' %}"></script>
+        <script src="{% static 'js/handlers/windowClickHandlers.js' %}"></script>
+        
+        <script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
+        <script src="{% static 'js/header.js' %}" defer></script>
+        {{ 'blank for now'|json_script:"websocket-route" }}
+
+    </head>
 	<body>
 		{% for message in messages %}
 		<div class="error">
@@ -28,25 +39,11 @@
 			</span>
 		</div>
 		{% endfor %}
+
 		{% block content %}{% endblock %}
-		<div class="layer layer--tooltips">
-			{% block tooltips %}{% endblock %}
-		</div>
+		<div class="layer layer--tooltips"></div>
+        
 	</body>
 
-	
-	{{ channel.pk|json_script:"channel-pk" }}
-	{{ room.pk|json_script:"room-pk" }}
-	{{ request.user.id|json_script:"user-id" }}
-
-	<script src="{% static 'js/dist/main.js' %}"></script>
-    <script src="{% static 'js/handlers/chatSocketReceiveHandlers.js' %}"></script>
-    <script src="{% static 'js/handlers/chatSocketSendHandlers.js' %}"></script>
-    <script src="{% static 'js/handlers/commandHandlers.js' %}"></script>
-    <script src="{% static 'js/handlers/windowClickHandlers.js' %}"></script>
-    <script src="{% static 'js/handlers/overlayHandlers.js' %}"></script>
-	
-    <script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
-	<script src="{% static 'js/header.js' %}" defer></script>
 	{% block scripts %}{% endblock %}
 </html>

@@ -5,7 +5,7 @@ from django.template import Template, Context
 from django.template.defaulttags import register
 
 
-from rooms.models import Room, Emote
+
 from ..settings import MEDIA_URL
 import utils
 
@@ -17,6 +17,7 @@ def classname(obj):
 def eq(self, other):
     return self == other
 
+"""
 @register.filter(name="convert_reactions")
 def convert_reactions(text, room_pk):
     room = Room.objects.get(pk=room_pk)
@@ -31,7 +32,7 @@ def convert_reactions(text, room_pk):
 
 
     return Template(re.sub(pattern, replace_with, text)).render(Context({}))
-    
+"""
 
 @register.filter(name="get_friendship_friend")
 def get_friendship_friend(user, friendship):
