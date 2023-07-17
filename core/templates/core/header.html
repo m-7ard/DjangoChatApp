@@ -21,8 +21,6 @@
         
         <script src="{% static 'js/globalJavascriptUtilities.js' %}"></script>
         <script src="{% static 'js/header.js' %}" defer></script>
-        {{ 'blank for now'|json_script:"websocket-route" }}
-
     </head>
 	<body>
 		{% for message in messages %}

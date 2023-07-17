@@ -6,8 +6,10 @@
 <div class="app">
     <div class="sidebar sidebar--groupchats" data-state="closed" id="groupchats">
         <div class="sidebar__body">
-            {% for groupchat in '123456789012' %}   
-                {% include './elements/groupchat.html' %}
+            {% for groupchat_membership in user.group_chat_memberships.all %}
+                {% with local_groupchat=groupchat_membership.chat %}
+                    {% include './elements/groupchat.html' %}
+                {% endwith %}
             {% endfor %}
         </div>
     </div>

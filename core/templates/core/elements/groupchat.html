@@ -2,9 +2,11 @@
     <div class="groupchat">
         <div class="groupchat__avatar">
             <div class="avatar avatar--medium">
-                <i class="material-symbols-outlined">
-                    supervisor_account
-                </i>
+                <div class="icon icon--medium">
+                    <i class="material-symbols-outlined">
+                        supervisor_account
+                    </i>
+                </div>
             </div>
         </div>
         <div class="groupchat__body">
@@ -17,25 +19,31 @@
 
     </div>
 {% endif %}
-<div class="groupchat">
+<a class="groupchat {% if local_groupchat == groupchat %} groupchat--selected {% endif %}" href="{% url 'group-chat' pk=local_groupchat.pk %}">
     <div class="groupchat__avatar">
         <div class="avatar avatar--medium">
-            <img src="" alt="">
+            {% if local_groupchat.image %}
+                <img src="{{ local_groupchat.image.url }}" alt="">
+            {% else %}
+                <div class="icon icon--small">
+                    {{ local_groupchat.name|slice:':1'|title }}
+                </div>
+            {% endif %}
         </div>
     </div>
     <div class="groupchat__body">
         <div class="groupchat__title">
-            some namesome namesome namesome namesome namesome namesome namesome namesome name
+            {{ local_groupchat.name }}
         </div>
         <div class="groupchat__subtitle">
             <div>
-                100 / 1000 online
+                {{ local_groupchat.memberships.count }}
             </div>
         </div>
     </div>
-</div>
+</a>
 {% if forloop.last %} 
-    <div class="sidebar__divider">
+    <div class="sidebar__divider" id="insert-groupchat">
 
     </div>
     <div class="groupchat" data-command="get-form" data-name="create-group-chat">

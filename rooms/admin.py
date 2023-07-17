@@ -4,7 +4,13 @@ from django.contrib.auth.models import Permission
 
 from .models import (
     GroupChatMembership,
-    PrivateChatMembership
-
+    PrivateChatMembership,
+    GroupChat,
+    Channel,
+    Role
 
 )
+
+admin.site.register(GroupChat)
+admin.site.register(Channel)
+admin.site.register(Role)

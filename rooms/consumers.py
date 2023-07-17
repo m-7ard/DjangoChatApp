@@ -21,19 +21,21 @@ from users.models import Friendship, CustomUser
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    pass
-
-
-"""
-class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope.get('user')
         if not self.user or not self.user.is_authenticated:
             return self.close()
+        
+        await self.channel_layer.group_add(f'user_{self.user.pk}', self.channel_name)
+        await self.accept()
 
-        self.accept()
+    async def receive(self, text_data=None, bytes_data=None):
+        pass
+    
+    async def disconnect(self, close_code):
+        await self.close()
 
-    async def send_to_JS(self, event):
+    async def send_to_client(self, event):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
 
@@ -43,6 +45,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return fn()
         
         return wrapper
+
+
+"""
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+
+
+
 
 class ChannelConsumer(ChatConsumer):
     async def connect(self):

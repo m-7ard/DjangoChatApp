@@ -5,30 +5,12 @@ const chatSocketReceiveHandlers = {
 	'offline': function(data) {
         let user_references = document.querySelectorAll('.deez')
     },
-	'create-room': function(data) {
-        if (window.location.href.includes('room/' + data.pk)) {
-            window.location = "{% url 'dashboard' %}"
-        };
-        let referenceNode = document.querySelector('.app-section--sidebar__modelbox--create-room');
-        let newRoom = document.createElement('a');
-        newRoom.setAttribute('href', `{% url 'room' ${data.pk} %}`);
-        newRoom.setAttribute('class', "app-section--sidebar__modelbox app-section--sidebar__modelbox--joined-room");
-        newRoom.innerHTML = (
-            `
-            <div class="app-section--sidebar__avatar app-section--sidebar__avatar--medium has-shadow">
-                <img src="${data.image}" alt="">
-            </div>
-            <div class="wrapper--remaining-space">
-                <div class="app-section--sidebar__infobox">
-                    <div class="app-section--sidebar__name app-section--sidebar__name--medium">
-                        ${data.name}
-                    </div>
-                </div>
-            </div>
-            `
-        );
-        referenceNode.parentNode.insertBefore(newRoom, referenceNode);
-        document.querySelector('#room-count').innerText = parseInt(document.querySelector('#room-count').innerText) + 1;
+	'create-group-chat': function({html}) {
+        let groupchat = parseHTML(html);
+        let sidebar = document.getElementById('groupchats');
+        let sidebarBody = sidebar.querySelector('.sidebar__body');
+        let referenceElement = document.getElementById('insert-groupchat');
+        sidebarBody.insertBefore(groupchat, referenceElement);
     },	
 	'remove-room': function(data) {
         if (window.location.href.includes('room/' + data.pk)) {

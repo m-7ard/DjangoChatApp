@@ -1,18 +1,13 @@
 // JSON elements
-const websocketRoute = JSON.parse(document.querySelector('#websocket-route').textContent) || '';
 
 // DOM elements
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
 const tooltipContainers = document.querySelectorAll('.tooltip');
 
-// Tooltip context
-const tooltipContext = {};
-
 // Misc
 const debug = true;
 
-
-let websocketURL = 'ws://' + window.location.host + '/ws/app/' + websocketRoute;
+let websocketURL = 'ws://' + window.location.host + '/ws/app/'
 
 chatSocket = new WebSocket(websocketURL);
 

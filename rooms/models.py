@@ -19,8 +19,19 @@ class Chat(models.Model):
 class GroupChat(Chat):
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='groups_owned', null=True)
     name = models.CharField(max_length=50)
-    image = models.ImageField(default='blank.png', max_length=500)
+    image = models.ImageField(max_length=500)
     public = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        print(self._state.adding)
+        created = self._state.adding
+
+        if created:
+            super().save(*args, **kwargs)
+            Channel.objects.create(kind='group_chat', group_chat=self, name='General')
+            Role.objects.create(name='all', chat=self)
+        
+        super().save(*args, **kwargs)
 
 
 class PrivateChat(Chat):
@@ -36,14 +47,14 @@ class Membership(models.Model):
 
 class GroupChatMembership(Membership):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
 
     nickname = models.CharField(max_length=20, blank=True)
 
 
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
 
 
 class Channel(models.Model):    
@@ -54,6 +65,7 @@ class Channel(models.Model):
         ('private_chat', 'Private Chat Channel')
     )
 
+    name = models.CharField(max_length=30)
     kind = models.CharField(max_length=20, choices=KINDS)
     pinned_messages = models.ManyToManyField('Message')
     group_chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)

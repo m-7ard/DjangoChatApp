@@ -1,0 +1,50 @@
+{% extends "core/app.html" %}
+
+{% block extrahead %}
+    {{ groupchat.pk|json_script:"groupchat-pk" }}
+{% endblock %}
+
+{% block app-sidebar-header %}
+    <div class="app__title">
+        {{ groupchat.name }}
+    </div>
+{% endblock %}
+
+{% block app-sidebar-body %}
+    {% for channel in groupchat.channels.all %}
+        {% include "./elements/channel.html" %}
+    {% endfor %}
+{% endblock %}
+
+{% block main-header %}
+    <div class="app__icon">
+        <div class="icon icon--medium">
+            <i class="material-symbols-outlined">
+                tag
+            </i>
+        </div>
+    </div>
+{% endblock %}
+
+{% block main-content %}
+ 
+{% endblock %}
+
+
+{% block main-content-sidebar %}
+    {% for membership in groupchat.memberships.all %}
+        <div class="user">
+            <div class="user__avatar">
+                <div class="avatar avatar--small">
+                    <img src="" alt="">
+                </div>
+            </div>
+            <div class="user__title">
+                {% firstof membership.nickname membership.user.username %}
+            </div>
+            <div class="user__subtitle">
+                {{ membership.user.status }}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

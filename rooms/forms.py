@@ -59,7 +59,7 @@ class ChannelPermissionsForm(forms.ModelForm):
 
 class GroupChatCreateForm(forms.ModelForm):
     name = forms.CharField(widget=widgets.FormTextInput())
-    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='')
+    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
     
     class Meta:
         model = GroupChat

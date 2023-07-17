@@ -1,6 +1,7 @@
 $light: (
-    primary: #e0dbd1,
-    secondary: #8D8A84,
+    light: #e0dbd1,
+    neutral: #b2aea6,
+    dark: #8D8A84,
 );
 
 
@@ -80,9 +81,9 @@ $online-secondary: $moss;
 $offline-primary: $acapulco-aqua;
 $offline-secondary: $blue-bayoux;
 
-$light-primary: $chalk-white;
+$light-light: $chalk-white;
 $light-neutral: $silver;
-$light-secondary: $battleship-grey;
+$light-dark: $battleship-grey;
 
 
 $grey-theme-1: (
@@ -90,48 +91,49 @@ $grey-theme-1: (
     "neutral-bg": $apollo-grey,
     "light-bg": $eerie-black,
 
-    "light-fg": $light-primary,
+    "light-fg": $light-light,
     "neutral-fg": $light-neutral,
-    "dark-fg": $light-secondary,
+    "dark-fg": $light-dark,
 );
 
 $blue-theme--DARK: (
-    "blue--DARK": #151532,
-    "blue--NEUTRAL": #13134B, 
-    "blue--LIGHT": #101065,
+    "dark-bg": #151532,
+    "neutral-bg": #13134B, 
+    "light-bg": #101065,
 
-    "light--DARK": map-get($light, secondary),
-    "light--NEUTRAL": map-get($light, secondary),
-    "light--LIGHT": map-get($light, primary),
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
 );
 
 $lime-theme--DARK: (
-    "lime--DARK": #2B3215,
-    "lime--NEUTRAL": #3D4B13, 
-    "lime--LIGHT": #506510,
+    "dark-bg": #232518,
+    "neutral-bg": #33371D, 
+    "light-bg": #424A21,
 
-    "light--DARK": map-get($light, secondary),
-    "light--NEUTRAL": map-get($light, secondary),
-    "light--LIGHT": map-get($light, primary),
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
 );
 
-$green-theme--DARK: (
-    "dark-bg": #284026,
-    "neutral-bg": #2B4D29,
-    "light-bg": #2E5A2C,
+$green-theme-1: (
+    "dark-bg": #344C2E,
+    "neutral-bg": #3E6236,
+    "light-bg": #47773D,
 
-    "dark-fg": map-get($light, secondary),
-    "light-fg": map-get($light, primary),
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
 );
 
-$red-theme--DARK: (
-    "dark-bg": #552224,
-    "neutral-bg": #6A1E1F,
-    "light-bg": #80191B,
+$red-theme-1: (
+    "dark-bg": #632117,
+    "neutral-bg": #7A2A1A,
+    "light-bg": #95321E,
 
-    "white--DARK": map-get($light, secondary),
-    "white--NEUTRAL": map-get($light, secondary),
-    "white--LIGHT": map-get($light, primary),
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
 );
 
 $red-theme--NEUTRAL: (
@@ -139,9 +141,9 @@ $red-theme--NEUTRAL: (
     "neutral-bg": #CC0505,
     "light-bg": #E50303,
 
-    "white--DARK": map-get($light, secondary),
-    "white--NEUTRAL": map-get($light, secondary),
-    "white--LIGHT": map-get($light, primary),
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
 );
 
 // mixins 
@@ -335,7 +337,7 @@ $red-theme--NEUTRAL: (
         display: flex;
         align-items: center;
         justify-content: center;
-		background-color: rgba(0, 0, 0, 0.3);
+		background-color: rgba(0, 0, 0, 0.5);
     }
 }
 
@@ -413,199 +415,22 @@ $red-theme--NEUTRAL: (
 	&--small {
 		width: 2rem; 
 		height: 2rem;
-		font-size: 2rem;
 	}
 
 	&--medium {
 		width: 2.5rem; 
 		height: 2.5rem;
-		font-size: 2.5rem;
 	}
 
 	&--large {
 		width: 6rem;
 		height: 6rem;
-		font-size: 6rem;
 	}
 
 	img {
 		max-height: 100%;
 		max-width: 100%;
 	}
-}
-
-.online-color {
-	&--primary {
-		color: $premier-yellow;
-	}
-
-	&--secondary {
-		color: $moss;
-	}
-}
-
-.offline-color {
-	&--primary {
-		color: $acapulco-aqua;
-	}
-
-	&--secondary {
-		color: $blue-bayoux;
-	}
-}
-
-.backlog {
-    @include flex-column($padding-medium, $gap-small $gap-medium);
-	position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    grid-template-columns: auto 1fr;
-    
-    &:hover {
-		background-color: $eerie-black;
-	}
-
-	&:hover &__actions {
-		display: flex;
-	}
-
-    &__avatar {
-        grid-row: 1/-1;
-
-        .avatar {
-            cursor: pointer;
-        }
-    }
-
-    &__header {
-        @include flex-row(0, $gap-small);
-        align-items: baseline;
-    }
-
-    &__user {
-        font-size: $text-primary-medium;
-        font-weight: bold;
-        cursor: pointer;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    &__timestamp {
-        font-size: $text-secondary-medium;
-        color: $light-secondary;
-    }
-
-    &__actions {
-        display: none;
-        position: absolute;
-        right: 1rem;
-        top: -0.5rem;
-        border-radius: 4px;
-
-        .menu {
-            z-index: 2;
-            position: absolute;
-            top: 100%;
-            right: 0;
-        }
-    }
-
-    &__action {
-        padding: $padding-small;
-        background-color: $apollo-grey;
-        transition: background-color 0.2s;
-        cursor: pointer;
-
-        &:hover {
-            background-color: $eerie-black;
-        }
-    }
-
-    &__body {
-        overflow: hidden;
-    }
-
-	&__content {
-        position: relative;
-		word-wrap: break-word;
-        white-space: pre-wrap;
-        line-height: 1.5rem;
-
-        color: $chalk-white;
-        font-size: $text-primary-small;
-
-		img {
-			max-height: 1.5rem;
-			max-width: 1.5rem;
-            vertical-align: middle;
-		}
-	}
-
-	&__edit {
-		all: unset;
-        white-space: pre-wrap;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		padding: $padding-medium;
-		background-color: $black-chestnut-oak;
-        box-shadow: inset $shadow-dimensions $night;
-        border-radius: 4px;
-        overflow: overlay;
-		overflow-wrap: break-word;
-        color: $chalk-white;
-	}
-
-    &__prompts {
-        @include flex-row(0, $gap-medium);
-
-        [data-action] {
-            font-size: $text-secondary-small;
-            font-weight: bold;
-            color: $amethyst;
-            cursor: pointer;
-        }
-    }
-
-    &--editing {
-        background-color: $eerie-black;
-        
-        .backlog__content {
-            min-height: 5rem;
-            color: transparent;
-
-            img {
-                display: none;
-            }
-        }
-    }
-
-	&__reactions {
-		@include flex-row(0, $gap-medium);
-        grid-column: 2;
-	}
-
-    &__action-name {
-        color: $chalk-white;
-        font-size: $text-primary-small;
-    }
-
-    &__divider {
-        @include flex-row(0, $gap-medium);
-        align-items: center;
-        grid-column: 1 / -1;
-
-        & > *:first-child, 
-        & > *:last-child {
-            flex-grow: 1;
-            height: 1px;
-            background-color: $light-secondary;
-        }
-    }
 }
 
 .chatbar {
@@ -745,7 +570,7 @@ $red-theme--NEUTRAL: (
 		cursor: pointer;
 
         &--accept {
-            $theme: $green-theme--DARK;
+            $theme: $green-theme-1;
             color: map-get($theme, dark-bg);
 
             &:hover { 
@@ -754,7 +579,7 @@ $red-theme--NEUTRAL: (
         }
     
         &--reject {
-            $theme: $red-theme--DARK;
+            $theme: $red-theme-1;
             color: map-get($theme, dark-bg);
 
             &:hover { 
@@ -862,18 +687,18 @@ $red-theme--NEUTRAL: (
     &__display-name {
         font-size: $text-primary-medium;
         font-weight: bold;
-        color: $light-primary;
+        color: $light-light;
     }
 
     &__username {
         font-size: $text-secondary-large;
-        color: $light-secondary;
+        color: $light-dark;
     }
 
     &__divider {
         height: 1px;
         width: 100%;
-        background-color: $light-secondary;
+        background-color: $light-dark;
         margin: $gap-medium 0;
     }
 
@@ -884,12 +709,12 @@ $red-theme--NEUTRAL: (
     &__label {
         font-size: $text-secondary-medium;
         font-weight: bold;
-        color: $light-primary;
+        color: $light-light;
     }
 
     &__bio {
         font-size: $text-secondary-medium;
-        color: $light-primary;
+        color: $light-light;
         overflow-wrap: break-word;
     }
 
@@ -915,18 +740,18 @@ $red-theme--NEUTRAL: (
         cursor: pointer;
 
         &[data-state="inactive"] {
-            color: $light-secondary;
+            color: $light-dark;
             border-bottom: $padding-small solid transparent;
         }
 
         &:hover {
-            color: $light-primary;
-            border-bottom: $padding-small solid $light-primary;
+            color: $light-light;
+            border-bottom: $padding-small solid $light-light;
         }
 
         &[data-state="active"] {
-            color: $light-primary;
-            border-bottom: $padding-small solid $light-primary;
+            color: $light-light;
+            border-bottom: $padding-small solid $light-light;
         }
     }
 
@@ -940,12 +765,12 @@ $red-theme--NEUTRAL: (
             justify-content: center;
             align-items: center;
             border-radius: 4px;
-            background-color: map-get($green-theme--DARK, dark-bg);
-            color: map-get($green-theme--DARK, light-fg);
+            background-color: map-get($green-theme-1, dark-bg);
+            color: map-get($green-theme-1, light-fg);
 
             &:hover {
-                background-color: map-get($green-theme--DARK, light-bg);
-                color: map-get($green-theme--DARK, light-fg);
+                background-color: map-get($green-theme-1, light-bg);
+                color: map-get($green-theme-1, light-fg);
             }
         }
 
@@ -1001,10 +826,10 @@ $red-theme--NEUTRAL: (
 .form {
 	@include flex-column($padding-large, $gap-large);
 	color: map-get($grey-theme-1, light-fg);
-    background-color: map-get($grey-theme-1, neutral-bg);
+    background-color: map-get($grey-theme-1, light-bg);
 	overflow: auto;
     flex: 1;
-    max-width: 35rem;
+    max-width: 24rem;
     position: relative;
     border-radius: $radius-small;
 
@@ -1021,7 +846,7 @@ $red-theme--NEUTRAL: (
 
 	&__subtitle {
 		font-size: $text-secondary-medium;
-		color: $light-secondary;
+		color: $light-dark;
 	}
 
     &__warning {
@@ -1031,7 +856,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__reset {
-        color: $light-primary;
+        color: $light-light;
         font-size: $text-secondary-large;
         cursor: pointer;
 
@@ -1042,7 +867,7 @@ $red-theme--NEUTRAL: (
 
     &__footer {
         @include flex-row($padding-medium, $gap-large);
-        background-color: $charcoal-grey;
+        background-color: map-get($grey-theme-1, neutral-bg);
         align-items: center;
         justify-content: flex-end;
         margin-top: auto;
@@ -1052,37 +877,38 @@ $red-theme--NEUTRAL: (
 	&__submit {
 		@include flex-row($padding-medium $padding-large, 0);
 		font-size: $text-secondary-large;
+        font-weight: bold;
 		border-radius: 4px;
 		transition: background-color 0.2s, color 0.2s;
 
         &--update {
-            color: map-get($green-theme--DARK, white--DARK);
-		    background-color: map-get($green-theme--DARK, dark-bg);
+            color: map-get($green-theme-1, white--DARK);
+		    background-color: map-get($green-theme-1, dark-bg);
         }
 
         &--update:hover {
-            background-color: map-get($green-theme--DARK, light-bg);
-			color: map-get($green-theme--DARK, light-fg);
+            background-color: map-get($green-theme-1, light-bg);
+			color: map-get($green-theme-1, light-fg);
 		}
 
         &--delete {
-            color: map-get($red-theme--DARK, white--DARK);
-		    background-color: map-get($red-theme--DARK, dark-bg);
+            color: map-get($red-theme-1, white--DARK);
+		    background-color: map-get($red-theme-1, dark-bg);
         }
 
         &--delete:hover {
-            background-color: map-get($red-theme--DARK, light-bg);
-			color: map-get($red-theme--DARK, white--LIGHT);
+            background-color: map-get($red-theme-1, light-bg);
+			color: map-get($red-theme-1, white--LIGHT);
 		}
 
         &--create {
-            color: map-get($lime-theme--DARK, light--DARK);
-		    background-color: map-get($lime-theme--DARK, lime--DARK);
+            color: map-get($green-theme-1, neutral-fg);
+            background-color: map-get($green-theme-1, dark-bg);
         }
 
         &--create:hover {
-            color: map-get($lime-theme--DARK, light--LIGHT);
-		    background-color: map-get($lime-theme--DARK, lime--LIGHT);
+            color: map-get($green-theme-1, light-fg);
+		    background-color: map-get($green-theme-1, light-bg);
 		}
 	}
 
@@ -1095,7 +921,7 @@ $red-theme--NEUTRAL: (
         font-weight: bold;     
 
         &--success {
-            background-color: map-get($green-theme--DARK, light-bg);
+            background-color: map-get($green-theme-1, light-bg);
         }
 
         &--error {
@@ -1104,11 +930,11 @@ $red-theme--NEUTRAL: (
     }
 
     &__close {
-        color: $light-secondary;
+        color: $light-dark;
         height: fit-content;
 
         &:hover {
-            color: $light-primary;
+            color: $light-light;
         }
     }
 }
@@ -1171,10 +997,10 @@ $red-theme--NEUTRAL: (
         font-size: $text-primary-medium;
         color: inherit;
         color-scheme: dark;
-        background-color: map-get($grey-theme-1, dark-bg);
+        background-color: map-get($grey-theme-1, neutral-bg);
     
         &:focus {
-            background-color: map-get($grey-theme-1, light-bg);
+            background-color: map-get($grey-theme-1, dark-bg);
         }
     }
 }
@@ -1197,7 +1023,7 @@ $red-theme--NEUTRAL: (
 
         &:has(:not(:checked)) {
             background-color: $charcoal-grey;
-            color: $light-secondary;
+            color: $light-dark;
     
             #{$self}__checkbox {
                 color: transparent;
@@ -1206,19 +1032,19 @@ $red-theme--NEUTRAL: (
     
         &:hover {
             background-color: $black-chestnut-oak;
-            color: $light-secondary;
+            color: $light-dark;
     
             #{$self}__checkbox {
-                color: $light-secondary;
+                color: $light-dark;
             }
         }
     
         &:has(:checked) {
             background-color: $eerie-black;
-            color: $light-primary;
+            color: $light-light;
     
             #{$self}__checkbox {
-                color: $light-primary;
+                color: $light-light;
             }
         }
     
@@ -1255,13 +1081,12 @@ $red-theme--NEUTRAL: (
 .form-slider {
     transition: all 0.4s $custom-ease-in;
     $padding: $padding-small;
-    $height: 1.25rem;
+    $height: 1.125rem;
     $width: 2.75rem;
     $self: &;
     position: relative;
-    border: $padding solid map-get($grey-theme-1, light-bg);
+    border: $padding solid transparent;
     border-radius: 9999px;
-    background-color: map-get($grey-theme-1, light-bg);
     height: $height;
     width: $width;
     overflow: hidden;
@@ -1274,7 +1099,7 @@ $red-theme--NEUTRAL: (
     }
 
     &:has(input:checked) {
-        $bg: map-get($green-theme--DARK, light-bg);
+        $bg: map-get($green-theme-1, neutral-bg);
         background-color: $bg;
         border-color: $bg;
         
@@ -1285,7 +1110,7 @@ $red-theme--NEUTRAL: (
     }
 
     &:not(:has(input:checked)) {
-        $bg: map-get($red-theme--DARK, light-bg);
+        $bg: map-get($red-theme-1, neutral-bg);
         background-color: $bg;
         border-color: $bg;
 
@@ -1296,12 +1121,12 @@ $red-theme--NEUTRAL: (
 
     &__marker {
         @include default-color-transition;
-        transition: left 0.2s;
+        transition: left 0.25s $custom-ease-in;
         position: absolute;
         height: 100%;
         aspect-ratio: 1 / 1;
         border-radius: 9999px;
-        background-color: map-get($grey-theme-1, neutral-fg);
+        background-color: map-get($grey-theme-1, light-fg);
     }
 }
 
@@ -1323,16 +1148,16 @@ $red-theme--NEUTRAL: (
     }
 
     &__label {
-        color: $light-secondary;
+        color: $light-dark;
         font-size: $text-secondary-medium;
         font-weight: bold;
     }
 
     &__add {
-        color: $light-secondary;
+        color: $light-dark;
 
         &:hover {
-            color: $light-primary;
+            color: $light-light;
         }
     }
 
@@ -1346,17 +1171,17 @@ $red-theme--NEUTRAL: (
 
         &[data-state="inactive"] {
             background-color: $charcoal-grey;
-            color: $light-secondary;
+            color: $light-dark;
         }
 
         &:hover {
-            color: $light-primary;
+            color: $light-light;
             background-color: $apollo-grey;
         }
 
         &[data-state="active"] {
             background-color: $eerie-black;
-            color: $light-primary;
+            color: $light-light;
         }
 
         div {
@@ -1388,7 +1213,7 @@ $red-theme--NEUTRAL: (
     &__name {
         grid-column: 1;
         font-size: $text-secondary-large;
-        color: $light-primary;
+        color: $light-light;
     }
 
     &__choices {
@@ -1417,51 +1242,51 @@ $red-theme--NEUTRAL: (
         &--false {
             &:has(:not(:checked)) {
                 background-color: $apollo-grey;
-                color: $light-secondary;
+                color: $light-dark;
             }
 
             &:hover {
                 background-color: $apollo-grey;
-                color: $light-primary;
+                color: $light-light;
             }
 
             &:has(:checked) {
-                background-color: map-get($red-theme--DARK, light-bg);
-                color: map-get($red-theme--DARK, white--LIGHT);
+                background-color: map-get($red-theme-1, light-bg);
+                color: map-get($red-theme-1, white--LIGHT);
             }
         }
 
         &--null {
             &:has(:not(:checked)) {
                 background-color: $apollo-grey;
-                color: $light-secondary;
+                color: $light-dark;
             }
 
             &:hover {
                 background-color: $apollo-grey;
-                color: $light-primary;
+                color: $light-light;
             }
 
             &:has(:checked) {
                 background-color: $eerie-black;
-                color: $light-primary;
+                color: $light-light;
             }
         }
 
         &--true {
             &:has(:not(:checked)) {
                 background-color: $apollo-grey;
-                color: $light-secondary;
+                color: $light-dark;
             }
 
             &:hover {
                 background-color: $apollo-grey;
-                color: $light-primary;
+                color: $light-light;
             }
 
             &:has(:checked) {
-                background-color: map-get($green-theme--DARK, light-bg);
-                color: map-get($green-theme--DARK, light-fg);
+                background-color: map-get($green-theme-1, light-bg);
+                color: map-get($green-theme-1, light-fg);
             }
         }
     }
@@ -1469,7 +1294,7 @@ $red-theme--NEUTRAL: (
     &__description {
         grid-column: 1 / -1;
         font-size: $text-secondary-medium;
-        color: $light-secondary;
+        color: $light-dark;
     }
 
     &__footer {
@@ -1520,18 +1345,18 @@ $red-theme--NEUTRAL: (
         &:has(:not(:checked)) {
             background-color: transparent;
             color: transparent;
-            border: 2px solid map-get($green-theme--DARK, dark-bg);
+            border: 2px solid map-get($green-theme-1, dark-bg);
         }
 
         &:hover {
-            border: 2px solid map-get($green-theme--DARK, neutral-bg);
-            color: map-get($green-theme--DARK, white--NEUTRAL);
+            border: 2px solid map-get($green-theme-1, neutral-bg);
+            color: map-get($green-theme-1, white--NEUTRAL);
         }
 
         &:has(:checked) {
-            background-color: map-get($green-theme--DARK, light-bg);
-            color: map-get($green-theme--DARK, light-fg);
-            border: 2px solid map-get($green-theme--DARK, light-bg);
+            background-color: map-get($green-theme-1, light-bg);
+            color: map-get($green-theme-1, light-fg);
+            border: 2px solid map-get($green-theme-1, light-bg);
         }
 
         input {
@@ -1559,11 +1384,11 @@ $red-theme--NEUTRAL: (
     }
 
     &__close {
-        color: $light-secondary;
+        color: $light-dark;
         height: fit-content;
 
         &:hover {
-            color: $light-primary;
+            color: $light-light;
         }
     }
 
@@ -1576,17 +1401,17 @@ $red-theme--NEUTRAL: (
         @include ellipsis;
 		@include flex-row($padding-medium, $gap-medium);
 		font-size: $text-secondary-large;
-		color: $light-secondary;
+		color: $light-dark;
 		border-radius: 4px;
 		cursor: pointer;
 		transition: color 0.2s, background-color 0.2s;
 
 		&:hover {
-			color: $light-primary;
+			color: $light-light;
 		}
 
         &[data-state="active"] {
-            color: $light-primary;
+            color: $light-light;
             background-color: $eerie-black
         }
 	}
@@ -1598,49 +1423,26 @@ $red-theme--NEUTRAL: (
 }
 
 .channel {
-	@include flex-row($padding-small, $gap-small);
-	transition: background-color 0.2s, color 0.2s;
-	cursor: pointer;
+    @include default-color-transition;
+	@include flex-row($padding-small $padding-medium, $gap-medium);
+    $self: &;
+    align-items: center;
+    border-radius: $radius-small;
+    cursor: pointer;
 
-	align-items: center;
-	color: $light-secondary;
-    border-radius: 4px;
-
-    @mixin selected {
-		color: $light-primary;
-		background-color: $eerie-black;
+    &__title {
+        @include default-color-transition;
+        font-size: $text-secondary-large;
+        color: map-get($grey-theme-1, dark-fg);
     }
 
-	&:hover {
-        @include selected;
-		
-		.channel__settings {
-			display: block;
-		}
-	}
+    &:hover {
+        background-color: map-get($grey-theme-1, light-bg);
 
-    &--selected {
-        @include selected;
+        #{$self}__title {
+            color: map-get($grey-theme-1, light-fg);
+        }
     }
-
-	&__kind {
-		color: $offline-secondary;
-	}
-
-	&__name {
-		@include ellipsis;
-		font-size: $text-primary-small;
-		user-select: none;
-	}
-
-	&__settings {
-		color: $light-secondary;
-		display: none;
-
-		&:hover {
-			color: $light-primary;
-		}
-	}
 }
 
 .error {
@@ -1675,13 +1477,13 @@ $red-theme--NEUTRAL: (
 		align-items: center;
         white-space: nowrap;
 		font-size: $text-secondary-medium;
-		color: $light-secondary;
+		color: $light-dark;
 		border-radius: 4px;
 		cursor: pointer;
 		transition: color 0.2s, background-color 0.2s;
         
 		&:hover {
-			color: $light-primary;
+			color: $light-light;
 			background-color: $eerie-black;
 		}
 	}
@@ -1911,8 +1713,7 @@ $red-theme--NEUTRAL: (
     &__divider {
         @include flex-row(0, 0);
         flex-shrink: 0;
-        height: 2px;
-        background-color: map-get($grey-theme-1, light-bg);
+        border-bottom: 2px solid map-get($grey-theme-1, light-bg);
     }
 
     &__pin {
@@ -1998,11 +1799,26 @@ $red-theme--NEUTRAL: (
     user-select: none;
     cursor: pointer;
 
-    &:hover {
+    &__avatar {
+        border: 2px solid transparent;
+        box-sizing: border-box;
+        padding: 3px;
+        border-radius: 33%;
+        transition: border-color 0.2s;
+
+        .avatar {
+            @include default-color-transition;
+            border-radius: 33%;
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, dark-fg);
+        }
+    }
+
+    &:hover, &--selected {
         #{$self}__avatar {
             border-color: map-get($grey-theme-1, light-bg);
         }
-
+        
         .avatar {
             background-color: map-get($grey-theme-1, light-bg);
             color: map-get($grey-theme-1, light-fg);
@@ -2010,21 +1826,6 @@ $red-theme--NEUTRAL: (
 
         #{$self}__title {
             color: map-get($grey-theme-1, light-fg);
-        }
-    }
-
-    &__avatar {
-        border: 2px solid transparent;
-        box-sizing: border-box;
-        padding: 3px;
-        border-radius: 25%;
-        transition: border-color 0.2s;
-
-        .avatar {
-            @include default-color-transition;
-            border-radius: 25%;
-            background-color: map-get($grey-theme-1, neutral-bg);
-            color: map-get($grey-theme-1, dark-fg);
         }
     }
 
@@ -2173,7 +1974,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__index {
-        color: $light-primary;
+        color: $light-light;
         font-size: $text-secondary-medium;
         padding: $gap-medium;
     }
@@ -2199,7 +2000,7 @@ $red-theme--NEUTRAL: (
 
     &__name {
         font-size: $text-secondary-small;
-        color: $light-primary;
+        color: $light-light;
     }
 }
 

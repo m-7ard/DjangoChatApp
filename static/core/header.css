@@ -123,7 +123,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .container {
@@ -195,173 +195,18 @@
 .avatar--small {
   width: 2rem;
   height: 2rem;
-  font-size: 2rem;
 }
 .avatar--medium {
   width: 2.5rem;
   height: 2.5rem;
-  font-size: 2.5rem;
 }
 .avatar--large {
   width: 6rem;
   height: 6rem;
-  font-size: 6rem;
 }
 .avatar img {
   max-height: 100%;
   max-width: 100%;
-}
-
-.online-color--primary {
-  color: #eff688;
-}
-.online-color--secondary {
-  color: #cbc83e;
-}
-
-.offline-color--primary {
-  color: #80a4a3;
-}
-.offline-color--secondary {
-  color: #62777e;
-}
-
-.backlog {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
-  gap: 0.25rem 0.5rem;
-  position: relative;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: auto 1fr;
-}
-.backlog:hover {
-  background-color: #212120;
-}
-.backlog:hover .backlog__actions {
-  display: flex;
-}
-.backlog__avatar {
-  grid-row: 1/-1;
-}
-.backlog__avatar .avatar {
-  cursor: pointer;
-}
-.backlog__header {
-  display: flex;
-  padding: 0;
-  gap: 0.25rem;
-  align-items: baseline;
-}
-.backlog__user {
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-.backlog__user:hover {
-  text-decoration: underline;
-}
-.backlog__timestamp {
-  font-size: 0.8125rem;
-  color: #8D8A84;
-}
-.backlog__actions {
-  display: none;
-  position: absolute;
-  right: 1rem;
-  top: -0.5rem;
-  border-radius: 4px;
-}
-.backlog__actions .menu {
-  z-index: 2;
-  position: absolute;
-  top: 100%;
-  right: 0;
-}
-.backlog__action {
-  padding: 0.25rem;
-  background-color: #181818;
-  transition: background-color 0.2s;
-  cursor: pointer;
-}
-.backlog__action:hover {
-  background-color: #212120;
-}
-.backlog__body {
-  overflow: hidden;
-}
-.backlog__content {
-  position: relative;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  line-height: 1.5rem;
-  color: #e0dbd1;
-  font-size: 0.9375rem;
-}
-.backlog__content img {
-  max-height: 1.5rem;
-  max-width: 1.5rem;
-  vertical-align: middle;
-}
-.backlog__edit {
-  all: unset;
-  white-space: pre-wrap;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem;
-  background-color: #1E1D1C;
-  box-shadow: inset 0px 0px 4px 1px #161615;
-  border-radius: 4px;
-  overflow: overlay;
-  overflow-wrap: break-word;
-  color: #e0dbd1;
-}
-.backlog__prompts {
-  display: flex;
-  padding: 0;
-  gap: 0.5rem;
-}
-.backlog__prompts [data-action] {
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: #9966cc;
-  cursor: pointer;
-}
-.backlog--editing {
-  background-color: #212120;
-}
-.backlog--editing .backlog__content {
-  min-height: 5rem;
-  color: transparent;
-}
-.backlog--editing .backlog__content img {
-  display: none;
-}
-.backlog__reactions {
-  display: flex;
-  padding: 0;
-  gap: 0.5rem;
-  grid-column: 2;
-}
-.backlog__action-name {
-  color: #e0dbd1;
-  font-size: 0.9375rem;
-}
-.backlog__divider {
-  display: flex;
-  padding: 0;
-  gap: 0.5rem;
-  align-items: center;
-  grid-column: 1/-1;
-}
-.backlog__divider > *:first-child, .backlog__divider > *:last-child {
-  flex-grow: 1;
-  height: 1px;
-  background-color: #8D8A84;
 }
 
 .chatbar {
@@ -487,16 +332,16 @@
   cursor: pointer;
 }
 .friendship__button--accept {
-  color: #284026;
+  color: #344C2E;
 }
 .friendship__button--accept:hover {
-  color: #2E5A2C;
+  color: #47773D;
 }
 .friendship__button--reject {
-  color: #552224;
+  color: #632117;
 }
 .friendship__button--reject:hover {
-  color: #80191B;
+  color: #95321E;
 }
 .friendship__button--manage {
   color: #8D8A84;
@@ -666,11 +511,11 @@
   justify-content: center;
   align-items: center;
   border-radius: 4px;
-  background-color: #284026;
+  background-color: #344C2E;
   color: #e0dbd1;
 }
 .profile__button--main:hover {
-  background-color: #2E5A2C;
+  background-color: #47773D;
   color: #e0dbd1;
 }
 .profile__button--sidebar {
@@ -720,10 +565,10 @@
   padding: 0.75rem;
   gap: 0.75rem;
   color: #e0dbd1;
-  background-color: #181818;
+  background-color: #212120;
   overflow: auto;
   flex: 1;
-  max-width: 35rem;
+  max-width: 24rem;
   position: relative;
   border-radius: 4px;
 }
@@ -759,7 +604,7 @@
   display: flex;
   padding: 0.5rem;
   gap: 0.75rem;
-  background-color: #131313;
+  background-color: #181818;
   align-items: center;
   justify-content: flex-end;
   margin-top: auto;
@@ -770,31 +615,30 @@
   padding: 0.5rem 0.75rem;
   gap: 0;
   font-size: 0.875rem;
+  font-weight: bold;
   border-radius: 4px;
   transition: background-color 0.2s, color 0.2s;
 }
 .form__submit--update {
-  background-color: #284026;
+  background-color: #344C2E;
 }
 .form__submit--update:hover {
-  background-color: #2E5A2C;
+  background-color: #47773D;
   color: #e0dbd1;
 }
 .form__submit--delete {
-  color: #8D8A84;
-  background-color: #552224;
+  background-color: #632117;
 }
 .form__submit--delete:hover {
-  background-color: #80191B;
-  color: #e0dbd1;
+  background-color: #95321E;
 }
 .form__submit--create {
-  color: #8D8A84;
-  background-color: #2B3215;
+  color: #b2aea6;
+  background-color: #344C2E;
 }
 .form__submit--create:hover {
   color: #e0dbd1;
-  background-color: #506510;
+  background-color: #47773D;
 }
 .form__response {
   display: flex;
@@ -808,7 +652,7 @@
   font-weight: bold;
 }
 .form__response--success {
-  background-color: #2E5A2C;
+  background-color: #47773D;
 }
 .form__response--error {
   background-color: #6B2A2A;
@@ -874,11 +718,11 @@
   font-size: 1rem;
   color: inherit;
   color-scheme: dark;
-  background-color: #131313;
+  background-color: #181818;
 }
 .form-text-input input:focus, .form-number-input input:focus, .form-date-input input:focus,
 .form-password-input input:focus, .form-email-input input:focus {
-  background-color: #212120;
+  background-color: #131313;
 }
 
 .channel-kind-select {
@@ -947,10 +791,9 @@
 .form-slider {
   transition: all 0.4s cubic-bezier(0.71, 1.15, 0.82, 1);
   position: relative;
-  border: 0.25rem solid #212120;
+  border: 0.25rem solid transparent;
   border-radius: 9999px;
-  background-color: #212120;
-  height: 1.25rem;
+  height: 1.125rem;
   width: 2.75rem;
   overflow: hidden;
 }
@@ -965,27 +808,27 @@
   cursor: pointer;
 }
 .form-slider:has(input:checked) {
-  background-color: #2E5A2C;
-  border-color: #2E5A2C;
+  background-color: #3E6236;
+  border-color: #3E6236;
 }
 .form-slider:has(input:checked) .form-slider__marker {
   left: 0px;
 }
 .form-slider:not(:has(input:checked)) {
-  background-color: #80191B;
-  border-color: #80191B;
+  background-color: #7A2A1A;
+  border-color: #7A2A1A;
 }
 .form-slider:not(:has(input:checked)) .form-slider__marker {
-  left: 1.5rem;
+  left: 1.625rem;
 }
 .form-slider__marker {
   transition: background-color 0.2s, color 0.2s;
-  transition: left 0.2s;
+  transition: left 0.25s cubic-bezier(0.71, 1.15, 0.82, 1);
   position: absolute;
   height: 100%;
   aspect-ratio: 1/1;
   border-radius: 9999px;
-  background-color: #b2aea6;
+  background-color: #e0dbd1;
 }
 
 .permissions {
@@ -1106,8 +949,7 @@
   color: #e0dbd1;
 }
 .permissions__option--false:has(:checked) {
-  background-color: #80191B;
-  color: #e0dbd1;
+  background-color: #95321E;
 }
 .permissions__option--null:has(:not(:checked)) {
   background-color: #181818;
@@ -1130,7 +972,7 @@
   color: #e0dbd1;
 }
 .permissions__option--true:has(:checked) {
-  background-color: #2E5A2C;
+  background-color: #47773D;
   color: #e0dbd1;
 }
 .permissions__description {
@@ -1187,15 +1029,15 @@
 .field__checkbox:has(:not(:checked)) {
   background-color: transparent;
   color: transparent;
-  border: 2px solid #284026;
+  border: 2px solid #344C2E;
 }
 .field__checkbox:hover {
-  border: 2px solid #2B4D29;
+  border: 2px solid #3E6236;
 }
 .field__checkbox:has(:checked) {
-  background-color: #2E5A2C;
+  background-color: #47773D;
   color: #e0dbd1;
-  border: 2px solid #2E5A2C;
+  border: 2px solid #47773D;
 }
 .field__checkbox input {
   position: absolute;
@@ -1266,43 +1108,23 @@
 }
 
 .channel {
-  display: flex;
-  padding: 0.25rem;
-  gap: 0.25rem;
   transition: background-color 0.2s, color 0.2s;
-  cursor: pointer;
+  display: flex;
+  padding: 0.25rem 0.5rem;
+  gap: 0.5rem;
   align-items: center;
-  color: #8D8A84;
   border-radius: 4px;
+  cursor: pointer;
+}
+.channel__title {
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 0.875rem;
+  color: #8D8A84;
 }
 .channel:hover {
-  color: #e0dbd1;
   background-color: #212120;
 }
-.channel:hover .channel__settings {
-  display: block;
-}
-.channel--selected {
-  color: #e0dbd1;
-  background-color: #212120;
-}
-.channel__kind {
-  color: #62777e;
-}
-.channel__name {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-x: clip;
-  font-size: 0.9375rem;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
-}
-.channel__settings {
-  color: #8D8A84;
-  display: none;
-}
-.channel__settings:hover {
+.channel:hover .channel__title {
   color: #e0dbd1;
 }
 
@@ -1555,8 +1377,7 @@
   padding: 0;
   gap: 0;
   flex-shrink: 0;
-  height: 2px;
-  background-color: #212120;
+  border-bottom: 2px solid #212120;
 }
 .sidebar__pin {
   transition: transform 0.2s;
@@ -1646,28 +1467,28 @@
           user-select: none;
   cursor: pointer;
 }
-.groupchat:hover .groupchat__avatar {
-  border-color: #212120;
-}
-.groupchat:hover .avatar {
-  background-color: #212120;
-  color: #e0dbd1;
-}
-.groupchat:hover .groupchat__title {
-  color: #e0dbd1;
-}
 .groupchat__avatar {
   border: 2px solid transparent;
   box-sizing: border-box;
   padding: 3px;
-  border-radius: 25%;
+  border-radius: 33%;
   transition: border-color 0.2s;
 }
 .groupchat__avatar .avatar {
   transition: background-color 0.2s, color 0.2s;
-  border-radius: 25%;
+  border-radius: 33%;
   background-color: #181818;
   color: #8D8A84;
+}
+.groupchat:hover .groupchat__avatar, .groupchat--selected .groupchat__avatar {
+  border-color: #212120;
+}
+.groupchat:hover .avatar, .groupchat--selected .avatar {
+  background-color: #212120;
+  color: #e0dbd1;
+}
+.groupchat:hover .groupchat__title, .groupchat--selected .groupchat__title {
+  color: #e0dbd1;
 }
 .groupchat__body {
   display: flex;

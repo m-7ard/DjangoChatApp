@@ -3,10 +3,9 @@ import json
 from itertools import chain
 from typing import Any, Dict
 from pathlib import Path
+
 from django import http
 from django.forms.models import BaseModelForm
-
-
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -14,14 +13,14 @@ from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.db.models import Q
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from users.models import CustomUser
 from core.models import News
 from .models import (
-    Channel, 
-    Log, 
-    Message, 
-    PrivateChat,
+    GroupChat,
+    GroupChatMembership,
 )
 from .forms import (
     ChannelCreateForm,
@@ -31,6 +30,9 @@ from .forms import (
 
     GroupChatCreateForm,
 )
+
+
+channel_layer = get_channel_layer()
 
 
 class DashboardView(TemplateView):
@@ -57,11 +59,25 @@ class CreateGroupChat(CreateView):
         return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
     def form_valid(self, form):
-        group_chat = form.save()
-        success_url = reverse('group_chat', kwargs={'pk': group_chat-pk})
+        group_chat = form.save(commit=False)
+        group_chat.owner = self.request.user
+        group_chat.save()
+        GroupChatMembership.objects.create(user=group_chat.owner, chat=group_chat)
+        success_url = reverse('group-chat', kwargs={'pk': group_chat.pk})
+
+        async_to_sync(channel_layer.group_send)(f'user_{self.request.user.pk}', {
+            'type': 'send_to_client',
+            'action': 'create-group-chat',
+            'html': render_to_string(request=self.request, template_name='core/elements/groupchat.html', context={'local_groupchat': group_chat})
+        })
+
         return JsonResponse({'status': 400, 'redirect': success_url})
         
 
+class GroupChatDetailView(DetailView):
+    model = GroupChat
+    template_name = 'rooms/group-chat.html'
+    context_object_name = 'groupchat'
 
     
 """
