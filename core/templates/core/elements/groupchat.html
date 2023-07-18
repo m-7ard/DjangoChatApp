@@ -1,24 +1,3 @@
-{% if forloop.first %} 
-    <div class="groupchat">
-        <div class="groupchat__avatar">
-            <div class="avatar avatar--medium">
-                <div class="icon icon--medium">
-                    <i class="material-symbols-outlined">
-                        supervisor_account
-                    </i>
-                </div>
-            </div>
-        </div>
-        <div class="groupchat__body">
-            <div class="groupchat__title">
-                To Dashboard
-            </div>
-        </div>
-    </div>
-    <div class="sidebar__divider">
-
-    </div>
-{% endif %}
 <a class="groupchat {% if local_groupchat == groupchat %} groupchat--selected {% endif %}" href="{% url 'group-chat' pk=local_groupchat.pk %}">
     <div class="groupchat__avatar">
         <div class="avatar avatar--medium">
@@ -42,22 +21,3 @@
         </div>
     </div>
 </a>
-{% if forloop.last %} 
-    <div class="sidebar__divider" id="insert-groupchat">
-
-    </div>
-    <div class="groupchat" data-command="get-form" data-name="create-group-chat">
-        <div class="groupchat__avatar">
-            <div class="avatar avatar--medium">
-                <i class="material-symbols-outlined">
-                    add
-                </i>
-            </div>
-        </div>
-        <div class="groupchat__body">
-            <div class="groupchat__title">
-                New Groupchat
-            </div>
-        </div>
-    </div>
-{% endif %}

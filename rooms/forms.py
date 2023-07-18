@@ -4,7 +4,7 @@ from utils import get_object_or_none
 
 from core.widgets import AvatarInput
 from commons import widgets
-from .models import Channel, GroupChat
+from .models import GroupChannel, GroupChat
 
 class ChannelCreateForm(forms.ModelForm):
     kind = forms.ChoiceField(widget=widgets.ChannelKindSelect(), choices=((),))
@@ -18,7 +18,7 @@ class ChannelCreateForm(forms.ModelForm):
             self.fields['category'].widget = self.fields['category'].hidden_widget()
 
     class Meta:
-        model = Channel
+        model = GroupChannel
         fields = ['name', 'description', 'kind']
 
 
@@ -31,7 +31,7 @@ class ChannelDeleteForm(forms.ModelForm):
         self.fields['confirm'].widget.field = self.fields['confirm']
 
     class Meta:
-        model = Channel
+        model = GroupChannel
         fields = ['confirm']
 
 class ChannelUpdateForm(forms.ModelForm):
@@ -47,13 +47,13 @@ class ChannelUpdateForm(forms.ModelForm):
         self.fields['category'].widget.field = self.fields['category']
 
     class Meta:
-        model = Channel
+        model = GroupChannel
         fields = ['name', 'description', 'order', 'category']
 
 
 class ChannelPermissionsForm(forms.ModelForm):
     class Meta:
-        model = Channel
+        model = GroupChannel
         fields = '__all__'
         
 
@@ -62,9 +62,10 @@ class GroupChatCreateForm(forms.ModelForm):
     public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
     
     class Meta:
-        model = GroupChat
+        model = GroupChannel
         fields = ['name', 'public']
-        
+
+
 """
 class RoomUpdateForm(forms.ModelForm):
     class Meta:

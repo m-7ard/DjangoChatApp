@@ -11,8 +11,16 @@
 {% endblock %}
 
 {% block app-sidebar-body %}
-    {% for channel in groupchat.channels.all %}
-        {% include "./elements/channel.html" %}
+    {% for item in groupchat.channels_and_categories %}
+        {% if item|classname == 'Channel' %}
+            {% with channel=item %}
+                {% include "./elements/channel.html" %}
+            {% endwith %}
+        {% elif item|classname == 'Category' %}
+            {% with category=item %}
+                {% include "./elements/category.html" %}
+            {% endwith %}
+        {% endif %}
     {% endfor %}
 {% endblock %}
 

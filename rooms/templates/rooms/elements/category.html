@@ -1,0 +1,21 @@
+<div class="dropdown">
+    <div class="sidebar__lead-in">
+        <div class="sidebar__label dropdown__trigger">
+            {{ category.name }}
+        </div>
+        <div class="app__icon">
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--tiny icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        add
+                    </i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dropdown__content dropdown__content--open">
+        {% for channel in category.channels.all %}
+            {% include "./channel.html" %}
+        {% endfor %}
+    </div>
+</div>

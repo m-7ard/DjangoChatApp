@@ -21,6 +21,9 @@ from core.models import News
 from .models import (
     GroupChat,
     GroupChatMembership,
+    Category,
+    Channel,
+    Role,
 )
 from .forms import (
     ChannelCreateForm,
@@ -62,7 +65,7 @@ class CreateGroupChat(CreateView):
         group_chat = form.save(commit=False)
         group_chat.owner = self.request.user
         group_chat.save()
-        GroupChatMembership.objects.create(user=group_chat.owner, chat=group_chat)
+
         success_url = reverse('group-chat', kwargs={'pk': group_chat.pk})
 
         async_to_sync(channel_layer.group_send)(f'user_{self.request.user.pk}', {

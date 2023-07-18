@@ -6,11 +6,19 @@ from .models import (
     GroupChatMembership,
     PrivateChatMembership,
     GroupChat,
-    Channel,
-    Role
+    PrivateChat,
+    GroupChannel,
+    PrivateChannel,
+    Role,
+    Category,
 
 )
 
 admin.site.register(GroupChat)
-admin.site.register(Channel)
+admin.site.register(PrivateChat)
+admin.site.register(PrivateChannel)
+admin.site.register(GroupChannel)
 admin.site.register(Role)
+admin.site.register(GroupChatMembership)
+admin.site.register(PrivateChatMembership)
+admin.site.register(Category)

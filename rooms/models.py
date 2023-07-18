@@ -19,19 +19,26 @@ class Chat(models.Model):
 class GroupChat(Chat):
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='groups_owned', null=True)
     name = models.CharField(max_length=50)
-    image = models.ImageField(max_length=500)
+    image = models.ImageField(max_length=500, blank=True)
     public = models.BooleanField(default=False)
+    base_role = models.OneToOneField('Role', on_delete=models.RESTRICT, related_name='+', null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        print(self._state.adding)
-        created = self._state.adding
+        creating = self._state.adding
 
-        if created:
+        if creating:
             super().save(*args, **kwargs)
-            Channel.objects.create(kind='group_chat', group_chat=self, name='General')
-            Role.objects.create(name='all', chat=self)
-        
+            default_category = Category.objects.create(name='Text Channels', chat=self)
+            default_channel = GroupChannel.objects.create(name='General', chat=self, category=default_category)
+            
+            self.base_role = Role.objects.create(name='all', chat=self)
+            owner_membership = GroupChatMembership.objects.create(user=self.owner, chat=self)
+            self.base_role.memberships.add(owner_membership)
+
         super().save(*args, **kwargs)
+
+    def channels_and_categories(self):
+        return sorted(chain(self.channels.all().filter(category=None), self.categories.all()), key=lambda obj: obj.relative_order)
 
 
 class PrivateChat(Chat):
@@ -57,19 +64,61 @@ class PrivateChatMembership(Membership):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=20)
+    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='categories')
+    relative_order = models.PositiveIntegerField()
+
+
 class Channel(models.Model):    
     date_created = models.DateTimeField(auto_now_add=True)
+    pinned_messages = models.ManyToManyField('Message')
 
+    class Meta:
+        abstract = True
+
+
+class PrivateChannel(Channel):
+    chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='channel', null=True)
+    
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        
+        if creating:
+            super().save(*args, **kwargs)
+            BacklogGroup.objects.create(kind='private_channel', private_channel=self)
+
+        super().save(*args, **kwargs)
+
+
+class GroupChannel(Channel):
+    name = models.CharField(max_length=30)
+    relative_order = models.PositiveIntegerField(validators=[MaxValueValidator(16), MinValueValidator(1)])
+    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='channels', null=True)
+
+    class Meta:
+        ordering = ["-relative_order"]
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        
+        if creating:
+            super().save(*args, **kwargs)
+            BacklogGroup.objects.create(kind='group_channel', group_channel=self)
+
+        super().save(*args, **kwargs)
+
+
+class BacklogGroup(models.Model):
     KINDS = (
-        ('group_chat', 'Group Chat Channel'),
-        ('private_chat', 'Private Chat Channel')
+        ('group_channel', 'Group Chat Backlogs'),
+        ('private_channel', 'Private Chat Backlogs'),
     )
 
-    name = models.CharField(max_length=30)
     kind = models.CharField(max_length=20, choices=KINDS)
-    pinned_messages = models.ManyToManyField('Message')
-    group_chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)
-    private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='channel', null=True)
+    group_channel = models.OneToOneField(GroupChannel, on_delete=models.CASCADE, related_name='backlog_group', null=True)
+    private_channel = models.OneToOneField(PrivateChannel, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
     def get_chat(self):
         return getattr(self, self.kind)
@@ -85,10 +134,7 @@ class Backlog(models.Model):
 
     kind = models.CharField(max_length=20, choices=KINDS)
     date_created = models.DateTimeField(auto_now_add=True)
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='backlogs')
-
-    def get_item(self):
-        return getattr(self, self.kind)
+    group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='backlogs', null=True)
 
 
 class Message(models.Model):
@@ -112,15 +158,6 @@ class Role(models.Model):
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
     memberships = models.ManyToManyField(GroupChatMembership, related_name='roles')
-
-
-
-
-
-
-
-
-
 
 
 """

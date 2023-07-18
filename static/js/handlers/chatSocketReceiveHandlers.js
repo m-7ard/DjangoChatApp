@@ -7,10 +7,8 @@ const chatSocketReceiveHandlers = {
     },
 	'create-group-chat': function({html}) {
         let groupchat = parseHTML(html);
-        let sidebar = document.getElementById('groupchats');
-        let sidebarBody = sidebar.querySelector('.sidebar__body');
         let referenceElement = document.getElementById('insert-groupchat');
-        sidebarBody.insertBefore(groupchat, referenceElement);
+        referenceElement.parentNode.insertBefore(groupchat, referenceElement);
     },	
 	'remove-room': function(data) {
         if (window.location.href.includes('room/' + data.pk)) {
