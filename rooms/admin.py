@@ -11,6 +11,9 @@ from .models import (
     PrivateChannel,
     Role,
     Category,
+    Backlog,
+    BacklogGroup,
+    Message
 
 )
 
@@ -22,3 +25,6 @@ admin.site.register(Role)
 admin.site.register(GroupChatMembership)
 admin.site.register(PrivateChatMembership)
 admin.site.register(Category)
+admin.site.register(Backlog)
+admin.site.register(BacklogGroup)
+admin.site.register(Message)

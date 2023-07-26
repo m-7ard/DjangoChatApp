@@ -1,4 +1,4 @@
-<a class="groupchat {% if local_groupchat == groupchat %} groupchat--selected {% endif %}" href="{% url 'group-chat' pk=local_groupchat.pk %}">
+<a class="groupchat {% if local_groupchat == group_chat %} groupchat--selected {% endif %}" href="{% url 'group-chat' pk=local_groupchat.pk %}">
     <div class="groupchat__avatar">
         <div class="avatar avatar--medium">
             {% if local_groupchat.image %}
@@ -10,14 +10,10 @@
             {% endif %}
         </div>
     </div>
-    <div class="groupchat__body">
-        <div class="groupchat__title">
-            {{ local_groupchat.name }}
-        </div>
-        <div class="groupchat__subtitle">
-            <div>
-                {{ local_groupchat.memberships.count }}
-            </div>
-        </div>
+    <div class="groupchat__divider">
+
+    </div>
+    <div class="groupchat__title">
+        {{ local_groupchat.name }}
     </div>
 </a>

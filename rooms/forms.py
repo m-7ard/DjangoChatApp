@@ -4,7 +4,7 @@ from utils import get_object_or_none
 
 from core.widgets import AvatarInput
 from commons import widgets
-from .models import GroupChannel, GroupChat
+from .models import GroupChannel, GroupChat, Category
 
 class ChannelCreateForm(forms.ModelForm):
     kind = forms.ChoiceField(widget=widgets.ChannelKindSelect(), choices=((),))
@@ -62,8 +62,30 @@ class GroupChatCreateForm(forms.ModelForm):
     public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
     
     class Meta:
-        model = GroupChannel
+        model = GroupChat
         fields = ['name', 'public']
+
+
+class GroupChannelCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormTextInput())
+    
+    class Meta:
+        model = GroupChannel
+        fields = ['name']
+
+
+class CategoryCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormTextInput())
+    
+    class Meta:
+        model = Category
+        fields = ['name']
+
+
+class FriendForm(forms.Form):
+    username = forms.CharField()
+    username_id = forms.IntegerField()
+
 
 
 """

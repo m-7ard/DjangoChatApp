@@ -39,7 +39,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    username_id = models.PositiveIntegerField()
+    username_id = models.PositiveIntegerField(null=True)
     username = models.CharField(max_length=30, default='user')
 
     image = models.ImageField(default='blank.png')
@@ -73,7 +73,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f'{self.username}#{str(self.username_id).zfill(2)}'
     
     def friendships(self):
-        return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
+        sent = self.sent_friendships.all()
+        received = self.received_friendships.all()
+        return sent.union(received)
     
     def joined_site(self):
         return self.date_joined.strftime("%d %B %Y")
@@ -94,23 +96,30 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-class FriendshipQuerySet(models.QuerySet):
+class FriendshipManager(models.Manager):
     def pending(self):
         return self.filter(status='pending')
     
     def accepted(self):
         return self.filter(status='accepted')
-    
-    def users(self):
-        return {user for friendship in self for user in friendship.users()}
-    
+
 
 class Friendship(models.Model):
-    status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted')])
-    sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='sent_friendships')
-    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='received_friendships')
-    
-    def users(self):
-        return {self.sender, self.receiver}
-    
-    objects = FriendshipQuerySet.as_manager()
+    CHOICES = (
+        ('accepted', 'Friends'),
+        ('pending', 'Pending Friendship'),
+    )
+    status = models.CharField(max_length=20, choices=CHOICES)
+    sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='sent_friendships', null=True)
+    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='received_friendships', null=True)
+
+    objects = FriendshipManager()
+
+
+class Friend(models.Model):
+    friendship = models.ForeignKey(Friendship, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='friend_objects', null=True)
+    nickname = models.CharField(max_length=30, blank=True)
+
+    def other_party(self):
+        return self.friendship.members.all().exclude(user=self.user).first()

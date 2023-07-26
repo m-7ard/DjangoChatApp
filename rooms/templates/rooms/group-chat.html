@@ -1,27 +1,111 @@
 {% extends "core/app.html" %}
 
 {% block extrahead %}
-    {{ groupchat.pk|json_script:"groupchat-pk" }}
+    {{ group_chat.pk|json_script:"group-chat-pk" }}
 {% endblock %}
 
 {% block app-sidebar-header %}
-    <div class="app__title">
-        {{ groupchat.name }}
+    <div class="sidebar-menu dropdown">
+        <div class="sidebar-menu__trigger dropdown__trigger">
+            <div class="app__title">
+                {{ group_chat.name }}
+            </div>
+            <div class="app__icon">
+                <div class="icon icon--medium">
+                    <i class="material-symbols-outlined">
+                        expand_more
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu__content dropdown__content">
+            <div class="sidebar-menu__button dropdown__close">
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            person_add
+                        </i>
+                    </div>
+                </div>
+                <div>
+                    Invite Users
+                </div>
+            </div>
+            <div class="sidebar-menu__divider">
+
+            </div>
+            <div class="sidebar-menu__button dropdown__close" data-command="get-form" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            add_circle
+                        </i>
+                    </div>
+                </div>
+                <div>
+                    Create Channel
+                </div>
+            </div>
+            <div class="sidebar-menu__button dropdown__close"  data-command="get-form" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            create_new_folder
+                        </i>
+                    </div>
+                </div>
+                <div>
+                    Create Category
+                </div>
+            </div>
+            <div class="sidebar-menu__divider">
+
+            </div>
+            {% if user != group_chat.owner %}
+                <div class="sidebar-menu__button dropdown__close">
+                    <div class="app__icon">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                door_open
+                            </i>
+                        </div>
+                    </div>
+                    <div>
+                        Leave Group Chat
+                    </div>
+                </div>
+            {% else %}
+                <div class="sidebar-menu__button dropdown__close">
+                    <div class="app__icon">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                backspace
+                            </i>
+                        </div>
+                    </div>
+                    <div>
+                        Delete Group Chat
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
 
 {% block app-sidebar-body %}
-    {% for item in groupchat.channels_and_categories %}
-        {% if item|classname == 'Channel' %}
-            {% with channel=item %}
-                {% include "./elements/channel.html" %}
-            {% endwith %}
-        {% elif item|classname == 'Category' %}
-            {% with category=item %}
-                {% include "./elements/category.html" %}
-            {% endwith %}
-        {% endif %}
-    {% endfor %}
+    <div class="sidebar__section sidebar__section--channels">
+        {% for item in group_chat.channels_and_categories %}
+            {% if item|classname == 'GroupChannel' %}
+                {% with channel=item %}
+                    {% include "./elements/channel.html" %}
+                {% endwith %}
+            {% elif item|classname == 'Category' %}
+                {% with category=item %}
+                    {% include "./elements/category.html" %}
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endblock %}
 
 {% block main-header %}
@@ -40,19 +124,21 @@
 
 
 {% block main-content-sidebar %}
-    {% for membership in groupchat.memberships.all %}
-        <div class="user">
-            <div class="user__avatar">
-                <div class="avatar avatar--small">
-                    <img src="" alt="">
+    <div class="sidebar__section sidebar__section--users">
+        {% for membership in group_chat.memberships.all %}
+            <div class="user">
+                <div class="user__avatar">
+                    <div class="avatar avatar--small">
+                        <img src="" alt="">
+                    </div>
+                </div>
+                <div class="user__title">
+                    {% firstof membership.nickname membership.user.username %}
+                </div>
+                <div class="user__subtitle">
+                    {{ membership.user.status }}
                 </div>
             </div>
-            <div class="user__title">
-                {% firstof membership.nickname membership.user.username %}
-            </div>
-            <div class="user__subtitle">
-                {{ membership.user.status }}
-            </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 {% endblock %}

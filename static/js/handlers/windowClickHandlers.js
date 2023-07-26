@@ -17,17 +17,22 @@ const windowClickHandlers = {
         let openTooltip = document.querySelector('.tooltip');
         if (openTooltip) {
             if (openTooltip.dataset.randomId == trigger.dataset.randomId) {
+                // open tooltip corresponds to trigger
                 openTooltip.remove();
                 return;
             }
             else {
+                // open tooltip does not correspond to trigger
                 openTooltip.remove();
             };
         };
-        let tooltip = await getTemplate({
-            templateName: trigger.dataset.templateName,
-            context: trigger.dataset.context,
-        });
+        let tooltip = parseHTML(
+            await getView({
+                name: trigger.dataset.name,
+                kwargs: trigger.dataset.kwargs,
+                query: trigger.dataset.query,
+            })
+        );
         let sharedID = randomID()
         tooltip.setAttribute('data-random-id', sharedID)
         trigger.setAttribute('data-random-id', sharedID)

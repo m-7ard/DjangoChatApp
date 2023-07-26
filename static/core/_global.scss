@@ -1,12 +1,12 @@
 $light: (
-    light: #e0dbd1,
+    light: #DBD6CC,
     neutral: #b2aea6,
     dark: #8D8A84,
 );
 
 
 
-$chalk-white: #e0dbd1;
+$chalk-white: #DBD6CC;
 $silver: #b2aea6;
 $battleship-grey: #8D8A84;
 
@@ -24,7 +24,7 @@ $saturated-titanium-yellow: #d6d018;
 $deep-burgundy: #3d2b3c;
 
 $black-olive: #403D39;
-$eerie-black: #212120;
+$eerie-black: #1D1D1C;
 $charcoal-grey: #131313;
 $night: #161615;
 $black-chestnut-oak: #1E1D1C;
@@ -59,13 +59,9 @@ $text-special-medium: 1.75rem;
 $text-special-large: 2rem;
 
 // other reusables
-$padding-small: 0.25rem;
-$padding-medium: 0.5rem;
-$padding-large: 0.75rem;
-
-$gap-small: 0.25rem;
-$gap-medium: 0.5rem;
-$gap-large: 0.75rem;
+$space-small: 0.25rem;
+$space-medium: 0.5rem;
+$space-large: 0.75rem;
 
 $radius-small: 4px;
 $radius-medium: 8px;
@@ -117,9 +113,10 @@ $lime-theme--DARK: (
 );
 
 $green-theme-1: (
-    "dark-bg": #344C2E,
-    "neutral-bg": #3E6236,
-    "light-bg": #47773D,
+    /* todo: change dark-bg */
+    "dark-bg": #0E441F,
+    "neutral-bg": #404228,
+    "light-bg": #6D7246,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -127,9 +124,9 @@ $green-theme-1: (
 );
 
 $red-theme-1: (
-    "dark-bg": #632117,
-    "neutral-bg": #7A2A1A,
-    "light-bg": #95321E,
+    "dark-bg": #9E542C,
+    "neutral-bg": #B35D30,
+    "light-bg": #C96733,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -145,13 +142,6 @@ $red-theme--NEUTRAL: (
     "neutral-fg": $light-neutral,
     "dark-fg": $light-dark,
 );
-
-// mixins 
-@mixin modelbox {
-	display: flex;
-	padding: $padding-medium;
-	gap: $gap-medium;
-}
 
 @mixin absolute-box($height, $width) {
 	position: absolute;
@@ -186,21 +176,27 @@ $red-theme--NEUTRAL: (
     bottom: $bottom;
 }
 
-@mixin bg-fg-transition($bg1, $bg2, $fg1, $fg2, $time, $event) {
-    background-color: $bg1;
-    color: $fg1;
-    transition: background-color $time, color $time;
-
-    &:#{$event} {
-        background-color: $bg2;
-        color: $fg2;
-    }
-}
-
 @mixin default-color-transition {
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
+@mixin break-long-words {
+    word-break: keep-all;
+    word-wrap: break-word;
+}
+
+@mixin base-button {
+    align-items: center;
+    border-radius: $radius-small;
+    cursor: pointer;
+    user-select: none;
+}
+
+@mixin small-button {
+    @include default-color-transition;
+    @include flex-row($space-small $space-large, $space-medium);
+    font-size: $text-secondary-large;
+}
 
 .bottom { margin-top: auto !important; }
 .top { margin-bottom: auto !important; }
@@ -238,7 +234,7 @@ $red-theme--NEUTRAL: (
 }
 
 .has-shadow {
-	box-shadow: $shadow-dimensions $anthracite;
+	box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.404);
 }
 
 
@@ -297,19 +293,92 @@ $red-theme--NEUTRAL: (
 	}
 
 	&--large {
-		width: 3rem;
-		height: 3rem;
-		font-size: 3rem;
+		width: 2rem;
+		height: 2rem;
+		font-size: 2rem;
 	}
 }
 
 .tooltip {
 	position: fixed;
 	pointer-events: all;
+    background-color: map-get($grey-theme-1, neutral-bg);
+    z-index: 100;
 
-	&--hidden {
-		display: none !important;
-	}
+    &--small {
+        width: 250px;
+        height: auto;
+    }
+
+    &--medium {
+        width: 200px;
+        min-height: 100px;
+    }
+    
+    &--x-adjacent {
+        margin: $space-small 0;
+    }
+
+    &--y-adjacent {
+        margin: 0 $space-small;
+    }
+
+	&__header{
+        @include flex-row($space-medium $space-large, $space-large);
+        background-color: map-get($grey-theme-1, dark-bg);
+    }
+
+    &__body {
+        @include flex-column($space-medium, $space-medium);
+    }
+
+    &__section {
+        @include flex-row(0, $space-medium);
+        align-items: center;
+    }
+
+    &__title {
+        color: map-get($grey-theme-1, light-fg);
+        font-size: $text-primary-small;
+    }
+
+    &__button {
+        @include base-button;
+
+        &--confirm {
+            @include small-button;
+            color: map-get($green-theme-1, light-fg);
+            background-color: map-get($green-theme-1, neutral-bg);
+
+            &:hover {
+                color: map-get($green-theme-1, light-fg);
+                background-color: map-get($green-theme-1, light-bg);
+            }
+        }
+    }
+
+    &__searchbar {
+        @include ellipsis;
+        @include flex-row($space-small, 0);
+        flex-grow: 1;
+
+        background-color: map-get($grey-theme-1, dark-bg);
+        color: map-get($grey-theme-1, dark-fg);
+        font-size: $text-secondary-large;
+        border-radius: $radius-small;
+
+    }
+
+    &__footer {
+        @include flex-row($space-medium $space-large, $space-large);
+        background-color: map-get($grey-theme-1, dark-bg);
+    }
+
+    &__message {
+        font-size: $text-secondary-small;
+        color: map-get($grey-theme-1, dark-fg);
+        padding: $space-small;
+    }
 }
 
 .layer {
@@ -350,7 +419,7 @@ $red-theme--NEUTRAL: (
 	&__header {
 		text-align: center;
 		background-color: $black-chestnut-oak;
-		padding: $padding-small;
+		padding: $space-small;
 		font-size: $text-primary-large;
 		font-weight: bold;
 		color: $online-primary;
@@ -359,8 +428,8 @@ $red-theme--NEUTRAL: (
 
 	&__subheader {
 		display: flex;
-		padding: $padding-small;
-		gap: $gap-small;
+		padding: $space-small;
+		gap: $space-small;
 		font-size: $text-primary-medium;
 		background-color: $charcoal-grey;
 		z-index: 3;
@@ -391,7 +460,7 @@ $red-theme--NEUTRAL: (
 
 	&__label {
 		color: $chalk-white;
-		padding: $padding-small;
+		padding: $space-small;
 		font-size: $text-secondary-medium;
 
 		&--optional {
@@ -430,42 +499,6 @@ $red-theme--NEUTRAL: (
 	img {
 		max-height: 100%;
 		max-width: 100%;
-	}
-}
-
-.chatbar {
-	z-index: 1;
-    margin: $padding-medium;
-    border-radius: 4px;
-    overflow: hidden;
-
-    &__body {
-        @include flex-row(0, 0);
-        position: relative;
-        background-color: $eerie-black;
-    }
-
-	&__input {
-		all: unset;
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		box-sizing: border-box;
-		padding: 0.5rem;
-		overflow-wrap: break-word;
-	}
-
-	&__button {
-		padding: 0.5rem;
-		border-right: 1px solid $anthracite;
-		transition: color 0.25s;
-
-		&:hover {
-			cursor: pointer;
-			color: $premier-yellow;
-		}
 	}
 }
 
@@ -563,7 +596,7 @@ $red-theme--NEUTRAL: (
 
 
 .friendship {
-	@include flex-row(0, $gap-medium);
+	@include flex-row(0, $space-medium);
 	align-self: center;
 
 	&__button {
@@ -603,7 +636,7 @@ $red-theme--NEUTRAL: (
     background-color: map-get($grey-theme-1, neutral-bg);
     overflow: hidden;
     border-radius: 4px;
-    $outer-padding: $padding-medium;
+    $outer-padding: $space-medium;
     $self: &;
     
     &--tooltip {
@@ -620,7 +653,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__avatar {
-        padding: $padding-medium;
+        padding: $space-medium;
         background-color: map-get($grey-theme-1, neutral-bg);
         overflow: hidden;
         border-radius: 4px;
@@ -643,18 +676,18 @@ $red-theme--NEUTRAL: (
     }
 
     &__field {
-        @include flex-column(0, $gap-small);
+        @include flex-column(0, $space-small);
     }
 
     &__header {
-        @include flex-row($outer-padding, $gap-medium);
+        @include flex-row($outer-padding, $space-medium);
         align-items: end;
         justify-content: space-between;
         position: relative;
     }
 
     &__header-group {
-        @include flex-row(0, $gap-medium);
+        @include flex-row(0, $space-medium);
         align-items: center;
     }
 
@@ -673,7 +706,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__body {
-        @include flex-column($padding-medium, $gap-medium);
+        @include flex-column($space-medium, $space-medium);
         margin: $outer-padding;
         overflow: hidden;
         border-radius: 4px;
@@ -699,11 +732,11 @@ $red-theme--NEUTRAL: (
         height: 1px;
         width: 100%;
         background-color: $light-dark;
-        margin: $gap-medium 0;
+        margin: $space-medium 0;
     }
 
     &__info {
-        @include flex-row(0, $gap-small);
+        @include flex-row(0, $space-small);
     }
 
     &__label {
@@ -724,39 +757,39 @@ $red-theme--NEUTRAL: (
     }
 
     &__section {
-        @include flex-column(0, $gap-medium);
+        @include flex-column(0, $space-large);
     }
 
     &__navigation {
-        @include flex-row(0, $gap-large);
+        @include flex-row(0, $space-medium);
         border-bottom: 1px solid map-get($grey-theme-1, light-bg);
     }
 
     &__switch {
         font-size: $text-secondary-medium;
         font-weight: bold;
-        padding-bottom: $padding-large;
+        padding-bottom: $space-large;
         transition: border 0.2s, color 0.2s;
         cursor: pointer;
 
         &[data-state="inactive"] {
             color: $light-dark;
-            border-bottom: $padding-small solid transparent;
+            border-bottom: $space-small solid transparent;
         }
 
         &:hover {
             color: $light-light;
-            border-bottom: $padding-small solid $light-light;
+            border-bottom: $space-small solid $light-light;
         }
 
         &[data-state="active"] {
             color: $light-light;
-            border-bottom: $padding-small solid $light-light;
+            border-bottom: $space-small solid $light-light;
         }
     }
 
     &__button {
-        @include flex-row($padding-medium $padding-large, 0);
+        @include flex-row($space-medium $space-large, 0);
         font-size: $text-secondary-medium;
         transition: background-color 0.2s, color 0.2s;
         cursor: pointer;
@@ -824,17 +857,12 @@ $red-theme--NEUTRAL: (
 }
 
 .form {
-	@include flex-column($padding-large, $gap-large);
+	@include flex-column(0, $space-medium);
 	color: map-get($grey-theme-1, light-fg);
-    background-color: map-get($grey-theme-1, light-bg);
-	overflow: auto;
-    flex: 1;
-    max-width: 24rem;
     position: relative;
-    border-radius: $radius-small;
 
 	&__header {
-		@include flex-row(0, $gap-medium);
+		@include flex-row(0, $space-medium);
 		justify-content: space-between;
 	}
 
@@ -866,8 +894,8 @@ $red-theme--NEUTRAL: (
     }
 
     &__footer {
-        @include flex-row($padding-medium, $gap-large);
-        background-color: map-get($grey-theme-1, neutral-bg);
+        @include flex-row($space-medium, $space-medium);
+        background-color: map-get($grey-theme-1, dark-bg);
         align-items: center;
         justify-content: flex-end;
         margin-top: auto;
@@ -875,8 +903,8 @@ $red-theme--NEUTRAL: (
     }
 
 	&__submit {
-		@include flex-row($padding-medium $padding-large, 0);
-		font-size: $text-secondary-large;
+		@include flex-row($space-small $space-large, 0);
+		font-size: $text-primary-small;
         font-weight: bold;
 		border-radius: 4px;
 		transition: background-color 0.2s, color 0.2s;
@@ -902,18 +930,18 @@ $red-theme--NEUTRAL: (
 		}
 
         &--create {
-            color: map-get($green-theme-1, neutral-fg);
+            color: map-get($green-theme-1, dark-fg);
             background-color: map-get($green-theme-1, dark-bg);
         }
 
         &--create:hover {
             color: map-get($green-theme-1, light-fg);
-		    background-color: map-get($green-theme-1, light-bg);
+		    background-color: map-get($green-theme-1, neutral-bg);
 		}
 	}
 
     &__response {
-        @include flex-row($padding-medium, $gap-large);
+        @include flex-row($space-medium, $space-medium);
         justify-content: space-between;
         height: fit-content;
         border-radius: 4px;
@@ -937,6 +965,43 @@ $red-theme--NEUTRAL: (
             color: $light-light;
         }
     }
+
+    &__input {
+        @include flex-row($space-small, 0);
+        color: map-get($green-theme-1, neutral-fg);
+        background-color: map-get($grey-theme-1, dark-bg);
+        font-size: $text-secondary-large;
+        border-radius: $radius-small;
+        text-indent: $space-small;
+        flex-grow: 1;
+    }
+
+    &__section {
+        @include flex-row(0, $space-medium);
+        align-items: center;
+    }
+
+    &__field {
+        @include flex-column(0, $space-small);
+    }
+
+    &__messages {
+        @include flex-column($space-small, $space-small);
+    }
+
+    &__message {
+        @include flex-row($space-small, $space-medium);
+        align-items: center;
+        font-size: $text-secondary-small;
+
+        &--confirmation {
+            color: map-get($grey-theme-1, dark-fg);
+        }
+
+        &--error {
+            color: map-get($red-theme-1, light-bg);
+        }
+    }
 }
 
 .form-select {
@@ -957,7 +1022,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__option {
-        @include flex-row($padding-small, $gap-large);
+        @include flex-row($space-small, $space-medium);
         justify-content: space-between;
         align-items: center;
         position: relative;
@@ -992,12 +1057,12 @@ $red-theme--NEUTRAL: (
     input {
         width: 100%;
         box-sizing: border-box;
-        padding: $padding-small;
+        padding: $space-small;
         border-radius: 4px;
         font-size: $text-primary-medium;
         color: inherit;
         color-scheme: dark;
-        background-color: map-get($grey-theme-1, neutral-bg);
+        background-color: map-get($grey-theme-1, dark-bg);
     
         &:focus {
             background-color: map-get($grey-theme-1, dark-bg);
@@ -1006,7 +1071,7 @@ $red-theme--NEUTRAL: (
 }
 
 .channel-kind-select {
-    @include flex-column(0, $gap-small);
+    @include flex-column(0, $space-small);
     $self: &;
 
     &__option {
@@ -1014,8 +1079,8 @@ $red-theme--NEUTRAL: (
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-rows: 1fr 1fr;
-        padding: $padding-medium;
-        gap: 0 $gap-medium;
+        padding: $space-medium;
+        gap: 0 $space-medium;
         border-radius: 4px;
         align-items: center;
         overflow: hidden;
@@ -1080,7 +1145,7 @@ $red-theme--NEUTRAL: (
     
 .form-slider {
     transition: all 0.4s $custom-ease-in;
-    $padding: $padding-small;
+    $padding: $space-small;
     $height: 1.125rem;
     $width: 2.75rem;
     $self: &;
@@ -1131,10 +1196,10 @@ $red-theme--NEUTRAL: (
 }
 
 .permissions {
-    @include flex-row(0, $gap-medium);
+    @include flex-row(0, $space-medium);
 
     &__navigation {
-		@include flex-column($padding-medium, $gap-small);
+		@include flex-column($space-medium, $space-small);
         background-color: $charcoal-grey;
         border-radius: 4px;
         overflow: hidden;
@@ -1142,7 +1207,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__header {
-        @include flex-row($padding-small $padding-medium, $gap-medium);
+        @include flex-row($space-small $space-medium, $space-medium);
         align-items: center;
         justify-content: space-between;
     }
@@ -1162,7 +1227,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__role {
-        @include flex-row($padding-small $padding-medium, $gap-medium);
+        @include flex-row($space-small $space-medium, $space-medium);
         align-items: center;
         font-size: $text-secondary-large;
         transition: background-color 0.2s, color 0.2s;
@@ -1190,12 +1255,12 @@ $red-theme--NEUTRAL: (
     }
 
     &__role-color {
-        padding: $padding-small;
+        padding: $space-small;
         border-radius: 9999px;
     }
 
     &__config {
-		@include flex-column($padding-large, $gap-medium);
+		@include flex-column($space-large, $space-medium);
         background-color: $charcoal-grey;
         border-radius: 4px;
         overflow: hidden;
@@ -1206,7 +1271,7 @@ $red-theme--NEUTRAL: (
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-rows: auto auto;
-        gap: $gap-small;
+        gap: $space-small;
         align-items: center;
     }
 
@@ -1217,7 +1282,7 @@ $red-theme--NEUTRAL: (
     }
 
     &__choices {
-        @include flex-row(3px, $gap-small);
+        @include flex-row(3px, $space-small);
         grid-column: 3;
         background-color: $charcoal-grey;
         border-radius: 4px;
@@ -1227,7 +1292,7 @@ $red-theme--NEUTRAL: (
     &__option {
         transition: background-color 0.2s, color 0.2s;
         position: relative;
-        padding: $padding-small $padding-medium;
+        padding: $space-small $space-medium;
 
         input {
             position: absolute;
@@ -1298,8 +1363,8 @@ $red-theme--NEUTRAL: (
     }
 
     &__footer {
-        @include flex-row(0, $gap-large);
-        margin-top: $gap-large;
+        @include flex-row(0, $space-medium);
+        margin-top: $space-medium;
         align-items: center;
         justify-content: flex-end;
         flex-wrap: wrap;
@@ -1308,14 +1373,14 @@ $red-theme--NEUTRAL: (
 
 
 .field {
-    @include flex-column(0, $gap-small);
+    @include flex-column(0, $space-small);
 
     &:has(.field__error) .field__name  {
         color: $vermillion;
     }
 
     &__row {
-        @include flex-row(0, $gap-small);
+        @include flex-row(0, $space-small);
         justify-content: space-between;
         align-items: center;
     }
@@ -1378,7 +1443,7 @@ $red-theme--NEUTRAL: (
     background-color: $apollo-grey;
 
     &__forms {
-        @include flex-row($padding-large, 0);
+        @include flex-row($space-large, 0);
         justify-content: space-between;
         flex: 1;
     }
@@ -1393,13 +1458,13 @@ $red-theme--NEUTRAL: (
     }
 
 	&__navigation {
-		@include flex-column($padding-large, $gap-medium);
+		@include flex-column($space-large, $space-medium);
         background-color: $charcoal-grey;
 	}
 
 	&__button {
         @include ellipsis;
-		@include flex-row($padding-medium, $gap-medium);
+		@include flex-row($space-medium, $space-medium);
 		font-size: $text-secondary-large;
 		color: $light-dark;
 		border-radius: 4px;
@@ -1417,18 +1482,14 @@ $red-theme--NEUTRAL: (
 	}
 }
 
-
-.channels {
-    @include flex-column($padding-medium, $gap-small);
-}
-
 .channel {
     @include default-color-transition;
-	@include flex-row($padding-small $padding-medium, $gap-medium);
+	@include flex-row($space-small, $space-medium);
     $self: &;
     align-items: center;
     border-radius: $radius-small;
     cursor: pointer;
+    user-select: none;
 
     &__title {
         @include default-color-transition;
@@ -1436,7 +1497,7 @@ $red-theme--NEUTRAL: (
         color: map-get($grey-theme-1, dark-fg);
     }
 
-    &:hover {
+    &:hover, &--selected {
         background-color: map-get($grey-theme-1, light-bg);
 
         #{$self}__title {
@@ -1446,7 +1507,7 @@ $red-theme--NEUTRAL: (
 }
 
 .error {
-	@include flex-row($padding-medium, $gap-medium);
+	@include flex-row($space-medium, $space-medium);
 	background-color: $garnet;
 	color: $chalk-white;
 	align-items: center;
@@ -1466,13 +1527,13 @@ $red-theme--NEUTRAL: (
 }
 
 .menu {
-	@include flex-column($padding-small, 0);
+	@include flex-column($space-small, 0);
 	background-color: $apollo-grey;
 	overflow: hidden;
 	border-radius: 4px;
 
 	&__item {
-		@include flex-row($padding-medium $padding-large, $gap-large);
+		@include flex-row($space-medium $space-large, $space-medium);
 		justify-content: space-between;
 		align-items: center;
         white-space: nowrap;
@@ -1566,10 +1627,12 @@ $red-theme--NEUTRAL: (
     background-color: map-get($grey-theme-1, dark-bg);
 
     &__header {
-        @include flex-row($padding-medium $padding-large, $gap-large);
+        @include flex-row($space-medium $space-large, $space-medium);
         height: 30px;
         flex-shrink: 0;
         align-items: center;
+        position: relative;
+        background-color: inherit;
 
         &--groupchats {
             border-bottom: 1px solid map-get($grey-theme-1, light-bg);
@@ -1602,10 +1665,11 @@ $red-theme--NEUTRAL: (
     &__content {
         @include flex-column(0, 0);
         flex-grow: 1;
+        overflow: auto;
     }
 
     &__icon {
-        color: map-get($grey-theme-1, dark-fg);
+        color: map-get($grey-theme-1, neutral-fg);
 
         &--hoverable {
             &:hover {
@@ -1622,13 +1686,15 @@ $red-theme--NEUTRAL: (
 
     &__button {
         $self: &;
-        border-radius: $radius-small;
+        @include default-color-transition;
+        border-radius: $space-small;
         cursor: pointer;
         user-select: none;
+        align-items: center;
 
         &--header {
             @include default-color-transition;
-            @include flex-row($padding-small $padding-large, $gap-medium);
+            @include flex-row($space-small $space-large, $space-medium);
             color: map-get($grey-theme-1, neutral-fg);
             font-size: $text-secondary-large;
             font-weight: bold;
@@ -1643,12 +1709,104 @@ $red-theme--NEUTRAL: (
             }
         }
     }
+
+    &__backlogs {
+        @include flex-column(0, 0);
+        flex: 1 0 0;
+        overflow: overlay;
+    }
 }
 
+.backlog {
+    display: grid;
+    padding: $space-medium $space-large;
+    gap: $space-small $space-medium;
+    align-items: baseline;
+
+    &--message {
+        grid-template: min-content auto auto / auto auto auto 1fr;
+    }
+
+    &:hover {
+        background-color: map-get($grey-theme-1, neutral-bg);
+    }
+
+    &__avatar {
+        grid-row: 1 / 3;
+        align-self: flex-start;
+
+        .avatar {
+            border-radius: $radius-medium;
+            background-color: map-get($grey-theme-1, dark-bg);
+        }
+    }
+
+    &__username {
+        @include ellipsis;
+        grid-row: 1 / 2;
+        color: map-get($grey-theme-1, neutral-fg);
+        font-weight: bold;
+        font-size: $text-primary-medium;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__timestamp {
+        grid-row: 1 / 2;
+        color: map-get($grey-theme-1, dark-fg);
+        font-size: $text-secondary-small;
+        user-select: none;
+    }
+
+    &__content {
+        @include break-long-words;
+        grid-row: 2 / 3;
+        grid-column: 2 / -1;
+        color: map-get($grey-theme-1, light-fg);
+        font-size: $text-primary-small;
+    }
+
+    &__reactions {
+        grid-row: 3 / 4;
+    }
+}
+
+
+.chatbar {
+    @include flex-row($space-medium $space-large, $space-large);
+    align-items: center;
+    background-color: map-get($grey-theme-1, dark-bg);
+    margin: $space-large;
+    border-radius: $radius-medium;
+    overflow: hidden;
+
+    &__divider {
+        width: 1px;
+        align-self: stretch;
+        background-color: map-get($grey-theme-1, dark-fg);
+    }
+
+    &__input {
+        @include flex-row($space-small, 0);
+        flex: 1;
+        border: none;
+        outline: none;
+        resize: none;
+        background-color: transparent;
+        font-size: $text-primary-large;
+        color: map-get($grey-theme-1, light-fg);
+        font-family: inherit;
+        caret-color:map-get($grey-theme-1, light-fg);
+    }
+}
 
 .sidebar {
     @include flex-column(0, 0);
     $self: &;
+    flex-shrink: 0;
     
     &--groupchats {
         background-color: map-get($grey-theme-1, dark-bg);
@@ -1659,7 +1817,7 @@ $red-theme--NEUTRAL: (
         }
     
         &[data-state="open"] {
-            flex-basis: 180px;
+            flex-basis: 220px;
         }
     }
 
@@ -1674,8 +1832,9 @@ $red-theme--NEUTRAL: (
     }
 
     &--content {
-        background-color: map-get($grey-theme-1, neutral-bg);
         transition: flex-basis 0.4s $custom-ease-in;
+        background-color: map-get($grey-theme-1, neutral-bg);
+        border-left: 1px solid map-get($grey-theme-1, dark-bg);
 
         .sidebar__label {
             transition: opacity 0.4s;
@@ -1710,10 +1869,50 @@ $red-theme--NEUTRAL: (
         }
     }
 
+    &__section {
+        &--groupchats {
+            @include flex-column(0, $space-medium);
+        }
+
+        &--catalogue {
+            @include flex-column(0, $space-small);
+        }
+
+        &--category {
+            @include flex-column(0, 0);
+
+            .channel {
+                padding-left: $space-large;
+            }
+        }
+
+        &--channels {
+            @include flex-column(0, 1px);
+        }
+
+        &--users {
+            @include flex-column(0, $space-small);
+
+            &:not(:has(.user)) {
+                #{$self}__lead-in {
+                    display: none;
+                }
+            }
+        }
+
+        &--private-chats {
+            @include flex-column(0, $space-small);
+        }
+        
+        &--buttons {
+            @include flex-column(0, $space-small);
+        }
+    }
+
     &__divider {
         @include flex-row(0, 0);
         flex-shrink: 0;
-        border-bottom: 2px solid map-get($grey-theme-1, light-bg);
+        border-bottom: 1px solid map-get($grey-theme-1, light-bg);
     }
 
     &__pin {
@@ -1726,44 +1925,56 @@ $red-theme--NEUTRAL: (
 
     &__searchbar {
         @include ellipsis;
-        @include flex-row($padding-small, 0);
+        @include flex-row($space-small, 0);
         flex-grow: 1;
 
         &--main {
             background-color: map-get($grey-theme-1, dark-bg);
             color: map-get($grey-theme-1, dark-fg);
-            font-size: $text-secondary-small;
-            border-radius: $radius-medium;
-            text-indent: $padding-medium;
+            font-size: $text-secondary-large;
+            border-radius: $radius-small;
+            text-indent: $space-medium;
         }
     }
 
     &__body {
-        @include flex-column($padding-medium, $gap-small);
+        @include flex-column($space-medium, $space-medium);
         flex-grow: 1;
         overflow: auto;
     }
 
     &__footer {
-        @include flex-row($padding-medium, $gap-medium);
+        @include flex-row($space-medium, $space-medium);
     }
 
     &__lead-in {
         position: relative;
         display: grid;
         grid-template: auto / minmax(0, 1fr) minmax(0, auto);
-        padding: $padding-small;
-        gap: $gap-medium;
+        padding: $space-small;
+        gap: $space-medium;
         justify-content: space-between;
         align-items: center;
         user-select: none;
     }
 
     &__label {
+        @include flex-row(0, $space-small);
         @include ellipsis;
+        align-items: center;
         color: map-get($grey-theme-1, dark-fg);
         font-size: $text-secondary-medium;
         font-weight: bold;
+        width: fit-content;
+
+        &--hoverable {
+            @include default-color-transition;
+            cursor: pointer;
+            
+            &:hover {
+                color: map-get($grey-theme-1, neutral-fg);
+            }
+        }
     }
 
     &__add {
@@ -1780,47 +1991,111 @@ $red-theme--NEUTRAL: (
         justify-self: center;
     }
 
-    &__collapsable-wrapper {
-        position: relative;
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
+    &__button {
+        $self: &;
+        @include default-color-transition;
+        display: grid;
+        grid-template: auto / auto minmax(0, $space-large) minmax(0, 1fr);
+        border-radius: $space-small;
+        cursor: pointer;
+        user-select: none;
+        align-items: center;
+        color: map-get($grey-theme-1, dark-fg);
+        padding: $space-small $space-large;
+        font-size: $text-secondary-large;
+
+        &:hover {
+            border-color: map-get($grey-theme-1, neutral-fg);
+            background-color: map-get($grey-theme-1, light-bg);
+            color: map-get($grey-theme-1, light-fg);
+        }
+        
+        .sidebar__button-body {
+            @include ellipsis;
+            grid-column: 3 / 4;
+        }
+    }
+}
+
+
+.sidebar-menu {
+    @include absolute-boundary(0, 0, 0, 0);
+    padding: inherit;
+    background-color: inherit;
+    user-select: none;
+
+    &__trigger {
+        @include absolute-boundary(0, 0, 0, 0);
+        @include flex-row(0, 0);
+        @include default-color-transition;
+        justify-content: space-between;
+        align-items: center;
+        padding: inherit;
+        cursor: pointer;
+
+        &:hover {
+            background-color: map-get($grey-theme-1, light-bg);
+        }
     }
 
-    &__collapsable-content {
-        @include absolute-boundary(0, 0, 0, 0);
+    &__content {
+        @include flex-column($space-small, $space-small);
+        @include absolute-boundary(100%, 0, auto, 0);
+        margin: $space-small;
+        border-radius: $radius-small;
+        overflow: hidden;
+        background-color: map-get($grey-theme-1, dark-bg);
+        z-index: 1;
+        border: 1px solid map-get($grey-theme-1, light-bg);
+    }
+
+    &__button {
+        @include default-color-transition;
+        @include flex-row($space-small $space-medium, $space-medium);
+        align-items: center;
+        cursor: pointer;
+        color: map-get($grey-theme-1, dark-fg);
+        font-size: $text-secondary-large;
+        border-radius: $radius-small;
+    
+        &:hover {
+            background-color: map-get($grey-theme-1, light-bg);
+            color: map-get($grey-theme-1, light-fg);
+        }
+    }
+
+    &__divider {
+        height: 1px;
+        background-color: map-get($grey-theme-1, light-bg);
     }
 }
 
 .groupchat {
-    display: grid;
-    grid-template: auto / auto minmax(0, $gap-medium) minmax(0, 1fr);
     $self: &;
+    transition: border-color 0.2s;
+    display: grid;
+    grid-template: auto / auto minmax(0, $space-small) minmax(0, $space-large) minmax(0, 1fr);
+    background-color: map-get($grey-theme-1, neutral-bg);
+    align-items: center;
     user-select: none;
     cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: $radius-medium;
 
     &__avatar {
-        border: 2px solid transparent;
-        box-sizing: border-box;
-        padding: 3px;
-        border-radius: 33%;
-        transition: border-color 0.2s;
+        @include flex-row(0, 0);
 
         .avatar {
             @include default-color-transition;
-            border-radius: 33%;
-            background-color: map-get($grey-theme-1, neutral-bg);
             color: map-get($grey-theme-1, dark-fg);
         }
     }
 
     &:hover, &--selected {
-        #{$self}__avatar {
-            border-color: map-get($grey-theme-1, light-bg);
-        }
-        
+        border-color: map-get($grey-theme-1, light-fg);
+        background-color: map-get($grey-theme-1, light-bg);
+
         .avatar {
-            background-color: map-get($grey-theme-1, light-bg);
             color: map-get($grey-theme-1, light-fg);
         }
 
@@ -1829,49 +2104,36 @@ $red-theme--NEUTRAL: (
         }
     }
 
-    &__body {
-        @include flex-column(0, $gap-small);
-        justify-content: center;
-        grid-column: 3;
-    }
-
     &__title {
+        grid-column: 4 / 5;
         @include default-color-transition;
         @include ellipsis;
         color: inherit;
-        font-size: $text-secondary-large;
-        font-weight: bold;
+        font-size: $text-primary-small;
         color: map-get($grey-theme-1, neutral-fg);
     }
 
-    &__subtitle {
-        @include default-color-transition;
-        @include ellipsis;
-        @include flex-row(0, $gap-medium);
-        color: inherit;
-        font-size: $text-secondary-small;
-        color: map-get($grey-theme-1, dark-fg);
+    &__divider { 
+        grid-column: 2 / 3;
+        align-self: stretch;        
+        background-color: map-get($grey-theme-1, dark-bg);
     }
 }
 
 .user {
     @include default-color-transition;
-    position: relative;
+    @include base-button;
     display: grid;
-    grid-template: auto auto / auto minmax(0, $padding-medium) minmax(0, 1fr);
-    padding: $padding-small;
+    grid-template: auto / auto minmax(0, $space-medium) minmax(0, 1fr) minmax(0, $space-medium) minmax(0, auto);
+    padding: $space-small;
     color: map-get($grey-theme-1, dark-fg);
-    user-select: none;
-    border-radius: $radius-small;
-    cursor: pointer;    
+    align-items: center;
 
     &:hover {
         background-color: map-get($grey-theme-1, light-bg);
     }
 
     &__avatar {
-        grid-row: 1 / -1;
-
         .avatar {
             background-color: map-get($grey-theme-1, dark-bg);
             border-radius: 9999px;
@@ -1879,22 +2141,30 @@ $red-theme--NEUTRAL: (
         }
     }
 
+    &__body {
+        @include flex-column(0, 0);
+        grid-column: 3 / 4;
+    }
+
+    &__icons {
+        @include flex-row(0, $space-medium);
+        grid-column: 5 / 6;
+    }
+
     &__title {
         @include ellipsis;
         font-size: $text-secondary-medium;
         font-weight: bold;
-        grid-column: 3 / -1
     }
 
     &__subtitle {
         @include ellipsis;
         font-size: $text-secondary-small;
-        grid-column: 3 / -1
     }
 }
 
 .user-container {
-    @include flex-row($padding-medium, $gap-medium);
+    @include flex-row($space-medium, $space-medium);
     background-color: map-get($grey-theme-1, dark-bg);
 
     align-items: center;
@@ -1910,7 +2180,7 @@ $red-theme--NEUTRAL: (
         grid-template: auto auto / auto minmax(0, 1fr);
         align-content: center;
         justify-content: start;
-        gap: 0 $gap-medium;
+        gap: 0 $space-medium;
     }
 
     &__avatar {
@@ -1932,7 +2202,7 @@ $red-theme--NEUTRAL: (
 }
 
 .reaction {
-    @include flex-row($padding-small, $gap-medium);
+    @include flex-row($space-small, $space-medium);
     align-items: center;
     border-radius: 4px;
     background-color: $charcoal-grey;
@@ -1964,28 +2234,8 @@ $red-theme--NEUTRAL: (
     }
 }
 
-.user-group {
-    @include flex-column(0, 0);
-
-    &:has(.user-group__content:empty) {
-        .user-group__index {
-            display: none;
-        }
-    }
-
-    &__index {
-        color: $light-light;
-        font-size: $text-secondary-medium;
-        padding: $gap-medium;
-    }
-
-    &__content {
-        @include flex-column(0, 0);
-    }
-}
-
 .role {
-    @include flex-row($padding-small, $gap-small);
+    @include flex-row($space-small, $space-small);
     background-color: $black-olive;
     border-radius: 4px;
     align-items: center;
@@ -2014,7 +2264,7 @@ $red-theme--NEUTRAL: (
     align-items: center;
 
     &__body {
-        @include flex-column(0, $gap-large);
+        @include flex-column(0, $space-medium);
         max-width: 1080px;
         height: fit-content;
         flex-grow: 1;
@@ -2028,14 +2278,14 @@ $red-theme--NEUTRAL: (
 	}
 
     &__navigation {
-        @include flex-row($padding-large, $gap-large);
+        @include flex-row($space-large, $space-medium);
         align-items: center;
         justify-content: space-between;
         width: 1080px;
     }
 
     &__introduction {
-        @include flex-column($padding-large, $gap-medium);
+        @include flex-column($space-large, $space-medium);
         text-align: center;
     }
 
@@ -2053,18 +2303,18 @@ $red-theme--NEUTRAL: (
 		flex-grow: 1;
         background-color: map-get($grey-theme-1, neutral-bg);
         width: 100%;
-        border: $padding-small solid map-get($grey-theme-1, dark-bg);
+        border: $space-small solid map-get($grey-theme-1, dark-bg);
         box-sizing: border-box;
     }
 
     &__sidebar {
-        @include flex-column($padding-large, $gap-medium);
+        @include flex-column($space-large, $space-medium);
         background-color: map-get($grey-theme-1, dark-bg);
     }
 
     &__switch {
         @include ellipsis;
-		@include flex-row($padding-medium, $gap-medium);
+		@include flex-row($space-medium, $space-medium);
 		font-size: $text-secondary-large;
 		border-radius: 4px;
 		transition: color 0.2s, background-color 0.2s;
@@ -2096,7 +2346,7 @@ $red-theme--NEUTRAL: (
     }
 
 	&__footer {
-        @include flex-row($padding-large, $gap-large);
+        @include flex-row($space-large, $space-medium);
         justify-content: space-around;
         align-items: center;
     }
@@ -2120,12 +2370,12 @@ $red-theme--NEUTRAL: (
 
         &--small {
             font-size: $text-primary-medium;
-            padding: $padding-medium;
+            padding: $space-medium;
         }
 
         &--large {
             font-size: $text-special-large;
-            padding: $padding-large;
+            padding: $space-large;
         }
     }
 }

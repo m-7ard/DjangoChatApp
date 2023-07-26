@@ -1,139 +1,19 @@
-<li class="backlog"
-data-model="{{ object|classname }}" 
-data-app="{{ object|app_name }}" 
-data-pk="{{ object.pk }}" 
-data-context='
-{
-    "objects": {
-        "object": {{ object|object_to_json }},
-        "room": {{ room|object_to_json }}
-    },
-    "variables": {
-        "emoteCommand": "react"
-    }
-}'>
+<div class="backlog backlog--message" data-pk="{{ backlog.pk }}">
     <div class="backlog__avatar">
-        <div class="avatar avatar--small has-shadow">
-            <img src="{{ object.user.image.url }}" alt="">
+        <div class="avatar avatar--medium">
+            <img src="" alt="">
         </div>
     </div>
-    {% comment %} 
-    
-    
-    *header
-    
-    
-    {% endcomment %}
-    <div class="backlog__header">
-        <div class="backlog__user tooltip__trigger"
-        data-target="#member-profile" 
-        data-positioning='{"top": "100%", "left": "0px"}'
-        data-pk="{{ member_pk }}"
-        >
-            {{ object.member.display_name }}
-        </div>
-        <div class="backlog__timestamp">
-            {{ object.display_date }}
-        </div>
+    <div class="backlog__username">
+        {{ backlog.message.user.username }}
     </div>
-    {% comment %} 
-    
-    
-    *body
-    
-    
-    {% endcomment %}
-    <div class="backlog__body">
-        <div class="backlog__content">{{ object.content|linebreaksbr|convert_reactions:room.pk }}</div>
+    <div class="backlog__timestamp">
+        {{ backlog.timestamp }}
     </div>
-    {% comment %} 
-    
-    
-    *reactions
-    
-    
-    {% endcomment %}
-    {% spaceless %}
+    <div class="backlog__content">
+        {{ backlog.message.content }}
+    </div>
     <div class="backlog__reactions">
-        {% for reaction in object.reactions.all %}
-        <span class="reaction {% if user in reaction.users.all %} reaction--selected {% endif %}"
-        data-emote-pk="{{ reaction.emote.pk }}"
-        data-command="react">
-            <img src="{{ reaction.emote.image.url }}" alt="">
-            <span class="reaction__counter">
-                {{ reaction.users.all.count }}
-            </span>
-        </span>
-        {% endfor %}
+
     </div>
-    {% endspaceless %}
-    {% comment %} 
-    
-    
-    *actions
-    
-    
-    {% endcomment %}
-    <div class="backlog__actions has-shadow">
-		<span class="backlog__action tooltip__trigger" 
-		data-target="emotes" 
-		data-positioning='{"top": "0px", "right": "-100%"}' 
-        data-kind="backlog"
-		>
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">								
-					add_reaction
-				</i>
-			</div>
-		</span>
-		<span class="backlog__action" data-command="reply-message">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">								
-					comment
-				</i>
-			</div>
-		</span>
-		{% if object.user == user %}
-		<span class="backlog__action" data-command="edit-message">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">								
-					edit
-				</i>
-			</div>
-		</span>
-		{% endif %}
-		<span class="dropdown">
-			<div class="backlog__action dropdown__trigger">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">								
-						menu
-					</i>
-				</div>
-			</div>
-            <div class="dropdown__content dropdown__content--hidden">
-                <ul class="menu has-shadow" data-command="delete-backlog">
-                    <li class="menu__item">
-                        <span>
-                            Delete
-                        </span>
-                        <span class="icon icon--small">
-                            <i class="material-symbols-outlined">								
-                                delete
-                            </i>
-                        </span>
-                    </li>
-                    <li class="menu__item" data-command="link-message">
-                        <span>
-                            Message Link
-                        </span>
-                        <span class="icon icon--small">
-                            <i class="material-symbols-outlined">								
-                                link
-                            </i>
-                        </span>
-                    </li>
-                </ul>
-            </div>
-		</span>
-    </div>
-</li>
+</div>

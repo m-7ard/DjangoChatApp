@@ -34,22 +34,6 @@ def convert_reactions(text, room_pk):
     return Template(re.sub(pattern, replace_with, text)).render(Context({}))
 """
 
-@register.filter(name="get_friendship_friend")
-def get_friendship_friend(user, friendship):
-    if user == friendship.receiver:
-        return friendship.sender
-    elif user == friendship.sender:
-        return  friendship.receiver
-    
-@register.filter(name="attribute_modifier")
-def attribute_modifier(obj, json_string):
-    parsed_json = json.loads(json_string)
-    attribute, success_string = parsed_json['attribute'], parsed_json['on_success']
-    if getattr(obj, attribute, None):
-        return success_string
-    else:
-        return ''
-
 
 @register.filter(name="printInConsole")
 def printInConsole(self):

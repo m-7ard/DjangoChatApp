@@ -115,4 +115,19 @@ const chatSocketReceiveHandlers = {
     
     'response': () => { console.log('response exists') },
 
+    'create_message': ({html}) => {
+        backlogs.appendChild(parseHTML(html));
+    },
+    'create_friendship': ({html, kind}) => {
+        let section;
+        if (kind == 'incoming') {
+            section = document.getElementById('incoming-pending-friendships');
+        }
+        else if (kind == 'outgoing') {
+            section = document.getElementById('outgoing-pending-friendships');
+        }
+        section.appendChild(parseHTML(html));
+        let counter = section.querySelector('[data-role="counter"]');
+        counter.innerText = parseInt(counter.innerText) + 1;
+    },
 };

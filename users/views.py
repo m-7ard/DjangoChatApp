@@ -37,6 +37,7 @@ class SignupView(CreateView):
             form.add_error('username', f'All IDs for username {form} are taken, please choose a different username.')
             return self.form_invalid(form)
         
+        user.username_id = free_ids.pop()
         user.save()
         return JsonResponse({'status': 200, 'redirect': reverse('frontpage')})
 
@@ -65,8 +66,8 @@ class SigninView(LoginView):
         return JsonResponse({'status': 200, 'redirect': reverse('frontpage')})
 
     def form_invalid(self, form):
-        print(form.errors.get_json_data())
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data(), 'message': 'Could not sign in'})
+    
     
 class SignoutView(LogoutView):
     success_url = reverse_lazy('core:frontpage')

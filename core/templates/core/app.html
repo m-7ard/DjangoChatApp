@@ -6,44 +6,46 @@
 <div class="app">
     <div class="sidebar sidebar--groupchats" data-state="closed" id="groupchats">
         <div class="sidebar__body">
-            <a class="groupchat {% if request.get_full_path == '/rooms/dashboard/' %} groupchat--selected {% endif %}" href="{% url 'dashboard' %}">
-                <div class="groupchat__avatar">
-                    <div class="avatar avatar--medium">
-                        <div class="icon icon--medium">
+            <div class="sidebar__section sidebar__section--groupchats">
+                <a class="groupchat {% if request.get_full_path == '/rooms/dashboard/' %} groupchat--selected {% endif %}" href="{% url 'dashboard' %}">
+                    <div class="groupchat__avatar">
+                        <div class="avatar avatar--medium">
                             <i class="material-symbols-outlined">
                                 supervisor_account
                             </i>
                         </div>
                     </div>
-                </div>
-                <div class="groupchat__body">
-                    <div class="groupchat__title">
-                        To Dashboard
+                    <div class="groupchat__divider">
+                
                     </div>
+                    <div class="groupchat__title">
+                        Dashboard
+                    </div>
+                </a>
+                <div class="sidebar__divider">
+            
                 </div>
-            </a>
-            <div class="sidebar__divider">
-        
-            </div>
-            {% for groupchat_membership in user.group_chat_memberships.all %}
-                {% with local_groupchat=groupchat_membership.chat %}
-                    {% include './elements/groupchat.html' %}
-                {% endwith %}
-            {% endfor %}
-            <div class="sidebar__divider" id="insert-groupchat">
+                {% for groupchat_membership in user.group_chat_memberships.all %}
+                    {% with local_groupchat=groupchat_membership.chat %}
+                        {% include './elements/groupchat.html' %}
+                    {% endwith %}
+                {% endfor %}
+                <div class="sidebar__divider" id="insert-groupchat">
 
-            </div>
-            <div class="groupchat" data-command="get-form" data-name="create-group-chat">
-                <div class="groupchat__avatar">
-                    <div class="avatar avatar--medium">
-                        <i class="material-symbols-outlined">
-                            add
-                        </i>
-                    </div>
                 </div>
-                <div class="groupchat__body">
+                <div class="groupchat" data-command="get-form" data-name="create-group-chat">
+                    <div class="groupchat__avatar">
+                        <div class="avatar avatar--medium">
+                            <i class="material-symbols-outlined">
+                                add
+                            </i>
+                        </div>
+                    </div>
+                    <div class="groupchat__divider">
+                
+                    </div>
                     <div class="groupchat__title">
-                        New Groupchat
+                        New Group Chat
                     </div>
                 </div>
             </div>
@@ -77,7 +79,7 @@
                     </i>
                 </div>
             </div>
-            <div class="app__icon app__icon--hoverable">
+            <div class="app__icon app__hoverable-element">
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">
                         settings
@@ -89,21 +91,21 @@
     <div class="app__main">
         <div class="app__header app__header--main">
             {% block main-header %}{% endblock %}
-            <div class="sidebar__pin app__icon app__icon--hoverable right" data-command="toggle-sidebar" data-target="groupchats" data-state="closed">
+            <div class="sidebar__pin app__icon app__hoverable-element right" data-command="toggle-sidebar" data-target="groupchats" data-state="closed">
                 <div class="icon icon--medium icon--hoverable">
                     <i class="material-symbols-outlined">
                         last_page
                     </i>
                 </div>
             </div>
-            <div class="sidebar__pin app__icon app__icon--hoverable">
+            <div class="sidebar__pin app__icon app__hoverable-element">
                 <div class="icon icon--medium icon--hoverable">
                     <i class="material-symbols-outlined">
                         inbox
                     </i>
                 </div>
             </div>
-            <div class="sidebar__pin app__icon app__icon--hoverable" data-command="toggle-sidebar" data-target="main-content-sidebar" data-state="open">
+            <div class="sidebar__pin app__icon app__hoverable-element" data-command="toggle-sidebar" data-target="main-content-sidebar" data-state="open">
                 <div class="icon icon--medium icon--hoverable">
                     <i class="material-symbols-outlined">
                         first_page

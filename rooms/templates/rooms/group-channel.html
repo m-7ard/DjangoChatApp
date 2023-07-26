@@ -1,0 +1,33 @@
+{% extends "rooms/group-chat.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ group_channel.pk|json_script:"group-channel-pk" }}
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src='{% static "js/backlogs.js" %}'></script>
+{% endblock %}
+
+{% block main-header %}
+    <div class="app__icon">
+        <div class="icon icon--medium">
+            <i class="material-symbols-outlined">
+                sticky_note_2
+            </i>
+        </div>
+    </div>
+    <div class="app__title">
+        {{ group_channel.name }}
+    </div>
+{% endblock %}
+
+{% block main-content %}
+    <div class="app__backlogs" id="backlogs">
+        {% for backlog in group_channel.backlog_group.backlogs.all %}
+            {% include "./elements/message.html" %}
+        {% endfor %}
+    </div>
+    {% include "../commons/widgets/chatbar.html" %}
+{% endblock %}

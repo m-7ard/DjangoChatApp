@@ -4,11 +4,12 @@
             <img src="" alt="">
         </div>
     </div>
-    <div class="user__title">
-        Admin
+    <div class="user__body">
+        <div class="user__title">
+            {{ local_user.username }}
+        </div>
+        <div class="user__subtitle">
+            {{ user.status }}
+        </div>
     </div>
-    <div class="user__subtitle">
-        online
-    </div>
-
 </div>

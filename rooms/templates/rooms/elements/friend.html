@@ -1,0 +1,48 @@
+<div class="user" id="friend-{{ friend.pk }}">
+    <div class="user__avatar">
+        <div class="avatar avatar--small">
+            <img src="" alt="">
+        </div>
+    </div>
+    <div class="user__body">
+        <div class="user__title">
+            {% firstof friend.username '[Deleted User]' %}
+        </div>
+        <div class="user__subtitle">
+            {{ friend.status }}
+        </div>
+    </div>
+    {% if friendship.status == 'pending' and friend == friendship.receiver %}
+        <div class="user__icons">
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        cancel
+                    </i>
+                </div>
+            </div>
+        </div>
+    {% elif friendship.status == 'pending' and friend == friendship.sender %}
+    <!--
+
+        todo: implement delete friendship
+
+    -->
+        <div class="user__icons">
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        check_circle
+                    </i>
+                </div>
+            </div>
+            <div class="app__icon app__icon--hoverable">
+                <div class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        cancel
+                    </i>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>

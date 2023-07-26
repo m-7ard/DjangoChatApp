@@ -133,11 +133,10 @@ const commandHandlers = {
             kwargs: trigger.dataset.kwargs,
             query: trigger.dataset.query,
         });
-        let form = parseHTML(formString);
         let layer = quickCreateElement('div', {
             parent: document.body,
             classList: ['layer', 'layer--form'],
-            innerHTML: form.outerHTML,
+            innerHTML: formString,
             eventListeners: {
                 'submit': processForm,
             }

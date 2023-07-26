@@ -10,14 +10,17 @@ from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.template import Template, Context
 from django.http import HttpResponse
-from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
-from django.db.models import Q
+from django.template.loader import render_to_string
 
 from .models import (
-    Backlog
+    Backlog,
+    GroupChat,
+    GroupChannel,
+    Message,
 )
 from users.models import Friendship, CustomUser
+from utils import get_object_or_none
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -30,7 +33,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def receive(self, text_data=None, bytes_data=None):
-        pass
+        data = json.loads(text_data)
+        print('received: ', data)
+        handler = getattr(self, data['action'])
+        await handler(**data)
     
     async def disconnect(self, close_code):
         await self.close()
@@ -39,12 +45,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
 
-    async def async_db_operation(self, fn):
-        @database_sync_to_async
-        def wrapper():
-            return fn()
+    @database_sync_to_async
+    def async_db_operation(self, fn):
+        return fn()
+    
+
+class GroupChatConsumer(ChatConsumer):
+    async def connect(self):
+        group_chat_pk = self.scope["url_route"]['kwargs'].get('group_chat_pk')
+        group_channel_pk = self.scope["url_route"]['kwargs'].get('group_channel_pk')
+        self.group_chat = await self.async_db_operation(lambda: get_object_or_none(GroupChat, pk=group_chat_pk))
+        self.group_channel = await self.async_db_operation(lambda: get_object_or_none(GroupChannel, pk=group_channel_pk))
+        await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
+
+        await super().connect()
+
+    async def create_message(self, content, **kwargs):
+        if not content:
+            return
         
-        return wrapper
+        backlog = await self.async_db_operation(lambda: Backlog.objects.create(kind='message', group=self.group_channel.backlog_group))
+        message = await self.async_db_operation(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))
+        html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
+
+        await self.channel_layer.group_send(
+            f'group_channel_{self.group_channel.pk}', {
+                'type': 'send_to_client',
+                'html': html,
+                **kwargs
+            }
+        )
+
+
 
 
 """

@@ -24,12 +24,12 @@ function positionFixedContainer(element, reference, positioning) {
 		element.style.left = '';
 	};
 	if (positioning.right != undefined) {
-		element.style.right = `calc(${document.body.clientWidth - referenceDimensions.right}px - calc(${positioning.right}))`;
+		element.style.right = `calc(${document.body.clientWidth - referenceDimensions.right}px + calc(${positioning.right}))`;
 	} else {
 		element.style.right = '';
 	};
 	if (positioning.bottom != undefined) {
-		element.style.bottom = `calc(${document.body.clientHeight - referenceDimensions.bottom}px - calc(${positioning.bottom}))`;
+		element.style.bottom = `calc(${document.body.clientHeight - referenceDimensions.bottom}px + calc(${positioning.bottom}))`;
 	} else {
 		element.style.bottom = '';
 	};
@@ -120,66 +120,9 @@ async function processForm(event) {
     });
     let response = await request.json();
     // Remove old errors
-    form.querySelectorAll('.field__error')?.forEach((error) => error.remove());
-    // Remove old response
-    form.querySelector('.form__response')?.remove();
-    let responseMessage;
-    if (response.redirect) {
-        window.location.replace(response.redirect);
-    }
+    form.querySelectorAll('.field__message')?.forEach((error) => error.remove());
 
-    if (response.status == 200) {
-        // Success
 
-        responseMessage = quickCreateElement('div', {
-            classList: ['form__response', 'form__response--success'],
-            innerHTML: `
-                <div>
-                ${response.message || 'Form was saved successfully'}
-                </div>
-                <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
-                    <i class="material-symbols-outlined">
-                        close
-                    </i>
-                </div>
-            `,
-        });
-    }
-    else if (response.status == 400) {
-        // Error
-
-        responseMessage = quickCreateElement('div', {
-            classList: ['form__response', 'form__response--error'],
-            innerHTML: `
-                <div>
-                    ${response.message || 'Form could not be saved'}
-                </div>
-                <div class="icon icon--small icon--hoverable" data-command="remove-closest" data-target=".form__response">
-                    <i class="material-symbols-outlined">
-                        close
-                    </i>
-                </div>
-            `,
-        });
-        Object.entries(response.errors).forEach(([fieldName, errorList]) => {
-            let field = form.querySelector(`[data-name="${fieldName}"]`);
-            errorList.forEach((error) => {
-                let {code, message} = error;
-                quickCreateElement('div', {
-                    classList: ['field__error'],
-                    innerHTML: message,
-                    parent: field
-                });
-            });
-        });
-    };
-    form.prepend(responseMessage);
-}
-
-function assignSoleClass({className, container, target}) {
-    let otherElements = container.querySelector(className);
-    otherElements.forEach((element) => element.classList.remove(className));
-    target.classList.add(className);
 }
 
 async function getTemplate({templateName, context}) {

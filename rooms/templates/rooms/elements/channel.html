@@ -1,8 +1,8 @@
-<a class="channel">
+<a class="channel {% if channel == group_channel %} channel--selected {% endif %}" href="{% url 'group-channel' group_chat_pk=channel.chat.pk group_channel_pk=channel.pk %}">
     <div class="app__icon">
         <div class="icon icon--small">
             <i class="material-symbols-outlined">
-                format_paragraph
+                sticky_note_2
             </i>
         </div>
     </div>

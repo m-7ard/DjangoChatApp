@@ -2,7 +2,7 @@ from itertools import chain
 from datetime import datetime
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.models import Permission
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -38,7 +38,7 @@ class GroupChat(Chat):
         super().save(*args, **kwargs)
 
     def channels_and_categories(self):
-        return sorted(chain(self.channels.all().filter(category=None), self.categories.all()), key=lambda obj: obj.relative_order)
+        return chain(self.categories.all(), self.channels.all().filter(category=None))
 
 
 class PrivateChat(Chat):
@@ -67,12 +67,11 @@ class PrivateChatMembership(Membership):
 class Category(models.Model):
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='categories')
-    relative_order = models.PositiveIntegerField()
 
 
 class Channel(models.Model):    
     date_created = models.DateTimeField(auto_now_add=True)
-    pinned_messages = models.ManyToManyField('Message')
+    pinned_messages = models.ManyToManyField('Message', blank=True)
 
     class Meta:
         abstract = True
@@ -93,21 +92,18 @@ class PrivateChannel(Channel):
 
 class GroupChannel(Channel):
     name = models.CharField(max_length=30)
-    relative_order = models.PositiveIntegerField(validators=[MaxValueValidator(16), MinValueValidator(1)])
+    description = models.CharField(max_length=1024, blank=True)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='channels', null=True)
 
-    class Meta:
-        ordering = ["-relative_order"]
-
     def save(self, *args, **kwargs):
         creating = self._state.adding
-        
+
         if creating:
             super().save(*args, **kwargs)
             BacklogGroup.objects.create(kind='group_channel', group_channel=self)
-
-        super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
 
 class BacklogGroup(models.Model):
@@ -136,10 +132,14 @@ class Backlog(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='backlogs', null=True)
 
+    def timestamp(self):
+        return self.date_created.strftime("%H:%M:%S")
+
 
 class Message(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
+    content = models.CharField(max_length=1024)
 
 
 class Log(models.Model):

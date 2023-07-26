@@ -1,10 +1,11 @@
 import os
 import json
 from itertools import chain
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from pathlib import Path
 
 from django import http
+from django.db import models
 from django.forms.models import BaseModelForm
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
@@ -16,24 +17,18 @@ from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from users.models import CustomUser
+from users.models import CustomUser, Friend, Friendship
 from core.models import News
 from .models import (
     GroupChat,
     GroupChatMembership,
+    GroupChannel,
     Category,
     Channel,
     Role,
 )
-from .forms import (
-    ChannelCreateForm,
-    ChannelUpdateForm,
-
-    ChannelDeleteForm,
-
-    GroupChatCreateForm,
-)
-
+from . import forms
+from utils import get_object_or_none
 
 channel_layer = get_channel_layer()
 
@@ -43,7 +38,7 @@ class DashboardView(TemplateView):
 
 
 class CreateGroupChat(CreateView):
-    form_class = GroupChatCreateForm
+    form_class = forms.GroupChatCreateForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
     def get(self, *args, **kwargs):
@@ -80,8 +75,125 @@ class CreateGroupChat(CreateView):
 class GroupChatDetailView(DetailView):
     model = GroupChat
     template_name = 'rooms/group-chat.html'
-    context_object_name = 'groupchat'
+    context_object_name = 'group_chat'
 
+
+class GroupChannelCreateView(CreateView):
+    form_class = forms.GroupChannelCreateForm
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get(self, *args, **kwargs):
+        self.object = None
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Channel',
+            'fields': self.form_class,
+            'url': self.request.path,
+            'type': 'create'
+        }
+
+        return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+    def form_valid(self, form):
+        channel = form.save(commit=False)
+        channel.chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        channel.category = Category.objects.filter(pk=self.kwargs.get('category_pk')).first()
+        channel.save()
+
+        success_url = reverse('group-channel', kwargs={'group_chat_pk': channel.chat.pk, 'group_channel_pk': channel.pk})  
+        return JsonResponse({'status': 400, 'redirect': success_url})
+
+
+class GroupChannelDetailView(DetailView):
+    model = GroupChannel
+    template_name = 'rooms/group-channel.html'
+    context_object_name = 'group_channel'
+    pk_url_kwarg = 'group_channel_pk'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_chat'] = self.object.chat
+        return context
+
+
+class CategoryCreateView(CreateView):
+    form_class = forms.CategoryCreateForm
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get(self, *args, **kwargs):
+        self.object = None
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Category',
+            'fields': self.form_class,
+            'url': self.request.path,
+            'type': 'create'
+        }
+
+        return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+    def form_valid(self, form):
+        category = form.save(commit=False)
+        category.chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        category.save()
+
+        return JsonResponse({'status': 400, 'redirect': self.request.META.get('HTTP_REFERER')})
+
+
+class FriendshipFormView(FormView):
+    form_class = forms.FriendForm
+    template_name = 'rooms/tooltips/add-friend.html'
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        username_id = form.cleaned_data['username_id']
+        full_username = f'{username}#{str(username_id).zfill(2)}'
+        receiver = get_object_or_none(CustomUser, username=username, username_id=username_id)
+        sender = self.request.user
+
+        if not receiver:
+            form.add_error(None, f'User {full_username} does not exist.')
+            return self.form_invalid(form)
+        
+        friendship = sender.friendships().intersection(receiver.friendships()).first()
+
+        if friendship:
+            status = friendship.status
+            if status == 'pending':
+                form.add_error(None, f'Already sent Friend Request to {full_username}')
+            elif status == 'accepted':
+                form.add_error(None, f'Already Friends with {full_username}')
+                
+            return self.form_invalid(form)
+        
+        new_friendship = Friendship.objects.create(status='pending', sender=sender, receiver=receiver)
+        sender_friend_profile = Friend.objects.create(user=sender, friendship=new_friendship)
+        receiver_friend_profile = Friend.objects.create(user=receiver, friendship=new_friendship)
+
+        async_to_sync(channel_layer.group_send)(f'user_{sender.pk}', {
+            'type': 'send_to_client',
+            'action': 'create_friendship',
+            'kind': 'outgoing',
+            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender, 'friendship': new_friendship})
+        })
+
+        async_to_sync(channel_layer.group_send)(f'user_{receiver.pk}', {
+            'type': 'send_to_client',
+            'action': 'create_friendship',
+            'kind': 'incoming',
+            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver,  'friendship': new_friendship})
+        })
+
+        return JsonResponse({'status': 200, 'confirmation': f'Friend Request was sent to {full_username}'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
     
 """
 class RoomView(DetailView):

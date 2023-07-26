@@ -1,4 +1,7 @@
 // JSON elements
+const groupChatPK = document.getElementById('group-chat-pk');
+const groupChannelPK = document.getElementById('group-channel-pk');
+const privateChatPK = document.getElementById('private-chat-pk');
 
 // DOM elements
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
@@ -8,6 +11,14 @@ const tooltipContainers = document.querySelectorAll('.tooltip');
 const debug = true;
 
 let websocketURL = 'ws://' + window.location.host + '/ws/app/'
+
+if (groupChatPK) {
+    websocketURL += `group-chat/${JSON.parse(groupChatPK.innerText)}/`;
+    websocketURL += groupChannelPK ? `${JSON.parse(groupChannelPK.innerText)}/` : '';
+}
+else if (privateChatPK) {
+    websocketURL += `private-chat/${JSON.parse(privateChatPK.innerText)}/`;
+};
 
 chatSocket = new WebSocket(websocketURL);
 
@@ -40,10 +51,16 @@ chatSocket.onopen = function() {
     if (debug) {
         console.log('opened')
     }
-	chatSocket.send(JSON.stringify({
-		'action': 'requestServerResponse'
-	}))
 };
+
+window.addEventListener('submit', function delegateSubmit(event) {
+    let form = event.target.closest('form');
+    let command = form.dataset.submitCommand;
+    if (Object.keys(submitHandlers).includes(command)) {
+        event.preventDefault();
+        submitHandlers[command](event);
+    }
+})
 
 window.addEventListener('click', function preventRedirect(event) {
     if (event.target.closest('[data-prevent-redirect]')) {
@@ -70,6 +87,7 @@ window.addEventListener('mouseup', (event) => {
     const trigger = event.target.closest('.dropdown__trigger');
     const close = event.target.closest('.dropdown__close');
     let eventType;
+
     if (!trigger && !eventDropdownContent) {
         eventType = 'window click';
     }
@@ -106,6 +124,7 @@ window.addEventListener('mouseup', (event) => {
 
 // Close tooltips
 window.addEventListener('mouseup', (event) => {
+    // only capture left clicks
     if (!(event.button == 0)) {
         return;
     };
