@@ -161,6 +161,10 @@ class FriendshipFormView(FormView):
             form.add_error(None, f'User {full_username} does not exist.')
             return self.form_invalid(form)
         
+        if receiver == sender:
+            form.add_error(None, f'Cannot send friendship request to yourself.')
+            return self.form_invalid(form)
+
         friendship = sender.friendships().intersection(receiver.friendships()).first()
 
         if friendship:
@@ -173,21 +177,21 @@ class FriendshipFormView(FormView):
             return self.form_invalid(form)
         
         new_friendship = Friendship.objects.create(status='pending', sender=sender, receiver=receiver)
-        sender_friend_profile = Friend.objects.create(user=sender, friendship=new_friendship)
-        receiver_friend_profile = Friend.objects.create(user=receiver, friendship=new_friendship)
+        sender_profile = Friend.objects.create(user=sender, friendship=new_friendship)
+        receiver_profile = Friend.objects.create(user=receiver, friendship=new_friendship)
 
         async_to_sync(channel_layer.group_send)(f'user_{sender.pk}', {
             'type': 'send_to_client',
             'action': 'create_friendship',
-            'kind': 'outgoing',
-            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender, 'friendship': new_friendship})
+            'is_receiver': False,
+            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver_profile, 'friendship': new_friendship})
         })
 
         async_to_sync(channel_layer.group_send)(f'user_{receiver.pk}', {
             'type': 'send_to_client',
             'action': 'create_friendship',
-            'kind': 'incoming',
-            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver,  'friendship': new_friendship})
+            'is_receiver': True,
+            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender_profile, 'friendship': new_friendship})
         })
 
         return JsonResponse({'status': 200, 'confirmation': f'Friend Request was sent to {full_username}'})

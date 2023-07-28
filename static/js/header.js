@@ -2,6 +2,7 @@
 const groupChatPK = document.getElementById('group-chat-pk');
 const groupChannelPK = document.getElementById('group-channel-pk');
 const privateChatPK = document.getElementById('private-chat-pk');
+const extraPath = document.getElementById('extra-path');
 
 // DOM elements
 const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
@@ -18,6 +19,10 @@ if (groupChatPK) {
 }
 else if (privateChatPK) {
     websocketURL += `private-chat/${JSON.parse(privateChatPK.innerText)}/`;
+};
+
+if (extraPath) {
+    websocketURL += JSON.parse(extraPath.innerText) + '/';
 };
 
 chatSocket = new WebSocket(websocketURL);

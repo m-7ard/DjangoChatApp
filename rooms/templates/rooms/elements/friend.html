@@ -6,14 +6,14 @@
     </div>
     <div class="user__body">
         <div class="user__title">
-            {% firstof friend.username '[Deleted User]' %}
+            {% firstof friend.user.username '[Deleted User]' %}
         </div>
         <div class="user__subtitle">
-            {{ friend.status }}
+            {{ friend.user.status }}
         </div>
     </div>
-    {% if friendship.status == 'pending' and friend == friendship.receiver %}
-        <div class="user__icons">
+    {% if friendship.status == 'pending' and friend == friendship.receiver_profile %}
+        <div class="user__icons" data-command="delete_friendship">
             <div class="app__icon app__icon--hoverable">
                 <div class="icon icon--small icon--hoverable">
                     <i class="material-symbols-outlined">
@@ -22,21 +22,16 @@
                 </div>
             </div>
         </div>
-    {% elif friendship.status == 'pending' and friend == friendship.sender %}
-    <!--
-
-        todo: implement delete friendship
-
-    -->
+    {% elif friendship.status == 'pending' and friend == friendship.sender_profile %}
         <div class="user__icons">
-            <div class="app__icon app__icon--hoverable">
+            <div class="app__icon app__icon--hoverable" data-command="accept_friendship">
                 <div class="icon icon--small icon--hoverable">
                     <i class="material-symbols-outlined">
                         check_circle
                     </i>
                 </div>
             </div>
-            <div class="app__icon app__icon--hoverable">
+            <div class="app__icon app__icon--hoverable" data-command="delete_friendship">
                 <div class="icon icon--small icon--hoverable">
                     <i class="material-symbols-outlined">
                         cancel

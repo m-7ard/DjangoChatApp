@@ -118,16 +118,40 @@ const chatSocketReceiveHandlers = {
     'create_message': ({html}) => {
         backlogs.appendChild(parseHTML(html));
     },
-    'create_friendship': ({html, kind}) => {
+    'create_friendship': ({html, is_receiver}) => {
         let section;
-        if (kind == 'incoming') {
+        if (is_receiver) {
             section = document.getElementById('incoming-pending-friendships');
+            let dashboardButton = document.getElementById('dashboard-button');
+            addNotification(dashboardButton);
         }
-        else if (kind == 'outgoing') {
+        else {
             section = document.getElementById('outgoing-pending-friendships');
         }
         section.appendChild(parseHTML(html));
-        let counter = section.querySelector('[data-role="counter"]');
-        counter.innerText = parseInt(counter.innerText) + 1;
+        increaseCounter(section);
+    },
+    'accept_friendship': ({pk, is_receiver}) => {
+        let friend = document.getElementById(`friend-${pk}`);
+        friend.querySelector('.user__icons').remove();
+        decreaseCounter(friend.closest('.sidebar__section'));
+        
+        let section = document.getElementById('accepted-friendships');
+        section.appendChild(friend);
+        increaseCounter(section);
+
+        if (is_receiver) {
+            let dashboardButton = document.getElementById('dashboard-button');
+            removeNotification(dashboardButton);
+        };
+    },
+    'delete_friendship': ({pk, was_receiver}) => {
+        let friend = document.getElementById(`friend-${pk}`);
+        decreaseCounter(friend.closest('.sidebar__section'));
+        if (was_receiver) {
+            let dashboardButton = document.getElementById('dashboard-button');
+            removeNotification(dashboardButton);
+        };
+        friend.remove();
     },
 };

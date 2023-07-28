@@ -1411,6 +1411,26 @@
   flex: 1 0 0;
   overflow: overlay;
 }
+.app__notification {
+  position: absolute;
+  bottom: -0.5rem;
+  right: -0.5rem;
+  border: 2px solid #b2aea6;
+  border-radius: 4px;
+}
+.app__notification [data-role=counter] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #181818;
+  color: #DBD6CC;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  height: 0.75rem;
+  min-width: 0.75rem;
+  padding: 1px;
+  font-weight: bold;
+}
 
 .backlog {
   display: grid;
@@ -1585,6 +1605,9 @@
 .sidebar__section--users:not(:has(.user)) .sidebar__lead-in {
   display: none;
 }
+.sidebar__section--users:has(.user) {
+  margin-top: 0.75rem;
+}
 .sidebar__section--private-chats {
   display: flex;
   flex-direction: column;
@@ -1596,6 +1619,12 @@
   flex-direction: column;
   padding: 0;
   gap: 0.25rem;
+}
+.sidebar__section--dense {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
 }
 .sidebar__divider {
   display: flex;
@@ -1788,6 +1817,7 @@
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 8px;
+  position: relative;
 }
 .groupchat__avatar {
   display: flex;
@@ -2134,6 +2164,16 @@ input[type=submit] {
 
 input:focus {
   outline: none !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ffffff;
+  -webkit-transition: background-color 5000s ease-in-out 0s;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 ul, li {

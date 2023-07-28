@@ -81,7 +81,6 @@ $light-light: $chalk-white;
 $light-neutral: $silver;
 $light-dark: $battleship-grey;
 
-
 $grey-theme-1: (
     "dark-bg": $charcoal-grey,
     "neutral-bg": $apollo-grey,
@@ -1715,6 +1714,29 @@ $red-theme--NEUTRAL: (
         flex: 1 0 0;
         overflow: overlay;
     }
+
+    &__notification {
+        position: absolute;
+        bottom: - $space-medium;
+        right: - $space-medium;
+        border: 2px solid map-get($grey-theme-1, neutral-fg);
+        border-radius: $radius-small;
+
+
+        [data-role="counter"] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, light-fg);
+            font-size: $text-secondary-small;
+            border-radius: $radius-small;
+            height: $text-secondary-small;
+            min-width: $text-secondary-small;
+            padding: 1px;
+            font-weight: bold;
+        }
+    }
 }
 
 .backlog {
@@ -1898,6 +1920,10 @@ $red-theme--NEUTRAL: (
                     display: none;
                 }
             }
+
+            &:has(.user) {
+                margin-top: $space-large;
+            }
         }
 
         &--private-chats {
@@ -1906,6 +1932,10 @@ $red-theme--NEUTRAL: (
         
         &--buttons {
             @include flex-column(0, $space-small);
+        }
+
+        &--dense {
+            @include flex-column(0, 0);
         }
     }
 
@@ -2081,6 +2111,7 @@ $red-theme--NEUTRAL: (
     cursor: pointer;
     border: 1px solid transparent;
     border-radius: $radius-medium;
+    position: relative;
 
     &__avatar {
         @include flex-row(0, 0);

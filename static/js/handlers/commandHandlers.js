@@ -154,4 +154,20 @@ const commandHandlers = {
         sidebar.dataset.state = newState;
         trigger.dataset.state = newState;
     },
+    'accept_friendship': ({trigger, event, command}) => {
+        let friend = trigger.closest('.user');
+        let [_, pk] = friend.id.split('-');
+        chatSocket.send(JSON.stringify({
+            'action': command,
+            'pk': pk,
+        }));
+    },
+    'delete_friendship': ({trigger, event, command}) => {
+        let friend = trigger.closest('.user');
+        let [_, pk] = friend.id.split('-');
+        chatSocket.send(JSON.stringify({
+            'action': command,
+            'pk': pk,
+        }));
+    }
 };

@@ -26,6 +26,14 @@ a {
 input { margin:0; padding:0; border:solid 0px #888; vertical-align:top; }
 input[type="submit"] { height:32px; }
 input:focus { outline:none!important; }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active { 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #ffffff;
+    transition: background-color 5000s ease-in-out 0s;
+}
 
 ul, li {
 	padding: 0;

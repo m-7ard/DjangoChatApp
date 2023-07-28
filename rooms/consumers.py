@@ -19,8 +19,17 @@ from .models import (
     GroupChannel,
     Message,
 )
-from users.models import Friendship, CustomUser
+from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
+
+
+@database_sync_to_async
+def get_foreign_keys(name, *objects):
+    return [getattr(object_, name) for object_ in objects]
+
+@database_sync_to_async
+def get_foreign_key(name, object_):
+    return getattr(object_, name)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -28,7 +37,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user = self.scope.get('user')
         if not self.user or not self.user.is_authenticated:
             return self.close()
-        
+
+        extra_path = self.scope['url_route']['kwargs'].get('extra_path')
+        if extra_path:
+            self.create_extra_groups(extra_path)
+
         await self.channel_layer.group_add(f'user_{self.user.pk}', self.channel_name)
         await self.accept()
 
@@ -41,6 +54,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.close()
 
+    async def create_extra_groups(self, extra_path):
+        extra_path = extra_path.split('/')
+        if 'dashboard' in extra_path:
+            await self.channel_layer.group_add(f'user_{self.user.pk}_dashboard', self.channel_name)
+
     async def send_to_client(self, event):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
@@ -48,6 +66,74 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def async_db_operation(self, fn):
         return fn()
+    
+    async def accept_friendship(self, pk, **kwargs):
+        @database_sync_to_async
+        def accept_friendship():
+            friend = Friend.objects.get(pk=pk)
+            friendship = friend.friendship
+            friendship.status = 'accepted'
+            friendship.save()
+
+            sender_profile = friendship.sender_profile()
+            receiver_profile = friendship.receiver_profile()
+
+            return sender_profile, receiver_profile
+        
+        sender_profile, receiver_profile = await accept_friendship()
+        sender_user, receiver_user = await get_foreign_keys('user', sender_profile, receiver_profile)
+        
+        await self.channel_layer.group_send(
+            f'user_{sender_user.pk}', {
+                'type': 'send_to_client',
+                'pk': receiver_profile.pk,
+                'is_receiver': False,
+                **kwargs
+            }
+        )
+
+        await self.channel_layer.group_send(
+            f'user_{receiver_user.pk}', {
+                'type': 'send_to_client',
+                'pk': sender_profile.pk,
+                'is_receiver': True,
+                **kwargs
+            }
+        )
+
+    async def delete_friendship(self, pk, **kwargs):
+        @database_sync_to_async
+        def delete_friendship():
+            friend = Friend.objects.get(pk=pk)
+            friendship = friend.friendship
+
+            sender_profile = friendship.sender_profile()
+            receiver_profile = friendship.receiver_profile()
+
+            friendship.delete()
+
+            return sender_profile, receiver_profile
+        
+        sender_profile, receiver_profile = await delete_friendship()
+        sender_user, receiver_user = await get_foreign_keys('user', sender_profile, receiver_profile)
+
+        await self.channel_layer.group_send(
+            f'user_{sender_user.pk}', {
+                'type': 'send_to_client',
+                'pk': receiver_profile.pk,
+                'was_receiver': False,
+                **kwargs
+            }
+        )
+
+        await self.channel_layer.group_send(
+            f'user_{receiver_user.pk}', {
+                'type': 'send_to_client',
+                'pk': sender_profile.pk,
+                'was_receiver': True,
+                **kwargs
+            }
+        )
     
 
 class GroupChatConsumer(ChatConsumer):

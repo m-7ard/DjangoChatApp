@@ -73,9 +73,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f'{self.username}#{str(self.username_id).zfill(2)}'
     
     def friendships(self):
-        sent = self.sent_friendships.all()
-        received = self.received_friendships.all()
-        return sent.union(received)
+        return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
     
     def joined_site(self):
         return self.date_joined.strftime("%d %B %Y")
@@ -83,6 +81,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f'{self.username}#{str(self.username_id).zfill(2)}'
     
+    def notifications(self):
+        return self.received_friendships.pending()
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -96,7 +97,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ]
 
 
-class FriendshipManager(models.Manager):
+class FriendshipQuerySet(models.QuerySet):
     def pending(self):
         return self.filter(status='pending')
     
@@ -112,8 +113,13 @@ class Friendship(models.Model):
     status = models.CharField(max_length=20, choices=CHOICES)
     sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='sent_friendships', null=True)
     receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='received_friendships', null=True)
+    objects = FriendshipQuerySet.as_manager()
 
-    objects = FriendshipManager()
+    def sender_profile(self):
+        return self.members.get(user=self.sender)
+    
+    def receiver_profile(self):
+        return self.members.get(user=self.receiver)
 
 
 class Friend(models.Model):

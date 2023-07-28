@@ -136,3 +136,39 @@ async function getTemplate({templateName, context}) {
     let template = parseHTML(response);
     return template;
 }
+
+function increaseCounter(element) {
+    let counter = element.querySelector('[data-role="counter"]');
+    let newCount = parseInt(counter.innerText) + 1;
+    counter.innerText = newCount;
+    return newCount;
+}
+
+function decreaseCounter(element) {
+    let counter = element.querySelector('[data-role="counter"]');
+    let newCount = parseInt(counter.innerText) - 1;
+    counter.innerText = newCount;
+    return newCount;
+}
+
+function addNotification(element) {
+    let notification = element.querySelector('.app__notification');
+    if (notification) {
+        increaseCounter(notification);
+    }
+    else {
+        notification = quickCreateElement('div', {
+            classList: ['app__notification'],
+            parent: element,
+            innerHTML: '<div data-role="counter">1</div>'
+        });
+    };
+}
+
+function removeNotification(element) {
+    let notification = element.querySelector('.app__notification');
+    let newCount = decreaseCounter(notification);
+    if (newCount == 0) {
+        notification.remove();
+    };
+}
