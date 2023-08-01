@@ -1,0 +1,59 @@
+{% extends "core/header.html" %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+    {% if invite %}
+        <form class="invite" method="POST" action="{% url 'invite' directory=invite.directory %}" data-submit-command="accept-invite">
+            {% csrf_token %}
+            <div class="invite__body form has-shadow">
+                <div class="invite__avatar">
+                    <div class="avatar avatar--large">
+                        <img src="" alt="">
+                    </div>
+                </div>
+                <div class="invite__divider">
+
+                </div>
+                <div class="invite__title">
+                    {{ invite.chat.name }}
+                </div>
+                <div class="invite__members">
+                    <div>
+                        {{ invite.chat.memberships.all.count }} Members
+                    </div>
+                    <div>
+                        ??? Online
+                    </div>
+                </div>
+                {% if already_member == True %}
+                    <a class="invite__button invite__button--valid" href="{% url 'group-chat' pk=invite.chat.pk %}">
+                        Go To Chat
+                    </a>
+                {% elif not invite.is_valid %}
+                    <button class="invite__button invite__button--expired" disabled>
+                        Invite Expired
+                    </button>
+                {% else %}
+                    <button class="invite__button invite__button--valid" data-role="accept-invite" type="submit">
+                        Accept Invite
+                    </button>
+                {% endif %}
+            </div>
+        </form>
+    {% else %}
+        <form class="invite">
+            <div class="invite__body form has-shadow">
+                <div class="invite__title">
+                    Invalid Invite
+                </div>
+                <div class="invite__subtitle">
+                    This invite doesn't exist or has been deleted already
+                </div>
+                <a class="invite__button invite__button--valid" href="{% url 'dashboard' %}">
+                    Go To Dashboard
+                </a>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}

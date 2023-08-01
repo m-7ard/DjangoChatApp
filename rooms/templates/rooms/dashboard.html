@@ -55,7 +55,8 @@
 
 
 {% block main-content-sidebar %}
-    <div class="sidebar__section sidebar__section--buttons">
+<div class="sidebar__section sidebar__section--large">
+    <div class="sidebar__section sidebar__section--small">
         <div class="sidebar__button tooltip__trigger" data-name="add-friend" data-positioning='{"top": "0px", "right": "100%"}'>
             <div class="icon icon--small">
                 <i class="material-symbols-outlined">
@@ -87,79 +88,78 @@
             </div>
         </div>
     </div>
-    <div class="sidebar__section sidebar__section--dense">
-        <div class="sidebar__section sidebar__section--users" id="incoming-pending-friendships">
-            <div class="sidebar__lead-in">
-                <div class="sidebar__label">
-                    Incoming Friendship Requests
-                </div>
-                <div class="sidebar__label" data-role="counter">
-                    {{ user.received_friendships.pending.count }}
-                </div>
-                <div class="sidebar__role-icon app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            group
-                        </i>
-                    </div>
+
+    <div class="sidebar__section sidebar__section--users" id="incoming-pending-friendships">
+        <div class="sidebar__lead-in">
+            <div class="sidebar__label">
+                Incoming Friendship Requests
+            </div>
+            <div class="sidebar__label" data-role="counter">
+                {{ user.received_friendships.pending.count }}
+            </div>
+            <div class="sidebar__role-icon app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        group
+                    </i>
                 </div>
             </div>
-            {% for friendship in user.received_friendships.pending %}
-                {% with friend=friendship.sender_profile %}
-                    {% include "./elements/friend.html" %}
-                {% endwith %}
-            {% endfor %}
         </div>
-        <div class="sidebar__section sidebar__section--users" id="accepted-friendships">
-            <div class="sidebar__lead-in">
-                <div class="sidebar__label">
-                    Friends
-                </div>
-                <div class="sidebar__label" data-role="counter">
-                    {{ user.friendships.accepted.count }}
-                </div>
-                <div class="sidebar__role-icon app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            group
-                        </i>
-                    </div>
+        {% for friendship in user.received_friendships.pending %}
+            {% with friend=friendship.sender_profile %}
+                {% include "./elements/friend.html" %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+    <div class="sidebar__section sidebar__section--users" id="accepted-friendships">
+        <div class="sidebar__lead-in">
+            <div class="sidebar__label">
+                Friends
+            </div>
+            <div class="sidebar__label" data-role="counter">
+                {{ user.friendships.accepted.count }}
+            </div>
+            <div class="sidebar__role-icon app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        group
+                    </i>
                 </div>
             </div>
-            {% for friendship in user.friendships.accepted %}
-                {% if user == friendship.sender %}
-                    {% with friend=friendship.receiver_profile %}
-                        {% include "./elements/friend.html" %}
-                    {% endwith %}
-                {% else %}
-                    {% with friend=friendship.sender_profile %}
-                        {% include "./elements/friend.html" %}
-                    {% endwith %}
-                {% endif %}
-            {% endfor %}
         </div>
-        <div class="sidebar__section sidebar__section--users" id="outgoing-pending-friendships">
-            <div class="sidebar__lead-in">
-                <div class="sidebar__label">
-                    Outgoing Friendship Requests
-                </div>
-                <div class="sidebar__label" data-role="counter">
-                    {{ user.sent_friendships.pending.count }}
-                </div>
-                <div class="sidebar__role-icon app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            group
-                        </i>
-                    </div>
-                </div>
-            </div>
-            {% for friendship in user.sent_friendships.pending %}
+        {% for friendship in user.friendships.accepted %}
+            {% if user == friendship.sender %}
                 {% with friend=friendship.receiver_profile %}
                     {% include "./elements/friend.html" %}
                 {% endwith %}
-            {% endfor %}
-        </div>
+            {% else %}
+                {% with friend=friendship.sender_profile %}
+                    {% include "./elements/friend.html" %}
+                {% endwith %}
+            {% endif %}
+        {% endfor %}
     </div>
-    
+    <div class="sidebar__section sidebar__section--users" id="outgoing-pending-friendships">
+        <div class="sidebar__lead-in">
+            <div class="sidebar__label">
+                Outgoing Friendship Requests
+            </div>
+            <div class="sidebar__label" data-role="counter">
+                {{ user.sent_friendships.pending.count }}
+            </div>
+            <div class="sidebar__role-icon app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        group
+                    </i>
+                </div>
+            </div>
+        </div>
+        {% for friendship in user.sent_friendships.pending %}
+            {% with friend=friendship.receiver_profile %}
+                {% include "./elements/friend.html" %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

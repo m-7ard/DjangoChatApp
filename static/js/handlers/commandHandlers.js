@@ -3,10 +3,10 @@ const commandHandlers = {
 		event.target.closest('.error').remove();
 	},
 	'select-option': ({trigger, event}) => {
-        let select = trigger.closest('.select');
-        let value = trigger.dataset.value;
-        let root = select.querySelector('.select__value');
-        root.textContent = value;
+        let option = trigger.querySelector('[data-role="option"]');
+        let select = trigger.closest('[data-role="select"]');
+        let rootOption = select.querySelector('[data-role="root-option"]');
+        rootOption.textContent = option.innerText;
 	},
 	'switch-content': ({trigger, event}) => {
         let navigation = trigger.closest('.switchable__navigation')
@@ -140,6 +140,19 @@ const commandHandlers = {
             eventListeners: {
                 'submit': processForm,
             }
+        });
+    },
+    'get-overlay': async ({trigger, event}) => {
+        event.preventDefault();
+        let overlayString = await getView({
+            name: trigger.dataset.name, 
+            kwargs: trigger.dataset.kwargs,
+            query: trigger.dataset.query,
+        });
+        let layer = quickCreateElement('div', {
+            parent: document.body,
+            classList: ['layer', 'layer--overlay'],
+            innerHTML: overlayString,
         });
     },
     'remove-closest': ({trigger, event}) => {

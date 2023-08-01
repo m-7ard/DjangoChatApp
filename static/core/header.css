@@ -135,25 +135,29 @@
   font-size: 0.9375rem;
 }
 .tooltip__button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   align-items: center;
   border-radius: 4px;
   cursor: pointer;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  flex-shrink: 0;
 }
 .tooltip__button--confirm {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   display: flex;
   padding: 0.25rem 0.75rem;
   gap: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #DBD6CC;
-  background-color: #404228;
+  background-color: #1B823C;
 }
 .tooltip__button--confirm:hover {
   color: #DBD6CC;
-  background-color: #6D7246;
+  background-color: #19943C;
 }
 .tooltip__searchbar {
   white-space: nowrap;
@@ -197,7 +201,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .layer--form {
   display: flex;
@@ -378,16 +382,16 @@
   cursor: pointer;
 }
 .friendship__button--accept {
-  color: #0E441F;
+  color: #1F7237;
 }
 .friendship__button--accept:hover {
-  color: #6D7246;
+  color: #19943C;
 }
 .friendship__button--reject {
-  color: #9E542C;
+  color: #8F3327;
 }
 .friendship__button--reject:hover {
-  color: #C96733;
+  color: #BA3220;
 }
 .friendship__button--manage {
   color: #8D8A84;
@@ -557,11 +561,11 @@
   justify-content: center;
   align-items: center;
   border-radius: 4px;
-  background-color: #0E441F;
+  background-color: #1F7237;
   color: #DBD6CC;
 }
 .profile__button--main:hover {
-  background-color: #6D7246;
+  background-color: #19943C;
   color: #DBD6CC;
 }
 .profile__button--sidebar {
@@ -605,6 +609,63 @@
   font-weight: bold;
 }
 
+.invite-user {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.25rem;
+  gap: 0.75rem;
+  align-items: center;
+  border-radius: 4px;
+}
+.invite-user__avatar .avatar {
+  background-color: #131313;
+  border-radius: 9999px;
+}
+.invite-user:hover {
+  background-color: #1D1D1C;
+}
+.invite-user:hover .invite-user__button {
+  border-color: #1F7237;
+  background-color: #1F7237;
+  color: #DBD6CC;
+}
+.invite-user:hover .invite-user__username {
+  color: #DBD6CC;
+}
+.invite-user__username {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  color: #8D8A84;
+  font-size: 0.9375rem;
+}
+.invite-user__username-id {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  font-size: 0.9375rem;
+}
+.invite-user__button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.25rem 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  border: 1px solid #1F7237;
+  color: #b2aea6;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -612,6 +673,129 @@
   gap: 0.5rem;
   color: #DBD6CC;
   position: relative;
+  max-width: 440px;
+  flex-grow: 1;
+}
+.form__name {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #8D8A84;
+}
+.form__widget--input {
+  display: flex;
+  padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+  gap: 0.75rem;
+  align-items: center;
+  box-sizing: border-box;
+  border-radius: 4px;
+  color: #DBD6CC;
+  color-scheme: dark;
+  background-color: #131313;
+  flex-grow: 1;
+}
+.form__widget--input:focus {
+  background-color: #131313;
+}
+.form__widget--input input {
+  display: flex;
+  padding: 0;
+  gap: 0;
+  color: #DBD6CC;
+  color-scheme: dark;
+  background-color: #131313;
+  align-self: stretch;
+  flex-grow: 1;
+}
+.form__widget--select {
+  position: relative;
+  flex-grow: 1;
+}
+.form__widget--select .dropdown__content {
+  position: absolute;
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+}
+.form__widget--select .dropdown__content .form__widget--option:not(:last-of-type) {
+  border-bottom: 1px solid #181818;
+}
+.form__widget--option {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0px;
+  justify-content: center;
+  color: #b2aea6;
+  background-color: #131313;
+  position: relative;
+  overflow: hidden;
+}
+.form__widget--option:first-of-type {
+  border-radius: 4px 4px 0 0;
+}
+.form__widget--option:last-of-type {
+  border-radius: 0 0 4px 4px;
+}
+.form__widget--option input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+.form__widget--option:hover, .form__widget--option:has(:checked) {
+  color: #DBD6CC;
+  background-color: #1D1D1C;
+}
+.form__widget--user-input {
+  display: flex;
+  padding: 0;
+  gap: 0.5rem;
+  align-items: center;
+}
+.form__widget--user-input [data-role=username_id-input] {
+  flex-grow: 0;
+}
+.form__labeled-element {
+  display: flex;
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  gap: 0.75rem;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #131313;
+  border-radius: 4px;
+  flex-grow: 1;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+.form__row {
+  display: flex;
+  padding: 0;
+  gap: 0.5rem;
+  align-items: center;
+}
+.form__connector {
+  height: 1px;
+  background-color: #b2aea6;
+  flex-grow: 1;
 }
 .form__header {
   display: flex;
@@ -629,7 +813,6 @@
   color: #8D8A84;
 }
 .form__warning {
-  color: #CC0505;
   font-size: 0.9375rem;
   font-weight: bold;
 }
@@ -652,34 +835,42 @@
   border-radius: 4px;
 }
 .form__submit {
-  display: flex;
-  padding: 0.25rem 0.75rem;
-  gap: 0;
-  font-size: 0.9375rem;
-  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
   border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
 }
 .form__submit--update {
-  background-color: #0E441F;
+  background-color: #1F7237;
 }
 .form__submit--update:hover {
-  background-color: #6D7246;
+  background-color: #19943C;
   color: #DBD6CC;
 }
 .form__submit--delete {
-  background-color: #9E542C;
+  background-color: #8F3327;
 }
 .form__submit--delete:hover {
-  background-color: #C96733;
+  border-color: #BA3220;
+  background-color: #BA3220;
 }
 .form__submit--create {
-  color: #8D8A84;
-  background-color: #0E441F;
+  background-color: #5C278E;
 }
 .form__submit--create:hover {
-  color: #DBD6CC;
-  background-color: #404228;
+  border-color: #6F20BA;
+  background-color: #6F20BA;
 }
 .form__response {
   display: flex;
@@ -693,7 +884,7 @@
   font-weight: bold;
 }
 .form__response--success {
-  background-color: #6D7246;
+  background-color: #19943C;
 }
 .form__response--error {
   background-color: #6B2A2A;
@@ -705,17 +896,6 @@
 }
 .form__close:hover {
   color: #DBD6CC;
-}
-.form__input {
-  display: flex;
-  padding: 0.25rem;
-  gap: 0;
-  color: #b2aea6;
-  background-color: #131313;
-  font-size: 0.875rem;
-  border-radius: 4px;
-  text-indent: 0.25rem;
-  flex-grow: 1;
 }
 .form__section {
   display: flex;
@@ -729,12 +909,6 @@
   padding: 0;
   gap: 0.25rem;
 }
-.form__messages {
-  display: flex;
-  flex-direction: column;
-  padding: 0.25rem;
-  gap: 0.25rem;
-}
 .form__message {
   display: flex;
   padding: 0.25rem;
@@ -746,7 +920,7 @@
   color: #8D8A84;
 }
 .form__message--error {
-  color: #C96733;
+  color: #BA3220;
 }
 
 .form-select {
@@ -876,8 +1050,8 @@
   position: relative;
   border: 0.25rem solid transparent;
   border-radius: 9999px;
-  height: 1.125rem;
-  width: 2.75rem;
+  height: 1.171875rem;
+  width: 2.8125rem;
   overflow: hidden;
 }
 .form-slider input {
@@ -891,18 +1065,18 @@
   cursor: pointer;
 }
 .form-slider:has(input:checked) {
-  background-color: #404228;
-  border-color: #404228;
+  background-color: #1B823C;
+  border-color: #1B823C;
 }
 .form-slider:has(input:checked) .form-slider__marker {
   left: 0px;
 }
 .form-slider:not(:has(input:checked)) {
-  background-color: #B35D30;
-  border-color: #B35D30;
+  background-color: #A63623;
+  border-color: #A63623;
 }
 .form-slider:not(:has(input:checked)) .form-slider__marker {
-  left: 1.625rem;
+  left: 1.640625rem;
 }
 .form-slider__marker {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
@@ -1032,7 +1206,7 @@
   color: #DBD6CC;
 }
 .permissions__option--false:has(:checked) {
-  background-color: #C96733;
+  background-color: #BA3220;
 }
 .permissions__option--null:has(:not(:checked)) {
   background-color: #181818;
@@ -1055,7 +1229,7 @@
   color: #DBD6CC;
 }
 .permissions__option--true:has(:checked) {
-  background-color: #6D7246;
+  background-color: #19943C;
   color: #DBD6CC;
 }
 .permissions__description {
@@ -1112,15 +1286,15 @@
 .field__checkbox:has(:not(:checked)) {
   background-color: transparent;
   color: transparent;
-  border: 2px solid #0E441F;
+  border: 2px solid #1F7237;
 }
 .field__checkbox:hover {
-  border: 2px solid #404228;
+  border: 2px solid #1B823C;
 }
 .field__checkbox:has(:checked) {
-  background-color: #6D7246;
+  background-color: #19943C;
   color: #DBD6CC;
-  border: 2px solid #6D7246;
+  border: 2px solid #19943C;
 }
 .field__checkbox input {
   position: absolute;
@@ -1487,7 +1661,7 @@
 
 .chatbar {
   display: flex;
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.75rem;
   gap: 0.75rem;
   align-items: center;
   background-color: #131313;
@@ -1569,6 +1743,11 @@
 .sidebar--content[data-state=open] .sidebar__role-icon {
   opacity: 0;
 }
+.sidebar__section {
+  /*
+  SEE comment in sidebar__body
+  */
+}
 .sidebar__section--groupchats {
   display: flex;
   flex-direction: column;
@@ -1580,6 +1759,24 @@
   flex-direction: column;
   padding: 0;
   gap: 0.25rem;
+}
+.sidebar__section--small {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0.25rem;
+}
+.sidebar__section--medium {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0.5rem;
+}
+.sidebar__section--large {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0.75rem;
 }
 .sidebar__section--category {
   display: flex;
@@ -1602,19 +1799,15 @@
   padding: 0;
   gap: 0.25rem;
 }
+.sidebar__section--users:not(:has(.user)) {
+  /* This avoids the hidden element from
+  triggering the sidebar__section's gap */
+  position: fixed;
+}
 .sidebar__section--users:not(:has(.user)) .sidebar__lead-in {
   display: none;
 }
-.sidebar__section--users:has(.user) {
-  margin-top: 0.75rem;
-}
 .sidebar__section--private-chats {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  gap: 0.25rem;
-}
-.sidebar__section--buttons {
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -1656,10 +1849,19 @@
   text-indent: 0.5rem;
 }
 .sidebar__body {
+  /*
+
+  NOTE: on sidebar__body and sidebar__section, 
+  __body should determine the padding, meanwhile,
+  the __section element/s will take care of the
+  spacing between the elements themselves, e.g,
+  gap / margin
+
+  */
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
-  gap: 0.5rem;
+  gap: 0;
   flex-grow: 1;
   overflow: auto;
 }
@@ -1778,19 +1980,20 @@
   left: 0;
   right: 0;
   bottom: auto;
-  margin: 0.25rem;
   border-radius: 4px;
   overflow: hidden;
-  background-color: #131313;
-  z-index: 1;
+  background-color: #181818;
   border: 1px solid #1D1D1C;
+  z-index: 1;
+  margin: 0.5rem;
 }
 .sidebar-menu__button {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   display: flex;
   padding: 0.25rem 0.5rem;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
+  justify-content: space-between;
   cursor: pointer;
   color: #8D8A84;
   font-size: 0.875rem;
@@ -1856,12 +2059,16 @@
 
 .user {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
   align-items: center;
   border-radius: 4px;
   cursor: pointer;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  flex-shrink: 0;
   display: grid;
   grid-template: auto/auto minmax(0, 0.5rem) minmax(0, 1fr) minmax(0, 0.5rem) minmax(0, auto);
   padding: 0.25rem;
@@ -2129,8 +2336,193 @@
   padding: 0.75rem;
 }
 
+.overlay {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  max-height: 100vh;
+  overflow: overlay;
+}
+.overlay > :first-child {
+  border-radius: 4px 4px 0 0;
+}
+.overlay > :last-child {
+  border-radius: 0 0 4px 4px;
+}
+.overlay__header {
+  display: flex;
+  padding: 0.75rem;
+  gap: 0.75rem;
+  background-color: #131313;
+  justify-content: space-between;
+}
+.overlay__title {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #DBD6CC;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.overlay__label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  font-size: 0.9375rem;
+  color: #DBD6CC;
+}
+.overlay__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  background-color: #1D1D1C;
+}
+.overlay__content {
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  background-color: #181818;
+  border-radius: 4px;
+  max-height: 180px;
+}
+.overlay__content--scroll {
+  overflow: overlay;
+}
+.overlay__footer {
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  gap: 0.75rem;
+  background-color: #181818;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.overlay__action {
+  font-size: 0.8125rem;
+  color: #DBD6CC;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  cursor: pointer;
+}
+.overlay__action:hover {
+  text-decoration: underline;
+}
+.overlay__row {
+  display: flex;
+  padding: 0;
+  gap: 0.5rem;
+}
+.overlay__close {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  color: #8D8A84;
+  cursor: pointer;
+}
+.overlay__close:hover {
+  color: #DBD6CC;
+}
+
+.invite {
+  display: flex;
+  padding: 0;
+  gap: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #131313;
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.invite__avatar {
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.invite__avatar .avatar {
+  background-color: #131313;
+}
+.invite__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.5rem;
+  background-color: #181818;
+  align-items: center;
+  border-radius: 8px;
+}
+.invite__divider {
+  height: 1px;
+  width: 100%;
+  background-color: #1D1D1C;
+}
+.invite__title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #DBD6CC;
+}
+.invite__subtitle {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #8D8A84;
+}
+.invite__members {
+  display: flex;
+  padding: 0.25rem 0.75rem;
+  gap: 0.75rem;
+  background-color: #1D1D1C;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  border: 1px solid #8D8A84;
+}
+.invite__button {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  align-self: stretch;
+  justify-content: center;
+  margin: 0.5rem;
+}
+.invite__button--valid {
+  background-color: #5C278E;
+  color: #DBD6CC;
+}
+.invite__button--valid:hover {
+  background-color: #6F20BA;
+}
+.invite__button--expired {
+  background-color: #8F3327;
+  color: #DBD6CC;
+}
+.invite__button--expired:hover {
+  background-color: #BA3220;
+}
+
 html {
-  height: 100%;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 0;
+  margin: 0;
   font-family: "Lato", monospace;
 }
 

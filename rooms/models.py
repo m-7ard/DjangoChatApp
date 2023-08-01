@@ -1,5 +1,6 @@
 from itertools import chain
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 
 from django.db import models
 from django.db.models import Q, F
@@ -159,6 +160,18 @@ class Role(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
     memberships = models.ManyToManyField(GroupChatMembership, related_name='roles')
 
+
+class Invite(models.Model):
+    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='invites')
+    directory = models.UUIDField(default=uuid4, editable=False)
+    one_time = models.BooleanField(default=False)
+    expiry_date = models.DateTimeField(default=datetime.now(timezone.utc) + timedelta(days=1))
+
+    def is_valid(self):
+        return self.expiry_date > datetime.now(timezone.utc)
+    
+    def __str__(self):
+        return f'{self.is_valid()} - {str(self.directory)}'
 
 """
 # *RolePermissions

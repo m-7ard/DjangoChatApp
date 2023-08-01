@@ -91,10 +91,10 @@ $grey-theme-1: (
     "dark-fg": $light-dark,
 );
 
-$blue-theme--DARK: (
-    "dark-bg": #151532,
-    "neutral-bg": #13134B, 
-    "light-bg": #101065,
+$blue-theme-1: (
+    "dark-bg": #5C278E,
+    "neutral-bg": #6A22A5, 
+    "light-bg": #6F20BA,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -112,10 +112,9 @@ $lime-theme--DARK: (
 );
 
 $green-theme-1: (
-    /* todo: change dark-bg */
-    "dark-bg": #0E441F,
-    "neutral-bg": #404228,
-    "light-bg": #6D7246,
+    "dark-bg": #1F7237,
+    "neutral-bg": #1B823C,
+    "light-bg": #19943C,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -123,19 +122,9 @@ $green-theme-1: (
 );
 
 $red-theme-1: (
-    "dark-bg": #9E542C,
-    "neutral-bg": #B35D30,
-    "light-bg": #C96733,
-
-    "light-fg": $light-light,
-    "neutral-fg": $light-neutral,
-    "dark-fg": $light-dark,
-);
-
-$red-theme--NEUTRAL: (
-    "dark-bg": #B20808,
-    "neutral-bg": #CC0505,
-    "light-bg": #E50303,
+    "dark-bg": #8F3327,
+    "neutral-bg": #A63623,
+    "light-bg": #BA3220,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -185,16 +174,30 @@ $red-theme--NEUTRAL: (
 }
 
 @mixin base-button {
+    @include ellipsis;
     align-items: center;
     border-radius: $radius-small;
     cursor: pointer;
     user-select: none;
+    flex-shrink: 0;
 }
 
 @mixin small-button {
     @include default-color-transition;
     @include flex-row($space-small $space-large, $space-medium);
+    font-size: $text-secondary-medium;
+}
+
+@mixin medium-button {
+    @include default-color-transition;
+    @include flex-row($space-medium $space-large, $space-medium);
     font-size: $text-secondary-large;
+}
+
+@mixin large-button {
+    @include default-color-transition;
+    @include flex-row($space-medium $space-large, $space-medium);
+    font-size: $text-primary-large;
 }
 
 .bottom { margin-top: auto !important; }
@@ -398,7 +401,7 @@ $red-theme--NEUTRAL: (
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background-color: rgba(0, 0, 0, 0.3);
+		background-color: rgba(0, 0, 0, 0.5);
 	}
 
     &--form {
@@ -855,10 +858,166 @@ $red-theme--NEUTRAL: (
 	}
 }
 
+.invite-user {
+    @include default-color-transition;
+    @include flex-row($space-small, $space-large);
+    $self: &;
+    align-items: center;
+    border-radius: $radius-small;
+
+    &__avatar {
+        .avatar {
+            background-color: map-get($grey-theme-1, dark-bg);
+            border-radius: 9999px;
+        }
+    }
+
+    &:hover {
+        background-color: map-get($grey-theme-1, light-bg);
+
+        #{$self}__button {
+            border-color: map-get($green-theme-1, dark-bg);
+            background-color: map-get($green-theme-1, dark-bg);
+            color: map-get($green-theme-1, light-fg);
+        }
+
+        #{$self}__username {
+            color: map-get($grey-theme-1, light-fg);
+        }
+    }
+
+    &__username {
+        @include default-color-transition;
+        user-select: none;
+        color: map-get($grey-theme-1, dark-fg);
+        font-size: $text-primary-small;
+    }
+
+    &__username-id {
+        user-select: none;
+        font-size: $text-primary-small;
+    }
+
+    &__button {
+        @include base-button;
+        @include small-button;
+        border: 1px solid map-get($green-theme-1, dark-bg);
+        color: map-get($green-theme-1, neutral-fg);
+    }
+}
+
 .form {
 	@include flex-column(0, $space-medium);
 	color: map-get($grey-theme-1, light-fg);
     position: relative;
+    max-width: 440px;
+    flex-grow: 1;
+
+    &__name {
+        font-size: $text-primary-medium;
+        font-weight: bold;
+        color: map-get($grey-theme-1, dark-fg);
+    }
+
+    &__widget {
+        &--input {
+            @include flex-row($space-small $space-small $space-small $space-medium, $space-large);
+            align-items: center;
+            box-sizing: border-box;
+            border-radius: 4px;
+            color: map-get($grey-theme-1, light-fg);
+            color-scheme: dark;
+            background-color: map-get($grey-theme-1, dark-bg);
+            flex-grow: 1;
+
+            &:focus {
+                background-color: map-get($grey-theme-1, dark-bg);
+            }
+
+            input {
+                @include flex-row(0, 0);
+                color: map-get($grey-theme-1, light-fg);
+                color-scheme: dark;
+                background-color: map-get($grey-theme-1, dark-bg);
+                align-self: stretch;
+                flex-grow: 1;
+            }
+        }
+
+        &--select {
+            position: relative;
+            flex-grow: 1;
+
+            .dropdown__content {
+                @include absolute-boundary(auto, 0, 100%, 0);
+            
+                .form__widget--option:not(:last-of-type) {
+                    border-bottom: 1px solid map-get($grey-theme-1, neutral-bg);
+                }
+            }
+        }
+
+        &--option {
+            @include base-button;
+            @include medium-button;
+            border-radius: 0px;
+            justify-content: center;
+            color: map-get($grey-theme-1, neutral-fg);
+            background-color: map-get($grey-theme-1, dark-bg);
+            position: relative;
+            overflow: hidden;
+
+            &:first-of-type {
+                border-radius: $radius-small $radius-small 0 0;
+            }
+
+            &:last-of-type {
+                border-radius: 0 0 $radius-small $radius-small;
+            }
+
+            input {
+                @include absolute-boundary(0, 0, 0, 0);
+                cursor: pointer;
+                opacity: 0;
+            }
+
+            &:hover, &:has(:checked) {
+                color: map-get($grey-theme-1, light-fg);
+                background-color: map-get($grey-theme-1, light-bg);
+            }
+        }
+
+        &--user-input {
+            @include flex-row(0, $space-medium);
+            align-items: center;
+
+            [data-role="username_id-input"] {
+                flex-grow: 0;
+            }
+        }
+    }
+
+    &__labeled-element {
+        @include flex-row($space-medium $space-medium $space-medium $space-large, $space-large);
+        user-select: none;
+        justify-content: space-between;
+        align-items: center;
+        background-color: map-get($grey-theme-1, dark-bg);
+        border-radius: $radius-small;
+        flex-grow: 1;
+        height: fit-content
+    }
+
+    &__row {
+        @include flex-row(0, $space-medium);
+        align-items: center;
+    }
+
+    &__connector {
+        height: 1px;
+        background-color: map-get($grey-theme-1, neutral-fg);
+        flex-grow: 1;
+    }
 
 	&__header {
 		@include flex-row(0, $space-medium);
@@ -877,7 +1036,6 @@ $red-theme--NEUTRAL: (
 	}
 
     &__warning {
-        color: map-get($red-theme--NEUTRAL, neutral-bg);
         font-size: $text-primary-small;
         font-weight: bold;
     }
@@ -902,11 +1060,8 @@ $red-theme--NEUTRAL: (
     }
 
 	&__submit {
-		@include flex-row($space-small $space-large, 0);
-		font-size: $text-primary-small;
-        font-weight: bold;
-		border-radius: 4px;
-		transition: background-color 0.2s, color 0.2s;
+		@include base-button;
+        @include medium-button;
 
         &--update {
             color: map-get($green-theme-1, white--DARK);
@@ -919,24 +1074,22 @@ $red-theme--NEUTRAL: (
 		}
 
         &--delete {
-            color: map-get($red-theme-1, white--DARK);
-		    background-color: map-get($red-theme-1, dark-bg);
-        }
+            background-color: map-get($red-theme-1, dark-bg);
 
-        &--delete:hover {
-            background-color: map-get($red-theme-1, light-bg);
-			color: map-get($red-theme-1, white--LIGHT);
-		}
+            &:hover {
+                border-color: map-get($red-theme-1, light-bg);
+                background-color: map-get($red-theme-1, light-bg);
+            }
+        }
 
         &--create {
-            color: map-get($green-theme-1, dark-fg);
-            background-color: map-get($green-theme-1, dark-bg);
-        }
+            background-color: map-get($blue-theme-1, dark-bg);
 
-        &--create:hover {
-            color: map-get($green-theme-1, light-fg);
-		    background-color: map-get($green-theme-1, neutral-bg);
-		}
+            &:hover {
+                border-color: map-get($blue-theme-1, light-bg);
+                background-color: map-get($blue-theme-1, light-bg);
+            }
+        }
 	}
 
     &__response {
@@ -965,16 +1118,6 @@ $red-theme--NEUTRAL: (
         }
     }
 
-    &__input {
-        @include flex-row($space-small, 0);
-        color: map-get($green-theme-1, neutral-fg);
-        background-color: map-get($grey-theme-1, dark-bg);
-        font-size: $text-secondary-large;
-        border-radius: $radius-small;
-        text-indent: $space-small;
-        flex-grow: 1;
-    }
-
     &__section {
         @include flex-row(0, $space-medium);
         align-items: center;
@@ -982,10 +1125,6 @@ $red-theme--NEUTRAL: (
 
     &__field {
         @include flex-column(0, $space-small);
-    }
-
-    &__messages {
-        @include flex-column($space-small, $space-small);
     }
 
     &__message {
@@ -1145,8 +1284,8 @@ $red-theme--NEUTRAL: (
 .form-slider {
     transition: all 0.4s $custom-ease-in;
     $padding: $space-small;
-    $height: 1.125rem;
-    $width: 2.75rem;
+    $height: 0.9375rem * 1.25;
+    $width: 2.25rem * 1.25;
     $self: &;
     position: relative;
     border: $padding solid transparent;
@@ -1167,7 +1306,6 @@ $red-theme--NEUTRAL: (
         background-color: $bg;
         border-color: $bg;
         
-
         #{$self}__marker {
             left: 0px;
         }
@@ -1722,7 +1860,6 @@ $red-theme--NEUTRAL: (
         border: 2px solid map-get($grey-theme-1, neutral-fg);
         border-radius: $radius-small;
 
-
         [data-role="counter"] {
             display: flex;
             align-items: center;
@@ -1798,7 +1935,7 @@ $red-theme--NEUTRAL: (
 
 
 .chatbar {
-    @include flex-row($space-medium $space-large, $space-large);
+    @include flex-row($space-small $space-large, $space-large);
     align-items: center;
     background-color: map-get($grey-theme-1, dark-bg);
     margin: $space-large;
@@ -1892,12 +2029,27 @@ $red-theme--NEUTRAL: (
     }
 
     &__section {
+        /*
+        SEE comment in sidebar__body
+        */
         &--groupchats {
             @include flex-column(0, $space-medium);
         }
 
         &--catalogue {
             @include flex-column(0, $space-small);
+        }
+
+        &--small {
+            @include flex-column(0, $space-small);
+        }
+
+        &--medium {
+            @include flex-column(0, $space-medium);
+        }
+
+        &--large {
+            @include flex-column(0, $space-large);
         }
 
         &--category {
@@ -1916,21 +2068,17 @@ $red-theme--NEUTRAL: (
             @include flex-column(0, $space-small);
 
             &:not(:has(.user)) {
+                /* This avoids the hidden element from
+                triggering the sidebar__section's gap */
+                position: fixed;
+
                 #{$self}__lead-in {
                     display: none;
                 }
             }
-
-            &:has(.user) {
-                margin-top: $space-large;
-            }
         }
 
         &--private-chats {
-            @include flex-column(0, $space-small);
-        }
-        
-        &--buttons {
             @include flex-column(0, $space-small);
         }
 
@@ -1968,7 +2116,16 @@ $red-theme--NEUTRAL: (
     }
 
     &__body {
-        @include flex-column($space-medium, $space-medium);
+        /*
+        
+        NOTE: on sidebar__body and sidebar__section, 
+        __body should determine the padding, meanwhile,
+        the __section element/s will take care of the
+        spacing between the elements themselves, e.g,
+        gap / margin
+
+        */
+        @include flex-column($space-medium, 0);
         flex-grow: 1;
         overflow: auto;
     }
@@ -2071,18 +2228,19 @@ $red-theme--NEUTRAL: (
     &__content {
         @include flex-column($space-small, $space-small);
         @include absolute-boundary(100%, 0, auto, 0);
-        margin: $space-small;
         border-radius: $radius-small;
         overflow: hidden;
-        background-color: map-get($grey-theme-1, dark-bg);
-        z-index: 1;
+        background-color: map-get($grey-theme-1, neutral-bg);
         border: 1px solid map-get($grey-theme-1, light-bg);
+        z-index: 1;
+        margin: $space-medium;
     }
 
     &__button {
         @include default-color-transition;
-        @include flex-row($space-small $space-medium, $space-medium);
+        @include flex-row($space-small $space-medium, $space-large);
         align-items: center;
+        justify-content: space-between;
         cursor: pointer;
         color: map-get($grey-theme-1, dark-fg);
         font-size: $text-secondary-large;
@@ -2407,6 +2565,159 @@ $red-theme--NEUTRAL: (
         &--large {
             font-size: $text-special-large;
             padding: $space-large;
+        }
+    }
+}
+
+.overlay {
+    @include flex-column(0, 0);
+    max-height: 100vh;
+    overflow: overlay;
+
+    & > :first-child { border-radius: $radius-small $radius-small 0 0 }
+    & > :last-child { border-radius: 0 0 $radius-small $radius-small }
+
+    &__header {
+        @include flex-row($space-large, $space-large);
+        background-color: map-get($grey-theme-1, dark-bg);
+        justify-content: space-between;
+    }
+
+    &__title {
+        font-size: $text-primary-large;
+        font-weight: bold;
+        color: map-get($grey-theme-1, light-fg);
+        user-select: none;
+    }
+
+    &__label {
+        @include ellipsis;
+        font-size: $text-primary-small;
+        color: map-get($grey-theme-1, light-fg);
+    }
+
+    &__body {
+        @include flex-column($space-medium $space-large, $space-medium);
+        background-color: map-get($grey-theme-1, light-bg);
+    }
+
+    &__content {
+        @include flex-column($space-small, $space-small);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        border-radius: $radius-small;
+        max-height: 180px;
+
+        &--scroll {
+            overflow: overlay;
+        }
+    }
+
+    &__footer {
+        @include flex-row($space-medium $space-large, $space-large);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    &__action {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, light-fg);
+        user-select: none;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__row {
+        @include flex-row(0, $space-medium);
+    }
+
+    &__close {
+        @include default-color-transition;
+        color: map-get($grey-theme-1, dark-fg);
+        cursor: pointer;
+        
+        &:hover {
+            color: map-get($grey-theme-1, light-fg);
+        }
+    }
+}
+
+.invite {
+    @include flex-row(0, 0);
+    @include absolute-boundary(0, 0, 0, 0);
+    background-color: map-get($grey-theme-1, dark-bg);
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+
+    &__avatar {
+        border-radius: 9999px;
+        overflow: hidden;
+
+        .avatar {
+            background-color: map-get($grey-theme-1, dark-bg);
+        }
+    }
+
+    &__body {
+        @include flex-column($space-medium, $space-medium);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        align-items: center;
+        border-radius: $radius-medium;
+    }
+
+    &__divider {
+        height: 1px;
+        width: 100%;
+        background-color: map-get($grey-theme-1, light-bg);
+    }
+
+    &__title {
+        font-size: $text-special-small;
+        font-weight: bold;
+        color: map-get($grey-theme-1, light-fg);
+    }
+
+    &__subtitle {
+        font-size: $text-secondary-large;
+        font-weight: bold;
+        color: map-get($grey-theme-1, dark-fg);
+    }
+
+    &__members {
+        @include flex-row($space-small $space-large, $space-large);
+        background-color: map-get($grey-theme-1, light-bg);
+        border-radius: 9999px;
+        font-size: $text-secondary-medium;
+        border: 1px solid map-get($grey-theme-1, dark-fg);
+    }
+
+    &__button {
+        @include base-button;
+        @include medium-button;
+        align-self: stretch;
+        justify-content: center;
+        margin: $space-medium;
+
+        &--valid {
+            background-color: map-get($blue-theme-1, dark-bg);
+            color: map-get($blue-theme-1, light-fg);
+
+            &:hover {
+                background-color: map-get($blue-theme-1, light-bg);
+            }
+        }
+
+        &--expired {
+            background-color: map-get($red-theme-1, dark-bg);
+            color: map-get($red-theme-1, light-fg);
+
+            &:hover {
+                background-color: map-get($red-theme-1, light-bg);
+            }
         }
     }
 }

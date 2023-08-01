@@ -3,6 +3,7 @@ import json
 from itertools import chain
 from typing import Any, Dict, Optional
 from pathlib import Path
+from datetime import datetime
 
 from django import http
 from django.db import models
@@ -10,12 +11,13 @@ from django.forms.models import BaseModelForm
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse 
+from django.http import HttpRequest, HttpResponseBadRequest, HttpResponse, JsonResponse 
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from users.models import CustomUser, Friend, Friendship
 from core.models import News
@@ -26,6 +28,7 @@ from .models import (
     Category,
     Channel,
     Role,
+    Invite
 )
 from . import forms
 from utils import get_object_or_none
@@ -37,7 +40,7 @@ class DashboardView(TemplateView):
     template_name = 'rooms/dashboard.html'
 
 
-class CreateGroupChat(CreateView):
+class GroupChatCreateView(CreateView):
     form_class = forms.GroupChatCreateForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
@@ -180,25 +183,107 @@ class FriendshipFormView(FormView):
         sender_profile = Friend.objects.create(user=sender, friendship=new_friendship)
         receiver_profile = Friend.objects.create(user=receiver, friendship=new_friendship)
 
-        async_to_sync(channel_layer.group_send)(f'user_{sender.pk}', {
-            'type': 'send_to_client',
-            'action': 'create_friendship',
-            'is_receiver': False,
-            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver_profile, 'friendship': new_friendship})
-        })
+        async_to_sync(channel_layer.group_send)(
+            f'user_{sender.pk}_dashboard', {
+                'type': 'send_to_client',
+                'action': 'create_friendship',
+                'is_receiver': False,
+                'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver_profile, 'friendship': new_friendship})
+            }
+        )
 
-        async_to_sync(channel_layer.group_send)(f'user_{receiver.pk}', {
-            'type': 'send_to_client',
-            'action': 'create_friendship',
-            'is_receiver': True,
-            'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender_profile, 'friendship': new_friendship})
-        })
+        async_to_sync(channel_layer.group_send)(
+            f'user_{receiver.pk}_dashboard', {
+                'type': 'send_to_client',
+                'action': 'create_friendship',
+                'is_receiver': True,
+                'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender_profile, 'friendship': new_friendship})
+            }
+        )
+
+        async_to_sync(channel_layer.group_send)(
+            f'user_{receiver.pk}', {
+                'type': 'send_to_client',
+                'action': 'create_notification',
+                'id': 'dashboard-button',
+            }
+        )
 
         return JsonResponse({'status': 200, 'confirmation': f'Friend Request was sent to {full_username}'})
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+
+class InviteFormView(FormView):
+    form_class = forms.InviteForm
+    template_name = 'rooms/overlays/create-invite.html'
+
+    def get(self, *args, **kwargs):
+        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        context = super().get_context_data(**kwargs)
+        valid_invite = group_chat.invites.filter(expiry_date__gte=datetime.now()).exclude(one_time=True).first()
+        context['invite'] = valid_invite if valid_invite else Invite.objects.create(chat=group_chat)
+        return self.render_to_response(context)
+
+    def form_valid(self, form):
+        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        invite = Invite.objects.create(chat=group_chat, expiry_date=form.cleaned_data['expiry_date'], one_time=form.cleaned_data['one_time'])
+        return JsonResponse({'status': 200, 'invite_link': reverse('invite', kwargs={'directory': invite.directory})})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+
+class InviteDetailView(DetailView):
+    model = Invite
+    template_name = 'rooms/invite.html'
+    context_object_name = 'invite'
+
+    def get_object(self):
+        # Return None if there's no invite
+        return Invite.objects.filter(directory=self.kwargs['directory']).first()
     
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if self.object:
+            context['already_member'] = self.object.chat.memberships.all().filter(user=self.request.user).exists()
+        
+        return context
+    
+    def post(self, *args, **kwargs):
+        invite = self.get_object()
+        if invite and invite.is_valid():
+            GroupChatMembership.objects.create(chat=invite.chat, user=self.request.user)
+            if invite.one_time == True:
+                invite.delete()
+
+            return JsonResponse({'status': 200, 'redirect': reverse('group-chat', kwargs={'pk': invite.chat.pk})})
+        else:
+            return JsonResponse({'status': 400})
+        
+        
+class GroupChatMembershipDeleteView(DeleteView):
+    model = GroupChatMembership
+    template_name = 'rooms/overlays/leave-group-chat.html'
+    context_object_name = 'membership'
+    success_url = reverse_lazy('dashboard')
+
+    def get_object(self, queryset=None):
+        group_chat_pk = self.kwargs.get('group_chat_pk')
+        return GroupChatMembership.objects.get(Q(chat__pk=group_chat_pk) & Q(user=self.request.user))
+    
+
+"""
+
+TODO: implement private chat, priority is sending invites over it rn
+rework overlay, tooltip, form into one class(?)
+
+"""
+
+
+
+
 """
 class RoomView(DetailView):
     template_name = 'rooms/room.html'

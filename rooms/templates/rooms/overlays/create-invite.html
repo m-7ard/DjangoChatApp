@@ -1,0 +1,88 @@
+<div class="overlay form has-shadow">
+    <div class="overlay__header">
+        <div class="overlay__title">
+            Invite Users
+        </div>
+        <div class="overlay__close" data-command="remove-closest" data-target=".layer">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    close
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="overlay__body">
+        <div class="overlay__content overlay__content--scroll">
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+            {% include "../elements/invite.html" %}
+        </div>
+        <div class="form__widget form__widget--input">
+            <input class="overlay__label" id="invite-link" value="http://127.0.0.1:8000/rooms/invite/{{ invite.directory }}"> 
+            <div class="form__submit form__submit--create right">
+                Copy Link
+            </div>
+        </div>
+        <form class="overlay__content" data-submit-command="create-invite" method="POST" action="{% url 'invite-users' group_chat_pk=group_chat_pk %}">
+            {% csrf_token %}
+            <div class="form__labeled-element">
+                <div class="overlay__label">
+                    One Time Invite
+                </div>
+                <div class="form-slider">
+                    <div class="form-slider__marker">
+        
+                    </div>
+                    <input type="checkbox" name="one_time">
+                </div>
+            </div>
+            <div class="overlay__row">
+                <div class="dropdown form__widget--select" data-role="select">
+                    <div class="form__widget form__widget--option dropdown__trigger" data-role="root-option">
+                        7 Days
+                    </div>
+                    <div class="dropdown__content has-shadow">
+                        <div class="form__widget form__widget--option dropdown__close" data-command="select-option">
+                            <div data-role="option">
+                                1 Day
+                            </div>
+                            <input type="radio" name="expiry_date" value="1 day" required>
+                        </div>
+                        <div class="form__widget form__widget--option dropdown__close" data-command="select-option">
+                            <div data-role="option">
+                                7 Days
+                            </div>
+                            <input type="radio" name="expiry_date" value="7 days" checked required>
+                        </div>
+                        <div class="form__widget form__widget--option dropdown__close" data-command="select-option">
+                            <div data-role="option">
+                                30 Days
+                            </div>
+                            <input type="radio" name="expiry_date" value="30 days" required>
+                        </div>
+                        <div class="form__widget form__widget--option dropdown__close" data-command="select-option">
+                            <div data-role="option">
+                                365 Days
+                            </div>
+                            <input type="radio" name="expiry_date" value="365 days" required>
+                        </div>
+                        <div class="form__widget form__widget--option dropdown__close" data-command="select-option">
+                            <div data-role="option">
+                                Forever
+                            </div>
+                            <input type="radio" name="expiry_date" value="forever" required>
+                        </div>
+                    </div>
+                </div>
+                <button class="form__submit form__submit--create" type="submit">
+                    Create New Invite
+                </button>
+            </div>
+        </div>
+    </div>
+    
+</div>

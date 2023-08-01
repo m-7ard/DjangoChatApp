@@ -98,7 +98,7 @@ function randomID() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
-async function getView({name, kwargs, query}) {
+async function getView({name, kwargs, query, format}) {
     let url = new URL(window.location.origin + '/GetViewByName/' + name);
     if (kwargs) {
         url.searchParams.append('kwargs', kwargs);
@@ -107,7 +107,17 @@ async function getView({name, kwargs, query}) {
         url.searchParams.append('query', query);
     };
     let request = await fetch(url);
-    let response = await request.text();
+    let response;
+    if (format == 'html') {
+        response = await request.text();
+        response = parseHTML(response);
+    }
+    else if (format == 'json') {
+        response = await request.json();
+    }
+    else {
+        response = await request.text();
+    };
     return response;
 }
 
@@ -119,10 +129,38 @@ async function processForm(event) {
         body: new FormData(form)
     });
     let response = await request.json();
-    // Remove old errors
-    form.querySelectorAll('.field__message')?.forEach((error) => error.remove());
+    // Remove old messages
+    form.querySelectorAll('.form__message').forEach((message) => message.remove());
 
+    if (response.redirect) {
+        window.location.replace(response.redirect);
+    };
 
+    if (response.status == 200) {
+        // Success
+        quickCreateElement('div', {
+            classList: ['form__message', 'form__message--confirmation'],
+            innerHTML: response.confirmation,
+            parent: form
+        });
+    }
+    else if (response.status == 400) {
+        // Error
+
+        Object.entries(response.errors).forEach(([fieldName, errorList]) => {
+            let field = form.querySelector(`[data-name="${fieldName}"]`);
+            let parent = field ? field : form;
+
+            errorList.forEach((error) => {
+                let {code, message} = error;
+                quickCreateElement('div', {
+                    classList: ['form__message', 'form__message--error'],
+                    innerHTML: message,
+                    parent: parent
+                });
+            });
+        });
+    };
 }
 
 async function getTemplate({templateName, context}) {

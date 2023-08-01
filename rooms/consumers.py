@@ -40,7 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         extra_path = self.scope['url_route']['kwargs'].get('extra_path')
         if extra_path:
-            self.create_extra_groups(extra_path)
+            await self.create_extra_groups(extra_path)
 
         await self.channel_layer.group_add(f'user_{self.user.pk}', self.channel_name)
         await self.accept()
@@ -84,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender_user, receiver_user = await get_foreign_keys('user', sender_profile, receiver_profile)
         
         await self.channel_layer.group_send(
-            f'user_{sender_user.pk}', {
+            f'user_{sender_user.pk}_dashboard', {
                 'type': 'send_to_client',
                 'pk': receiver_profile.pk,
                 'is_receiver': False,
@@ -93,7 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.channel_layer.group_send(
-            f'user_{receiver_user.pk}', {
+            f'user_{receiver_user.pk}_dashboard', {
                 'type': 'send_to_client',
                 'pk': sender_profile.pk,
                 'is_receiver': True,
@@ -101,11 +101,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+        await self.channel_layer.group_send(
+            f'user_{receiver_user.pk}', {
+                'type': 'send_to_client',
+                'action': 'remove_notification',
+                'id': 'dashboard-button',
+            }
+        )
+
     async def delete_friendship(self, pk, **kwargs):
         @database_sync_to_async
         def delete_friendship():
+            nonlocal cancelled
             friend = Friend.objects.get(pk=pk)
             friendship = friend.friendship
+            cancelled = True if friendship.status == 'pending' else False
 
             sender_profile = friendship.sender_profile()
             receiver_profile = friendship.receiver_profile()
@@ -114,11 +124,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             return sender_profile, receiver_profile
         
+        cancelled = None
         sender_profile, receiver_profile = await delete_friendship()
         sender_user, receiver_user = await get_foreign_keys('user', sender_profile, receiver_profile)
 
         await self.channel_layer.group_send(
-            f'user_{sender_user.pk}', {
+            f'user_{sender_user.pk}_dashboard', {
                 'type': 'send_to_client',
                 'pk': receiver_profile.pk,
                 'was_receiver': False,
@@ -127,13 +138,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.channel_layer.group_send(
-            f'user_{receiver_user.pk}', {
+            f'user_{receiver_user.pk}_dashboard', {
                 'type': 'send_to_client',
                 'pk': sender_profile.pk,
                 'was_receiver': True,
                 **kwargs
             }
         )
+
+        if cancelled:
+            await self.channel_layer.group_send(
+                f'user_{receiver_user.pk}', {
+                    'type': 'send_to_client',
+                    'action': 'remove_notification',
+                    'id': 'dashboard-button',
+                }
+            )
     
 
 class GroupChatConsumer(ChatConsumer):

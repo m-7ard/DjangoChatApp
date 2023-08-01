@@ -1,0 +1,28 @@
+<form class="overlay form has-shadow" method="POST" action="{{ request.path }}">
+    {% csrf_token %}
+    <div class="overlay__header">
+        <div class="overlay__title">
+            {{ membership.chat.name }}
+        </div>
+        <div class="overlay__close" data-command="remove-closest" data-target=".layer">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    close
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="overlay__body">
+        <div class="overlay__label">
+            Are you sure you want to leave "{{ membership.chat.name }}"?
+        </div>
+    </div>
+    <div class="overlay__footer">
+        <div class="overlay__action right" data-command="remove-closest" data-target=".layer">
+            Cancel
+        </div>
+        <button class="form__submit form__submit--delete" type="submit">
+            Leave
+        </button>
+    </div>
+</form>

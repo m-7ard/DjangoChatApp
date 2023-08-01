@@ -64,8 +64,8 @@ window.addEventListener('submit', function delegateSubmit(event) {
     if (Object.keys(submitHandlers).includes(command)) {
         event.preventDefault();
         submitHandlers[command](event);
-    }
-})
+    };
+});
 
 window.addEventListener('click', function preventRedirect(event) {
     if (event.target.closest('[data-prevent-redirect]')) {
@@ -84,7 +84,6 @@ window.addEventListener('mouseup', function delegateClick(event) {
 		};
     };
 });
-
 
 // Close dropdowns
 window.addEventListener('mouseup', (event) => {

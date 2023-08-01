@@ -13,7 +13,8 @@ from .models import (
     Category,
     Backlog,
     BacklogGroup,
-    Message
+    Message,
+    Invite
 
 )
 
@@ -28,3 +29,4 @@ admin.site.register(Category)
 admin.site.register(Backlog)
 admin.site.register(BacklogGroup)
 admin.site.register(Message)
+admin.site.register(Invite)

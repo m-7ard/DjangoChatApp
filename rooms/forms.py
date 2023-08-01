@@ -1,6 +1,7 @@
 from django import forms
 from .models import Channel
 from utils import get_object_or_none
+from datetime import datetime, timedelta, MAXYEAR
 
 from core.widgets import AvatarInput
 from commons import widgets
@@ -87,7 +88,27 @@ class FriendForm(forms.Form):
     username_id = forms.IntegerField()
 
 
+class InviteForm(forms.Form):
+    one_time = forms.BooleanField(required=False)
+    expiry_date = forms.CharField(max_length=20)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.expiry_date_values = {
+            '1 day': lambda: datetime.today() + timedelta(days=1),
+            '7 days': lambda: datetime.today() + timedelta(weeks=1),
+            '30 days': lambda: datetime.today() + timedelta(days=30),
+            '365 days': lambda: datetime.today() + timedelta(days=365),
+            'forever': lambda: datetime.max
+        }
+
+    def clean_expiry_date(self):
+        expiry_date = self.cleaned_data["expiry_date"]
+        if expiry_date not in self.expiry_date_values:
+            raise forms.ValidationError("Not a valid expiry_date length")
+
+        return self.expiry_date_values[expiry_date]()
+    
 """
 class RoomUpdateForm(forms.ModelForm):
     class Meta:

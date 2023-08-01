@@ -18,8 +18,11 @@
                 </div>
             </div>
         </div>
-        <div class="sidebar-menu__content dropdown__content">
-            <div class="sidebar-menu__button dropdown__close">
+        <div class="sidebar-menu__content dropdown__content has-shadow">
+            <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="invite-users" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Invite Users
+                </div>
                 <div class="app__icon">
                     <div class="icon icon--small">
                         <i class="material-symbols-outlined">
@@ -27,14 +30,14 @@
                         </i>
                     </div>
                 </div>
-                <div>
-                    Invite Users
-                </div>
             </div>
             <div class="sidebar-menu__divider">
 
             </div>
             <div class="sidebar-menu__button dropdown__close" data-command="get-form" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Create Channel
+                </div>
                 <div class="app__icon">
                     <div class="icon icon--small">
                         <i class="material-symbols-outlined">
@@ -42,11 +45,11 @@
                         </i>
                     </div>
                 </div>
-                <div>
-                    Create Channel
-                </div>
             </div>
             <div class="sidebar-menu__button dropdown__close"  data-command="get-form" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Create Category
+                </div>
                 <div class="app__icon">
                     <div class="icon icon--small">
                         <i class="material-symbols-outlined">
@@ -54,15 +57,15 @@
                         </i>
                     </div>
                 </div>
-                <div>
-                    Create Category
-                </div>
             </div>
             <div class="sidebar-menu__divider">
 
             </div>
             {% if user != group_chat.owner %}
-                <div class="sidebar-menu__button dropdown__close">
+                <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                    <div>
+                        Leave Group Chat
+                    </div>
                     <div class="app__icon">
                         <div class="icon icon--small">
                             <i class="material-symbols-outlined">
@@ -70,21 +73,18 @@
                             </i>
                         </div>
                     </div>
-                    <div>
-                        Leave Group Chat
-                    </div>
                 </div>
             {% else %}
                 <div class="sidebar-menu__button dropdown__close">
+                    <div>
+                        Delete Group Chat
+                    </div>
                     <div class="app__icon">
                         <div class="icon icon--small">
                             <i class="material-symbols-outlined">
                                 backspace
                             </i>
                         </div>
-                    </div>
-                    <div>
-                        Delete Group Chat
                     </div>
                 </div>
             {% endif %}
@@ -122,9 +122,13 @@
  
 {% endblock %}
 
-
 {% block main-content-sidebar %}
     <div class="sidebar__section sidebar__section--users">
+        <div class="sidebar__lead-in">
+            <div class="sidebar__label sidebar__label--hoverable">
+                Members
+            </div>
+        </div>
         {% for membership in group_chat.memberships.all %}
             <div class="user">
                 <div class="user__avatar">
@@ -132,11 +136,13 @@
                         <img src="" alt="">
                     </div>
                 </div>
-                <div class="user__title">
-                    {% firstof membership.nickname membership.user.username %}
-                </div>
-                <div class="user__subtitle">
-                    {{ membership.user.status }}
+                <div class="user__body">
+                    <div class="user__title">
+                        {% firstof membership.nickname membership.user.username %}
+                    </div>
+                    <div class="user__subtitle">
+                        {{ membership.user.status }}
+                    </div>
                 </div>
             </div>
         {% endfor %}

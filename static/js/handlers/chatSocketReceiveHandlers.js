@@ -122,8 +122,6 @@ const chatSocketReceiveHandlers = {
         let section;
         if (is_receiver) {
             section = document.getElementById('incoming-pending-friendships');
-            let dashboardButton = document.getElementById('dashboard-button');
-            addNotification(dashboardButton);
         }
         else {
             section = document.getElementById('outgoing-pending-friendships');
@@ -154,4 +152,12 @@ const chatSocketReceiveHandlers = {
         };
         friend.remove();
     },
+    'create_notification': ({id}) => {
+        let element = document.getElementById(id);
+        addNotification(element);
+    },
+    'remove_notification': ({id}) => {
+        let element = document.getElementById(id);
+        removeNotification(element);
+    }
 };

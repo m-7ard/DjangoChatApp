@@ -5,6 +5,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.views import LoginView, LogoutView
 from django.template.loader import render_to_string
+from django.contrib.auth import login
 
 from .forms import SignupForm, CustomisedAuthenticationForm
 from .models import CustomUser
@@ -37,8 +38,9 @@ class SignupView(CreateView):
             form.add_error('username', f'All IDs for username {form} are taken, please choose a different username.')
             return self.form_invalid(form)
         
-        user.username_id = free_ids.pop()
+        user.username_id = free_ids.pop(0)
         user.save()
+        login(self.request, user)
         return JsonResponse({'status': 200, 'redirect': reverse('frontpage')})
 
     def form_invalid(self, form):
