@@ -1,0 +1,24 @@
+<form class="form__pick-item" method="POST" action="{% url 'create-private-chat' %}" data-submit-command="process-form">
+    {% csrf_token %}
+    <div data-role="item">
+        <div class="avatar avatar--small">
+            <img src="" alt="">
+        </div>
+        <div class="form__label">
+            {{ friend.user.full_name }}
+        </div>
+    </div>
+    {% with shared_private_chat=user|get_shared_private_chat:friend.user %}
+        {% if shared_private_chat %}
+            <a class="form__button form__button--pick-item" href="{% url 'private-chat' pk=shared_private_chat.pk %}">
+                Go To Chat
+            </a>
+        {% else %}
+            <input type="hidden" name="username" value="{{ friend.user.username }}">
+            <input type="hidden" name="username_id" value="{{ friend.user.username_id }}">
+            <button class="form__button form__button--pick-item" type="submit">
+                Create Chat
+            </button>
+        {% endif %}
+    {% endwith %}
+</form>

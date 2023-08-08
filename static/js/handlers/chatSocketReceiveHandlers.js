@@ -51,12 +51,7 @@ const chatSocketReceiveHandlers = {
             friend.remove();
         };
     },
-    'send-message': function receiveMessage({html}) {
-        let message = parseHTML(html);
-        let appMessages = document.querySelector('#app-messages');
-        appMessages.appendChild(message);
-        appMessages.scrollTo(0, appMessages.scrollHeight);
-    },
+
     'delete-backlog': ({objectType, objectPk}) => {
         let objectSelector = '.backlog';
         objectSelector += `[data-object-type="${objectType}"]`;
@@ -115,8 +110,16 @@ const chatSocketReceiveHandlers = {
     
     'response': () => { console.log('response exists') },
 
-    'create_message': ({html}) => {
+    'create_message': ({html, pk}) => {
         backlogs.appendChild(parseHTML(html));
+        backlogs.scrollTo(0, backlogs.scrollHeight);
+
+        if (!document.hidden) {
+            chatSocket.send(JSON.stringify({
+                'action': 'confirm_backlog_reception',
+                'pk': pk
+            }));
+        };
     },
     'create_friendship': ({html, is_receiver}) => {
         let section;
@@ -159,5 +162,9 @@ const chatSocketReceiveHandlers = {
     'remove_notification': ({id}) => {
         let element = document.getElementById(id);
         removeNotification(element);
-    }
+    },
+    'create_private_chat': ({html}) => {
+        let privateChats = document.getElementById('private-chats');
+        privateChats.appendChild(parseHTML(html));
+    },
 };

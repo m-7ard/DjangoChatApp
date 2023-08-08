@@ -1,0 +1,23 @@
+<a class="user user--private-chat {% if private_chat == local_private_chat %} user--selected {% endif %}" href="{% url 'private-chat' pk=local_private_chat.pk %}" id="private-chat-{{ local_private_chat.pk }}">
+    <div class="user__avatar">
+        <div class="avatar avatar--small">
+            <img src="" alt="">
+        </div>
+    </div>
+    <div class="user__body">
+        <div class="user__title">
+            {{ other_party.user.username }}
+        </div>
+        <div class="user__subtitle">
+            {{ other_party.user.status }}
+        </div>
+    </div>
+    <div class="user__notification">
+
+    </div>
+    {% if private_chat_membership.unread_backlogs %}
+        <div class="app__notification">
+            {{ other_party.unread_backlogs.count }}
+        </div>
+    {% endif %}
+</a>

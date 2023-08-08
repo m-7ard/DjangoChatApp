@@ -43,8 +43,16 @@ class GroupChat(Chat):
 
 
 class PrivateChat(Chat):
-    pass
+    pinned_messages = models.ManyToManyField('Message', blank=True)
 
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            super().save(*args, **kwargs)
+            BacklogGroup.objects.create(kind='private_chat', private_chat=self)
+        else:
+            super().save(*args, **kwargs)
 
 class Membership(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -63,6 +71,21 @@ class GroupChatMembership(Membership):
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
+    active = models.BooleanField(default=False)
+
+    def other_party(self):
+        return self.chat.memberships.all().exclude(user=self.user).first()
+    
+    def activate(self):
+        previous_state = self.active
+        self.active = True
+        self.save()
+        return previous_state == False
+    
+    def unread_backlogs(self):
+        tracker = self.user.backlog_trackers.all().get(backlog_group=self.chat.backlog_group)
+        if tracker.last_backlog_seen:
+            return self.chat.backlog_group.backlogs.all().filter(pk__gt=tracker.last_backlog_seen.pk)
 
 
 class Category(models.Model):
@@ -70,28 +93,9 @@ class Category(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='categories')
 
 
-class Channel(models.Model):    
+class GroupChannel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     pinned_messages = models.ManyToManyField('Message', blank=True)
-
-    class Meta:
-        abstract = True
-
-
-class PrivateChannel(Channel):
-    chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='channel', null=True)
-    
-    def save(self, *args, **kwargs):
-        creating = self._state.adding
-        
-        if creating:
-            super().save(*args, **kwargs)
-            BacklogGroup.objects.create(kind='private_channel', private_channel=self)
-
-        super().save(*args, **kwargs)
-
-
-class GroupChannel(Channel):
     name = models.CharField(max_length=30)
     description = models.CharField(max_length=1024, blank=True)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='channels', null=True)
@@ -110,14 +114,14 @@ class GroupChannel(Channel):
 class BacklogGroup(models.Model):
     KINDS = (
         ('group_channel', 'Group Chat Backlogs'),
-        ('private_channel', 'Private Chat Backlogs'),
+        ('private_chat', 'Private Chat Backlogs'),
     )
 
     kind = models.CharField(max_length=20, choices=KINDS)
     group_channel = models.OneToOneField(GroupChannel, on_delete=models.CASCADE, related_name='backlog_group', null=True)
-    private_channel = models.OneToOneField(PrivateChannel, on_delete=models.CASCADE, related_name='backlog_group', null=True)
+    private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
-    def get_chat(self):
+    def belongs_to(self):
         return getattr(self, self.kind)
 
 
@@ -161,17 +165,28 @@ class Role(models.Model):
     memberships = models.ManyToManyField(GroupChatMembership, related_name='roles')
 
 
+def invite_default_expiry_date():
+    return datetime.now(timezone.utc) + timedelta(days=1)
+
+
 class Invite(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='invites')
     directory = models.UUIDField(default=uuid4, editable=False)
     one_time = models.BooleanField(default=False)
-    expiry_date = models.DateTimeField(default=datetime.now(timezone.utc) + timedelta(days=1))
+    expiry_date = models.DateTimeField(default=invite_default_expiry_date)
 
     def is_valid(self):
         return self.expiry_date > datetime.now(timezone.utc)
     
     def __str__(self):
         return f'{self.is_valid()} - {str(self.directory)}'
+
+
+class BacklogGroupTracker(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='backlog_trackers')
+    backlog_group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='+')
+    last_backlog_seen = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='+', null=True)
+    
 
 """
 # *RolePermissions

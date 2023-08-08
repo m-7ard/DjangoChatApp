@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.db.models import Q
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
-
+from django.apps import apps
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -75,6 +75,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
     
+    def private_chats(self):
+        PrivateChat = apps.get_model('rooms', 'PrivateChat')
+        return PrivateChat.objects.filter(memberships__user=self)
+       
+    def friends(self):
+        return map(lambda obj: obj.other_party(), self.friend_objects.all())
+
     def joined_site(self):
         return self.date_joined.strftime("%d %B %Y")
     

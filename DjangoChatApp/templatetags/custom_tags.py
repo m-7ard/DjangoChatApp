@@ -3,7 +3,10 @@ import re
 
 from django.template import Template, Context
 from django.template.defaulttags import register
+from django.db.models import Q
 
+
+from rooms.models import PrivateChat
 
 
 from ..settings import MEDIA_URL
@@ -68,3 +71,8 @@ def split(string, replace_with='_'):
 @register.filter(name="generateID")
 def generateID(self):
     return f'{app_name(self)}-{classname(self)}-{self.pk}'
+
+
+@register.filter(name="get_shared_private_chat")
+def get_shared_private_chat(user1, user2):
+    return (PrivateChat.objects.filter(memberships__user=user1) & PrivateChat.objects.filter(memberships__user=user2)).first()

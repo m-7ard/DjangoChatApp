@@ -8,19 +8,18 @@ from .models import (
     GroupChat,
     PrivateChat,
     GroupChannel,
-    PrivateChannel,
     Role,
     Category,
     Backlog,
     BacklogGroup,
     Message,
-    Invite
+    Invite,
+    BacklogGroupTracker
 
 )
 
 admin.site.register(GroupChat)
 admin.site.register(PrivateChat)
-admin.site.register(PrivateChannel)
 admin.site.register(GroupChannel)
 admin.site.register(Role)
 admin.site.register(GroupChatMembership)
@@ -30,3 +29,4 @@ admin.site.register(Backlog)
 admin.site.register(BacklogGroup)
 admin.site.register(Message)
 admin.site.register(Invite)
+admin.site.register(BacklogGroupTracker)

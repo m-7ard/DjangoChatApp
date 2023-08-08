@@ -3,7 +3,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-	path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+	path('self/dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('self/private-chat/<int:pk>/', views.PrivateChatDetailView.as_view(), name='private-chat'),
+    path('self/create/private-chat/', views.CreatePrivateChat.as_view(), name='create-private-chat'),
+    
     path('create/group-chat/', views.GroupChatCreateView.as_view(), name='create-group-chat'),
     path('group-chat/<int:pk>/', views.GroupChatDetailView.as_view(), name='group-chat'),
     path('create/category/<int:group_chat_pk>/', views.CategoryCreateView.as_view(), name='create-category'),

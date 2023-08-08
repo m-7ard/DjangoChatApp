@@ -1,0 +1,63 @@
+{% extends "core/app.html" %}
+
+{% block app-sidebar-header %}
+    <input class="sidebar__searchbar sidebar__searchbar--main" placeholder="Search Private Chat">
+{% endblock %}
+
+{% block app-sidebar-body %}
+    <div class="sidebar__section sidebar__section--large">
+        <div class="sidebar__section sidebar__section--small">
+            <div class="sidebar__button tooltip__trigger" data-name="add-friend" data-positioning='{"top": "0px", "left": "100%"}'>
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        person_add
+                    </i>
+                </div>
+                <div class="sidebar__button-body">
+                    Add Friend
+                </div>
+            </div>
+            <div class="sidebar__button">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        diamond
+                    </i>
+                </div>
+                <div class="sidebar__button-body">
+                    Premium
+                </div>
+            </div>
+            <div class="sidebar__button">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        forward_to_inbox
+                    </i>
+                </div>
+                <div class="sidebar__button-body">
+                    Message Requests
+                </div>
+            </div>
+        </div>
+        <div class="sidebar__section sidebar__section--small" id="private-chats">
+            <div class="sidebar__lead-in">
+                <div class="sidebar__label sidebar__label--hoverable">
+                    Private Chats
+                </div>
+                <div class="app__icon app__icon--hoverable" data-command="get-overlay" data-name="create-private-chat">
+                    <div class="icon icon--tiny icon--hoverable">
+                        <i class="material-symbols-outlined">
+                            add
+                        </i>
+                    </div>
+                </div>
+            </div>
+            {% for private_chat_membership in user.private_chat_memberships.all %}
+                {% if private_chat_membership.active %}
+                    {% with other_party=private_chat_membership.other_party local_private_chat=private_chat_membership.chat %}
+                        {% include "./elements/private-chat.html" %}
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

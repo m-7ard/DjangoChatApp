@@ -26,9 +26,11 @@ from .models import (
     GroupChatMembership,
     GroupChannel,
     Category,
-    Channel,
     Role,
-    Invite
+    Invite,
+    PrivateChat,
+    PrivateChatMembership,
+    BacklogGroupTracker
 )
 from . import forms
 from utils import get_object_or_none
@@ -150,19 +152,12 @@ class CategoryCreateView(CreateView):
 
 
 class FriendshipFormView(FormView):
-    form_class = forms.FriendForm
+    form_class = forms.VerifyUser
     template_name = 'rooms/tooltips/add-friend.html'
 
     def form_valid(self, form):
-        username = form.cleaned_data['username']
-        username_id = form.cleaned_data['username_id']
-        full_username = f'{username}#{str(username_id).zfill(2)}'
-        receiver = get_object_or_none(CustomUser, username=username, username_id=username_id)
+        receiver = form.get_user()
         sender = self.request.user
-
-        if not receiver:
-            form.add_error(None, f'User {full_username} does not exist.')
-            return self.form_invalid(form)
         
         if receiver == sender:
             form.add_error(None, f'Cannot send friendship request to yourself.')
@@ -173,9 +168,9 @@ class FriendshipFormView(FormView):
         if friendship:
             status = friendship.status
             if status == 'pending':
-                form.add_error(None, f'Already sent Friend Request to {full_username}')
+                form.add_error(None, f'Already sent Friend Request to {receiver.full_name()}')
             elif status == 'accepted':
-                form.add_error(None, f'Already Friends with {full_username}')
+                form.add_error(None, f'Already Friends with {receiver.full_name()}')
                 
             return self.form_invalid(form)
         
@@ -274,37 +269,53 @@ class GroupChatMembershipDeleteView(DeleteView):
         return GroupChatMembership.objects.get(Q(chat__pk=group_chat_pk) & Q(user=self.request.user))
     
 
-"""
-
-TODO: implement private chat, priority is sending invites over it rn
-rework overlay, tooltip, form into one class(?)
-
-"""
-
-
-
-
-"""
-class RoomView(DetailView):
-    template_name = 'rooms/room.html'
-    model = Room
-    context_object_name = 'room'
-
-
-
-class ChannelView(DetailView):
-    template_name = 'rooms/channel.html'
-    model = Channel
-    context_object_name = 'channel'
-
-    def get_object(self):
-        return Channel.objects.get(pk=self.kwargs['channel'])
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+class PrivateChatDetailView(DetailView):
+    model = PrivateChat
+    template_name = 'rooms/private-chat.html'
+    context_object_name = 'private_chat'
 
     def get(self, request, *args, **kwargs):
-        pass
+        self.object = self.get_object()
+        context = super().get_context_data(*args, **kwargs)
+        context['other_party'] = self.object.memberships.all().exclude(user=request.user).first()
+        private_chat_membership = PrivateChatMembership.objects.get(user=request.user, chat=self.object)
+        private_chat_membership.active = True
+        private_chat_membership.save()
+
+        return self.render_to_response(context)
+
+
+class CreatePrivateChat(FormView):
+    form_class = forms.VerifyUser
+    template_name = 'rooms/overlays/create-private-chat.html'
+    
+    def form_valid(self, form):
+        receiver = form.get_user()
+        sender = self.request.user
+
+        if receiver == sender:
+            form.add_error(None, f'Cannot create private chat with yourself.')
+            return self.form_invalid(form)
+
+        private_chat = sender.private_chats().intersection(receiver.private_chats()).first()
+
+        if private_chat:
+            return JsonResponse({'status': 400, 'redirect': reverse('private-chat', kwargs={'pk': private_chat.pk})})
+        else:
+            private_chat = PrivateChat.objects.create()
+            PrivateChatMembership.objects.create(user=sender, chat=private_chat, active=True)
+            PrivateChatMembership.objects.create(user=receiver, chat=private_chat)
+            # to track unread messages
+            BacklogGroupTracker.objects.create(user=sender, backlog_group=private_chat.backlog_group)
+            BacklogGroupTracker.objects.create(user=receiver, backlog_group=private_chat.backlog_group)
+            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': private_chat.pk})})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+
+"""
+
 
 
 class ChannelCreateView(CreateView):
@@ -394,30 +405,6 @@ class ChannelManageView(TemplateView):
         return render(request, self.template_name, context=context)
 
 
-class ChannelUpdateView(UpdateView):
-    model = Channel
-    form_class = ChannelUpdateForm
-
-    def form_invalid(self, form):
-        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
-
-    def form_valid(self, form):
-        self.object = form.save()
-        return JsonResponse({'status': 200})
-        
-
-class ChannelDeleteView(DeleteView):
-    model = Channel
-    form_class = ChannelDeleteForm
-
-    def form_invalid(self, form):
-        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data(), 'message': 'Could not delete channel'})
-
-    def form_valid(self, form):
-        success_url = reverse('room', kwargs={'pk': self.object.room.pk})
-        self.object.delete()
-        return JsonResponse({'status': 400, 'redirect': success_url})
-    
 
 class RoomCreateView(CreateView):
     form_class = RoomCreateForm

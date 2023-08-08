@@ -1,62 +1,12 @@
 from django import forms
-from .models import Channel
 from utils import get_object_or_none
 from datetime import datetime, timedelta, MAXYEAR
 
 from core.widgets import AvatarInput
 from commons import widgets
 from .models import GroupChannel, GroupChat, Category
+from users.models import CustomUser
 
-class ChannelCreateForm(forms.ModelForm):
-    kind = forms.ChoiceField(widget=widgets.ChannelKindSelect(), choices=((),))
-    name = forms.CharField(widget=widgets.FormTextInput())
-    description = forms.CharField(widget=widgets.FormTextInput(), required=False)
-
-    def __init__(self, category=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if category:
-            self.fields['category'].initial = category.pk
-            self.fields['category'].widget = self.fields['category'].hidden_widget()
-
-    class Meta:
-        model = GroupChannel
-        fields = ['name', 'description', 'kind']
-
-
-class ChannelDeleteForm(forms.ModelForm):
-    confirm = forms.BooleanField(widget=widgets.FormSlider())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)        
-        self.fields['confirm'].label = f'I confirm that I wish to delete "{self.instance.name}"'
-        self.fields['confirm'].widget.field = self.fields['confirm']
-
-    class Meta:
-        model = GroupChannel
-        fields = ['confirm']
-
-class ChannelUpdateForm(forms.ModelForm):
-    name = forms.CharField(widget=widgets.FormTextInput())
-    description = forms.CharField(widget=widgets.FormTextInput(), required=False)
-    order =  forms.CharField(widget=widgets.FormNumberInput())
-    category = forms.ModelChoiceField(widget=widgets.FormSelect(), queryset=None, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['category'].queryset = self.instance.room.categories.all()
-        self.fields['category'].selected = self.instance.category
-        self.fields['category'].widget.field = self.fields['category']
-
-    class Meta:
-        model = GroupChannel
-        fields = ['name', 'description', 'order', 'category']
-
-
-class ChannelPermissionsForm(forms.ModelForm):
-    class Meta:
-        model = GroupChannel
-        fields = '__all__'
-        
 
 class GroupChatCreateForm(forms.ModelForm):
     name = forms.CharField(widget=widgets.FormTextInput())
@@ -83,9 +33,23 @@ class CategoryCreateForm(forms.ModelForm):
         fields = ['name']
 
 
-class FriendForm(forms.Form):
+class VerifyUser(forms.Form):
     username = forms.CharField()
     username_id = forms.IntegerField()
+
+    def get_user(self):
+        username = self.cleaned_data['username']
+        username_id = self.cleaned_data['username_id']
+        return get_object_or_none(CustomUser, username=username, username_id=username_id)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        user = self.get_user()
+
+        if not user:
+            username = cleaned_data["username"]
+            username_id = str(cleaned_data["username_id"]).zfill(2)
+            self.add_error(None, f'User {username}#{username_id} does not exist.')
 
 
 class InviteForm(forms.Form):
@@ -108,24 +72,3 @@ class InviteForm(forms.Form):
             raise forms.ValidationError("Not a valid expiry_date length")
 
         return self.expiry_date_values[expiry_date]()
-    
-"""
-class RoomUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Room
-        fields = ['name', 'description', 'image']
-        
-    def clean_image(self):
-        image = self.cleaned_data.get('image')
-
-        if image:
-            return image
-        else:
-            # Keep the current image at the time of editing
-            # if none provided
-            return self.initial.get('image')
-
-class MessageForm(forms.ModelForm):
-    pass
-
-"""

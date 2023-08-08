@@ -124,13 +124,14 @@ async function getView({name, kwargs, query, format}) {
 async function processForm(event) {
     event.preventDefault();
     let form = event.target.closest('form');
+    let formContainer = event.target.closest('.form');
     let request = await fetch(form.action, {
         method: form.method,
         body: new FormData(form)
     });
     let response = await request.json();
     // Remove old messages
-    form.querySelectorAll('.form__message').forEach((message) => message.remove());
+    formContainer.querySelectorAll('.form__message').forEach((message) => message.remove());
 
     if (response.redirect) {
         window.location.replace(response.redirect);
@@ -141,15 +142,15 @@ async function processForm(event) {
         quickCreateElement('div', {
             classList: ['form__message', 'form__message--confirmation'],
             innerHTML: response.confirmation,
-            parent: form
+            parent: formContainer
         });
     }
     else if (response.status == 400) {
         // Error
 
         Object.entries(response.errors).forEach(([fieldName, errorList]) => {
-            let field = form.querySelector(`[data-name="${fieldName}"]`);
-            let parent = field ? field : form;
+            let field = formContainer.querySelector(`[data-name="${fieldName}"]`);
+            let parent = field ? field : formContainer.querySelector('[data-role="form-errors"]');
 
             errorList.forEach((error) => {
                 let {code, message} = error;

@@ -1,34 +1,25 @@
-<div class="tooltip tooltip--small tooltip--y-adjacent has-shadow">
-    <div class="tooltip__header">
-        <div class="tooltip__title">
-            Enter User
+<form class="form overlay tooltip tooltip--small tooltip--y-adjacent has-shadow" action="{% url 'add-friend' %}" data-submit-command="process-form" method="POST">
+    {% csrf_token %}
+    <div class="overlay__header">
+        <div class="overlay__title">
+            Send Friend Request
         </div>
     </div>
-    <div class="tooltip__body">
-        <form class="form" method="POST" action="{% url 'add-friend' %}" data-submit-command="process-form">
-            {% csrf_token %}
-            <div class="form__field">
-                <div class="form__widget form__widget--user-input">
-                    <div class="form__widget form__widget--input">
-                        <input required size="1" type="text" name="username" placeholder="user" id="add-friend-input" pattern="[a-zA-Z0-9]+" data-role="username-input">
-                        <div class="app__icon">
-                            <div class="icon icon--small">
-                                <i class="material-symbols-outlined">
-                                    tag
-                                </i>
-                            </div>
-                        </div>
-                        <input minlength="2" required maxlength="2" size="1" type="text" name="username_id" placeholder="00" id="add-friend-input" inputmode="numeric" data-role="username_id-input">
-                    </div>
-                    <button class="app__icon app__icon--hoverable">
-                        <div class="icon icon--small icon--hoverable">
-                            <i class="material-symbols-outlined">
-                                send
-                            </i>
-                        </div>
-                    </button>
+    <div class="overlay__body">
+        <div class="form__row">
+            <div class="form__user-input">
+                <input class="form__input" required size="1" type="text" name="username" placeholder="user" id="add-friend-input" pattern="[a-zA-Z0-9]+" data-role="username-input">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        tag
+                    </i>
                 </div>
+                <input class="form__input" minlength="2" required maxlength="2" size="1" type="text" name="username_id" placeholder="00" id="add-friend-input" inputmode="numeric" data-role="username_id-input">
             </div>
-        </form>
+            <button class="form__submit form__submit--create">
+                Send
+            </button>
+        </div>
     </div>
+    <div class="overlay__footer" data-role="form-errors"></div>
 </div>

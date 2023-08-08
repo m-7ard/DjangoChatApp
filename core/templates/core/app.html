@@ -7,7 +7,7 @@
         <div class="sidebar sidebar--groupchats" data-state="closed" id="groupchats">
             <div class="sidebar__body">
                 <div class="sidebar__section sidebar__section--groupchats">
-                    <a class="groupchat {% if request.get_full_path == '/rooms/dashboard/' %} groupchat--selected {% endif %}" href="{% url 'dashboard' %}" id="dashboard-button">
+                    <a class="groupchat {% if '/self/' in request.get_full_path %} groupchat--selected {% endif %}" href="{% url 'dashboard' %}" id="dashboard-button">
                         <div class="groupchat__avatar">
                             <div class="avatar avatar--medium">
                                 <i class="material-symbols-outlined">
