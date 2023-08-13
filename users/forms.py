@@ -13,24 +13,24 @@ from commons import widgets
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(
-        widget=widgets.FormEmailInput()
+        widget=widgets.FormInput()
     )
     birthday = forms.DateTimeField(
         label="Birthday", 
         required=True, 
-        widget=widgets.FormDateInput(attrs={'type':'date'})
+        widget=widgets.FormInput(attrs={'type':'date'})
     )
     password1 = forms.CharField(
         label="Password",
-        widget=widgets.FormPasswordInput()
+        widget=widgets.FormInput()
     )
     password2 = forms.CharField(
         label="Repeat password", 
-        widget=widgets.FormPasswordInput(),
+        widget=widgets.FormInput(),
     )
     username = forms.CharField(
         max_length=30,
-        widget=widgets.FormTextInput()
+        widget=widgets.FormInput()
     )
 
     class Meta:
@@ -52,5 +52,5 @@ class SignupForm(UserCreationForm):
         
 
 class CustomisedAuthenticationForm(AuthenticationForm):
-    username = forms.CharField(widget=widgets.FormTextInput())
-    password = forms.CharField(widget=widgets.FormPasswordInput())
+    username = forms.CharField(widget=widgets.FormInput())
+    password = forms.CharField(widget=widgets.FormInput())

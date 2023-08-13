@@ -126,22 +126,6 @@ const commandHandlers = {
             kind: trigger.dataset.kind,
         }));
     },
-    'get-form': async ({trigger, event}) => {
-        event.preventDefault();
-        let formString = await getView({
-            name: trigger.dataset.name, 
-            kwargs: trigger.dataset.kwargs,
-            query: trigger.dataset.query,
-        });
-        let layer = quickCreateElement('div', {
-            parent: document.body,
-            classList: ['layer', 'layer--form'],
-            innerHTML: formString,
-            eventListeners: {
-                'submit': processForm,
-            }
-        });
-    },
     'get-overlay': async ({trigger, event}) => {
         event.preventDefault();
         let overlayString = await getView({
@@ -182,5 +166,9 @@ const commandHandlers = {
             'action': command,
             'pk': pk,
         }));
+    },
+    'select-text': ({trigger, event}) => {
+       let target = document.getElementById(trigger.dataset.target);
+       target.select();
     }
 };

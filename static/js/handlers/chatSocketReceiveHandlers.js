@@ -159,12 +159,16 @@ const chatSocketReceiveHandlers = {
         let element = document.getElementById(id);
         addNotification(element);
     },
-    'remove_notification': ({id}) => {
+    'remove_notification': ({id, times}) => {
         let element = document.getElementById(id);
-        removeNotification(element);
+        removeNotification(element, times);
     },
     'create_private_chat': ({html}) => {
         let privateChats = document.getElementById('private-chats');
         privateChats.appendChild(parseHTML(html));
     },
+    'remove_all_notifications': ({id}) => {
+        let element = document.getElementById(id);
+        element.querySelector('.app__notification').remove();
+    }
 };

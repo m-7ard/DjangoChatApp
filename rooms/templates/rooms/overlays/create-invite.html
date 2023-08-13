@@ -23,8 +23,8 @@
         </div>
         <div class="form__row">
             <input class="form__input" class="overlay__label" id="invite-link" value="http://127.0.0.1:8000/rooms/invite/{{ invite.directory }}"> 
-            <div class="form__submit form__submit--create">
-                Copy Link
+            <div class="form__submit form__submit--create" data-command="select-text" data-target="invite-link">
+                Select Link
             </div>
         </div>
         <form class="overlay__content" data-submit-command="create-invite" method="POST" action="{% url 'invite-users' group_chat_pk=group_chat_pk %}">

@@ -37,8 +37,10 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active { 
     -webkit-background-clip: text;
-    -webkit-text-fill-color: #ffffff;
+    -webkit-text-fill-color: map-get(global.$grey-theme-1, light-fg);
     transition: background-color 5000s ease-in-out 0s;
+    background-color: map-get(global.$grey-theme-1, dark-bg) !important;
+    background: map-get(global.$grey-theme-1, dark-bg) !important;
 }
 
 ul, li {

@@ -183,9 +183,10 @@ function increaseCounter(element) {
     return newCount;
 }
 
-function decreaseCounter(element) {
+function decreaseCounter(element, times) {
+    decreaseBy = times ? times : 1;
     let counter = element.querySelector('[data-role="counter"]');
-    let newCount = parseInt(counter.innerText) - 1;
+    let newCount = parseInt(counter.innerText) - decreaseBy;
     counter.innerText = newCount;
     return newCount;
 }
@@ -204,9 +205,9 @@ function addNotification(element) {
     };
 }
 
-function removeNotification(element) {
+function removeNotification(element, times) {
     let notification = element.querySelector('.app__notification');
-    let newCount = decreaseCounter(notification);
+    let newCount = decreaseCounter(notification, times);
     if (newCount == 0) {
         notification.remove();
     };

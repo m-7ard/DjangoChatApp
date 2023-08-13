@@ -9,8 +9,8 @@ from users.models import CustomUser
 
 
 class GroupChatCreateForm(forms.ModelForm):
-    name = forms.CharField(widget=widgets.FormTextInput())
-    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
+    name = forms.CharField(widget=widgets.FormInput())
+    public = forms.BooleanField(widget=widgets.FormLabeledSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
     
     class Meta:
         model = GroupChat
@@ -18,7 +18,7 @@ class GroupChatCreateForm(forms.ModelForm):
 
 
 class GroupChannelCreateForm(forms.ModelForm):
-    name = forms.CharField(widget=widgets.FormTextInput())
+    name = forms.CharField(widget=widgets.FormInput())
     
     class Meta:
         model = GroupChannel
@@ -26,7 +26,7 @@ class GroupChannelCreateForm(forms.ModelForm):
 
 
 class CategoryCreateForm(forms.ModelForm):
-    name = forms.CharField(widget=widgets.FormTextInput())
+    name = forms.CharField(widget=widgets.FormInput())
     
     class Meta:
         model = Category

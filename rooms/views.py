@@ -41,7 +41,6 @@ channel_layer = get_channel_layer()
 class DashboardView(TemplateView):
     template_name = 'rooms/dashboard.html'
 
-
 class GroupChatCreateView(CreateView):
     form_class = forms.GroupChatCreateForm
     template_name = 'commons/forms/compact-dynamic-form.html'
@@ -278,6 +277,7 @@ class PrivateChatDetailView(DetailView):
         self.object = self.get_object()
         context = super().get_context_data(*args, **kwargs)
         context['other_party'] = self.object.memberships.all().exclude(user=request.user).first()
+        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender')
         private_chat_membership = PrivateChatMembership.objects.get(user=request.user, chat=self.object)
         private_chat_membership.active = True
         private_chat_membership.save()

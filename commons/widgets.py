@@ -6,8 +6,8 @@ class ChannelKindSelect(forms.RadioSelect):
     template_name = "commons/widgets/channel-kind-select.html"
 
 
-class FormTextInput(forms.TextInput):
-    template_name = "commons/widgets/form-text-input.html"
+class FormInput(forms.TextInput):
+    template_name = "commons/widgets/form-input.html"
 
     def format_value(self, value):
         # taken from https://github.com/django/django/blob/main/django/forms/widgets.py#L249
@@ -50,8 +50,8 @@ class FormSelect(forms.Select):
         return context
     
 
-class FormSlider(forms.CheckboxInput):
-    template_name = "commons/widgets/form-slider.html"
+class FormLabeledSlider(forms.CheckboxInput):
+    template_name = "commons/widgets/form-labeled-slider.html"
     
 
 class FormPasswordInput(forms.PasswordInput):

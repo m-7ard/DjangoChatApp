@@ -1,6 +1,3 @@
-import datetime
-import random
-
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models.signals import post_save, pre_save
@@ -9,6 +6,10 @@ from django.db.models import Q
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.apps import apps
+from functools import reduce
+
+
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -88,8 +89,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f'{self.username}#{str(self.username_id).zfill(2)}'
     
-    def notifications(self):
-        return self.received_friendships.pending()
+    def notification_count(self):
+        Backlog = apps.get_model('rooms', 'Backlog')
+        unread_private_chat_backlogs = Backlog.objects.none()
+        for unread_backlogs in map(lambda obj: obj.unread_backlogs(), self.backlog_trackers.all()):
+            unread_private_chat_backlogs = unread_private_chat_backlogs.union(unread_backlogs)
+
+        return self.received_friendships.pending().count() + unread_private_chat_backlogs.count()
 
     class Meta:
         constraints = [

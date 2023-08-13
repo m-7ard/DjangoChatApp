@@ -21,10 +21,10 @@
                         <div class="groupchat__title">
                             Dashboard
                         </div>
-                        {% if user.notifications %}
+                        {% if user.notification_count %}
                             <div class="app__notification">
                                 <div data-role="counter">
-                                    {{ user.notifications.count }}
+                                    {{ user.notification_count }}
                                 </div>
                             </div>
                         {% endif %}
@@ -40,7 +40,7 @@
                     <div class="sidebar__divider" id="insert-groupchat">
 
                     </div>
-                    <div class="groupchat" data-command="get-form" data-name="create-group-chat">
+                    <div class="groupchat" data-command="get-overlay" data-name="create-group-chat">
                         <div class="groupchat__avatar">
                             <div class="avatar avatar--medium">
                                 <i class="material-symbols-outlined">

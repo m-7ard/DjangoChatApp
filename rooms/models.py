@@ -29,12 +29,12 @@ class GroupChat(Chat):
 
         if creating:
             super().save(*args, **kwargs)
-            default_category = Category.objects.create(name='Text Channels', chat=self)
-            default_channel = GroupChannel.objects.create(name='General', chat=self, category=default_category)
-            
             self.base_role = Role.objects.create(name='all', chat=self)
             owner_membership = GroupChatMembership.objects.create(user=self.owner, chat=self)
             self.base_role.memberships.add(owner_membership)
+            
+            default_category = Category.objects.create(name='Text Channels', chat=self)
+            default_channel = GroupChannel.objects.create(name='General', chat=self, category=default_category)
 
         super().save(*args, **kwargs)
 
@@ -64,9 +64,17 @@ class Membership(models.Model):
 class GroupChatMembership(Membership):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
-
     nickname = models.CharField(max_length=20, blank=True)
 
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            super().save(*args, **kwargs)
+            for channel in self.chat.channels.all():
+                BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
+        else:
+            super().save(*args, **kwargs)
 
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
@@ -85,7 +93,7 @@ class PrivateChatMembership(Membership):
     def unread_backlogs(self):
         tracker = self.user.backlog_trackers.all().get(backlog_group=self.chat.backlog_group)
         if tracker.last_backlog_seen:
-            return self.chat.backlog_group.backlogs.all().filter(pk__gt=tracker.last_backlog_seen.pk)
+            return self.chat.backlog_group.backlogs.all().filter(date_created__gt=tracker.last_backlog_seen.date_created)
 
 
 class Category(models.Model):
@@ -107,8 +115,13 @@ class GroupChannel(models.Model):
         if creating:
             super().save(*args, **kwargs)
             BacklogGroup.objects.create(kind='group_channel', group_channel=self)
+            for membership in self.chat.memberships.all():
+                BacklogGroupTracker.objects.create(user=membership.user, backlog_group=self.backlog_group)
         else:
             super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f'{self.chat.name} ({self.chat.pk}) >>> {self.name} ({self.pk})'
 
 
 class BacklogGroup(models.Model):
@@ -139,7 +152,7 @@ class Backlog(models.Model):
 
     def timestamp(self):
         return self.date_created.strftime("%H:%M:%S")
-
+    
 
 class Message(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
@@ -187,6 +200,14 @@ class BacklogGroupTracker(models.Model):
     backlog_group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='+')
     last_backlog_seen = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='+', null=True)
     
+    def unread_backlogs(self):
+        if not self.last_backlog_seen:
+            return Backlog.objects.none()
+        
+        return self.backlog_group.backlogs.filter(date_created__gt=self.last_backlog_seen.date_created)
+
+    def __str__(self):
+        return f'{self.backlog_group.kind} ({self.backlog_group.belongs_to().pk}) {self.user.full_name()} ({self.user.pk})'
 
 """
 # *RolePermissions

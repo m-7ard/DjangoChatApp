@@ -1,17 +1,22 @@
-<form class="form" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}">
+<form class="overlay form has-shadow" action="{{ form.url }}" method="POST" enctype="multipart/form-data" id="{{ form.title }}" data-submit-command="process-form">
     {% csrf_token %}
-    <div class="form__header">
+    <div class="overlay__header">
         <div>
-            <div class="form__title">
+            <div class="overlay__title">
                 {{ form.title }}
             </div>
             {% if form.subtitle %}
-                <div class="form__subtitle">
+                <div class="overlay__subtitle">
                     {{ form.subtitle }}
                 </div>
             {% endif %}
+            {% if form.warning %}
+                <div class="form__warning">
+                    {{ form.warning }}
+                </div>
+            {% endif %}
         </div>
-        <div class="form__close" data-command="remove-closest" data-target=".layer">
+        <div class="overlay__close" data-command="remove-closest" data-target=".layer">
             <div class="icon icon--small icon--hoverable">
                 <i class="material-symbols-outlined">
                     close
@@ -19,24 +24,21 @@
             </div>
         </div>
     </div>
-    {% if form.warning %}
-        <div class="form__warning">
-            {{ form.warning }}
-        </div>
-    {% endif %}
-    {% for field in form.fields %}
-        {% if field.field.widget|classname == 'HiddenInput' %}
-            {{ field }}
-        {% else %}
-            <div class="field" data-name="{{ field.name }}">
-                <div class="field__name">
-                    {{ field.label|title }}
+    <div class="overlay__body">
+        {% for field in form.fields %}
+            {% if field.field.widget|classname == 'HiddenInput' %}
+                {{ field }}
+            {% else %}
+                <div class="form__field" data-name="{{ field.name }}">
+                    <div class="form__field-name">
+                        {{ field.label|title }}
+                    </div>
+                    {{ field }}
                 </div>
-                 {{ field }}
-            </div>
-        {% endif %}
-    {% endfor %}
-    <div class="form__footer">
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="overlay__footer">
         {% if form.fields %}
             <div class="form__reset">
                 Reset
@@ -46,4 +48,5 @@
             {{ form.title }}
         </button>
     </div>
+    <div class="overlay__footer" data-role="form-errors"></div>
 </form>

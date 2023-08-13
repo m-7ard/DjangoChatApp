@@ -1,4 +1,5 @@
 {% extends "rooms/self.html" %}
+{% load static %}
 
 
 {% block extrahead %}
@@ -7,7 +8,7 @@
 
 {% block main-content %}
     <div class="app__backlogs" id="backlogs">
-        {% for backlog in private_chat.backlog_group.backlogs.all %}
+        {% for backlog in backlogs %}
             {% include "./elements/message.html" %}
         {% endfor %}
     </div>
@@ -23,4 +24,8 @@
     <div class="app__title">
         {{ other_party.user.full_name }}
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src='{% static "js/backlog_group.js" %}'></script>
 {% endblock %}

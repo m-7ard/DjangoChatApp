@@ -34,6 +34,10 @@ def get_foreign_keys(name, *objects):
 def get_foreign_key(name, object_):
     return getattr(object_, name)
 
+@database_sync_to_async
+def db_async(fn):
+    return fn()
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -43,14 +47,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not self.user or not self.user.is_authenticated:
             return self.close()
 
-        extra_path = self.scope['url_route']['kwargs'].get('extra_path')
-        if extra_path:
-            await self.create_extra_groups(extra_path)
-
-
+        await self.create_extra_path()
         await self.channel_layer.group_add(f'user_{self.user.pk}', self.channel_name)
-        await self.accept()
         await self.connect_user_to_chats()
+        await self.accept()
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
@@ -61,9 +61,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.close()
 
-    async def create_extra_groups(self, extra_path):
-        self.extra_path = extra_path.split('/')
-        
+    async def create_extra_path(self):
+        """ Server-Side called method """
+        extra_path = self.scope['url_route']['kwargs'].get('extra_path')
+        self.extra_path = extra_path.split('/') if extra_path else []
+
+        if 'self' in self.extra_path:
+            await self.channel_layer.group_add(f'user_{self.user.pk}_self', self.channel_name)
         if 'dashboard' in self.extra_path:
             await self.channel_layer.group_add(f'user_{self.user.pk}_dashboard', self.channel_name)
 
@@ -71,72 +75,87 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print('sending', 'data: ', event)
         await self.send(text_data=json.dumps(event))
 
-    async def check_and_send_chat_notification(self, event):
+    async def create_new_backlog_notification(self, event):
+        """ 
+            Server-Side called method.
+            Called from group send.
+        """
         @database_sync_to_async
-        def check_if_ok_to_send_notification():
+        def allow_notification(sender: int, target_backlog_group: int, backlog: int, **kwargs):
+            consumer_backlog_group = getattr(self, 'backlog_group', None)
+            consumer_backlog_group_pk = consumer_backlog_group.pk if consumer_backlog_group else None
+
             # backlog was sent by the same user
-            if event['sender'] == self.user.pk:
+            is_sender = (sender == self.user.pk)
+            if is_sender:
                 return False
 
-            # the user is already in the chat / backlog group and doesn't need a notification
-            if consumer_backlog_group and consumer_backlog_group.pk == initial_backlog_group:
+            # consumer user is already in the backlog_group's chat / channel; doesn't need a notification
+            already_served = (consumer_backlog_group_pk == target_backlog_group)
+            if already_served:
                 return False
             
             # the user already saw the message
-            backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=initial_backlog_group)
-            last_backlog_seen = backlog_group_tracker.last_backlog_seen
-            if last_backlog_seen and last_backlog_seen.pk >= event['backlog']:
+            target_backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=target_backlog_group)
+            last_backlog = target_backlog_group_tracker.last_backlog_seen
+            last_backlog_pk = last_backlog.pk if last_backlog else None
+            already_seen_backlog = (last_backlog_pk >= backlog)
+            if already_seen_backlog:
                 return False
 
             return True
         
-
+        async def delegate_notification_creation(notification_type: str, target_backlog_group: int, **kwargs):
+            await asyncio.sleep(2)
+            if not await allow_notification(**event):
+                return
+            
+            if notification_type == 'private_chat_notification':
+                await self.send_private_chat_notification(backlog_group=target_backlog_group, private_chat=kwargs['private_chat'])
         
-        consumer_backlog_group = getattr(self, 'backlog_group', None)
-        initial_backlog_group = event['backlog_group']
+        self.loop.create_task(delegate_notification_creation(**event))
         
-        await asyncio.sleep(2)
-        send_notification = await check_if_ok_to_send_notification() 
-        if send_notification:
-            kind = event['kind']
-            if kind == 'private_chat':
-                receiver = await self.async_db_operation(lambda: PrivateChatMembership.objects.get(chat__backlog_group=event['backlog_group'], user=self.user))
-                toggled = await self.async_db_operation(lambda: receiver.activate())
-                if toggled:
-                    html = self.async_db_operation(
-                        lambda: render_to_string(template_name='rooms/elements/message.html', context={
-                            'local_private_chat': receiver.chat, 
-                            'other_party': receiver
-                        })
-                    ) 
-                    await self.send(text_data=json.dumps({
-                        'action': 'create_private_chat',
-                        'html': html
-                    }))
+    async def send_private_chat_notification(self, backlog_group, private_chat):
+        """ Server-Side called method """
+        receiver = await db_async(lambda: PrivateChatMembership.objects.get(chat__backlog_group=backlog_group, user=self.user))
+        # The private chat will now appear on the clients /self/... sidebar
+        toggled = await db_async(lambda: receiver.activate())
+        
+        if 'self' in self.extra_path and toggled:
+            html = await db_async(lambda: render_to_string(template_name='rooms/elements/message.html', context={
+                'local_private_chat': receiver.chat, 
+                'other_party': receiver
+            })) 
+            await self.send_to_client({
+                'action': 'create_private_chat',
+                'html': html
+            })
 
-                await self.send(text_data=json.dumps({
-                    'action': 'create_notification',
-                    'id': f'private-chat-{event["pk"]}'
-                }))
-                await self.send(text_data=json.dumps({
-                    'action': 'create_notification',
-                    'id': f'dashboard-button'
-                }))
+        if 'self':
+            await self.send_to_client({
+                'action': 'create_notification',
+                'id': f'private-chat-{private_chat}'
+            })
+
+        await self.send_to_client({
+            'action': 'create_notification',
+            'id': f'dashboard-button'
+        })
 
     async def connect_user_to_chats(self):
+        """ 
+            Server-Side called method.
+            This method makes the user listen to all backlogs groups they're in.
+        """
         # using list(...) due to queryset not being iterable in async context
-        user_backlog_groups = await self.async_db_operation(
-            lambda: list(self.user.backlog_trackers.all().values_list('backlog_group', flat=True))
+        user_backlog_groups = await db_async(
+            lambda: list(self.user.backlog_trackers.values_list('backlog_group', flat=True))
         )
-
         for backlog_group in user_backlog_groups:
-             await self.channel_layer.group_add(f'backlog_group_{backlog_group}', self.channel_name)
-
-    @database_sync_to_async
-    def async_db_operation(self, fn):
-        return fn()
+            await self.channel_layer.group_add(f'backlog_group_{backlog_group}', self.channel_name)
     
     async def accept_friendship(self, pk, **kwargs):
+        """ Client-Side called method """
         @database_sync_to_async
         def accept_friendship():
             friend = Friend.objects.get(pk=pk)
@@ -179,9 +198,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def delete_friendship(self, pk, **kwargs):
+        """ Client-Side called method """
         @database_sync_to_async
         def delete_friendship():
-            nonlocal cancelled
             friend = Friend.objects.get(pk=pk)
             friendship = friend.friendship
             cancelled = True if friendship.status == 'pending' else False
@@ -191,10 +210,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             friendship.delete()
 
-            return sender_profile, receiver_profile
+            return cancelled, sender_profile, receiver_profile
         
-        cancelled = None
-        sender_profile, receiver_profile = await delete_friendship()
+        cancelled, sender_profile, receiver_profile = await delete_friendship()
         sender_user, receiver_user = await get_foreign_keys('user', sender_profile, receiver_profile)
 
         await self.channel_layer.group_send(
@@ -224,38 +242,56 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    async def confirm_backlog_reception(self, pk=None, **kwargs):
-        @database_sync_to_async
-        def confirm_backlog_reception():
-            backlog = get_object_or_none(Backlog, pk=pk)
-            if not backlog or backlog.group != self.backlog_group:
-                return
-            
-            backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
-            backlog_group_tracker.last_backlog_seen = backlog
-            backlog_group_tracker.save()
-
-        await confirm_backlog_reception()
-
+    @database_sync_to_async
+    def confirm_backlog_reception(self, pk=None, **kwargs):
+        """ Client-Side called method """
+        # verify input integrity
+        backlog = get_object_or_none(Backlog, pk=pk)
+        if not backlog or backlog.group != self.backlog_group:
+            return
         
+        backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
+        backlog_group_tracker.last_backlog_seen = backlog
+        backlog_group_tracker.save()
 
+    @database_sync_to_async
+    def get_unread_backlog_count(self):
+        if self.tracker.last_backlog_seen:
+            unread_count = self.backlog_group.backlogs.filter(date_created__gt=self.tracker.last_backlog_seen.date_created).count()
+        else:
+            unread_count = self.backlog_group.backlogs.all().count()
+        
+        return unread_count
+
+    @database_sync_to_async
+    def update_last_backlog_seen(self):
+        """ Server and Client-Side called method """
+        self.tracker.last_backlog_seen = self.backlog_group.backlogs.last()
+        self.tracker.save()
+
+       
 class GroupChatConsumer(ChatConsumer):    
     async def connect(self):
+        await super().connect()
         group_chat_pk = self.scope["url_route"]['kwargs'].get('group_chat_pk')
         group_channel_pk = self.scope["url_route"]['kwargs'].get('group_channel_pk')
-        self.group_chat = await self.async_db_operation(lambda: get_object_or_none(GroupChat, pk=group_chat_pk))
-        self.group_channel = await self.async_db_operation(lambda: get_object_or_none(GroupChannel, pk=group_channel_pk))
-        self.backlog_group = get_foreign_key('backlog_group', self.group_channel)
-        await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
+        self.group_chat = await db_async(lambda: GroupChat.objects.get(pk=group_chat_pk))
+        await self.channel_layer.group_add(f'group_chat_{self.group_chat.pk}', self.channel_name)
 
-        await super().connect()
+        if not group_channel_pk:
+            return
+        
+        self.group_channel = await db_async(lambda: GroupChannel.objects.get(pk=group_channel_pk))
+        self.backlog_group = await get_foreign_key('backlog_group', self.group_channel)
+        self.tracker = await db_async(lambda: BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group))
+        await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
 
     async def create_message(self, content, **kwargs):
         if not content:
             return
         
-        backlog = await self.async_db_operation(lambda: Backlog.objects.create(kind='message', group=self.group_channel.backlog_group))
-        message = await self.async_db_operation(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))
+        backlog = await db_async(lambda: Backlog.objects.create(kind='message', group=self.group_channel.backlog_group))
+        message = await db_async(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))
         html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
 
         await self.channel_layer.group_send(
@@ -266,14 +302,48 @@ class GroupChatConsumer(ChatConsumer):
             }
         )
 
+    async def update_last_backlog_seen(self, **kwargs):
+        super().update_last_backlog_seen()
+
+        # write notification group sends here
+
+        """
+        
+        TODO: notifications in groupchats at time of message creation
+        
+        """
 
 class PrivateChatConsumer(ChatConsumer):
     async def connect(self):
-        private_chat_pk = self.scope["url_route"]['kwargs'].get('private_chat_pk')
-        self.private_chat = await self.async_db_operation(lambda: PrivateChat.objects.get(pk=private_chat_pk))
-        self.backlog_group = await get_foreign_key('backlog_group', self.private_chat)
-        await self.channel_layer.group_add(f'private_chat_{self.private_chat.pk}', self.channel_name)
         await super().connect()
+        private_chat_pk = self.scope["url_route"]['kwargs'].get('private_chat_pk')
+        self.private_chat = await db_async(lambda: PrivateChat.objects.get(pk=private_chat_pk))
+        self.backlog_group = await get_foreign_key('backlog_group', self.private_chat)
+        self.tracker = await db_async(lambda: BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group))
+        await self.channel_layer.group_add(f'private_chat_{self.private_chat.pk}', self.channel_name)
+        await self.update_last_backlog_seen()
+    
+    async def update_last_backlog_seen(self, **kwargs):
+        unread_count = await super().get_unread_backlog_count()
+        if not unread_count:
+            return
+        
+        await super().update_last_backlog_seen()
+        await self.channel_layer.group_send(
+            f'user_{self.user.pk}_self', {
+                'type': 'send_to_client',
+                'action': 'remove_all_notifications',
+                'id': f'private-chat-{self.private_chat.pk}'
+            }
+        )
+        await self.channel_layer.group_send(
+            f'user_{self.user.pk}', {
+                'type': 'send_to_client',
+                'action': 'remove_notification',
+                'times': unread_count,
+                'id': f'dashboard-button'
+            }
+        )
 
     async def create_message(self, content, **kwargs):
         if not content:
@@ -293,16 +363,16 @@ class PrivateChatConsumer(ChatConsumer):
             }
         )
 
-        self.loop.create_task(self.channel_layer.group_send(
+        await self.channel_layer.group_send(
             f'backlog_group_{self.backlog_group.pk}', {
-                'type': 'check_and_send_chat_notification',
+                'type': 'create_new_backlog_notification',
                 'backlog': backlog.pk,
-                'backlog_group': backlog_group.pk,
+                'target_backlog_group': backlog_group.pk,
                 'sender': self.user.pk,
-                'kind': 'private_chat',
-                'pk': self.private_chat.pk
+                'notification_type': 'private_chat_notification',
+                'private_chat': self.private_chat.pk
             }
-        ))
+        )
 
 
 
@@ -591,7 +661,7 @@ class ChannelConsumer(ChatConsumer):
 class PrivateChatConsumer(ChatConsumer):
     async def connect(self):
         chat_pk = self.scope['url_route']['kwargs'].get('room')
-        self.chat = await self.async_db_operation(
+        self.chat = await db_async(
             lambda: PrivateChatConsumer.objects.get(pk=chat_pk)
         )
 

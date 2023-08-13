@@ -105,12 +105,12 @@
 }
 
 .layer {
-  display: flex;
   position: absolute;
   top: 0;
-  bottom: 0;
-  right: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   z-index: 1000;
 }
 .layer--tooltips {
@@ -119,12 +119,6 @@
   pointer-events: none;
 }
 .layer--overlay {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-.layer--form {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -859,16 +853,6 @@
 .form__reset:hover {
   text-decoration: underline;
 }
-.form__footer {
-  display: flex;
-  padding: 0.5rem;
-  gap: 0.5rem;
-  background-color: #131313;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: auto;
-  border-radius: 4px;
-}
 .form__submit {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -943,6 +927,11 @@
   flex-direction: column;
   padding: 0;
   gap: 0.25rem;
+}
+.form__field-name {
+  color: #DBD6CC;
+  font-size: 0.8125rem;
+  font-weight: bold;
 }
 .form__message {
   display: flex;
@@ -1460,9 +1449,9 @@
 }
 .app__notification {
   position: absolute;
-  bottom: -0.5rem;
-  right: -0.5rem;
-  border: 2px solid #b2aea6;
+  bottom: -0.25rem;
+  right: -0.25rem;
+  border: 1px solid #b2aea6;
   border-radius: 2px;
 }
 .app__notification [data-role=counter] {
@@ -1511,7 +1500,7 @@
   text-overflow: ellipsis;
   overflow-x: clip;
   grid-row: 1/2;
-  color: #b2aea6;
+  color: #DBD6CC;
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
@@ -1886,7 +1875,7 @@
      -moz-user-select: none;
           user-select: none;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1px solid #131313;
   border-radius: 4px;
   position: relative;
 }
@@ -1957,8 +1946,8 @@
   grid-column-end: 6;
 }
 .user__notification {
-  height: 0.75rem;
-  width: 0.75rem;
+  height: 6px;
+  width: 6px;
   border-radius: 9999px;
   background-color: #D6E019;
   box-shadow: 0px 0px 8px 1px rgba(214, 224, 25, 0.404);
@@ -2462,9 +2451,11 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-background-clip: text;
-  -webkit-text-fill-color: #ffffff;
+  -webkit-text-fill-color: #DBD6CC;
   -webkit-transition: background-color 5000s ease-in-out 0s;
   transition: background-color 5000s ease-in-out 0s;
+  background-color: #131313 !important;
+  background: #131313 !important;
 }
 
 ul, li {

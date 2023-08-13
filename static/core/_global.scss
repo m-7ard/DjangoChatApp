@@ -364,12 +364,8 @@ $red-theme-1: (
 }
 
 .layer {
+	@include absolute-boundary(0, 0, 0, 0);
     display: flex;
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	left: 0;
 	z-index: 1000;
 
 	&--tooltips {
@@ -384,13 +380,6 @@ $red-theme-1: (
 		justify-content: center;
 		background-color: rgba(0, 0, 0, 0.5);
 	}
-
-    &--form {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-		background-color: rgba(0, 0, 0, 0.5);
-    }
 }
 
 .container {
@@ -1146,15 +1135,6 @@ $red-theme-1: (
         }
     }
 
-    &__footer {
-        @include flex-row($space-medium, $space-medium);
-        background-color: map-get($grey-theme-1, dark-bg);
-        align-items: center;
-        justify-content: flex-end;
-        margin-top: auto;
-        border-radius: 4px;
-    }
-
 	&__submit {
 		@include base-button;
         @include medium-button;
@@ -1221,6 +1201,12 @@ $red-theme-1: (
 
     &__field {
         @include flex-column(0, $space-small);
+    }
+
+    &__field-name {
+        color: map-get($grey-theme-1, light-fg);
+        font-size: $text-secondary-medium;
+        font-weight: bold;
     }
 
     &__message {
@@ -1762,9 +1748,9 @@ $red-theme-1: (
 
     &__notification {
         position: absolute;
-        bottom: - $space-medium;
-        right: - $space-medium;
-        border: 2px solid map-get($grey-theme-1, neutral-fg);
+        bottom: - $space-small;
+        right: - $space-small;
+        border: 1px solid map-get($grey-theme-1, neutral-fg);
         border-radius: $radius-small;
 
         [data-role="counter"] {
@@ -1819,7 +1805,7 @@ $red-theme-1: (
     &__username {
         @include ellipsis;
         grid-row: 1 / 2;
-        color: map-get($grey-theme-1, neutral-fg);
+        color: map-get($grey-theme-1, light-fg);
         font-weight: bold;
         font-size: $text-primary-medium;
         cursor: pointer;
@@ -2175,7 +2161,7 @@ $red-theme-1: (
     align-items: center;
     user-select: none;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: 1px solid map-get($grey-theme-1, dark-bg);
     border-radius: $radius-medium;
     position: relative;
 
@@ -2233,8 +2219,8 @@ $red-theme-1: (
     border-radius: $radius-medium;
 
     &__notification {
-        height: $text-secondary-small;
-        width: $text-secondary-small;
+        height: 6px;
+        width: 6px;
         border-radius: 9999px;
         background-color: map-get($yellow-theme-1, light-bg);
         box-shadow: 0px 0px 8px 1px rgba(map-get($yellow-theme-1, light-bg), 0.404);
