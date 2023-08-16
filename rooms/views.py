@@ -18,6 +18,7 @@ from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.paginator import Paginator
 
 from users.models import CustomUser, Friend, Friendship
 from core.models import News
@@ -40,6 +41,14 @@ channel_layer = get_channel_layer()
 
 class DashboardView(TemplateView):
     template_name = 'rooms/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['incoming_friendship_requests'] = self.request.user.received_friendships.pending().select_related('sender')
+        context['accepted_friendship_requests'] = self.request.user.friendships().accepted().select_related('sender', 'receiver')
+        context['outgoing_friendship_requests'] = self.request.user.sent_friendships.pending().select_related('receiver')
+        return context
+    
 
 class GroupChatCreateView(CreateView):
     form_class = forms.GroupChatCreateForm
@@ -120,6 +129,12 @@ class GroupChannelDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group_chat'] = self.object.chat
+        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')[:20]
+        """
+        
+        TODO: make new messages appear by scrolling up
+        
+        """
         return context
 
 
@@ -140,7 +155,7 @@ class CategoryCreateView(CreateView):
         return self.render_to_response(context)
 
     def form_invalid(self, form):
-        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
     def form_valid(self, form):
         category = form.save(commit=False)

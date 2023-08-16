@@ -223,7 +223,8 @@ $red-theme-1: (
     }
 }
 
-@mixin build-row($column-templates: (1: auto), $gap: 0) {
+@mixin build-single-grid-row($column-templates: (1: auto), $gap: 0) {
+    display: grid;
     $column-template-string: ''; 
     $n: 0;
 
@@ -1512,18 +1513,16 @@ $red-theme-1: (
 }
 
 .channel {
-    @include default-color-transition;
 	@include flex-row($space-small, $space-medium);
     $self: &;
     align-items: center;
     border-radius: $radius-small;
     cursor: pointer;
     user-select: none;
+    color: map-get($grey-theme-1, dark-fg);
 
     &__title {
-        @include default-color-transition;
         font-size: $text-secondary-large;
-        color: map-get($grey-theme-1, dark-fg);
     }
 
     &:hover, &--selected {
@@ -1532,6 +1531,11 @@ $red-theme-1: (
         #{$self}__title {
             color: map-get($grey-theme-1, light-fg);
         }
+    }
+
+    /*00000*/
+    &:has(.notification) {
+        color: map-get($grey-theme-1, light-fg);
     }
 }
 
@@ -1663,7 +1667,7 @@ $red-theme-1: (
         position: relative;
         background-color: inherit;
 
-        &--groupchats {
+        &--group-chats {
             border-bottom: 1px solid map-get($grey-theme-1, light-bg);
             color: map-get($grey-theme-1, dark-fg);
         }
@@ -1744,28 +1748,6 @@ $red-theme-1: (
         @include flex-column(0, 0);
         flex: 1 0 0;
         overflow: overlay;
-    }
-
-    &__notification {
-        position: absolute;
-        bottom: - $space-small;
-        right: - $space-small;
-        border: 1px solid map-get($grey-theme-1, neutral-fg);
-        border-radius: $radius-small;
-
-        [data-role="counter"] {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: map-get($grey-theme-1, neutral-bg);
-            color: map-get($grey-theme-1, light-fg);
-            font-size: $text-secondary-small;
-            border-radius: $radius-small;
-            height: $text-secondary-small;
-            min-width: $text-secondary-small;
-            padding: 1px;
-            font-weight: bold;
-        }
     }
 
     &__avatar {
@@ -1869,7 +1851,7 @@ $red-theme-1: (
     $self: &;
     flex-shrink: 0;
     
-    &--groupchats {
+    &--group-chats {
         background-color: map-get($grey-theme-1, dark-bg);
         transition: flex-basis 0.4s $custom-ease-in;
 
@@ -1934,10 +1916,6 @@ $red-theme-1: (
         /*
         SEE comment in sidebar__body
         */
-        &--groupchats {
-            @include flex-column(0, $space-medium);
-        }
-
         &--catalogue {
             @include flex-column(0, $space-small);
         }
@@ -2152,61 +2130,71 @@ $red-theme-1: (
     }
 }
 
-.groupchat {
+.group-chat {
+    @include build-single-grid-row(
+        $column-templates: (1: auto, 2: minmax(0, 1fr)), 
+        $gap: minmax(0, $space-large)
+    );
     $self: &;
-    transition: border-color 0.2s;
-    display: grid;
-    grid-template: auto / auto minmax(0, $space-small) minmax(0, $space-large) minmax(0, 1fr);
-    background-color: map-get($grey-theme-1, neutral-bg);
     align-items: center;
     user-select: none;
     cursor: pointer;
     border: 1px solid map-get($grey-theme-1, dark-bg);
-    border-radius: $radius-medium;
     position: relative;
+    border-radius: $radius-small;
 
     &__avatar {
-        @include flex-row(0, 0);
+        border-radius: inherit;
+        color: map-get($grey-theme-1, dark-fg);
+        background-color: map-get($grey-theme-1, neutral-bg);
 
         .avatar {
             @include default-color-transition;
-            color: map-get($grey-theme-1, dark-fg);
+            border: 1px solid transparent;
+            overflow: hidden;
+            border-radius: inherit;
         }
     }
 
-    &:hover, &--selected {
-        border-color: map-get($grey-theme-1, dark-fg);
-        background-color: map-get($grey-theme-1, light-bg);
+    &__body {
+        @include default-color-transition;
+        @include flex-row(0, 0);
+        align-items: center;
+        align-self: stretch;
+        border-radius: inherit;
+        color: map-get($grey-theme-1, dark-fg);
+    }
 
-        .avatar {
-            color: map-get($grey-theme-1, light-fg);
+    &:hover, &--selected {
+        #{$self}__avatar {
+            .avatar {
+                border-color: map-get($grey-theme-1, dark-fg);
+                color: map-get($grey-theme-1, light-fg);
+                background-color: map-get($grey-theme-1, light-bg);
+            }
         }
 
-        #{$self}__title {
+        #{$self}__body {
             color: map-get($grey-theme-1, light-fg);
         }
     }
 
     &__title {
-        grid-column: 4 / 5;
-        @include default-color-transition;
         @include ellipsis;
-        color: inherit;
-        font-size: $text-primary-small;
-        color: map-get($grey-theme-1, neutral-fg);
+        font-size: $text-secondary-large;
     }
 
-    &__divider { 
-        grid-column: 2 / 3;
-        align-self: stretch;        
-        background-color: map-get($grey-theme-1, dark-bg);
+    &:has(.notification) {
+        .avatar {
+            box-shadow: 0px 0px 3px 1px map-get($blue-theme-1, light-bg);
+        }
     }
 }
 
 .user {
     @include default-color-transition;
     @include base-button;
-    @include build-row(
+    @include build-single-grid-row(
         $column-templates: (1: auto, 2: minmax(0, 1fr), 3: minmax(0, auto)),
         $gap: minmax(0, $space-medium)
     );
@@ -2218,32 +2206,8 @@ $red-theme-1: (
     position: relative;
     border-radius: $radius-medium;
 
-    &__notification {
-        height: 6px;
-        width: 6px;
-        border-radius: 9999px;
-        background-color: map-get($yellow-theme-1, light-bg);
-        box-shadow: 0px 0px 8px 1px rgba(map-get($yellow-theme-1, light-bg), 0.404);
-    }
-
     &--private-chat {
         overflow: visible;
-
-        .app__notification {
-            display: none;
-        }
-
-        &:has(.app__notification) {
-            #{$self}__notification {
-                visibility: visible;
-            }
-        }
-
-        &:not(:has(.app__notification)) {
-            #{$self}__notification {
-                visibility: hidden;
-            }
-        }
     }
 
     &:hover, &--selected {
@@ -2647,6 +2611,44 @@ $red-theme-1: (
             &:hover {
                 background-color: map-get($red-theme-1, light-bg);
             }
+        }
+    }
+}
+
+.notification {
+    &--hidden {
+        display: none;
+    }
+
+    &--private-chat {
+        height: 6px;
+        width: 6px;
+        overflow: hidden; /* prevent text from causing parent to overflow */
+        color: transparent;
+        border-radius: 9999px;
+        background-color: map-get($yellow-theme-1, light-bg);
+        box-shadow: 0px 0px 8px 1px rgba(map-get($yellow-theme-1, light-bg), 0.404);
+    }
+
+    &--dashboard, &--mention {
+        position: absolute;
+        bottom: - $space-medium;
+        left: - $space-small;
+        border-radius: $radius-medium;
+        border: 3px solid map-get($grey-theme-1, dark-bg);
+        overflow: hidden;
+
+        [data-role="counter"] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: map-get($red-theme-1, light-bg);
+            color: map-get($red-theme-1, light-fg);
+            font-size: $text-secondary-small;
+            height: $text-secondary-small;
+            min-width: $text-secondary-small;
+            padding: 1px 2px;
+            font-weight: bold;
         }
     }
 }

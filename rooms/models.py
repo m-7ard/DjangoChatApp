@@ -90,11 +90,6 @@ class PrivateChatMembership(Membership):
         self.save()
         return previous_state == False
     
-    def unread_backlogs(self):
-        tracker = self.user.backlog_trackers.all().get(backlog_group=self.chat.backlog_group)
-        if tracker.last_backlog_seen:
-            return self.chat.backlog_group.backlogs.all().filter(date_created__gt=tracker.last_backlog_seen.date_created)
-
 
 class Category(models.Model):
     name = models.CharField(max_length=20)
@@ -153,6 +148,9 @@ class Backlog(models.Model):
     def timestamp(self):
         return self.date_created.strftime("%H:%M:%S")
     
+    def __str__(self):
+        return f'({self.pk}) | {self.kind}'
+    
 
 class Message(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
@@ -202,7 +200,7 @@ class BacklogGroupTracker(models.Model):
     
     def unread_backlogs(self):
         if not self.last_backlog_seen:
-            return Backlog.objects.none()
+                return self.backlog_group.backlogs.all()
         
         return self.backlog_group.backlogs.filter(date_created__gt=self.last_backlog_seen.date_created)
 

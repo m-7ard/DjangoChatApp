@@ -99,7 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             target_backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=target_backlog_group)
             last_backlog = target_backlog_group_tracker.last_backlog_seen
             last_backlog_pk = last_backlog.pk if last_backlog else None
-            already_seen_backlog = (last_backlog_pk >= backlog)
+            already_seen_backlog = last_backlog_pk and (last_backlog_pk >= backlog)
             if already_seen_backlog:
                 return False
 
@@ -112,13 +112,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
             if notification_type == 'private_chat_notification':
                 await self.send_private_chat_notification(backlog_group=target_backlog_group, private_chat=kwargs['private_chat'])
+            elif notification_type == 'group_chat_notification':
+                await self.send_group_chat_notification(group_chat=kwargs['group_chat'], group_channel=kwargs['group_channel'])
         
         self.loop.create_task(delegate_notification_creation(**event))
         
     async def send_private_chat_notification(self, backlog_group, private_chat):
         """ Server-Side called method """
         receiver = await db_async(lambda: PrivateChatMembership.objects.get(chat__backlog_group=backlog_group, user=self.user))
-        # The private chat will now appear on the clients /self/... sidebar
+        # The private chat will now appear on the clients /self/... left side sidebar
         toggled = await db_async(lambda: receiver.activate())
         
         if 'self' in self.extra_path and toggled:
@@ -131,15 +133,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'html': html
             })
 
-        if 'self':
+        if 'self' in self.extra_path:
             await self.send_to_client({
                 'action': 'create_notification',
-                'id': f'private-chat-{private_chat}'
+                'id': f'private-chat-{private_chat}',
+                'modifier': 'private-chat'
             })
 
         await self.send_to_client({
             'action': 'create_notification',
-            'id': f'dashboard-button'
+            'id': f'dashboard-button',
+            'modifier': 'dashboard'
+        })
+    
+    async def send_group_chat_notification(self, group_chat, group_channel):
+        """ Server-Side called method """
+        if hasattr(self, 'group_chat'):
+            await self.send_to_client({
+                'action': 'create_notification',
+                'id': f'group-channel-{group_channel}',
+                'modifier': 'hidden'
+            })
+
+        await self.send_to_client({
+            'action': 'create_notification',
+            'id': f'group-chat-{group_chat}',
+            'modifier': 'hidden'
         })
 
     async def connect_user_to_chats(self):
@@ -266,8 +285,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_last_backlog_seen(self):
         """ Server and Client-Side called method """
+        changing = (self.tracker.last_backlog_seen != self.backlog_group.backlogs.last())
         self.tracker.last_backlog_seen = self.backlog_group.backlogs.last()
         self.tracker.save()
+        return changing
 
        
 class GroupChatConsumer(ChatConsumer):    
@@ -277,6 +298,7 @@ class GroupChatConsumer(ChatConsumer):
         group_channel_pk = self.scope["url_route"]['kwargs'].get('group_channel_pk')
         self.group_chat = await db_async(lambda: GroupChat.objects.get(pk=group_chat_pk))
         await self.channel_layer.group_add(f'group_chat_{self.group_chat.pk}', self.channel_name)
+        await self.channel_layer.group_add(f'group_chat_{self.group_chat.pk}_user_{self.user.pk}', self.channel_name)
 
         if not group_channel_pk:
             return
@@ -285,12 +307,14 @@ class GroupChatConsumer(ChatConsumer):
         self.backlog_group = await get_foreign_key('backlog_group', self.group_channel)
         self.tracker = await db_async(lambda: BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group))
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
+        await self.update_last_backlog_seen()
 
     async def create_message(self, content, **kwargs):
         if not content:
             return
         
         backlog = await db_async(lambda: Backlog.objects.create(kind='message', group=self.group_channel.backlog_group))
+        backlog_group = await get_foreign_key('group', backlog)
         message = await db_async(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))
         html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
 
@@ -298,20 +322,46 @@ class GroupChatConsumer(ChatConsumer):
             f'group_channel_{self.group_channel.pk}', {
                 'type': 'send_to_client',
                 'html': html,
+                'pk': backlog.pk,
                 **kwargs
             }
         )
 
+        await self.channel_layer.group_send(
+            f'backlog_group_{self.backlog_group.pk}', {
+                'type': 'create_new_backlog_notification',
+                'backlog': backlog.pk,
+                'target_backlog_group': backlog_group.pk,
+                'sender': self.user.pk,
+                'notification_type': 'group_chat_notification',
+                'group_channel': self.group_channel.pk,
+                'group_chat': self.group_chat.pk
+            }
+        )
+
     async def update_last_backlog_seen(self, **kwargs):
-        super().update_last_backlog_seen()
-
-        # write notification group sends here
-
-        """
+        changed = await super().update_last_backlog_seen()
+        if not changed:
+            return
         
-        TODO: notifications in groupchats at time of message creation
-        
-        """
+        await self.channel_layer.group_send(
+            f'user_{self.user.pk}', {
+                'type': 'send_to_client',
+                'action': 'remove_notification',
+                'modifier': 'hidden',
+                'id': f'group-chat-{self.group_chat.pk}'
+            }
+        )
+
+        await self.channel_layer.group_send(
+            f'group_chat_{self.group_chat.pk}_user_{self.user.pk}', {
+                'type': 'send_to_client',
+                'action': 'remove_all_notifications',
+                'id': f'group-channel-{self.group_channel.pk}'
+            }
+        )
+
+
 
 class PrivateChatConsumer(ChatConsumer):
     async def connect(self):

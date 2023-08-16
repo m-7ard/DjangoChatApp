@@ -191,22 +191,25 @@ function decreaseCounter(element, times) {
     return newCount;
 }
 
-function addNotification(element) {
-    let notification = element.querySelector('.app__notification');
+function addNotification(element, modifier) {
+    let notification = element.querySelector('.notification');
     if (notification) {
         increaseCounter(notification);
     }
     else {
+        let classList = ['notification'];
+        modifier && classList.push(`notification--${modifier}`);
         notification = quickCreateElement('div', {
-            classList: ['app__notification'],
+            classList: classList,
             parent: element,
             innerHTML: '<div data-role="counter">1</div>'
         });
     };
 }
 
-function removeNotification(element, times) {
-    let notification = element.querySelector('.app__notification');
+function removeNotification(element, times, modifier) {
+    let selector = modifier ? `.notification--${modifier}` : '.notification';
+    let notification = element.querySelector(selector);
     let newCount = decreaseCounter(notification, times);
     if (newCount == 0) {
         notification.remove();

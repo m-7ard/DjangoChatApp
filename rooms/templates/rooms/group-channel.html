@@ -23,7 +23,7 @@
 
 {% block main-content %}
     <div class="app__backlogs" id="backlogs">
-        {% for backlog in group_channel.backlog_group.backlogs.all %}
+        {% for backlog in backlogs %}
             {% include "./elements/message.html" %}
         {% endfor %}
     </div>

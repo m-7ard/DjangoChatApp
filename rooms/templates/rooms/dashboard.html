@@ -39,7 +39,7 @@
                     Incoming Friendship Requests
                 </div>
                 <div class="sidebar__label" data-role="counter">
-                    {{ user.received_friendships.pending.count }}
+                    {{ incoming_friendship_requests.count }}
                 </div>
                 <div class="sidebar__role-icon app__icon">
                     <div class="icon icon--small">
@@ -49,7 +49,7 @@
                     </div>
                 </div>
             </div>
-            {% for friendship in user.received_friendships.pending %}
+            {% for friendship in incoming_friendship_requests %}
                 {% with friend=friendship.sender_profile %}
                     {% include "./elements/friend.html" %}
                 {% endwith %}
@@ -61,7 +61,7 @@
                     Friends
                 </div>
                 <div class="sidebar__label" data-role="counter">
-                    {{ user.friendships.accepted.count }}
+                    {{ accepted_friendship_requests.count }}
                 </div>
                 <div class="sidebar__role-icon app__icon">
                     <div class="icon icon--small">
@@ -71,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            {% for friendship in user.friendships.accepted %}
+            {% for friendship in accepted_friendship_requests %}
                 {% if user == friendship.sender %}
                     {% with friend=friendship.receiver_profile %}
                         {% include "./elements/friend.html" %}
@@ -99,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            {% for friendship in user.sent_friendships.pending %}
+            {% for friendship in outgoing_friendship_requests %}
                 {% with friend=friendship.receiver_profile %}
                     {% include "./elements/friend.html" %}
                 {% endwith %}

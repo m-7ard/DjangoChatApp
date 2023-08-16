@@ -92,7 +92,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def notification_count(self):
         Backlog = apps.get_model('rooms', 'Backlog')
         unread_private_chat_backlogs = Backlog.objects.none()
-        for unread_backlogs in map(lambda obj: obj.unread_backlogs(), self.backlog_trackers.all()):
+        private_chat_trackers = self.backlog_trackers.filter(backlog_group__kind='private_chat')
+        for unread_backlogs in map(lambda obj: obj.unread_backlogs(), private_chat_trackers):
             unread_private_chat_backlogs = unread_private_chat_backlogs.union(unread_backlogs)
 
         return self.received_friendships.pending().count() + unread_private_chat_backlogs.count()

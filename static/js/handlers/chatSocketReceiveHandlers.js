@@ -6,9 +6,9 @@ const chatSocketReceiveHandlers = {
         let user_references = document.querySelectorAll('.deez')
     },
 	'create-group-chat': function({html}) {
-        let groupchat = parseHTML(html);
-        let referenceElement = document.getElementById('insert-groupchat');
-        referenceElement.parentNode.insertBefore(groupchat, referenceElement);
+        let groupChat = parseHTML(html);
+        let referenceElement = document.getElementById('insert-group-chat');
+        referenceElement.parentNode.insertBefore(groupChat, referenceElement);
     },	
 	'remove-room': function(data) {
         if (window.location.href.includes('room/' + data.pk)) {
@@ -155,20 +155,22 @@ const chatSocketReceiveHandlers = {
         };
         friend.remove();
     },
-    'create_notification': ({id}) => {
+    'create_notification': ({id, modifier}) => {
         let element = document.getElementById(id);
-        addNotification(element);
+        addNotification(element, modifier);
     },
-    'remove_notification': ({id, times}) => {
+    'remove_notification': ({id, times, modifier}) => {
         let element = document.getElementById(id);
-        removeNotification(element, times);
+        console.log(element)
+        removeNotification(element, times, modifier);
     },
     'create_private_chat': ({html}) => {
         let privateChats = document.getElementById('private-chats');
         privateChats.appendChild(parseHTML(html));
     },
-    'remove_all_notifications': ({id}) => {
+    'remove_all_notifications': ({id, modifier}) => {
         let element = document.getElementById(id);
-        element.querySelector('.app__notification').remove();
+        let selector = modifier ? `.notification--${modifier}` : '.notification';
+        element.querySelectorAll(selector).forEach((element) => element.remove());
     }
 };

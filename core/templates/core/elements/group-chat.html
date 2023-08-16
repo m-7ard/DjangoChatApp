@@ -1,0 +1,27 @@
+<a class="group-chat {% if local_group_chat == group_chat %} group-chat--selected {% endif %}" href="{% url 'group-chat' pk=local_group_chat.pk %}" id="group-chat-{{ local_group_chat.pk }}">
+    <div class="group-chat__avatar">
+        <div class="avatar avatar--medium">
+            {% if local_group_chat.image %}
+                <img src="{{ local_group_chat.image.url }}" alt="">
+            {% else %}
+                <div class="icon icon--small">
+                    {{ local_group_chat.name|slice:':1'|title }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="group-chat__body">
+        <div class="group-chat__title">
+            {{ local_group_chat.name }}
+        </div>
+    </div>
+    {% with unread_channels=user|unread_group_channels:local_group_chat %}
+        {% if unread_channels %}
+            <div class="notification notification--hidden">
+                <div data-role="counter">
+                    {{ unread_channels }}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+</a>

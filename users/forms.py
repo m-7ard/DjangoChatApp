@@ -26,11 +26,11 @@ class SignupForm(UserCreationForm):
     )
     password2 = forms.CharField(
         label="Repeat password", 
-        widget=widgets.FormInput(),
+        widget=widgets.FormInput(attrs={'type': 'password'}),
     )
     username = forms.CharField(
         max_length=30,
-        widget=widgets.FormInput()
+        widget=widgets.FormInput(attrs={'type': 'password'})
     )
 
     class Meta:
@@ -53,4 +53,4 @@ class SignupForm(UserCreationForm):
 
 class CustomisedAuthenticationForm(AuthenticationForm):
     username = forms.CharField(widget=widgets.FormInput())
-    password = forms.CharField(widget=widgets.FormInput())
+    password = forms.CharField(widget=widgets.FormInput(attrs={'type': 'password'}))

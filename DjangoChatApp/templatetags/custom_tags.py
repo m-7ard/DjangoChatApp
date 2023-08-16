@@ -6,7 +6,7 @@ from django.template.defaulttags import register
 from django.db.models import Q
 
 
-from rooms.models import PrivateChat
+from rooms.models import PrivateChat, BacklogGroupTracker
 
 
 from ..settings import MEDIA_URL
@@ -76,3 +76,22 @@ def generateID(self):
 @register.filter(name="get_shared_private_chat")
 def get_shared_private_chat(user1, user2):
     return (PrivateChat.objects.filter(memberships__user=user1) & PrivateChat.objects.filter(memberships__user=user2)).first()
+
+
+@register.filter(name="unread_backlogs")
+def unread_backlogs(user, backlog_group):
+    tracker = BacklogGroupTracker.objects.filter(user=user, backlog_group=backlog_group).first()
+    if not tracker.last_backlog_seen:
+        return tracker.backlog_group.backlogs.all()
+        
+    return backlog_group.backlogs.filter(date_created__gt=tracker.last_backlog_seen.date_created)
+
+@register.filter(name="unread_group_channels")
+def unread_group_channels(user, group_chat):
+    count = 0
+    trackers = BacklogGroupTracker.objects.filter(user=user, backlog_group__in=group_chat.channels.values_list('backlog_group', flat=True))
+    for tracker in trackers:
+        if tracker.last_backlog_seen != tracker.backlog_group.backlogs.last():
+            count += 1
+
+    return count
