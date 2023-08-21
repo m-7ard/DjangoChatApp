@@ -7,6 +7,14 @@
 {% endblock %}
 
 {% block main-content %}
+    <div class="app__subheader app__subheader--unread has-shadow" id="unread-backlogs-subheader">
+        <div data-role="display">
+            <span data-role="counter" data-count="0">0</span> New Messages
+        </div>
+        <div data-command="mark_as_read">
+            Mark As Read
+        </div>
+    </div>
     <div class="app__backlogs" id="backlogs">
         {% for backlog in backlogs %}
             {% include "./elements/message.html" %}

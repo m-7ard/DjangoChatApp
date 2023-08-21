@@ -56,17 +56,13 @@ chatSocket.onopen = function() {
     if (debug) {
         console.log('opened')
     }
-};
 
-if (groupChannelPK || privateChatPK) {
-    document.addEventListener('visibilitychange', (event) => {
-        if (!document.hidden) {
-            chatSocket.send(JSON.stringify({
-                'action': 'update_last_backlog_seen',
-            }));
-        };
-    });
-}
+    if ((groupChannelPK || privateChatPK) && !document.hidden) {
+        chatSocket.send(JSON.stringify({
+            'action': 'mark_as_read',
+        }));
+    }
+};
 
 window.addEventListener('submit', function delegateSubmit(event) {
     let form = event.target.closest('form');

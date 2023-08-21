@@ -110,16 +110,41 @@ const chatSocketReceiveHandlers = {
     
     'response': () => { console.log('response exists') },
 
-    'create_message': ({html, pk}) => {
-        backlogs.appendChild(parseHTML(html));
-        backlogs.scrollTo(0, backlogs.scrollHeight);
+    'create_message': ({html, pk, is_sender}) => {
+        let newMessage = parseHTML(html);
+        let scrollbarWasAtBottom = scrollbarAtBottom(backlogs);
+        backlogs.appendChild(newMessage);
+
+        if (scrollbarWasAtBottom || is_sender) {
+            backlogs.scrollTo(0, backlogs.scrollHeight);
+        };
 
         if (!document.hidden) {
             chatSocket.send(JSON.stringify({
                 'action': 'confirm_backlog_reception',
                 'pk': pk
             }));
-        };
+            return
+        }
+
+        if (!is_sender) {
+            let unreadBacklogsSubheader = document.getElementById('unread-backlogs-subheader');
+            increaseCounter(unreadBacklogsSubheader);
+            let unreadBacklogsDivider = document.getElementById('unread-backlogs-divider');
+            if (unreadBacklogsDivider) {
+                // there are unread backlogs already
+                return
+            };
+            let divider = quickCreateElement('div', {
+                classList: ['app__divider', 'app__divider--unread-backlogs'],
+                id: 'unread-backlogs-divider',
+            });
+            backlogs.insertBefore(divider, newMessage);
+        }    
+    },
+    'scroll_to_bottom': ({id}) => {
+        let element = document.getElementById(id);
+        element.scrollTo(0, element.scrollHeight);
     },
     'create_friendship': ({html, is_receiver}) => {
         let section;
@@ -172,5 +197,11 @@ const chatSocketReceiveHandlers = {
         let element = document.getElementById(id);
         let selector = modifier ? `.notification--${modifier}` : '.notification';
         element.querySelectorAll(selector).forEach((element) => element.remove());
+    },
+    'mark_as_read': ({}) => {
+        let unreadBacklogsDivider = document.getElementById('unread-backlogs-divider');
+        unreadBacklogsDivider?.remove();
+        let unreadBacklogsSubheader = document.getElementById('unread-backlogs-subheader');
+        setCounter(unreadBacklogsSubheader, 0);
     }
 };

@@ -129,12 +129,7 @@ class GroupChannelDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group_chat'] = self.object.chat
-        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')[:20]
-        """
-        
-        TODO: make new messages appear by scrolling up
-        
-        """
+        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')[:20:-1]
         return context
 
 

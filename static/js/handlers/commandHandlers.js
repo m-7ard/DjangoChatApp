@@ -170,5 +170,10 @@ const commandHandlers = {
     'select-text': ({trigger, event}) => {
        let target = document.getElementById(trigger.dataset.target);
        target.select();
+    },
+    'mark_as_read': ({trigger, event, command}) => {
+        chatSocket.send(JSON.stringify({
+            'action': command,
+        }))
     }
 };

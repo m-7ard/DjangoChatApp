@@ -1234,12 +1234,10 @@
 }
 .channel:hover, .channel--selected {
   background-color: #1D1D1C;
-}
-.channel:hover .channel__title, .channel--selected .channel__title {
   color: #DBD6CC;
 }
 .channel:has(.notification) {
-  color: #DBD6CC;
+  color: #BA3220;
 }
 
 .error {
@@ -1455,6 +1453,44 @@
 }
 .app__avatar .avatar {
   background-color: #131313;
+}
+.app__subheader {
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  align-items: center;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.app__subheader--unread {
+  justify-content: space-between;
+  background-color: #6A22A5;
+  color: #DBD6CC;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+.app__subheader--unread [data-role=display] {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+}
+.app__subheader--unread:has([data-role=counter][data-count="0"]) {
+  display: none;
+}
+.app__subheader:hover {
+  cursor: pointer;
+}
+.app__divider {
+  display: flex;
+  padding: 0;
+  gap: 0;
+  height: 0px;
+  flex-shrink: 0;
+  margin: 0.5rem;
+}
+.app__divider--unread-backlogs {
+  border-top: 1px dashed #5C278E;
 }
 
 .backlog {

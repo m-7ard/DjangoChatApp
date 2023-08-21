@@ -64,7 +64,7 @@ function editAttributes(element, {attributes}) {
     attributes && Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
 };
 
-function quickCreateElement(elementTag, {classList, attributes, parent, eventListeners, innerHTML}) {
+function quickCreateElement(elementTag, {classList, attributes, parent, eventListeners, innerHTML, id}) {
     /* elementTag: String, classList: Object, attributes: Object
         parent: HtmlNode, eventListeners: Object, innerHTML: String */
     const element = document.createElement(elementTag);
@@ -82,6 +82,9 @@ function quickCreateElement(elementTag, {classList, attributes, parent, eventLis
     };
     if (innerHTML) {
         element.innerHTML = innerHTML;
+    };
+    if (id) {
+        element.id = id;
     };
     return element;
 };
@@ -180,6 +183,7 @@ function increaseCounter(element) {
     let counter = element.querySelector('[data-role="counter"]');
     let newCount = parseInt(counter.innerText) + 1;
     counter.innerText = newCount;
+    counter.dataset.count = newCount;
     return newCount;
 }
 
@@ -188,7 +192,14 @@ function decreaseCounter(element, times) {
     let counter = element.querySelector('[data-role="counter"]');
     let newCount = parseInt(counter.innerText) - decreaseBy;
     counter.innerText = newCount;
+    counter.dataset.count = newCount;
     return newCount;
+}
+
+function setCounter(element, newCount) {
+    let counter = element.querySelector('[data-role="counter"]');
+    counter.innerText = newCount;
+    counter.dataset.count = newCount;
 }
 
 function addNotification(element, modifier) {
@@ -214,4 +225,8 @@ function removeNotification(element, times, modifier) {
     if (newCount == 0) {
         notification.remove();
     };
+}
+
+function scrollbarAtBottom(element) {
+    return element.scrollHeight - element.scrollTop - element.clientHeight < 1
 }

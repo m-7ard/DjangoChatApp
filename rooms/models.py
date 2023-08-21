@@ -204,6 +204,15 @@ class BacklogGroupTracker(models.Model):
         
         return self.backlog_group.backlogs.filter(date_created__gt=self.last_backlog_seen.date_created)
 
+    def update(self):
+        latest = self.backlog_group.backlogs.last()
+        changing = self.last_backlog_seen != latest
+        if changing:
+            self.last_backlog_seen = latest
+            self.save()
+        
+        return changing
+
     def __str__(self):
         return f'{self.backlog_group.kind} ({self.backlog_group.belongs_to().pk}) {self.user.full_name()} ({self.user.pk})'
 

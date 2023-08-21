@@ -1527,15 +1527,12 @@ $red-theme-1: (
 
     &:hover, &--selected {
         background-color: map-get($grey-theme-1, light-bg);
-
-        #{$self}__title {
-            color: map-get($grey-theme-1, light-fg);
-        }
+        color: map-get($grey-theme-1, light-fg);
     }
 
     /*00000*/
     &:has(.notification) {
-        color: map-get($grey-theme-1, light-fg);
+        color: map-get($red-theme-1, light-bg);
     }
 }
 
@@ -1756,6 +1753,43 @@ $red-theme-1: (
 
         .avatar {
             background-color: map-get($grey-theme-1, dark-bg);
+        }
+    }
+
+    &__subheader {
+        @include flex-row($space-medium $space-large, $space-medium);
+        align-items: center;
+        user-select: none;
+
+        &--unread {
+            justify-content: space-between;
+            background-color: map-get($blue-theme-1, neutral-bg);
+            color: map-get($blue-theme-1, light-fg);
+            font-size: $text-secondary-large;
+            font-weight: bold;
+
+            [data-role="display"] {
+                @include ellipsis;
+            }
+
+            &:has([data-role="counter"][data-count="0"]) {
+                display: none;
+            }
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    &__divider {
+        @include flex-row(0, 0);
+        height: 0px;
+        flex-shrink: 0;
+        margin: $space-medium;
+
+        &--unread-backlogs {
+            border-top: 1px dashed map-get($blue-theme-1, dark-bg);
         }
     }
 }
