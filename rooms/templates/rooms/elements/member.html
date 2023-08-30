@@ -1,21 +1,15 @@
-<li class="user user--{{ member.user.status }} tooltip__trigger" data-template-name="rooms/tooltips/member-profile.html" data-positioning='{"left": "100%", "top": "0px"}' 
-data-context='
-{
-    "objects": {
-        "member": {{ member|object_to_json }}
-    }
-}
-'>
-
-    <div class="avatar avatar--small has-shadow">
-        <img src="{{ member.user.image.url }}" alt="">
+<div class="user">
+    <div class="user__avatar">
+        <div class="avatar avatar--small">
+            <img src="" alt="">
+        </div>
     </div>
     <div class="user__body">
-        <div class="user__username">
-            {{ member.display_name }}
+        <div class="user__title">
+            {% firstof membership.nickname membership.user.username %}
         </div>
-        <div class="user__status">
-            {{ member.user.status }}
+        <div class="user__subtitle">
+            {{ membership.user.status }}
         </div>
     </div>
-</li>
+</div>

@@ -12,6 +12,8 @@ from django.template import Template, Context
 from django.http import HttpResponse
 from django.apps import apps
 from django.template.loader import render_to_string
+from django.core.paginator import Paginator
+
 
 from .models import (
     Backlog,
@@ -24,6 +26,21 @@ from .models import (
 )
 from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
+
+@sync_to_async
+def process_mention(mention):
+    import re
+
+    alphanumeric_pattern = r'>>([a-zA-Z0-9]+)'
+    numeric_pattern = r'#(\d{1,2})?$'
+    
+    alphanumeric_match = re.search(alphanumeric_pattern, mention)
+    numeric_match = re.search(numeric_pattern, mention)
+    
+    alphanumeric = alphanumeric_match.group(1) if alphanumeric_match else None
+    numeric = numeric_match.group(1) if numeric_match else None
+    
+    return alphanumeric, numeric
 
 
 @database_sync_to_async
@@ -62,7 +79,6 @@ class AppConsumer(AsyncWebsocketConsumer):
         await self.close()
 
     async def create_extra_path(self):
-        """ Server-Side called method """
         extra_path = self.scope['url_route']['kwargs'].get('extra_path')
         self.extra_path = extra_path.split('/') if extra_path else []
 
@@ -77,7 +93,6 @@ class AppConsumer(AsyncWebsocketConsumer):
 
     async def create_new_backlog_notification(self, event):
         """ 
-            Server-Side called method.
             Called from group send.
         """
         @database_sync_to_async
@@ -110,7 +125,6 @@ class AppConsumer(AsyncWebsocketConsumer):
         self.loop.create_task(delegate_notification_creation(**event))
         
     async def send_private_chat_notification(self, backlog_group, private_chat):
-        """ Server-Side called method """
         receiver = await db_async(lambda: PrivateChatMembership.objects.get(chat__backlog_group=backlog_group, user=self.user))
         # The private chat will now appear on the clients /self/... left side sidebar
         toggled = await db_async(lambda: receiver.activate())
@@ -119,7 +133,7 @@ class AppConsumer(AsyncWebsocketConsumer):
             html = await sync_to_async(render_to_string)(template_name='rooms/elements/message.html', context={
                 'local_private_chat': get_foreign_key('chat', receiver), 
                 'other_party': receiver
-            })) 
+            })
             await self.send_to_client({
                 'action': 'create_private_chat',
                 'html': html
@@ -139,7 +153,6 @@ class AppConsumer(AsyncWebsocketConsumer):
         })
     
     async def send_group_chat_notification(self, group_chat, group_channel):
-        """ Server-Side called method """
         if hasattr(self, 'group_chat'):
             await self.send_to_client({
                 'action': 'create_notification',
@@ -155,7 +168,6 @@ class AppConsumer(AsyncWebsocketConsumer):
 
     async def connect_user_to_chats(self):
         """ 
-            Server-Side called method.
             This method makes the user listen to all backlogs groups they're in.
         """
         # using list(...) due to queryset not being iterable in async context
@@ -166,7 +178,6 @@ class AppConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_add(f'backlog_group_{backlog_group}', self.channel_name)
     
     async def accept_friendship(self, pk, **kwargs):
-        """ Client-Side called method """
         @database_sync_to_async
         def accept_friendship():
             friend = Friend.objects.get(pk=pk)
@@ -209,7 +220,6 @@ class AppConsumer(AsyncWebsocketConsumer):
         )
 
     async def delete_friendship(self, pk, **kwargs):
-        """ Client-Side called method """
         @database_sync_to_async
         def delete_friendship():
             friend = Friend.objects.get(pk=pk)
@@ -255,41 +265,19 @@ class AppConsumer(AsyncWebsocketConsumer):
 
 
 class BacklogGroupUtils():
-    @database_sync_to_async
-    def confirm_backlog_reception(self, pk=None, **kwargs):
-        """ Client-Side called method """
-        # verify input integrity
-        backlog = get_object_or_none(Backlog, pk=pk)
-        if not backlog or backlog.group != self.backlog_group:
-            return
-        
-        self.tracker.last_backlog_seen = backlog
-        self.tracker.save()
+    @sync_to_async
+    def mark_as_read(self):
+        new_backlogs = self.tracker.unread_backlogs()
+        new_backlogs_count = new_backlogs.count()
 
-    @database_sync_to_async
-    def get_unread_backlog_count(self):
-        """ Server-Side called method """
-        last_backlog_seen = self.tracker.last_backlog_seen
-        if last_backlog_seen:
-            unread_count = self.backlog_group.backlogs.filter(date_created__gt=last_backlog_seen.date_created).count()
-        else:
-            unread_count = self.backlog_group.backlogs.all().count()
-        
-        return unread_count
-
-
-    async def mark_as_read(self):
-        """ Server and Client-Side called method """
-        @sync_to_async
-        def update_tracker():
+        if new_backlogs_count:
             self.tracker.last_backlog_seen = self.backlog_group.backlogs.last()
             self.tracker.save()
+            # messages of the very same user do not (and should not)
+            # produce notifications
+            return new_backlogs.exclude(message__user=self.user).count()
 
-        unread_count = await self.get_unread_backlog_count()
-        if unread_count:
-            await update_tracker()
-
-        return unread_count
+        return 0
     
     async def send_message_to_client(self, event):
         await self.send(text_data=json.dumps({
@@ -298,7 +286,98 @@ class BacklogGroupUtils():
             'pk': event['pk'],
             'is_sender': (event['sender'] == self.user.pk)
         }))
-       
+
+    @sync_to_async
+    def delete_backlog(self, pk):
+        backlog = get_object_or_none(Backlog, pk=pk)
+        if not backlog or backlog.group != self.backlog_group:
+            return False
+        
+        backlog.delete()
+        return True
+
+    @sync_to_async
+    def create_message(self, content):
+        backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
+        message = Message.objects.create(user=self.user, content=content, backlog=backlog)
+        html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
+
+        return backlog, html
+    
+    @sync_to_async
+    def edit_message(self, pk, content):
+        backlog = get_object_or_none(Backlog, pk=pk)
+        if not backlog or backlog.group != self.backlog_group:
+            return False
+        
+        message = backlog.message
+        message.content = content
+        message.save()
+        return True
+    
+    async def generate_backlogs(self):
+        @sync_to_async
+        def get_backlogs():
+            pass
+    
+    @sync_to_async
+    def create_common_attributes(self, chat):
+        self.backlog_group = chat.backlog_group
+        self.tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
+        backlogs = self.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')
+        print(backlogs.explain())
+        self.paginator = Paginator(backlogs, 20)
+        self.current_page = self.paginator.get_page(1)
+
+    async def generate_backlogs(self, **kwargs):
+        if self.current_page == None:
+            return
+        
+        backlogs = self.current_page.object_list
+        html = await sync_to_async(render_to_string)(
+            template_name='rooms/elements/backlogs.html',
+            context={'backlogs': backlogs},
+        )
+        await self.send(json.dumps({
+            'type': 'send_to_client',
+            'action': 'generate_backlogs',
+            'html': html,
+            'page': self.current_page.number,
+        }))
+
+        await self.prepare_next_page()
+
+    @sync_to_async
+    def prepare_next_page(self):
+        if self.current_page.has_next():
+            next_page_number = self.current_page.next_page_number()
+            self.current_page = self.paginator.get_page(next_page_number)
+        else:
+            self.current_page = None
+        
+    @sync_to_async
+    def get_mentionables(self, chat, username, username_id):
+        query = chat.memberships.filter(user__username__icontains=username)[:10] if username else chat.memberships.all()[:10]
+        query = query.select_related('user')
+
+        if username_id:
+            # mention username id is substring of member formatted username id
+            query = filter(lambda member: username_id in member.user.formatted_username_id(), query)
+
+        html = render_to_string(template_name='commons/tooltips/mentionables-list.html', context={
+            'members': [{
+                'username': member.user.username, 
+                'username_id': member.user.formatted_username_id(),
+                'image': member.user.image.url,
+            } for member in query],
+            'roles': [{
+
+            }]
+        })
+
+        return html
+
+
 class GroupChatConsumer(AppConsumer, BacklogGroupUtils):    
     async def connect(self):
         await super().connect()
@@ -312,19 +391,26 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
             return
         
         self.group_channel = await db_async(lambda: GroupChannel.objects.get(pk=group_channel_pk))
-        self.backlog_group = await get_foreign_key('backlog_group', self.group_channel)
-        self.tracker = await db_async(lambda: BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group))
+        await self.create_common_attributes(self.group_channel)
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}_user_{self.user.pk}', self.channel_name)
+        await self.generate_backlogs()
+
+    async def get_mentionables(self, mention, uuid, positioning, **kwargs):
+        username, username_id = await process_mention(mention)
+        html = await super().get_mentionables(self.group_chat, username, username_id)
+        await self.send(text_data=json.dumps({
+            'action': 'get_mentionables',
+            'html': html,
+            'uuid': uuid,
+            'positioning': positioning,
+        }))
 
     async def create_message(self, content, **kwargs):
         if not content:
             return
         
-        backlog = await db_async(lambda: Backlog.objects.create(kind='message', group=self.group_channel.backlog_group))
-        backlog_group = await get_foreign_key('group', backlog)
-        message = await db_async(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))
-        html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
+        backlog, html = await super().create_message(content)
 
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {
@@ -340,17 +426,22 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
             f'backlog_group_{self.backlog_group.pk}', {
                 'type': 'create_new_backlog_notification',
                 'backlog': backlog.pk,
-                'target_backlog_group': backlog_group.pk,
+                'target_backlog_group': self.backlog_group.pk,
                 'sender': self.user.pk,
                 'notification_type': 'group_chat_notification',
                 'group_channel': self.group_channel.pk,
-                'group_chat': self.group_chat.pk
+                'group_chat': self.group_chat.pk,
             }
         )
 
     async def mark_as_read(self, **kwargs):
-        unread_count = await super().mark_as_read()
-        if not unread_count:
+        """
+        
+        TODO: fix error where the mark_as_read doesn't trigger when we generate backlogs at the first connection
+        
+        """
+        reduce_notifications_by = await super().mark_as_read()
+        if not reduce_notifications_by:
             return
         
         await self.channel_layer.group_send(
@@ -358,7 +449,7 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
                 'type': 'send_to_client',
                 'action': 'remove_notification',
                 'modifier': 'hidden',
-                'times': unread_count,
+                'times': reduce_notifications_by,
                 'id': f'group-chat-{self.group_chat.pk}'
             }
         )
@@ -378,20 +469,52 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
             }
         )
 
+    async def delete_backlog(self, pk, action, **kwargs):
+        deleted = await super().delete_backlog(pk)
+        if not deleted:
+            return
+        
+        await self.channel_layer.group_send(
+            f'group_channel_{self.group_channel.pk}', {
+                'type': 'send_to_client',
+                'action': 'delete_backlog',
+                'pk': pk
+            }
+        )
+
+    async def edit_message(self, pk, content, action, **kwargs):
+        if not content:
+            return
+        
+        edited = await super().edit_message(pk, content)
+        if not edited:
+            return
+        
+        await self.channel_layer.group_send(
+            f'group_channel_{self.group_channel.pk}', {
+                'type': 'send_to_client',
+                'action': 'edit_message',
+                'content': content,
+                'pk': pk,
+            }
+        )
+        
+
+
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
     async def connect(self):
         await super().connect()
         private_chat_pk = self.scope["url_route"]['kwargs'].get('private_chat_pk')
         self.private_chat = await db_async(lambda: PrivateChat.objects.get(pk=private_chat_pk))
-        self.backlog_group = await get_foreign_key('backlog_group', self.private_chat)
-        self.tracker = await db_async(lambda: BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group))
+        await self.create_common_attributes(self.private_chat)
         await self.channel_layer.group_add(f'private_chat_{self.private_chat.pk}', self.channel_name)
         await self.channel_layer.group_add(f'private_chat_{self.private_chat.pk}_user_{self.user.pk}', self.channel_name)
-    
+        await self.generate_backlogs()
+
     async def mark_as_read(self, **kwargs):
-        unread_count = await super().mark_as_read()
-        if not unread_count:
+        reduce_notifications_by = await super().mark_as_read()
+        if not reduce_notifications_by:
             return
         
         await self.channel_layer.group_send(
@@ -413,7 +536,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             f'user_{self.user.pk}', {
                 'type': 'send_to_client',
                 'action': 'remove_notification',
-                'times': unread_count,
+                'times': reduce_notifications_by,
                 'id': f'dashboard-button'
             }
         )
@@ -422,10 +545,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
         if not content:
             return
         
-        backlog = await database_sync_to_async(lambda: Backlog.objects.create(kind='message', group=self.private_chat.backlog_group))()
-        backlog_group = await get_foreign_key('group', backlog)
-        message = await database_sync_to_async(lambda: Message.objects.create(user=self.user, content=content, backlog=backlog))()
-        html = await sync_to_async(render_to_string)(template_name='rooms/elements/message.html', context={'backlog': backlog})
+        backlog, html = await super().create_message(content)
 
         await self.channel_layer.group_send(
             f'private_chat_{self.private_chat.pk}', {
@@ -441,7 +561,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             f'backlog_group_{self.backlog_group.pk}', {
                 'type': 'create_new_backlog_notification',
                 'backlog': backlog.pk,
-                'target_backlog_group': backlog_group.pk,
+                'target_backlog_group': self.backlog_group.pk,
                 'sender': self.user.pk,
                 'notification_type': 'private_chat_notification',
                 'private_chat': self.private_chat.pk

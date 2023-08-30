@@ -90,6 +90,11 @@ class GroupChatDetailView(DetailView):
     template_name = 'rooms/group-chat.html'
     context_object_name = 'group_chat'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['memberships'] = self.object.memberships.all().select_related('user')
+        return context
+
 
 class GroupChannelCreateView(CreateView):
     form_class = forms.GroupChannelCreateForm
@@ -129,7 +134,7 @@ class GroupChannelDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group_chat'] = self.object.chat
-        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')[:20:-1]
+        context['memberships'] = self.object.chat.memberships.all().select_related('user')
         return context
 
 
@@ -213,7 +218,7 @@ class FriendshipFormView(FormView):
             }
         )
 
-        return JsonResponse({'status': 200, 'confirmation': f'Friend Request was sent to {full_username}'})
+        return JsonResponse({'status': 200, 'confirmation': f'Friend Request was sent to {receiver.full_name()}'})
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
@@ -287,7 +292,6 @@ class PrivateChatDetailView(DetailView):
         self.object = self.get_object()
         context = super().get_context_data(*args, **kwargs)
         context['other_party'] = self.object.memberships.all().exclude(user=request.user).first()
-        context['backlogs'] = self.object.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender')
         private_chat_membership = PrivateChatMembership.objects.get(user=request.user, chat=self.object)
         private_chat_membership.active = True
         private_chat_membership.save()
@@ -322,6 +326,16 @@ class CreatePrivateChat(FormView):
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+
+
+class GetMentionables(TemplateView):
+    template_name = 'commons/tooltips/get-mentionables.html'
+    
+    def get(self, request, *args, **kwargs):
+        context = super().get_context_data
+        
+
+
 
 
 """

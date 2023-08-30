@@ -69,9 +69,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager()
-
-    def __str__(self):
-        return f'{self.username}#{str(self.username_id).zfill(2)}'
     
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
@@ -87,7 +84,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.date_joined.strftime("%d %B %Y")
     
     def full_name(self):
-        return f'{self.username}#{str(self.username_id).zfill(2)}'
+        return f'{self.username}#{self.formatted_username_id()}'
+    
+    def formatted_username_id(self):
+        return str(self.username_id).zfill(2)
     
     def notification_count(self):
         Backlog = apps.get_model('rooms', 'Backlog')
@@ -98,6 +98,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
         return self.received_friendships.pending().count() + unread_private_chat_backlogs.count()
 
+    def __str__(self):
+        return f'{self.username}#{self.formatted_username_id()}'
+    
     class Meta:
         constraints = [
             models.CheckConstraint(

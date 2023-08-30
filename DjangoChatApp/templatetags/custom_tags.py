@@ -82,16 +82,15 @@ def get_shared_private_chat(user1, user2):
 def unread_backlogs(user, backlog_group):
     tracker = BacklogGroupTracker.objects.filter(user=user, backlog_group=backlog_group).first()
     if not tracker.last_backlog_seen:
-        return tracker.backlog_group.backlogs.all()
+        return backlog_group.backlogs.filter(date_created__gt=tracker.last_updated)
         
     return backlog_group.backlogs.filter(date_created__gt=tracker.last_backlog_seen.date_created)
 
 @register.filter(name="unread_group_channels")
-def unread_group_channels(user, group_chat):
+def unread_group_chat_backlogs(user, group_chat):
     count = 0
     trackers = BacklogGroupTracker.objects.filter(user=user, backlog_group__in=group_chat.channels.values_list('backlog_group', flat=True))
     for tracker in trackers:
-        if tracker.last_backlog_seen != tracker.backlog_group.backlogs.last():
-            count += 1
+        count += tracker.unread_backlogs().count()
 
     return count

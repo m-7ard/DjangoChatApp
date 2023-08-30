@@ -22,15 +22,17 @@
             {% include "../elements/invite.html" %}
         </div>
         <div class="form__row">
-            <input class="form__input" class="overlay__label" id="invite-link" value="http://127.0.0.1:8000/rooms/invite/{{ invite.directory }}"> 
+            <input class="form__input" id="invite-link" value="http://127.0.0.1:8000/rooms/invite/{{ invite.directory }}"> 
             <div class="form__submit form__submit--create" data-command="select-text" data-target="invite-link">
                 Select Link
             </div>
         </div>
-        <form class="overlay__content" data-submit-command="create-invite" method="POST" action="{% url 'invite-users' group_chat_pk=group_chat_pk %}">
-            {% csrf_token %}
+    </div>
+    <form class="overlay__footer" data-submit-command="create-invite" method="POST" action="{% url 'invite-users' group_chat_pk=group_chat_pk %}">
+        {% csrf_token %}
+        <div class="overlay__row">
             <div class="form__labeled-element">
-                <div class="overlay__label">
+                <div class="form__label form__label--small">
                     One Time Invite
                 </div>
                 <div class="form__slider">
@@ -39,49 +41,49 @@
                     </div>
                     <input type="checkbox" name="one_time">
                 </div>
-            </div>
-            <div class="overlay__row">
-                <div class="dropdown form__select" data-role="select">
-                    <div class="form__option dropdown__trigger" data-role="root-option">
-                        7 Days
+            </div>    
+        </div>
+        <div class="overlay__row">
+            <div class="dropdown form__select" data-role="select">
+                <div class="form__option dropdown__trigger" data-role="root-option">
+                    7 Days
+                </div>
+                <div class="dropdown__content has-shadow">
+                    <div class="form__option dropdown__close" data-command="select-option">
+                        <div data-role="option">
+                            1 Day
+                        </div>
+                        <input type="radio" name="expiry_date" value="1 day" required>
                     </div>
-                    <div class="dropdown__content has-shadow">
-                        <div class="form__option dropdown__close" data-command="select-option">
-                            <div data-role="option">
-                                1 Day
-                            </div>
-                            <input type="radio" name="expiry_date" value="1 day" required>
+                    <div class="form__option dropdown__close" data-command="select-option">
+                        <div data-role="option">
+                            7 Days
                         </div>
-                        <div class="form__option dropdown__close" data-command="select-option">
-                            <div data-role="option">
-                                7 Days
-                            </div>
-                            <input type="radio" name="expiry_date" value="7 days" checked required>
+                        <input type="radio" name="expiry_date" value="7 days" checked required>
+                    </div>
+                    <div class="form__option dropdown__close" data-command="select-option">
+                        <div data-role="option">
+                            30 Days
                         </div>
-                        <div class="form__option dropdown__close" data-command="select-option">
-                            <div data-role="option">
-                                30 Days
-                            </div>
-                            <input type="radio" name="expiry_date" value="30 days" required>
+                        <input type="radio" name="expiry_date" value="30 days" required>
+                    </div>
+                    <div class="form__option dropdown__close" data-command="select-option">
+                        <div data-role="option">
+                            365 Days
                         </div>
-                        <div class="form__option dropdown__close" data-command="select-option">
-                            <div data-role="option">
-                                365 Days
-                            </div>
-                            <input type="radio" name="expiry_date" value="365 days" required>
+                        <input type="radio" name="expiry_date" value="365 days" required>
+                    </div>
+                    <div class="form__option dropdown__close" data-command="select-option">
+                        <div data-role="option">
+                            Forever
                         </div>
-                        <div class="form__option dropdown__close" data-command="select-option">
-                            <div data-role="option">
-                                Forever
-                            </div>
-                            <input type="radio" name="expiry_date" value="forever" required>
-                        </div>
+                        <input type="radio" name="expiry_date" value="forever" required>
                     </div>
                 </div>
-                <button class="form__submit form__submit--create" type="submit">
-                    Create New Invite
-                </button>
             </div>
+            <button class="form__submit form__submit--create" type="submit">
+                Create New Invite
+            </button>
         </div>
     </div>
 </div>

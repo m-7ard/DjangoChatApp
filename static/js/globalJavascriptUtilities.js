@@ -98,7 +98,9 @@ function objectSelector(data) {
 }
 
 function randomID() {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    const typedArray = new Uint8Array(10);
+    const randomValues = window.crypto.getRandomValues(typedArray);
+    return randomValues.join('');
 }
 
 async function getView({name, kwargs, query, format}) {
@@ -128,6 +130,7 @@ async function processForm(event) {
     event.preventDefault();
     let form = event.target.closest('form');
     let formContainer = event.target.closest('.form');
+    let formResponses = formContainer.querySelector('[data-role="form-responses"]');
     let request = await fetch(form.action, {
         method: form.method,
         body: new FormData(form)
@@ -145,7 +148,7 @@ async function processForm(event) {
         quickCreateElement('div', {
             classList: ['form__message', 'form__message--confirmation'],
             innerHTML: response.confirmation,
-            parent: formContainer
+            parent: formResponses
         });
     }
     else if (response.status == 400) {
@@ -153,7 +156,7 @@ async function processForm(event) {
 
         Object.entries(response.errors).forEach(([fieldName, errorList]) => {
             let field = formContainer.querySelector(`[data-name="${fieldName}"]`);
-            let parent = field ? field : formContainer.querySelector('[data-role="form-errors"]');
+            let parent = field ? field : formResponses;
 
             errorList.forEach((error) => {
                 let {code, message} = error;
@@ -225,8 +228,17 @@ function removeNotification(element, times, modifier) {
     if (newCount == 0) {
         notification.remove();
     };
-}
+};
 
 function scrollbarAtBottom(element) {
-    return element.scrollHeight - element.scrollTop - element.clientHeight < 1
-}
+    return element.scrollHeight - Math.round(element.scrollTop) - element.clientHeight <= 1;
+};
+
+function getMention(input) {
+    /*
+    Captures all mentions in format >>[optional a-z/0-9]#[optional 0-9, max chars 2]
+    */
+    const pattern = /^>>[a-zA-Z0-9]*#?\d{0,2}$/g;
+    const matches = input.match(pattern) || [];
+    return matches[matches.length - 1]
+};

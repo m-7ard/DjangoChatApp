@@ -129,22 +129,8 @@
                 Members
             </div>
         </div>
-        {% for membership in group_chat.memberships.all %}
-            <div class="user">
-                <div class="user__avatar">
-                    <div class="avatar avatar--small">
-                        <img src="" alt="">
-                    </div>
-                </div>
-                <div class="user__body">
-                    <div class="user__title">
-                        {% firstof membership.nickname membership.user.username %}
-                    </div>
-                    <div class="user__subtitle">
-                        {{ membership.user.status }}
-                    </div>
-                </div>
-            </div>
+        {% for membership in memberships %}
+            {% include "./elements/member.html" %}
         {% endfor %}
     </div>
 {% endblock %}

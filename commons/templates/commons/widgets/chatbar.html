@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="chatbar" id="chatbar">
+<div class="chatbar has-shadow" id="chatbar">
     <div class="app__icon app__icon--hoverable">
         <div class="icon icon--hoverable icon--medium">
             <i class="material-symbols-outlined">
@@ -11,7 +11,7 @@
     <div class="chatbar__divider">
 
     </div>
-    <textarea class="chatbar__input" rows="1"></textarea>
+    <textarea class="chatbar__input" rows="1" data-role="input" data-get-mentionables data-positioning='{"bottom": "100%", "left": "0px", "right": "0px"}' data-reference="#chatbar"></textarea>
     <div class="chatbar__divider">
 
     </div>

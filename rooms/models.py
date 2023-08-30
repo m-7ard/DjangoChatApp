@@ -196,22 +196,18 @@ class Invite(models.Model):
 class BacklogGroupTracker(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='backlog_trackers')
     backlog_group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='+')
-    last_backlog_seen = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='+', null=True)
-    
-    def unread_backlogs(self):
-        if not self.last_backlog_seen:
-                return self.backlog_group.backlogs.all()
-        
-        return self.backlog_group.backlogs.filter(date_created__gt=self.last_backlog_seen.date_created)
+    last_backlog_seen = models.ForeignKey(Backlog, on_delete=models.SET_NULL, related_name='+', null=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
-    def update(self):
-        latest = self.backlog_group.backlogs.last()
-        changing = self.last_backlog_seen != latest
-        if changing:
-            self.last_backlog_seen = latest
-            self.save()
+    def unread_backlogs(self):
+        last_backlog_seen = self.last_backlog_seen
+
+        if last_backlog_seen:
+            new_backlogs = self.backlog_group.backlogs.filter(date_created__gt=last_backlog_seen.date_created)
+        else:
+            new_backlogs = self.backlog_group.backlogs.all()
         
-        return changing
+        return new_backlogs
 
     def __str__(self):
         return f'{self.backlog_group.kind} ({self.backlog_group.belongs_to().pk}) {self.user.full_name()} ({self.user.pk})'

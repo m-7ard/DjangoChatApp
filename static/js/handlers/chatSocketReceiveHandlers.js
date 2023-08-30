@@ -114,18 +114,17 @@ const chatSocketReceiveHandlers = {
         let newMessage = parseHTML(html);
         let scrollbarWasAtBottom = scrollbarAtBottom(backlogs);
         backlogs.appendChild(newMessage);
-
-        if (scrollbarWasAtBottom || is_sender) {
-            backlogs.scrollTo(0, backlogs.scrollHeight);
+        
+        if (!document.hidden && (scrollbarWasAtBottom || is_sender)) {
+            backlogs.scrollTop = backlogs.scrollHeight;
         };
 
-        if (!document.hidden) {
+        if (!document.hidden && scrollbarAtBottom(backlogs)) {
             chatSocket.send(JSON.stringify({
-                'action': 'confirm_backlog_reception',
-                'pk': pk
+                'action': 'mark_as_read',
             }));
-            return
-        }
+            return;
+        };
 
         if (!is_sender) {
             let unreadBacklogsSubheader = document.getElementById('unread-backlogs-subheader');
@@ -203,5 +202,37 @@ const chatSocketReceiveHandlers = {
         unreadBacklogsDivider?.remove();
         let unreadBacklogsSubheader = document.getElementById('unread-backlogs-subheader');
         setCounter(unreadBacklogsSubheader, 0);
-    }
+    },
+    'delete_backlog': ({pk}) => {
+        let backlog = document.getElementById(`backlog-${pk}`);
+        backlog.remove();
+    },
+    'edit_message': ({pk, content}) => {
+        let backlog = document.getElementById(`backlog-${pk}`);
+        if (!backlog) {
+            return;
+        };
+        let backlogContent = backlog.querySelector('[data-role="content"]');
+        backlogContent.innerText = content;
+    },
+    'generate_backlogs': ({html, page}) => {
+        backlogs.scrollTo(0, 1);
+        let backlogList = parseHTML(html);
+        backlogs.prepend(...[...backlogList.childNodes].reverse());
+        if (page === 1) {
+            backlogs.scroll(0, backlogs.scrollHeight);
+        };
+    },
+    'get_mentionables': ({html, uuid, positioning}) => {
+        let tooltip = parseHTML(html);
+        tooltip.setAttribute('data-uuid', uuid);
+        let reference = document.querySelector(`[data-uuid="${uuid}"]`);
+        positioning = JSON.parse(positioning);
+        
+        let tooltipLayer = document.querySelector('.layer--tooltips');
+        tooltipLayer.appendChild(tooltip);
+
+        positionFixedContainer(tooltip, reference, positioning);
+        fitFixedContainer(tooltip);
+    },
 };

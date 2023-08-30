@@ -139,6 +139,41 @@ const commandHandlers = {
             innerHTML: overlayString,
         });
     },
+    'get-tooltip': async ({trigger, event}) => {
+        event.preventDefault();
+        let openTooltip = document.querySelector('.tooltip');
+        if (openTooltip) {
+            if (openTooltip.dataset.randomId == trigger.dataset.randomId) {
+                // open tooltip corresponds to trigger
+                openTooltip.remove();
+                return;
+            }
+            else {
+                // open tooltip does not correspond to trigger
+                openTooltip.remove();
+            };
+        };
+        let tooltip = await getView({
+            name: trigger.dataset.name,
+            kwargs: trigger.dataset.kwargs,
+            query: trigger.dataset.query,
+            format: 'html',
+        });
+
+        /* This will be used when a click happens on another trigger to see
+        if it is the same one that opened the existing tooltip */
+        let sharedID = randomID()
+        tooltip.setAttribute('data-random-id', sharedID)
+        trigger.setAttribute('data-random-id', sharedID)
+        let positioning = JSON.parse(trigger.dataset.positioning);
+
+        let tooltipLayer = document.querySelector('.layer--tooltips');
+        tooltipLayer.appendChild(tooltip);
+
+        positionFixedContainer(tooltip, trigger, positioning);
+        fitFixedContainer(tooltip);
+
+    },
     'remove-closest': ({trigger, event}) => {
         let targetSelector = trigger.dataset.target;
         let target = trigger.closest(targetSelector);
@@ -174,6 +209,53 @@ const commandHandlers = {
     'mark_as_read': ({trigger, event, command}) => {
         chatSocket.send(JSON.stringify({
             'action': command,
-        }))
+        }));
+    },
+    'delete_backlog': ({trigger, event, command}) => {
+        let backlog = trigger.closest('.backlog');
+        chatSocket.send(JSON.stringify({
+            'action': command,
+            'pk': backlog.dataset.pk
+        }));
+    },
+    'edit_message': ({trigger, event, command}) => {
+        function save() {
+            let editorInput = editor.querySelector('[data-role="input"]');
+            content = editorInput.value.trim();
+            if (!content) {
+                return;
+            };
+            chatSocket.send(JSON.stringify({
+                'action': command,
+                'pk': backlog.dataset.pk,
+                'content': content,
+            }));
+            editor.remove();
+        };
+
+        document.querySelectorAll('.backlog__editor')?.forEach((openEditor) => openEditor.remove());
+        let backlog = trigger.closest('.backlog');
+        let backlogContent = backlog.querySelector('[data-role="content"]');
+        let editor = quickCreateElement('div', {
+            classList: ['backlog__editor'],
+            parent: backlog,
+            innerHTML: `
+                <textarea data-role="input">${backlogContent.innerText}</textarea>
+                <div data-role="cancel" data-command="remove-closest" data-target=".backlog__editor">Cancel</div>
+                <div data-role="save">Save</div>
+            `,
+            eventListeners: {
+                'keydown': (event) => {
+                    let triggerSubmit = (event.key === 'Enter' && !event.shiftKey);
+                    if (!triggerSubmit) {
+                        return
+                    };
+                    event.preventDefault();
+                    save();
+                }
+            }
+        });
+        let saveButton = document.querySelector('[data-role="save"]');
+        saveButton.addEventListener('click', save);
     }
 };

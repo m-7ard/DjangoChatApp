@@ -44,11 +44,22 @@ class VerifyUser(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        username_id = cleaned_data.get('username_id')
+
+        """
+
+        TODO: make message actions like delete edit reacts
+
+        """
+
+        if not username or not username_id:
+            return
+        
         user = self.get_user()
 
         if not user:
-            username = cleaned_data["username"]
-            username_id = str(cleaned_data["username_id"]).zfill(2)
+            username_id = str(username_id).zfill(2)
             self.add_error(None, f'User {username}#{username_id} does not exist.')
 
 

@@ -11,37 +11,6 @@ const windowClickHandlers = {
 		let dropdownContent = dropdown.querySelector('.dropdown__content');
 		dropdownContent.classList.toggle('dropdown__content--open');
 	},
-	'.tooltip__trigger': async (event) => {
-        event.preventDefault();
-		let trigger = event.target.closest('.tooltip__trigger');
-        let openTooltip = document.querySelector('.tooltip');
-        if (openTooltip) {
-            if (openTooltip.dataset.randomId == trigger.dataset.randomId) {
-                // open tooltip corresponds to trigger
-                openTooltip.remove();
-                return;
-            }
-            else {
-                // open tooltip does not correspond to trigger
-                openTooltip.remove();
-            };
-        };
-        let tooltip = parseHTML(
-            await getView({
-                name: trigger.dataset.name,
-                kwargs: trigger.dataset.kwargs,
-                query: trigger.dataset.query,
-            })
-        );
-        let sharedID = randomID()
-        tooltip.setAttribute('data-random-id', sharedID)
-        trigger.setAttribute('data-random-id', sharedID)
-        let tooltipLayer = document.querySelector('.layer--tooltips');
-        let positioning = JSON.parse(trigger.dataset.positioning);
-        positionFixedContainer(tooltip, trigger, positioning);
-        tooltipLayer.appendChild(tooltip);
-        fitFixedContainer(tooltip);
-	},
     '.overlay__trigger': async (event) => {
         event.preventDefault();
 		let trigger = event.target.closest('.overlay__trigger');

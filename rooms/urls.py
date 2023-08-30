@@ -18,5 +18,5 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/invite-users/', views.InviteFormView.as_view(), name='invite-users'),
     path('invite/<uuid:directory>/', views.InviteDetailView.as_view(), name='invite'),
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatMembershipDeleteView.as_view(), name='leave-group-chat'),
-    
+    path('get-mentionables/<str:mention>', views.GetMentionables.as_view(), name='get-mentionables'),
 ]
