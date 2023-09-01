@@ -166,52 +166,96 @@ window.addEventListener('mouseup', (event) => {
     };
 });
 
-window.addEventListener('keydown', function (event) {
-    document.querySelectorAll('.mentionables-list')?.forEach((element) => element.remove());
-    const activeElement = event.target;
-
-    if (!activeElement.hasAttribute('data-get-mentionables')) {
-        return;
+class MentionableObserver {
+    constructor() {
+        this.init()
     };
-    if (!(event.code == 'Delete' || event.code == 'Backspace')) {
-        return;
-    };
-    let i = activeElement.value.length - 2;
-    let mention = getMention(chatbarInput.value.slice(0, i+1));
-    if (!mention) {
-        return;
-    };
-    let reference = activeElement.closest(activeElement.dataset.reference);
-    let uuid = randomID();
-    reference.setAttribute('data-uuid', uuid);
-    let positioning = activeElement.dataset.positioning;
-    chatSocket.send(JSON.stringify({
-        'action': 'get_mentionables',
-        'mention': mention,
-        'uuid': uuid,
-        'positioning': positioning,
-    }));      
-});
 
-document.addEventListener('selectionchange', (event) => {
-    const activeElement = document.activeElement;
+    init() {
+        document.addEventListener('keydown', (event) => {
+            this.activeElement = document.activeElement;
+            if (!this.activeElement.hasAttribute('data-get-mentionables')) {
+                return;
+            };
 
-    if (activeElement.hasAttribute('data-get-mentionables')) {
-        document.querySelectorAll('.mentionables-list')?.forEach((element) => element.remove());
-        let i = activeElement.selectionStart;
-        let mention = getMention(chatbarInput.value.slice(0, i+1));
-        if (!mention) {
-            return;
+            if ((event.code === 'Delete' || event.code === 'Backspace')) {
+                this.deleteHandler();
+            }
+            else if ((event.code === 'Enter')) {
+                this.enterHandler();
+            }
+        });
+    
+        document.addEventListener('selectionchange', () => {
+            this.activeElement = document.activeElement;
+            if (!this.activeElement.hasAttribute('data-get-mentionables')) {
+                return;
+            };
+
+            this.selectionChangeHandler();
+        });
+    };
+
+    deleteHandler() {
+        this.openMentionablesList?.remove();
+        this.selectionStart = this.activeElement.selectionStart - 1;
+
+        let mention = getMention({
+            i: this.selectionStart,
+            input: this.activeElement.value
+        })
+    
+        if (validateMention(mention)) {
+            this.getMentionables(mention);
         };
-        let reference = activeElement.closest(activeElement.dataset.reference);
+    }
+
+    enterHandler() {
+        this.openMentionablesList?.remove();
+    };
+
+    selectionChangeHandler() {
+        this.openMentionablesList?.remove();
+        this.selectionStart = this.activeElement.selectionStart
+
+        let mention = getMention({
+            i: this.selectionStart,
+            input: this.activeElement.value
+        })
+
+        if (validateMention(mention)) {
+            this.getMentionables(mention);
+        };
+    };
+
+    buildMentionablesList(html) {
+        let {positioning, reference, uuid} = this.tooltipConfig;
+        this.openMentionablesList = buildTooltip({
+            html: html,
+            uuid: uuid,
+            positioning: positioning, 
+            reference: reference
+        });
+    };
+
+    getMentionables(mention) {
+        let referenceSelector = this.activeElement.dataset.reference;
+        let reference = this.activeElement.closest(referenceSelector);
+        let positioning = this.activeElement.dataset.positioning;
         let uuid = randomID();
         reference.setAttribute('data-uuid', uuid);
-        let positioning = activeElement.dataset.positioning;
+        this.tooltipConfig = {
+            positioning: positioning, 
+            reference: reference,
+            uuid: uuid,
+        };
         chatSocket.send(JSON.stringify({
             'action': 'get_mentionables',
             'mention': mention,
-            'uuid': uuid,
-            'positioning': positioning,
-        }));        
+        }));
     };
-})
+};
+
+const mentionableObserver = new MentionableObserver();
+
+

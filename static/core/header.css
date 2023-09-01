@@ -1679,7 +1679,7 @@
   gap: 0.5rem;
   border-radius: 0.25rem;
 }
-.mentionables-list__mentionable:hover {
+.mentionables-list__mentionable:hover, .mentionables-list__mentionable--active {
   background-color: #1D1D1C;
 }
 

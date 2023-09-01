@@ -223,16 +223,6 @@ const chatSocketReceiveHandlers = {
             backlogs.scroll(0, backlogs.scrollHeight);
         };
     },
-    'get_mentionables': ({html, uuid, positioning}) => {
-        let tooltip = parseHTML(html);
-        tooltip.setAttribute('data-uuid', uuid);
-        let reference = document.querySelector(`[data-uuid="${uuid}"]`);
-        positioning = JSON.parse(positioning);
-        
-        let tooltipLayer = document.querySelector('.layer--tooltips');
-        tooltipLayer.appendChild(tooltip);
+    'get_mentionables': ({html}) => mentionableObserver.buildMentionablesList(html),
 
-        positionFixedContainer(tooltip, reference, positioning);
-        fitFixedContainer(tooltip);
-    },
 };

@@ -240,7 +240,7 @@ const commandHandlers = {
             classList: ['backlog__editor'],
             parent: backlog,
             innerHTML: `
-                <textarea data-role="input">${backlogContent.innerText}</textarea>
+                <textarea data-role="input" data-get-mentionables data-positioning='{"bottom": "100%", "left": "0px", "right": "0px"}' data-reference='.backlog__editor'>${backlogContent.innerText}</textarea>
                 <div data-role="cancel" data-command="remove-closest" data-target=".backlog__editor">Cancel</div>
                 <div data-role="save">Save</div>
             `,

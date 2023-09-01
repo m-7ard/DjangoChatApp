@@ -39,19 +39,19 @@ function fitFixedContainer(element) {
 	let elementDimensions = element.getBoundingClientRect();
 	if (elementDimensions.bottom > document.body.clientHeight) {
 		element.style.bottom = '0px';
-		element.style.top = '';
+		element.style.top = element.style.top ? element.style.top : '';
 	}; 
 	if (elementDimensions.top < 0) {
 		element.style.top = '0px';
-		element.style.bottom = '';
+		element.style.bottom = element.style.bottom ? element.style.bottom : '';
 	}; 
 	if (elementDimensions.right > document.body.clientWidth) {
 		element.style.right = '0px';
-		element.style.left = '';
+		element.style.left = element.style.left ? element.style.left : '';
 	}; 
 	if (elementDimensions.left < 0) {
 		element.style.left = '0px';
-		element.style.right = '';
+		element.style.right = element.style.right ? element.style.right : '';
 	};
 };
 
@@ -234,11 +234,36 @@ function scrollbarAtBottom(element) {
     return element.scrollHeight - Math.round(element.scrollTop) - element.clientHeight <= 1;
 };
 
-function getMention(input) {
+function getMention({i, input}) {
+    let precedingString = input.slice(0, i);
+    let mentionStart = precedingString.lastIndexOf('>>');
+    if (mentionStart === -1) {
+        return;
+    };
+
+    return precedingString.slice(mentionStart, i+1);
+}
+
+function validateMention(mention) {
+    if (!mention) {
+        return;
+    };
     /*
-    Captures all mentions in format >>[optional a-z/0-9]#[optional 0-9, max chars 2]
+    validates format >>[optional a-z/0-9]#[optional 0-9, max chars 2]
     */
     const pattern = /^>>[a-zA-Z0-9]*#?\d{0,2}$/g;
-    const matches = input.match(pattern) || [];
-    return matches[matches.length - 1]
+    return pattern.test(mention);
+};
+
+function buildTooltip({html, uuid, positioning, reference}) {
+    let tooltip = parseHTML(html);
+    tooltip.setAttribute('data-uuid', uuid);
+    positioning = JSON.parse(positioning);
+    let tooltipLayer = document.querySelector('.layer--tooltips');
+    tooltipLayer.appendChild(tooltip);
+
+    positionFixedContainer(tooltip, reference, positioning);
+    fitFixedContainer(tooltip);
+
+    return tooltip;
 };

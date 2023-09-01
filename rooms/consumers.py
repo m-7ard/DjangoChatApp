@@ -325,7 +325,6 @@ class BacklogGroupUtils():
         self.backlog_group = chat.backlog_group
         self.tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
         backlogs = self.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')
-        print(backlogs.explain())
         self.paginator = Paginator(backlogs, 20)
         self.current_page = self.paginator.get_page(1)
 
@@ -396,14 +395,12 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}_user_{self.user.pk}', self.channel_name)
         await self.generate_backlogs()
 
-    async def get_mentionables(self, mention, uuid, positioning, **kwargs):
+    async def get_mentionables(self, mention, **kwargs):
         username, username_id = await process_mention(mention)
         html = await super().get_mentionables(self.group_chat, username, username_id)
         await self.send(text_data=json.dumps({
             'action': 'get_mentionables',
             'html': html,
-            'uuid': uuid,
-            'positioning': positioning,
         }))
 
     async def create_message(self, content, **kwargs):

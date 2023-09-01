@@ -1968,7 +1968,7 @@ $red-theme-1: (
         @include flex-row($space-small, $space-medium);
         border-radius: $space-small;
         
-        &:hover {
+        &:hover, &--active {
             background-color: map-get($grey-theme-1, light-bg);
         }
     }
