@@ -1,3 +1,5 @@
+const { reference } = require("@popperjs/core");
+
 // JSON elements
 const groupChatPK = document.getElementById('group-chat-pk');
 const groupChannelPK = document.getElementById('group-channel-pk');
@@ -201,10 +203,6 @@ window.addEventListener('mouseup', (event) => {
 
 
 class TooltipManager {
-    /* 
-        BUGS: when triggering by clicking on a trigger and switftly clicking away
-        the tooltip gets incorrectly positioned 
-    */
     constructor() {
         this.init();
     };
@@ -244,7 +242,11 @@ class TooltipManager {
 
     toggleTooltip = ({trigger, tooltip, reference}) => {
         if (!this.activeTooltip) {
-            this.registerTooltip({trigger: trigger, reference: reference, tooltip: tooltip});
+            this.registerTooltip({
+                trigger: trigger, 
+                tooltip: tooltip, 
+                reference: reference
+            });
             return true;
         };
 
@@ -254,7 +256,7 @@ class TooltipManager {
         };
 
         this.deregisterActiveTooltip();
-        this.registerTooltip({trigger: trigger, reference: reference, tooltip: tooltip});
+        this.registerTooltip({trigger, tooltip});
         return true;    
     };
 
@@ -262,20 +264,19 @@ class TooltipManager {
 };
 
 class EmoteMenuUtils {
-    /* TODO: put the handlers for the menu here */
+    
 
     
 };
 
 class MentionableObserver {
     constructor() {
-        this.init();
+        this.init()
     };
 
     init() {
         document.addEventListener('keydown', (event) => {
             this.activeElement = document.activeElement;
-
             if (this.activeElement.hasAttribute('data-get-mentionables')) {
                 if ((event.code === 'Delete' || event.code === 'Backspace')) {
                     this.deleteHandler();
@@ -296,36 +297,22 @@ class MentionableObserver {
                 }
             };
         });
-
-        document.addEventListener('focusin', (event) => {
-            // certain browsers won't fire selectionchange on focus
-            this.activeElement = document.activeElement;
-
-            if (!this.activeElement.hasAttribute('data-get-mentionables')) {
-                return;
-            };
-
-            this.selectionHandler();
-        })
     
         document.addEventListener('selectionchange', () => {
             this.activeElement = document.activeElement;
-
             if (!this.activeElement.hasAttribute('data-get-mentionables')) {
                 return;
             };
 
-            this.selectionHandler();
+            this.selectionChangeHandler();
         });
     };
 
     closeMentionablesList() {
-        tooltipManager.deregisterActiveTooltip();
+        this.openMentionablesList?.remove();
         this.openMentionablesList = undefined;
         this.activeMentionable = undefined;
     };
-
-
 
     arrowUpHandler() {
         if (!this.activeMentionable) {
@@ -388,7 +375,7 @@ class MentionableObserver {
         this.closeMentionablesList();
     };
 
-    selectionHandler() {
+    selectionChangeHandler() {
         this.closeMentionablesList();
         this.selectionStart = this.activeElement.selectionStart;
 
@@ -403,13 +390,13 @@ class MentionableObserver {
     };
 
     buildMentionablesList(html) {
-        this.openMentionablesList = parseHTML(html);
-        tooltipManager.toggleTooltip({
-            trigger: this.activeElement,
-            tooltip: this.openMentionablesList,
-            reference: this.tooltipReference
+        let {positioning, reference, uuid} = this.tooltipConfig;
+        this.openMentionablesList = buildTooltip({
+            html: html,
+            uuid: uuid,
+            positioning: positioning, 
+            reference: reference
         });
-        console.log(this.openMentionablesList)
 
         // to enable arrow navigation. Easier to handle enumerating them on frontend.
         this.mentionablesNodes = this.openMentionablesList.querySelectorAll('.mentionables-list__mentionable');
@@ -458,7 +445,15 @@ class MentionableObserver {
     getMentionables(mention) {
         let referenceSelector = this.activeElement.dataset.reference;
         let reference = this.activeElement.closest(referenceSelector);
-        this.tooltipReference = reference;
+        let positioning = this.activeElement.dataset.positioning;
+        let uuid = randomID();
+        this.activeElement.setAttribute('data-uuid', uuid);
+
+        this.tooltipConfig = {
+            positioning: positioning, 
+            reference: reference,
+            uuid: uuid,
+        };
         
         chatSocket.send(JSON.stringify({
             'action': 'get_mentionables',

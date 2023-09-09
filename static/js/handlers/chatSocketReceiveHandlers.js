@@ -110,8 +110,9 @@ const chatSocketReceiveHandlers = {
     
     'response': () => { console.log('response exists') },
 
-    'create_message': ({html, pk, is_sender}) => {
+    'create_message': ({html, is_sender, is_mentioned}) => {
         let newMessage = parseHTML(html);
+        is_mentioned ? newMessage.classList.add('backlog--mentioned') : undefined;
         let scrollbarWasAtBottom = scrollbarAtBottom(backlogs);
         backlogs.appendChild(newMessage);
         
@@ -207,13 +208,15 @@ const chatSocketReceiveHandlers = {
         let backlog = document.getElementById(`backlog-${pk}`);
         backlog.remove();
     },
-    'edit_message': ({pk, content}) => {
+    'edit_message': ({pk, content, is_mentioned}) => {
         let backlog = document.getElementById(`backlog-${pk}`);
         if (!backlog) {
             return;
         };
+        console.log(is_mentioned)
+        is_mentioned ? backlog.classList.add('backlog--mentioned') : backlog.classList.remove('backlog--mentioned');
         let backlogContent = backlog.querySelector('[data-role="content"]');
-        backlogContent.innerText = content;
+        backlogContent.innerHTML = content;
     },
     'generate_backlogs': ({html, page}) => {
         backlogs.scrollTo(0, 1);

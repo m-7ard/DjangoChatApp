@@ -126,18 +126,18 @@ async function getView({name, kwargs, query, format}) {
     return response;
 }
 
-async function processForm(event) {
-    event.preventDefault();
-    let form = event.target.closest('form');
-    let formContainer = event.target.closest('.form');
-    let formResponses = formContainer.querySelector('[data-role="form-responses"]');
+async function submitForm(form) {
     let request = await fetch(form.action, {
         method: form.method,
-        body: new FormData(form)
+        body: new FormData(form),
     });
     let response = await request.json();
+    return response;
+};
+
+function processForm({form, response}) {
     // Remove old messages
-    formContainer.querySelectorAll('.form__message').forEach((message) => message.remove());
+    form.querySelectorAll('.form__response').forEach((message) => message.remove());
 
     if (response.redirect) {
         window.location.replace(response.redirect);
@@ -145,29 +145,36 @@ async function processForm(event) {
 
     if (response.status == 200) {
         // Success
+
+        if (!response.confirmation) {
+            return;
+        };
+
         quickCreateElement('div', {
-            classList: ['form__message', 'form__message--confirmation'],
+            classList: ['form__response', 'form__response--success'],
             innerHTML: response.confirmation,
-            parent: formResponses
+            parent: formResponses,
         });
     }
     else if (response.status == 400) {
         // Error
 
         Object.entries(response.errors).forEach(([fieldName, errorList]) => {
-            let field = formContainer.querySelector(`[data-name="${fieldName}"]`);
+            let field = form.querySelector(`[data-name="${fieldName}"]`);
             let parent = field ? field : formResponses;
 
             errorList.forEach((error) => {
                 let {code, message} = error;
                 quickCreateElement('div', {
-                    classList: ['form__message', 'form__message--error'],
+                    classList: ['form__response', 'form__response--error'],
                     innerHTML: message,
                     parent: parent
                 });
             });
         });
     };
+
+    return response;
 }
 
 async function getTemplate({templateName, context}) {
@@ -237,12 +244,16 @@ function scrollbarAtBottom(element) {
 function getMention({i, input}) {
     let precedingString = input.slice(0, i);
     let mentionStart = precedingString.lastIndexOf('>>');
+
     if (mentionStart === -1) {
         return;
     };
-
+    
+    if (!(mentionStart === 0) && !(input[mentionStart-1] === ' ')) {
+        return;
+    };
     return precedingString.slice(mentionStart, i+1);
-}
+};
 
 function validateMention(mention) {
     if (!mention) {

@@ -13,6 +13,10 @@ window.onload = (event) => {
 const chatbar = document.getElementById('chatbar');
 const chatbarInput = chatbar.querySelector('[data-role="input"]');
 chatbar.addEventListener('keydown', (event) => {
+    if (mentionableObserver.activeMentionable) {
+        return;
+    };
+
     if (event.key === 'Enter' && !event.shiftKey) {
         input = event.target;
         event.preventDefault();

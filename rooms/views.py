@@ -27,11 +27,11 @@ from .models import (
     GroupChatMembership,
     GroupChannel,
     Category,
-    Role,
     Invite,
     PrivateChat,
     PrivateChatMembership,
-    BacklogGroupTracker
+    BacklogGroupTracker,
+    Emote
 )
 from . import forms
 from utils import get_object_or_none
@@ -328,217 +328,82 @@ class CreatePrivateChat(FormView):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
 
-class GetMentionables(TemplateView):
-    template_name = 'commons/tooltips/get-mentionables.html'
-    
-    def get(self, request, *args, **kwargs):
-        context = super().get_context_data
-        
+class EmoteManageView(TemplateView):
+    template_name = 'rooms/overlays/manage-emotes.html'
+    form_class = forms.EmoteCreateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        context['group_chat'] = group_chat
+        return context
+     
 
-
-
-"""
-
-
-
-class ChannelCreateView(CreateView):
-    form_class = ChannelCreateForm
+class EmoteCreateView(CreateView):
     template_name = 'commons/forms/compact-dynamic-form.html'
+    model = Emote
+    form_class = forms.EmoteCreateForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = None
-        category_pk = request.GET.get('category')
-        category = ChannelCategory.objects.get(pk=category_pk) if category_pk else None
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['form'] = {
-            'title': 'Create Channel',
-            'subtitle': category and category.name,
-            'fields': ChannelCreateForm(category=category),
-            'url': reverse('create-channel', kwargs={'pk': kwargs.get('pk')}),
-            'type': 'create'
+            'title': 'Add Emote',
+            'fields': self.form_class,
+            'url': self.request.path,
+            'on_response': 'addEmote',
+            'type': 'create',
         }
-        
-        return render(request, self.template_name, context=context)
+
+        return context
     
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
-
-    def form_valid(self, form):
-        channel = form.save(commit=False)
-        channel.room = Room.objects.get(pk=self.kwargs.get('pk'))
-        channel.save()
-        success_url = reverse('channel', kwargs={'channel': channel.pk, 'room': channel.room.pk})
-        return JsonResponse({'status': 400, 'redirect': success_url})
-
-class RoomManageView(TemplateView):
-    template_name = 'commons/forms/full-dynamic-form.html'
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        room = Room.objects.get(pk=kwargs['pk'])
-        context['forms'] = [
-            {
-                'title': 'Update Room',
-                'subtitle': room.name,
-                'fields': RoomUpdateForm(),
-                'url': reverse('update-room', kwargs={'pk': room.pk}),
-                'type': 'update'
-            },
-        ]
     
-        return render(request, self.template_name, context=context)
+    def form_valid(self, form):
+        emote = form.save(commit=False)
+        emote.added_by = self.request.user
+        emote.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        emote.save()
+        html = render_to_string('rooms/elements/emote-manager-item.html', {'emote': emote})
+        return JsonResponse({'status': 200, 'html': html})
 
 
-class ChannelManageView(TemplateView):
-    template_name = 'commons/forms/full-dynamic-form.html'
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        channel = Channel.objects.get(pk=kwargs['pk'])
-        context['forms'] = [
-            {
-                'title': 'Update Channel',
-                'subtitle': channel.category and channel.category.name,
-                'fields': ChannelUpdateForm(instance=channel),
-                'url': reverse('update-channel', kwargs={'pk': channel.pk}),
-                'type': 'update'
-            },
-            {
-                'title': 'Delete Channel',
-                'subtitle': channel.category and channel.category.name,
-                'warning': 'This action is not reversible',
-                'fields': ChannelDeleteForm(instance=channel),
-                'url': reverse('delete-channel', kwargs={'pk': channel.pk}),
-                'type': 'delete'
-            },
-            {
-                'title': 'Manage Channel Permissions',
-                'prerender': render_to_string(
-                    request=request, 
-                    template_name='rooms/forms/manage-channel-permissions.html', 
-                    context= {
-                        'title': 'Manage Channel Permissions',
-                        'channel': channel,
-                        'type': 'update'
-                    }
-                ),
-            },
-        ]
-        
-        return render(request, self.template_name, context=context)
-
-
-
-class RoomCreateView(CreateView):
-    form_class = RoomCreateForm
+class EmoteUpdateView(UpdateView):
     template_name = 'commons/forms/compact-dynamic-form.html'
+    model = Emote
+    form_class = forms.EmoteUpdateForm
 
-    def get(self, request, *args, **kwargs):
-        self.object = None
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['form'] = {
-            'title': 'Create Room',
-            'fields': RoomCreateForm(),
-            'url': reverse('create-room'),
-            'type': 'create'
+            'title': 'Edit Emote',
+            'fields': self.form_class,
+            'url': self.request.path,
+            'on_response': 'editEmote',
+            'type': 'update',
         }
-        
-        return render(request, self.template_name, context=context)
+
+        return context
     
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
-
-    def form_valid(self, form):
-        room = form.save(commit=False)
-        room.owner = self.request.user
-        room.save()
-        success_url = reverse('room', kwargs={'pk': room.pk})
-        return JsonResponse({'status': 400, 'redirect': success_url})
     
+    def form_valid(self, form):
+        emote = form.save()
+        return JsonResponse({'status': 200, 'id': f'emote-{emote.pk}', 'name': emote.name})
 
-class RoomUpdateView(UpdateView):
-    model = Room
 
+class EmoteDeleteView(DeleteView):
+    model = Emote
+    
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
-
+    
     def form_valid(self, form):
-        self.object = form.save()
-        return JsonResponse({'status': 400})
+        pk = self.object.pk
+        self.object.delete()
+        return JsonResponse({'status': 200, 'id': f'emote-{pk}'})
 
 
-class LeaveRoom(TemplateView):
-    template_name = 'commons/forms/compact-dynamic-form.html'
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        context['form'] = {
-            'title': 'Leave Room',
-            'fields': {},
-            'url': reverse('leave-room', kwargs={'pk': kwargs.get('pk')}),
-            'type': 'delete'
-        }
-
-        return render(request, self.template_name, context=context)
-
-    def post(self, request, *args, **kwargs):
-        pass
-    
-
-class DeleteRoom(DeleteView):
-    model = Room
-
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-
-        room = self.kwargs.get('room')
-        return queryset.get(pk=room)
-
-    def delete(self, *args, **kwargs):
-        self.object = self.get_object()
-        super().delete(*args, **kwargs)
-        
-    def get_success_url(self):
-        return reverse('frontpage')
-    
-
-class JoinRoom(View):
-    def post(self, request, *args, **kwargs):
-        pass
-    
-
-class RoomListView(ListView):
-    model = Room
-    template_name = 'rooms/explore-rooms.html'
-    context_object_name = 'rooms'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(public=True)
-        return queryset
-    
-
-class ModelPermissionGroupUpdateView(View):
-    pass
-    
-
-
-class PrivateChatView(TemplateView):
-    template_name = 'rooms/private-chat.html'
-    
-    def get(self, request, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        counterparty = CustomUser.objects.get(pk=kwargs.get('pk'))
-        private_chat = PrivateChat.objects.filter(
-            Q(chatters__values__user=counterparty.pk) & Q(chatters__chatters__user=request.user.pk)
-        ).first()
-
-        if not private_chat:
-            private_chat = PrivateChat.objects.create()
-            Chatter.objects.create(user=request.user, group=private_chat.chatters)
-            Chatter.objects.create(user=counterparty, group=private_chat.chatters)
-        
-        return self.render_to_response(context)
-"""
+class EmoteMenuView(TemplateView):
+    template_name = 'rooms/tooltips/emotes-menu.html'

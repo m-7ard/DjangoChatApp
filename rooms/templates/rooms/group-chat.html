@@ -5,91 +5,102 @@
 {% endblock %}
 
 {% block app-sidebar-header %}
-    <div class="sidebar-menu dropdown">
-        <div class="sidebar-menu__trigger dropdown__trigger">
-            <div class="app__title">
-                {{ group_chat.name }}
+    <div class="sidebar__button sidebar__button--header dropdown__trigger">
+        <div class="app__title">
+            {{ group_chat.name }}
+        </div>
+        <div class="app__icon">
+            <div class="icon icon--medium">
+                <i class="material-symbols-outlined">
+                    expand_more
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="menu menu--sidebar dropdown__content has-shadow">
+        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="invite-users" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div>
+                Invite Users
             </div>
             <div class="app__icon">
-                <div class="icon icon--medium">
+                <div class="icon icon--small">
                     <i class="material-symbols-outlined">
-                        expand_more
+                        person_add
                     </i>
                 </div>
             </div>
         </div>
-        <div class="sidebar-menu__content dropdown__content has-shadow">
-            <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="invite-users" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-                <div>
-                    Invite Users
-                </div>
-                <div class="app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            person_add
-                        </i>
-                    </div>
-                </div>
-            </div>
-            <div class="sidebar-menu__divider">
+        <div class="menu__divider">
 
-            </div>
-            <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-                <div>
-                    Create Channel
-                </div>
-                <div class="app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            add_circle
-                        </i>
-                    </div>
-                </div>
-            </div>
-            <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-                <div>
-                    Create Category
-                </div>
-                <div class="app__icon">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            create_new_folder
-                        </i>
-                    </div>
-                </div>
-            </div>
-            <div class="sidebar-menu__divider">
-
-            </div>
-            {% if user != group_chat.owner %}
-                <div class="sidebar-menu__button dropdown__close" data-command="get-overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-                    <div>
-                        Leave Group Chat
-                    </div>
-                    <div class="app__icon">
-                        <div class="icon icon--small">
-                            <i class="material-symbols-outlined">
-                                door_open
-                            </i>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="sidebar-menu__button dropdown__close">
-                    <div>
-                        Delete Group Chat
-                    </div>
-                    <div class="app__icon">
-                        <div class="icon icon--small">
-                            <i class="material-symbols-outlined">
-                                backspace
-                            </i>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
         </div>
+        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div>
+                Create Channel
+            </div>
+            <div class="app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        add_circle
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div>
+                Create Category
+            </div>
+            <div class="app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        create_new_folder
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="manage-emotes" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div>
+                Manage Emote
+            </div>
+            <div class="app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        add_reaction
+                    </i>
+                </div>
+            </div>
+        </div>
+        <div class="menu__divider">
+
+        </div>
+        {% if user != group_chat.owner %}
+            <div class="menu__button dropdown__close" data-command="get-overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Leave Group Chat
+                </div>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            door_open
+                        </i>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="menu__button dropdown__close">
+                <div>
+                    Delete Group Chat
+                </div>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            backspace
+                        </i>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
+
 {% endblock %}
 
 {% block app-sidebar-body %}

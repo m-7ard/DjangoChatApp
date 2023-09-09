@@ -92,9 +92,19 @@ $grey-theme-1: (
 );
 
 $blue-theme-1: (
-    "dark-bg": #5C278E,
-    "neutral-bg": #6A22A5, 
-    "light-bg": #6F20BA,
+    "dark-bg": #572586,
+    "neutral-bg": #6A26A1, 
+    "light-bg": #7425B5,
+
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
+);
+
+$lavender-theme: (
+    "dark-bg": #A670D8,
+    "neutral-bg": #AF71E2, 
+    "light-bg": #B176E8,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -122,9 +132,9 @@ $lime-theme--DARK: (
 );
 
 $green-theme-1: (
-    "dark-bg": #1E6432,
-    "neutral-bg": #1D6D35,
-    "light-bg": #1B7538,
+    "dark-bg": #154623,
+    "neutral-bg": #135327,
+    "light-bg": #16632F,
 
     "light-fg": $light-light,
     "neutral-fg": $light-neutral,
@@ -178,6 +188,10 @@ $red-theme-1: (
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
+@mixin default-shadow-transition {
+    transition: text-shadow 0.2s, box-shadow 0.2s;
+}
+
 @mixin break-long-words {
     word-break: keep-all;
     word-wrap: break-word;
@@ -194,15 +208,15 @@ $red-theme-1: (
 @mixin small-button {
     @include default-color-transition;
     @include flex-row($space-small $space-large, $space-medium);
-    font-size: $text-secondary-large;
-    border-radius: $radius-small;
+    font-size: $text-secondary-small;
+    border-radius: 1px;
 }
 
 @mixin medium-button {
     @include default-color-transition;
     @include flex-row($space-medium $space-large, $space-medium);
-    font-size: $text-secondary-large;
-    border-radius: $radius-medium;
+    font-size: $text-secondary-medium;
+    border-radius: $radius-small;
 }
 
 @mixin large-button {
@@ -249,6 +263,33 @@ $red-theme-1: (
     grid-template-columns: unquote($column-template-string);
 }
 
+@mixin title {
+    font-size: $text-primary-medium;
+    font-weight: bold;
+    user-select: none;
+}
+
+@mixin has-shadow {
+    box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
+}
+
+@mixin input-replacement {
+    position: relative;
+
+    input {
+        &::-webkit-file-upload-button {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+        }
+        
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+    }
+}
+
+
 .bottom { margin-top: auto !important; }
 .top { margin-bottom: auto !important; }
 .left { margin-right: auto !important; }
@@ -274,20 +315,9 @@ $red-theme-1: (
     }
 }
 
-.wrapper {
-	&--remaining-space {
-		position: relative;
-		flex: 1;
-	}
-    &--flex {
-        display: flex;
-    }
-}
-
 .has-shadow {
-	box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.404);
+	box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
 }
-
 
 .dropdown {
 	position: relative;
@@ -541,206 +571,6 @@ $red-theme-1: (
     }
 }
 
-.profile {
-    @include flex-column(0, 0);
-    background-color: map-get($grey-theme-1, neutral-bg);
-    overflow: hidden;
-    border-radius: 4px;
-    $outer-padding: $space-medium;
-    $self: &;
-    
-    &--tooltip {
-        width: 20rem;
-    }
-
-    &--overlay {
-        width: 40rem;
-    }
-
-    &--sidebar {
-        flex: 1;
-        background-color: map-get($grey-theme-1, dark-bg);
-    }
-
-    &__avatar {
-        padding: $space-medium;
-        background-color: map-get($grey-theme-1, neutral-bg);
-        overflow: hidden;
-        border-radius: 4px;
-        position: relative;
-
-        .on-hover {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            background-color: map-get($grey-theme-1, dark-bg);
-            opacity: 0;
-            transition: opacity 0.1s;
-        }
-
-        &:hover .on-hover {
-            opacity: 50;
-        }
-    }
-
-    &__field {
-        @include flex-column(0, $space-small);
-    }
-
-    &__header {
-        @include flex-row($outer-padding, $space-medium);
-        align-items: end;
-        justify-content: space-between;
-        position: relative;
-    }
-
-    &__header-group {
-        @include flex-row(0, $space-medium);
-        align-items: center;
-    }
-
-    &__open-menu {
-        color: map-get($grey-theme-1, light-fg);
-    }
-
-    &__banner {
-        position: absolute;
-        top: 0;
-        bottom: 25%;
-        left: 0;
-        right: 0;
-        background-color: map-get($grey-theme-1, neutral-bg);
-        z-index: -1;
-    }
-
-    &__body {
-        @include flex-column($space-medium, $space-medium);
-        margin: $outer-padding;
-        overflow: hidden;
-        border-radius: 4px;
-        background-color: map-get($grey-theme-1, dark-bg);
-
-        &--neutral {
-            background-color: map-get($grey-theme-1, neutral-bg);
-        }
-    }
-
-    &__display-name {
-        font-size: $text-primary-medium;
-        font-weight: bold;
-        color: $light-light;
-    }
-
-    &__username {
-        font-size: $text-secondary-large;
-        color: $light-dark;
-    }
-
-    &__divider {
-        height: 1px;
-        width: 100%;
-        background-color: $light-dark;
-        margin: $space-medium 0;
-    }
-
-    &__info {
-        @include flex-row(0, $space-small);
-    }
-
-    &__label {
-        font-size: $text-secondary-medium;
-        font-weight: bold;
-        color: $light-light;
-    }
-
-    &__bio {
-        font-size: $text-secondary-medium;
-        color: $light-light;
-        overflow-wrap: break-word;
-    }
-
-    &__date {
-        font-size: $text-secondary-small;
-        color: $battleship-grey;
-    }
-
-    &__section {
-        @include flex-column(0, $space-large);
-    }
-
-    &__navigation {
-        @include flex-row(0, $space-medium);
-        border-bottom: 1px solid map-get($grey-theme-1, light-bg);
-    }
-
-    &__switch {
-        font-size: $text-secondary-medium;
-        font-weight: bold;
-        padding-bottom: $space-large;
-        transition: border 0.2s, color 0.2s;
-        cursor: pointer;
-
-        &[data-state="inactive"] {
-            color: $light-dark;
-            border-bottom: $space-small solid transparent;
-        }
-
-        &:hover {
-            color: $light-light;
-            border-bottom: $space-small solid $light-light;
-        }
-
-        &[data-state="active"] {
-            color: $light-light;
-            border-bottom: $space-small solid $light-light;
-        }
-    }
-
-    &__button {
-        @include flex-row($space-medium $space-large, 0);
-        font-size: $text-secondary-medium;
-        transition: background-color 0.2s, color 0.2s;
-        cursor: pointer;
-
-        &--main {
-            justify-content: center;
-            align-items: center;
-            border-radius: 4px;
-            background-color: map-get($green-theme-1, dark-bg);
-            color: map-get($green-theme-1, light-fg);
-
-            &:hover {
-                background-color: map-get($green-theme-1, light-bg);
-                color: map-get($green-theme-1, light-fg);
-            }
-        }
-
-        &--sidebar {
-            height: fit-content;
-            flex: 1;
-            background-color: map-get($grey-theme-1, neutral-bg);
-            align-items: center;
-            justify-content: space-between;
-            
-            &:hover {
-                background-color: map-get($grey-theme-1, light-bg);
-            }
-        }
-    }
-
-    &__sidebar-group {
-        border-radius: 4px;
-        overflow: hidden;
-        margin: $outer-padding;
-        
-        & > :nth-child(n+1) {
-            border-top: map-get($grey-theme-1, dark-bg);
-        }
-    }
-}
-
 .account {
     display: flex;
     align-items: center;
@@ -814,354 +644,49 @@ $red-theme-1: (
     }
 }
 
-.form {
-	@include flex-column(0, 0);
-	color: map-get($grey-theme-1, light-fg);
-    max-width: 440px;
-    width: 100%;
+.manage-emote {
+    @include build-single-grid-row(
+        $column-templates: (1: auto, 2: 1fr, 3: auto, 4: minmax(0, auto)), 
+        $gap: minmax(0, $space-large)
+    );
+    padding: $space-small;
+    align-items: center;
 
-    &__label {
-        &--small {
-            font-size: $text-secondary-large;
-        }
-        &--medium {
-            font-size: $text-primary-small;
-        }
-        &--large {
-
-        }
-    }
-
-    /* -----------
-    
-    WIDGETS
-    START v
-
-    ----------- */ 
-
-    &__slider {
-        transition: all 0.4s $custom-ease-in;
-        $padding: $space-small;
-        $height: 0.9375rem;
-        $width: 2.25rem;
-        $self: &;
-        position: relative;
-        border: $padding solid transparent;
-        border-radius: 9999px;
-        height: $height;
-        width: $width;
-        overflow: hidden;
-    
-        input {
-            @include absolute-boundary(- $padding, - $padding, - $padding, - $padding);
-            opacity: 0;
-            border: $padding solid transparent;
-            cursor: pointer;
-        }
-    
-        &:has(input:checked) {
-            $bg: map-get($green-theme-1, neutral-bg);
-            background-color: $bg;
-            border-color: $bg;
-            
-            [data-role="marker"] {
-                left: 0px;
-            }
-        }
-    
-        &:not(:has(input:checked)) {
-            $bg: map-get($red-theme-1, neutral-bg);
-            background-color: $bg;
-            border-color: $bg;
-    
-            [data-role="marker"] {
-                left: $width - $height;
-            }
-        }
-    
-        [data-role="marker"] {
-            @include default-color-transition;
-            transition: left 0.25s $custom-ease-in;
-            position: absolute;
-            height: 100%;
-            aspect-ratio: 1 / 1;
-            border-radius: inherit;
-            background-color: map-get($grey-theme-1, light-fg);
-        }
-    }
-
-    &__input {
-        @include flex-row($space-medium, $space-small);
-        border-radius: $radius-small;
-        font-size: $text-secondary-large;
-        color: map-get($grey-theme-1, light-fg);
-        color-scheme: dark;
+    .avatar {
         background-color: map-get($grey-theme-1, dark-bg);
-        border: 1px solid transparent;
-        flex-grow: 1;
-
-        &:focus {
-            border: 1px dashed map-get($grey-theme-1, dark-fg);
-        }
     }
 
-    &__select {
-        position: relative;
-        flex-grow: 1;
-
-        .dropdown__content {
-            @include absolute-boundary(auto, 0, 100%, 0);
-        
-            .form__widget--option:not(:last-of-type) {
-                border-bottom: 1px solid map-get($grey-theme-1, neutral-bg);
-            }
-        }
-    }
-
-    &__option {
-        @include base-button;
-        @include medium-button;
-        border-radius: 0px;
-        justify-content: center;
-        color: map-get($grey-theme-1, neutral-fg);
-        background-color: map-get($grey-theme-1, dark-bg);
-        position: relative;
-        overflow: hidden;
-
-        &:first-of-type {
-            border-radius: $radius-small $radius-small 0 0;
-        }
-
-        &:last-of-type {
-            border-radius: 0 0 $radius-small $radius-small;
-        }
-
-        input {
-            @include absolute-boundary(0, 0, 0, 0);
-            align-items: center;
-            cursor: pointer;
-            opacity: 0;
-        }
-
-        &:hover, &:has(:checked) {
-            color: map-get($grey-theme-1, light-fg);
-            background-color: map-get($grey-theme-1, light-bg);
-        }
-    }
-
-    &__user-input {
-        @include flex-row(0, $space-medium);
-        align-items: center;
-        border-radius: $radius-small;
-        flex-grow: 1;
-
-        .icon {
-            color: map-get($grey-theme-1, neutral-fg);
-        }
-
-        [data-role="username_id-input"] {
-            flex-grow: 0;
-        }
-    }
-
-    &__button {
-        @include base-button;
-
-        &--green {
-            @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: neutral-fg);
-
-            &:hover {
-                @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
-            }
-        }
-
-        &--pick-item {
-            @include small-button;
-            color: map-get($green-theme-1, neutral-fg);
-            border: 1px solid map-get($green-theme-1, dark-bg);
-
-            .form__pick-item:hover & {
-                background-color: map-get($green-theme-1, dark-bg);
-            }
-
-            .form__pick-item:hover &:hover {
-                @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg, $bc: light-bg);
-            }
-        }
-    }
-
-    &__pick-item {
-        @include default-color-transition;
-        @include flex-row($space-small, $space-large);
-        $self: &;
-        align-items: center;
-        justify-content: space-between;
-        border-radius: $radius-small;
-        user-select: none;
-        color: map-get($grey-theme-1, dark-fg);
-
-        
-
-        [data-role="item"] {
-            @include default-color-transition;
-            @include flex-row(0, $space-large);
-            align-items: center;
-        }
-
-        .avatar {
-            background-color: map-get($grey-theme-1, dark-bg);
-            border-radius: 9999px;
-        }
-        
-        &:hover {
-            background-color: map-get($grey-theme-1, light-bg);
-        
-            [data-role="item"] {
-                color: map-get($grey-theme-1, light-fg);
-            }
-        }
-    }
-    /* -----------
-    
-    WIDGETS
-    END ^
-
-    ----------- */ 
-
-    &__labeled-element {
-        @include flex-row(0 $space-small, $space-large);
-        user-select: none;
-        justify-content: space-between;
-        align-items: center;
-        flex-grow: 1;
-        height: fit-content;
-    }
-
-    &__row {
-        @include flex-row(0, $space-medium);
-        align-items: center;
-    }
-
-    &__connector {
-        height: 1px;
-        background-color: map-get($grey-theme-1, neutral-fg);
-        flex-grow: 1;
-    }
-
-	&__header {
-		@include flex-row(0, $space-medium);
-		justify-content: space-between;
-	}
-
-	&__title {
-		font-size: $text-primary-large;
-		color: $chalk-white;
-		font-weight: bold;
-	}
-
-	&__subtitle {
-		font-size: $text-secondary-medium;
-		color: $light-dark;
-	}
-
-    &__warning {
+    &__username {
         font-size: $text-primary-small;
-        font-weight: bold;
     }
-
-    &__reset {
-        color: $light-light;
-        font-size: $text-secondary-large;
-        cursor: pointer;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-	&__submit {
-		@include base-button;
-        @include medium-button;
-        justify-content: center;
-
-        &--update {
-            color: map-get($green-theme-1, white--DARK);
-		    background-color: map-get($green-theme-1, dark-bg);
-        }
-
-        &--update:hover {
-            background-color: map-get($green-theme-1, light-bg);
-			color: map-get($green-theme-1, light-fg);
-		}
+    
+    &__action {
+        @include default-color-transition;
+        @include base-button;
+        border-radius: 9999px;
+        padding: $space-small;
+        border: 2px solid;
 
         &--delete {
-            background-color: map-get($red-theme-1, dark-bg);
+            color: map-get($red-theme-1, dark-bg);
+            border-color: map-get($red-theme-1, dark-bg);
 
             &:hover {
+                background-color: map-get($grey-theme-1, light-bg);
+                color: map-get($red-theme-1, light-bg);
                 border-color: map-get($red-theme-1, light-bg);
-                background-color: map-get($red-theme-1, light-bg);
             }
         }
 
-        &--create {
-            background-color: map-get($blue-theme-1, dark-bg);
+        &--edit {
+            color: map-get($grey-theme-1, dark-fg);
+            border-color: map-get($grey-theme-1, dark-fg);
 
             &:hover {
-                background-color: map-get($blue-theme-1, light-bg);
+                background-color: map-get($grey-theme-1, light-bg);
+                color: map-get($grey-theme-1, light-fg);
+                border-color: map-get($grey-theme-1, light-fg);
             }
-        }
-	}
-
-    &__response {
-        @include flex-row($space-medium, $space-medium);
-        justify-content: space-between;
-        height: fit-content;
-        border-radius: 4px;
-        font-size: $text-primary-small;
-        font-weight: bold;     
-
-        &--success {
-            background-color: map-get($green-theme-1, light-bg);
-        }
-
-        &--error {
-            background-color: $garnet;
-        }
-    }
-
-    &__close {
-        color: $light-dark;
-        height: fit-content;
-
-        &:hover {
-            color: $light-light;
-        }
-    }
-
-    &__section {
-        @include flex-row(0, $space-medium);
-        align-items: center;
-    }
-
-    &__field {
-        @include flex-column(0, $space-small);
-    }
-
-    &__field-name {
-        color: map-get($grey-theme-1, light-fg);
-        font-size: $text-secondary-medium;
-        font-weight: bold;
-    }
-
-    &__message {
-        font-size: $text-secondary-small;
-
-        &--confirmation {
-            color: map-get($grey-theme-1, dark-fg);
-        }
-
-        &--error {
-            color: map-get($red-theme-1, light-bg);
         }
     }
 }
@@ -1407,52 +932,6 @@ $red-theme-1: (
     }
 }
 
-.formbox {
-	@include flex-row(0, 0);
-    height: 100%;
-    width: 100%;
-    background-color: $apollo-grey;
-
-    &__forms {
-        @include flex-row($space-large, 0);
-        justify-content: space-between;
-        flex: 1;
-    }
-
-    &__close {
-        color: $light-dark;
-        height: fit-content;
-
-        &:hover {
-            color: $light-light;
-        }
-    }
-
-	&__navigation {
-		@include flex-column($space-large, $space-medium);
-        background-color: $charcoal-grey;
-	}
-
-	&__button {
-        @include ellipsis;
-		@include flex-row($space-medium, $space-medium);
-		font-size: $text-secondary-large;
-		color: $light-dark;
-		border-radius: 4px;
-		cursor: pointer;
-		transition: color 0.2s, background-color 0.2s;
-
-		&:hover {
-			color: $light-light;
-		}
-
-        &[data-state="active"] {
-            color: $light-light;
-            background-color: $eerie-black
-        }
-	}
-}
-
 .channel {
 	@include flex-row($space-small, $space-medium);
     $self: &;
@@ -1494,30 +973,6 @@ $red-theme-1: (
 	&__close {
 		align-self: flex-end;
 		cursor: pointer;
-	}
-}
-
-.menu {
-	@include flex-column($space-small, 0);
-	background-color: $apollo-grey;
-	overflow: hidden;
-	border-radius: 4px;
-
-	&__item {
-		@include flex-row($space-medium $space-large, $space-medium);
-		justify-content: space-between;
-		align-items: center;
-        white-space: nowrap;
-		font-size: $text-secondary-medium;
-		color: $light-dark;
-		border-radius: 4px;
-		cursor: pointer;
-		transition: color 0.2s, background-color 0.2s;
-        
-		&:hover {
-			color: $light-light;
-			background-color: $eerie-black;
-		}
 	}
 }
 
@@ -1604,11 +1059,6 @@ $red-theme-1: (
         align-items: center;
         position: relative;
         background-color: inherit;
-
-        &--group-chats {
-            border-bottom: 1px solid map-get($grey-theme-1, light-bg);
-            color: map-get($grey-theme-1, dark-fg);
-        }
 
         &--content-sidebar {
             border-bottom: 2px solid map-get($grey-theme-1, dark-bg);
@@ -1748,15 +1198,24 @@ $red-theme-1: (
     align-items: baseline;
     position: relative;
 
+    &:hover {
+        background-color: map-get($grey-theme-1, neutral-bg);
+    }
+
+    &--mentioned {
+        background-color: rgba(map-get($yellow-theme-1, dark-bg), 0.1);
+        border-left: 2px solid map-get($yellow-theme-1, light-bg);
+
+        &:hover {
+            background-color: rgba(map-get($yellow-theme-1, dark-bg), 0.05);
+        }
+    }
+
     &--message {
         grid-template: min-content auto auto / auto auto auto 1fr;
     }
 
     &:has(.backlog__editor) {
-        background-color: map-get($grey-theme-1, neutral-bg);
-    }
-
-    &:hover {
         background-color: map-get($grey-theme-1, neutral-bg);
     }
 
@@ -1798,6 +1257,7 @@ $red-theme-1: (
         font-size: $text-primary-small;
         position: relative;
         white-space: pre-line;
+        line-height: 1.5rem;
 
         .backlog:has(.backlog__editor) & {
             display: none;
@@ -1833,11 +1293,11 @@ $red-theme-1: (
         [data-role="save"] {
             @include base-button;
             @include small-button;
-            @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: neutral-fg);
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
             grid-row: 2 / 3;
 
             &:hover {
-                @include color-shortcut($green-theme-1, $bg: neutral-bg, $fg: light-fg);
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
             }
         }
 
@@ -2149,7 +1609,6 @@ $red-theme-1: (
         color: map-get($grey-theme-1, dark-fg);
         font-size: $text-secondary-medium;
         font-weight: bold;
-        width: fit-content;
 
         &--hoverable {
             @include default-color-transition;
@@ -2176,82 +1635,70 @@ $red-theme-1: (
     }
 
     &__button {
-        $self: &;
-        @include default-color-transition;
-        display: grid;
-        grid-template: auto / auto minmax(0, $space-large) minmax(0, 1fr);
-        border-radius: $space-small;
-        cursor: pointer;
-        user-select: none;
-        align-items: center;
-        color: map-get($grey-theme-1, dark-fg);
-        padding: $space-small $space-large;
-        font-size: $text-secondary-large;
+        @include base-button;
 
-        &:hover {
-            border-color: map-get($grey-theme-1, neutral-fg);
-            background-color: map-get($grey-theme-1, light-bg);
-            color: map-get($grey-theme-1, light-fg);
+        &--header {
+            @include absolute-boundary(0, 0, 0, 0);
+            @include flex-row(0, 0);
+            @include default-color-transition;
+            justify-content: space-between;
+            padding: inherit;
+
+            &:hover {
+                background-color: map-get($grey-theme-1, light-bg);
+            }
         }
-        
-        .sidebar__button-body {
-            @include ellipsis;
-            grid-column: 3 / 4;
+
+        &--self {
+            @include default-color-transition;
+            @include small-button;
+            color: map-get($grey-theme-1, dark-fg);
+            padding: $space-small $space-large;
+            font-size: $text-secondary-large;
+    
+            &:hover {
+                border-color: map-get($grey-theme-1, neutral-fg);
+                background-color: map-get($grey-theme-1, light-bg);
+                color: map-get($grey-theme-1, light-fg);
+            }
         }
     }
 }
 
 
-.sidebar-menu {
-    @include absolute-boundary(0, 0, 0, 0);
-    padding: inherit;
-    background-color: inherit;
-    user-select: none;
+.menu {
+    @include flex-column($space-small, $space-small);
+    border-radius: $radius-small;
+    background-color: map-get($grey-theme-1, dark-bg);
+    border: 2px solid map-get($grey-theme-1, neutral-bg);
+    z-index: 1;
 
-    &__trigger {
-        @include absolute-boundary(0, 0, 0, 0);
-        @include flex-row(0, 0);
-        @include default-color-transition;
-        justify-content: space-between;
-        align-items: center;
-        padding: inherit;
-        cursor: pointer;
-
-        &:hover {
-            background-color: map-get($grey-theme-1, light-bg);
-        }
-    }
-
-    &__content {
-        @include flex-column($space-small, $space-small);
+    &--sidebar {
         @include absolute-boundary(100%, 0, auto, 0);
-        border-radius: $radius-small;
-        overflow: hidden;
-        background-color: map-get($grey-theme-1, neutral-bg);
-        border: 1px solid map-get($grey-theme-1, light-bg);
-        z-index: 1;
-        margin: $space-medium;
+        margin: $space-small;
     }
 
     &__button {
-        @include default-color-transition;
-        @include flex-row($space-small $space-medium, $space-large);
-        align-items: center;
+        @include base-button;
+        @include small-button;
         justify-content: space-between;
-        cursor: pointer;
         color: map-get($grey-theme-1, neutral-fg);
         font-size: $text-secondary-large;
-        border-radius: $radius-small;
     
         &:hover {
-            background-color: map-get($grey-theme-1, dark-bg);
-            color: map-get($grey-theme-1, light-fg);
+            background-color: map-get($blue-theme-1, dark-bg);
+            color: map-get($blue-theme-1, light-fg);
+
+            .icon {
+                color: map-get($blue-theme-1, light-fg);
+            }
         }
     }
 
     &__divider {
-        height: 1px;
-        background-color: map-get($grey-theme-1, light-bg);
+        height: 0px;
+        margin: 0 $space-medium;
+        border-bottom: 2px solid map-get($grey-theme-1, neutral-bg);
     }
 }
 
@@ -2317,7 +1764,6 @@ $red-theme-1: (
 }
 
 .user {
-    @include default-color-transition;
     @include base-button;
     @include build-single-grid-row(
         $column-templates: (1: auto, 2: minmax(0, 1fr), 3: minmax(0, auto)),
@@ -2585,87 +2031,295 @@ $red-theme-1: (
     }
 }
 
-.overlay {
-    @include flex-column(0, 0);
-    max-height: 100vh;
-    overflow: overlay;
-    border-radius: $radius-small;
+.emote-manager {
+    @include flex-column($space-small, 0);
+    background-color: map-get($grey-theme-1, neutral-bg);
 
-    &__header {
-        @include flex-row($space-large, $space-large);
-        background-color: map-get($grey-theme-1, dark-bg);
-        justify-content: space-between;
-    }
+    &__item {
+        @include flex-row($space-medium, $space-large);
 
-    &__title {
-        font-size: $text-primary-medium;
-        font-weight: bold;
-        color: map-get($grey-theme-1, light-fg);
-        user-select: none;
-    }
-
-    &__label {
-        @include ellipsis;
-        font-size: $text-primary-small;
-        color: map-get($grey-theme-1, light-fg);
-    }
-
-    &__body {
-        @include flex-column($space-medium $space-large, $space-medium);
-        background-color: map-get($grey-theme-1, light-bg);
-    }
-
-    &__content {
-        @include flex-column($space-small, $space-small);
-        background-color: map-get($grey-theme-1, neutral-bg);
-        border-radius: $radius-small;
-        max-height: 180px;
-
-        &--scroll {
-            overflow: overlay;
+        &:not(&:last-of-type) {
+            border-bottom: 2px solid map-get($grey-theme-1, light-bg);
         }
     }
 
-    &__footer {
-        @include flex-row($space-medium $space-large, $space-large);
-        background-color: map-get($grey-theme-1, neutral-bg);
-        align-items: center;
+    &__item-body {
+        display: grid;
+        grid-template: auto auto / auto 1fr auto;
+        align-items: flex-end;
+        gap: $space-small; 
+        width: 100%;
+
+        > :nth-child(2n - 1) {
+            grid-column: 1 / 2;
+        }
+
+        > :nth-child(2n - 2) {
+            grid-column: 3 / 4;
+        }
+    }
+
+    &__item-label {
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__item-value {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, light-fg);
+    }
+
+    &__item-actions {
+        @include flex-row(0, $space-medium);
         flex-wrap: wrap;
     }
 
-    &__extra {
-        @include flex-column($space-medium $space-large, $space-small);
-        background-color: map-get($grey-theme-1, neutral-bg);
+    &__button {
+        @include base-button;
+        @include small-button;
+        font-weight: bold;
+        height: fit-content;
+        width: fit-content;
+        
+        &--edit {
+            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
 
-        &:empty {
-            display: none;
+            &:hover {
+                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--delete {
+            @include color-shortcut($red-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($red-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--add {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
         }
     }
 
-    &__action {
+    &__item-avatar {
+        height: fit-content;
+    }
+
+    &__counter {
         font-size: $text-secondary-medium;
         color: map-get($grey-theme-1, light-fg);
-        user-select: none;
-        cursor: pointer;
+        font-weight: bold;
+    }
+}
 
+.form-container {
+    @include flex-column(0, 0);
+
+    &__submit {
+        @include base-button;
+        @include small-button;
+        font-weight: bold;
+    }
+}
+
+.form {
+    @include flex-column(0, $space-medium);
+
+    &__headliner {
+        @include flex-column(0, $space-small);
+    }
+
+    &__field-group {
+        @include flex-column(0, $space-large);
+    }
+
+    &__field {
+        @include flex-column(0, $space-small);
+
+        &:has(.form__response--error) {
+            .form__field-label {
+                color: map-get($red-theme-1, light-bg);
+            }
+        }
+    }
+
+    &__field-label {
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__text-input {
+        @include flex-row($space-small, $space-small);
+        border-radius: $radius-small;
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, light-fg);
+        color-scheme: dark;
+        background-color: map-get($grey-theme-1, dark-bg);
+        border: 1px solid transparent;
+        flex-grow: 1;
+
+        &:focus {
+            border: 1px dashed map-get($grey-theme-1, dark-fg);
+        }
+    }
+
+    &__reset {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, neutral-fg);
+        cursor: pointer;
+        
         &:hover {
             text-decoration: underline;
         }
     }
 
-    &__row {
-        @include flex-row(0, $space-medium);
-        width: 100%;
+    &__submit {
+        @include base-button;
+        @include medium-button;
+        font-weight: bold;
+
+        &--update {
+            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--delete {
+            @include color-shortcut($red-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($red-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--create {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+    }
+
+    &__responses {
+        &:empty {
+            display: none;
+        }
+    }
+
+    &__response {
+        font-size: $text-secondary-medium;
+        font-weight: bold;
+
+        &--error {
+            color: map-get($red-theme-1, light-bg);
+        }
+
+        &--success {
+            color: map-get($green-theme-1, light-bg);
+        }
+    }
+}
+
+.image-input {
+    display: grid;
+    grid-template: 1fr auto / auto 1fr;
+    gap: 0 $space-medium;
+    align-items: center;
+
+    &__avatar {
+        grid-row: 1 / -1;
+        padding: $space-small;
+        border: 1px solid map-get($grey-theme-1, neutral-fg);
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+    }
+
+    &__filename {
+        @include ellipsis;
+        overflow: hidden;
+        font-size: $text-secondary-large;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__upload {
+        @include base-button;
+        @include small-button;
+        @include input-replacement;
+        font-weight: bold;
+        color: map-get($blue-theme-1, light-fg);
+        background-color: map-get($blue-theme-1, light-bg);
+        width: fit-content;
+
+        &:hover {
+            background-color: map-get($blue-theme-1, dark-bg);
+        }
+    }
+}
+
+.overlay {
+    @include flex-column(0, 0);
+    @include has-shadow;
+    max-height: calc(100vh - (2 * $space-large));
+    max-width: calc(100vw - (2 * $space-large));
+    width: 440px;
+
+    & > :first-child {
+        border-radius: $radius-medium $radius-medium 0 0;
+    }
+
+    & > :last-child {
+        border-radius: 0 0 $radius-medium $radius-medium;
     }
 
     &__close {
-        @include default-color-transition;
         color: map-get($grey-theme-1, dark-fg);
-        cursor: pointer;
-        
+
         &:hover {
             color: map-get($grey-theme-1, light-fg);
         }
+    }
+
+    &__header {
+        @include flex-row($space-large, $space-medium);
+        background-color: map-get($grey-theme-1, dark-bg);
+        justify-content: space-between;
+
+        box-shadow: $shadow-dimensions map-get($grey-theme-1, dark-bg);
+        z-index: 1;
+        position: relative;
+    }
+
+    &__body {
+        @include flex-column($space-large, $space-medium);
+        background-color: map-get($grey-theme-1, light-bg);
+        overflow: auto;
+    }
+
+    &__footer {
+        @include flex-row($space-large, $space-medium);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        justify-content: space-between;
+        align-items: center;
+
+        box-shadow: $shadow-dimensions map-get($grey-theme-1, dark-bg);
+        z-index: 1;
+        position: relative;
+    }
+
+    &__title {
+        @include title;
+        color: map-get($grey-theme-1, light-fg);
     }
 }
 
@@ -2781,5 +2435,18 @@ $red-theme-1: (
             padding: 1px 2px;
             font-weight: bold;
         }
+    }
+}
+
+.mention {
+    @include default-color-transition;
+    padding: 1px $space-medium;
+    background-color: rgba(map-get($blue-theme-1, dark-bg), 0.25);
+    color: map-get($blue-theme-1, light-fg);
+    border-left: 2px solid map-get($blue-theme-1, light-bg);
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(map-get($blue-theme-1, light-bg), 0.35);
     }
 }

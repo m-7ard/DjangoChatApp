@@ -7,7 +7,7 @@
 
         </div>
         {% for member in members %}
-            <div class="mentionables-list__mentionable {% if forloop.first %} mentionables-list__mentionable--active {% endif %}" data-kind="member">
+            <div class="mentionables-list__mentionable {% if forloop.first %} mentionables-list__mentionable--active {% endif %}" data-kind="member" data-value="{{ member.username }}#{{ member.username_id }}">
                 <div class="avatar mentionables-list__avatar">
                     <img src="{{ member.image }}" alt="">
                 </div>

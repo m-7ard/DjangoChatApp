@@ -18,5 +18,9 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/invite-users/', views.InviteFormView.as_view(), name='invite-users'),
     path('invite/<uuid:directory>/', views.InviteDetailView.as_view(), name='invite'),
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatMembershipDeleteView.as_view(), name='leave-group-chat'),
-    path('get-mentionables/<str:mention>', views.GetMentionables.as_view(), name='get-mentionables'),
+    path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),
+    path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
+    path('emote/<int:pk>/edit/', views.EmoteUpdateView.as_view(), name='edit-emote'),
+    path('emote/<int:pk>/delete/', views.EmoteDeleteView.as_view(), name='delete-emote'),
+    path('emote-menu', views.EmoteMenuView.as_view(), name='emote-menu'),
 ]

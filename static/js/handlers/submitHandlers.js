@@ -1,5 +1,4 @@
 const submitHandlers = {
-    'process-form': async (event) => await processForm(event),
     'create-invite': async (event) => {
         let invite = document.getElementById('invite-link');
         let form = event.target.closest('form');

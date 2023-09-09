@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, MAXYEAR
 
 from core.widgets import AvatarInput
 from commons import widgets
-from .models import GroupChannel, GroupChat, Category
+from .models import GroupChannel, GroupChat, Category, Emote
 from users.models import CustomUser
 
 
@@ -83,3 +83,20 @@ class InviteForm(forms.Form):
             raise forms.ValidationError("Not a valid expiry_date length")
 
         return self.expiry_date_values[expiry_date]()
+
+
+class EmoteCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormInput())
+    image = forms.ImageField(widget=widgets.FormImageInput())
+
+    class Meta:
+        model = Emote
+        fields = ['name', 'image']
+
+
+class EmoteUpdateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormInput())
+
+    class Meta:
+        model = Emote
+        fields = ['name']

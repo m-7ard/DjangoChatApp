@@ -20,6 +20,11 @@ def classname(obj):
 def eq(self, other):
     return self == other
 
+@register.filter(name="convert_mentions")
+def convert_mentions(text):
+    replace_with = lambda match: f'<span class="mention">{match.group(0)}</span>'
+    return Template(re.sub(r'(?<!\w)>>(\w+#\d{2})(?!\w)', replace_with, text)).render(Context({}))
+
 """
 @register.filter(name="convert_reactions")
 def convert_reactions(text, room_pk):

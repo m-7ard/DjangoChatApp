@@ -1,4 +1,4 @@
-<div class="backlog backlog--message" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+<div class="backlog backlog--message {% if user in backlog.mentions.all %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
     <div class="backlog__avatar">
         <div class="avatar avatar--small">
             <img src="{{ backlog.message.user.image.url }}" alt="">
@@ -10,11 +10,11 @@
     <div class="backlog__timestamp">
         {{ backlog.timestamp }}
     </div>
-    <div class="backlog__content" data-role="content">{{ backlog.message.content }}</div>
+    <div class="backlog__content" data-role="content">{{ backlog.message.content|convert_mentions }}</div>
     <div class="backlog__reactions">
 
     </div>
-    <div class="backlog__actions has-shadow">
+    <div class="backlog__actions has-shadow" data-command="open_emote_menu" data-positioning='{"top": "0px", "right": "100%"}'>
         <div class="backlog__action">
             <div class="icon icon--small">
                 <i class="material-symbols-outlined">

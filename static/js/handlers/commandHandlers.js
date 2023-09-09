@@ -139,40 +139,18 @@ const commandHandlers = {
             innerHTML: overlayString,
         });
     },
-    'get-tooltip': async ({trigger, event}) => {
-        event.preventDefault();
-        let openTooltip = document.querySelector('.tooltip');
-        if (openTooltip) {
-            if (openTooltip.dataset.randomId == trigger.dataset.randomId) {
-                // open tooltip corresponds to trigger
-                openTooltip.remove();
-                return;
-            }
-            else {
-                // open tooltip does not correspond to trigger
-                openTooltip.remove();
-            };
-        };
+    'get_tooltip': async ({trigger, event, command}) => {
         let tooltip = await getView({
             name: trigger.dataset.name,
             kwargs: trigger.dataset.kwargs,
             query: trigger.dataset.query,
             format: 'html',
         });
-
-        /* This will be used when a click happens on another trigger to see
-        if it is the same one that opened the existing tooltip */
-        let sharedID = randomID()
-        tooltip.setAttribute('data-random-id', sharedID)
-        trigger.setAttribute('data-random-id', sharedID)
-        let positioning = JSON.parse(trigger.dataset.positioning);
-
-        let tooltipLayer = document.querySelector('.layer--tooltips');
-        tooltipLayer.appendChild(tooltip);
-
-        positionFixedContainer(tooltip, trigger, positioning);
-        fitFixedContainer(tooltip);
-
+        tooltipManager.toggleTooltip({
+            trigger: trigger, 
+            tooltip: tooltip, 
+            reference: reference
+        });
     },
     'remove-closest': ({trigger, event}) => {
         let targetSelector = trigger.dataset.target;
@@ -203,8 +181,10 @@ const commandHandlers = {
         }));
     },
     'select-text': ({trigger, event}) => {
-       let target = document.getElementById(trigger.dataset.target);
-       target.select();
+        // Just selects the text in an input
+        // used in invite creation menu / tooltip
+        let target = document.getElementById(trigger.dataset.target);
+        target.select();
     },
     'mark_as_read': ({trigger, event, command}) => {
         chatSocket.send(JSON.stringify({
@@ -220,6 +200,10 @@ const commandHandlers = {
     },
     'edit_message': ({trigger, event, command}) => {
         function save() {
+            if (mentionableObserver.activeMentionable) {
+                return;
+            };
+
             let editorInput = editor.querySelector('[data-role="input"]');
             content = editorInput.value.trim();
             if (!content) {
@@ -257,5 +241,20 @@ const commandHandlers = {
         });
         let saveButton = document.querySelector('[data-role="save"]');
         saveButton.addEventListener('click', save);
-    }
+    },
+    'close_overlay': ({trigger, event, command}) => {
+        trigger.closest('.layer')?.remove();
+    },
+    'open_emote_menu': async ({trigger, event, command}) => {
+        let tooltip = await getView({
+            name: 'emote-menu',
+            format: 'html',
+        });
+        tooltipManager.toggleTooltip({
+            trigger: trigger,
+            tooltip: tooltip,
+            reference: trigger
+        });
+        
+    },
 };

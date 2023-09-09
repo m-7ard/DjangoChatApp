@@ -26,6 +26,7 @@ from .models import (
 )
 from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
+from DjangoChatApp.templatetags.custom_tags import convert_mentions
 
 @sync_to_async
 def process_mention(mention):
@@ -279,12 +280,25 @@ class BacklogGroupUtils():
 
         return 0
     
+    @sync_to_async
+    def is_mentioned(self, pk):
+        backlog = Backlog.objects.get(pk=pk)
+        return self.user in backlog.mentions.all()
+    
     async def send_message_to_client(self, event):
         await self.send(text_data=json.dumps({
             'action': event['action'],
             'html': event['html'],
+            'is_sender': (event['sender'] == self.user.pk),
+            'is_mentioned': await self.is_mentioned(event['pk']),
+        }))
+
+    async def update_message_to_client(self, event):
+        await self.send(text_data=json.dumps({
+            'action': event['action'],
+            'content': event['content'],
             'pk': event['pk'],
-            'is_sender': (event['sender'] == self.user.pk)
+            'is_mentioned': await self.is_mentioned(event['pk'])
         }))
 
     @sync_to_async
@@ -307,18 +321,17 @@ class BacklogGroupUtils():
     @sync_to_async
     def edit_message(self, pk, content):
         backlog = get_object_or_none(Backlog, pk=pk)
-        if not backlog or backlog.group != self.backlog_group:
+        if (
+            not backlog 
+            or backlog.group != self.backlog_group
+            or backlog.message.user != self.user
+        ):
             return False
-        
+
         message = backlog.message
         message.content = content
         message.save()
         return True
-    
-    async def generate_backlogs(self):
-        @sync_to_async
-        def get_backlogs():
-            pass
     
     @sync_to_async
     def create_common_attributes(self, chat):
@@ -335,7 +348,7 @@ class BacklogGroupUtils():
         backlogs = self.current_page.object_list
         html = await sync_to_async(render_to_string)(
             template_name='rooms/elements/backlogs.html',
-            context={'backlogs': backlogs},
+            context={'backlogs': backlogs, 'user': self.user},
         )
         await self.send(json.dumps({
             'type': 'send_to_client',
@@ -412,10 +425,10 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {
                 'type': 'send_message_to_client',
+                'action': 'create_message',
                 'html': html,
                 'pk': backlog.pk,
                 'sender': self.user.pk,
-                **kwargs
             }
         )
 
@@ -432,11 +445,6 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         )
 
     async def mark_as_read(self, **kwargs):
-        """
-        
-        TODO: fix error where the mark_as_read doesn't trigger when we generate backlogs at the first connection
-        
-        """
         reduce_notifications_by = await super().mark_as_read()
         if not reduce_notifications_by:
             return
@@ -486,18 +494,16 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         edited = await super().edit_message(pk, content)
         if not edited:
             return
-        
+
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {
-                'type': 'send_to_client',
+                'type': 'update_message_to_client',
                 'action': 'edit_message',
-                'content': content,
+                'content': await sync_to_async(convert_mentions)(content),
                 'pk': pk,
             }
         )
         
-
-
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
     async def connect(self):
