@@ -1320,17 +1320,18 @@ $red-theme-1: (
     }
 
     &__actions {
+        @include flex-row(0, 0);
         position: absolute;
         right: $space-medium;
         top: - $space-medium;
-        display: none;
+        visibility: hidden;
         border-radius: $radius-medium;
         overflow: hidden;
         border: 1px solid map-get($grey-theme-1, light-bg);
 
         .backlog:hover &, 
         .backlog:has(.backlog__editor) & {
-            display: flex;
+            visibility: visible;
         }
     }
 

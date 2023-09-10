@@ -993,16 +993,19 @@
   grid-row: 3/4;
 }
 .backlog__actions {
+  display: flex;
+  padding: 0;
+  gap: 0;
   position: absolute;
   right: 0.5rem;
   top: -0.5rem;
-  display: none;
+  visibility: hidden;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid #1D1D1C;
 }
 .backlog:hover .backlog__actions, .backlog:has(.backlog__editor) .backlog__actions {
-  display: flex;
+  visibility: visible;
 }
 .backlog__action {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;

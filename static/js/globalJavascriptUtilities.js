@@ -1,5 +1,6 @@
 function positionFixedContainer(element, reference, positioning) {
-	// positioning arg needs to be a dict / object. Use JSON.parse on the data-positioning.
+	// positioning arg needs to be a dict / object. Use JSON.parse on the data-positioning
+    // before passing it in.
 	let referenceDimensions = reference.getBoundingClientRect();
 	
 	//
@@ -37,21 +38,17 @@ function positionFixedContainer(element, reference, positioning) {
 
 function fitFixedContainer(element) {
 	let elementDimensions = element.getBoundingClientRect();
-	if (elementDimensions.bottom > document.body.clientHeight) {
+	if (elementDimensions.top > document.body.clientHeight) {
 		element.style.bottom = '0px';
-		element.style.top = element.style.top ? element.style.top : '';
 	}; 
 	if (elementDimensions.top < 0) {
 		element.style.top = '0px';
-		element.style.bottom = element.style.bottom ? element.style.bottom : '';
 	}; 
 	if (elementDimensions.right > document.body.clientWidth) {
 		element.style.right = '0px';
-		element.style.left = element.style.left ? element.style.left : '';
 	}; 
 	if (elementDimensions.left < 0) {
 		element.style.left = '0px';
-		element.style.right = element.style.right ? element.style.right : '';
 	};
 };
 

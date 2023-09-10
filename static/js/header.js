@@ -201,10 +201,6 @@ window.addEventListener('mouseup', (event) => {
 
 
 class TooltipManager {
-    /* 
-        BUGS: when triggering by clicking on a trigger and switftly clicking away
-        the tooltip gets incorrectly positioned 
-    */
     constructor() {
         this.init();
     };
@@ -261,10 +257,9 @@ class TooltipManager {
     
 };
 
-class EmoteMenuUtils {
+class EmoteMenuManager {
     /* TODO: put the handlers for the menu here */
-
-    
+  
 };
 
 class MentionableObserver {
