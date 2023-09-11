@@ -266,7 +266,11 @@ $red-theme-1: (
 @mixin title {
     font-size: $text-primary-medium;
     font-weight: bold;
-    user-select: none;
+}
+
+@mixin label {
+    font-size: $text-secondary-medium;
+    font-weight: bold;
 }
 
 @mixin has-shadow {
@@ -378,6 +382,13 @@ $red-theme-1: (
 		height: 2rem;
 		font-size: 2rem;
 	}
+
+    &--as-avatar {
+        img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+    }
 }
 
 .tooltip {
@@ -435,6 +446,15 @@ $red-theme-1: (
 		width: 6rem;
 		height: 6rem;
 	}
+
+    &--round {
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+
+    &--shaded {
+        background-color: map-get($grey-theme-1, dark-bg);
+    }
 
 	img {
 		max-height: 100%;
@@ -2321,6 +2341,7 @@ $red-theme-1: (
     &__title {
         @include title;
         color: map-get($grey-theme-1, light-fg);
+        user-select: none; 
     }
 }
 
@@ -2449,5 +2470,134 @@ $red-theme-1: (
 
     &:hover {
         background-color: rgba(map-get($blue-theme-1, light-bg), 0.35);
+    }
+}
+
+.emote-menu {
+    @include flex-column(0, 0);
+    @include has-shadow;
+    height: 275px;
+    overflow: hidden;
+    border-radius: $space-medium;
+
+    display: grid;
+    grid-template: auto 1fr auto / auto 1fr;
+
+    &__header {
+        @include flex-row($space-large, $space-large);
+        @include has-shadow;
+        background-color: map-get($grey-theme-1, light-bg);
+        align-items: center;
+        z-index: 1;
+
+        grid-column: 1 / -1;
+        grid-row: 1 / 2;
+    }
+
+    &__navigation {
+        @include flex-column(0, 0);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        border-right: 2px solid map-get($grey-theme-1, light-bg);
+        align-items: center;
+
+        grid-column: 1 / 2;
+        grid-row: 2 / -1;
+    }
+
+    &__body {
+        @include flex-row(0, 0);
+        background-color: map-get($grey-theme-1, dark-bg);
+        flex-grow: 1;
+        overflow: hidden;
+
+        grid-column: 2 / -1;
+        grid-row: 2 / 3;
+    }
+
+    &__footer {
+        @include flex-row($space-medium, $space-large);
+        background-color: map-get($grey-theme-1, neutral-bg);
+        border-top: 2px solid map-get($grey-theme-1, light-bg);
+
+        grid-column: 2 / -1;
+        grid-row: 3 / -1;
+    }
+
+    &__search {
+        @include flex-row($space-small, $space-small);
+        border-radius: $radius-small;
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, light-fg);
+        color-scheme: dark;
+        background-color: map-get($grey-theme-1, dark-bg);
+        border: 1px solid transparent;
+        flex-grow: 1;
+    }
+
+    &__control {
+        @include base-button;
+        @include default-color-transition;
+        padding: $space-medium;
+        color: map-get($grey-theme-1, light-fg);
+
+        &:hover {
+            background-color: map-get($grey-theme-1, dark-bg);
+        }
+    }
+
+    &__content {
+        @include flex-column($space-medium, $space-large);
+        overflow: overlay;
+        flex-grow: 1;
+    }
+
+    &__emote {
+        @include base-button;
+        @include default-color-transition;
+        padding: $space-small;
+        border-radius: $space-medium;
+
+        &:hover {
+            background-color: map-get($grey-theme-1, light-bg);
+        }
+    }
+
+    &__close {
+        color: map-get($grey-theme-1, dark-fg);
+
+        &:hover {
+            color: map-get($grey-theme-1, light-fg);
+        }
+    }
+
+    &__list {
+        display: grid;
+        grid-template-columns: repeat(10, 48px);
+        align-content: flex-start;
+        justify-items: center;
+    }
+
+    &__label {
+        @include label;
+        color: map-get($grey-theme-1, neutral-fg);
+        margin: 0 $space-medium;
+        user-select: none;
+    }
+
+    &__category {
+        @include flex-column(0, 0);
+    }
+
+
+    &__create {
+        @include base-button;
+        @include small-button;
+        background-color: map-get($green-theme-1, light-bg);
+        color: map-get($green-theme-1, light-fg);
+        width: fit-content;
+
+        &:hover{
+            background-color: map-get($green-theme-1, dark-bg);
+        }
     }
 }

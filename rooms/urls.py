@@ -22,5 +22,5 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
     path('emote/<int:pk>/edit/', views.EmoteUpdateView.as_view(), name='edit-emote'),
     path('emote/<int:pk>/delete/', views.EmoteDeleteView.as_view(), name='delete-emote'),
-    path('emote-menu', views.EmoteMenuView.as_view(), name='emote-menu'),
+    path('emote-menu/<int:group_chat_pk>/', views.EmoteMenuView.as_view(), name='emote-menu'),
 ]

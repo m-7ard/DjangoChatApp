@@ -38,11 +38,14 @@ function positionFixedContainer(element, reference, positioning) {
 
 function fitFixedContainer(element) {
 	let elementDimensions = element.getBoundingClientRect();
-	if (elementDimensions.top > document.body.clientHeight) {
+    console.log(elementDimensions.bottom, document.body.clientHeight)
+	if (elementDimensions.bottom > document.body.clientHeight) {
 		element.style.bottom = '0px';
+		element.style.top = 'auto';
 	}; 
 	if (elementDimensions.top < 0) {
 		element.style.top = '0px';
+		element.style.bottom = element.style.bottom ? element.style.bottom : 'auto';
 	}; 
 	if (elementDimensions.right > document.body.clientWidth) {
 		element.style.right = '0px';

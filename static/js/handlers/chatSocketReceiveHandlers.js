@@ -227,5 +227,4 @@ const chatSocketReceiveHandlers = {
         };
     },
     'get_mentionables': ({html}) => mentionableObserver.buildMentionablesList(html),
-
 };

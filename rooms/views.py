@@ -1,5 +1,3 @@
-import os
-import json
 from itertools import chain
 from typing import Any, Dict, Optional
 from pathlib import Path
@@ -37,7 +35,6 @@ from . import forms
 from utils import get_object_or_none
 
 channel_layer = get_channel_layer()
-
 
 class DashboardView(TemplateView):
     template_name = 'rooms/dashboard.html'
@@ -407,3 +404,9 @@ class EmoteDeleteView(DeleteView):
 
 class EmoteMenuView(TemplateView):
     template_name = 'rooms/tooltips/emotes-menu.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group_chat_pk = self.kwargs.get('group_chat_pk')
+        context['group_chat'] = get_object_or_none(GroupChat, pk=group_chat_pk)
+        return context

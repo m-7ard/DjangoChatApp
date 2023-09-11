@@ -1,12 +1,10 @@
 // JSON elements
-const groupChatPK = document.getElementById('group-chat-pk');
-const groupChannelPK = document.getElementById('group-channel-pk');
-const privateChatPK = document.getElementById('private-chat-pk');
-const extraPath = document.getElementById('extra-path');
+let groupChatPK = document.getElementById('group-chat-pk');
+groupChatPK = groupChatPK && JSON.parse(groupChatPK.innerText);
 
-// DOM elements
-const dropdownContentContainers = document.querySelectorAll('.dropdown__content');
-const tooltipContainers = document.querySelectorAll('.tooltip');
+let groupChannelPK = document.getElementById('group-channel-pk');
+let privateChatPK = document.getElementById('private-chat-pk');
+let extraPath = document.getElementById('extra-path');
 
 // Misc
 const debug = true;
@@ -14,7 +12,7 @@ const debug = true;
 let websocketURL = 'ws://' + window.location.host + '/ws/app/'
 
 if (groupChatPK) {
-    websocketURL += `group-chat/${JSON.parse(groupChatPK.innerText)}/`;
+    websocketURL += `group-chat/${groupChatPK}/`;
     websocketURL += groupChannelPK ? `${JSON.parse(groupChannelPK.innerText)}/` : '';
 }
 else if (privateChatPK) {
@@ -257,9 +255,17 @@ class TooltipManager {
     
 };
 
-class EmoteMenuManager {
+class EmoteMenuUtils {
     /* TODO: put the handlers for the menu here */
-  
+    configureEmoteMenu = ({tooltip, handler, kwargs}) => {
+        tooltip.addEventListener('click', () => {
+            this[handler]({...kwargs});   
+        });
+    };
+
+    reactBacklog = ({pk}) => {
+        
+    };
 };
 
 class MentionableObserver {
@@ -314,7 +320,7 @@ class MentionableObserver {
         });
     };
 
-    closeMentionablesList() {
+    closeMentionablesList = () => {
         tooltipManager.deregisterActiveTooltip();
         this.openMentionablesList = undefined;
         this.activeMentionable = undefined;
@@ -322,7 +328,7 @@ class MentionableObserver {
 
 
 
-    arrowUpHandler() {
+    arrowUpHandler = () => {
         if (!this.activeMentionable) {
             this.activeMentionable = this.lastMentionable;
             this.activeMentionable?.classList.add(`mentionables-list__mentionable--active`);
@@ -336,7 +342,7 @@ class MentionableObserver {
         this.activeMentionable.classList.add(`mentionables-list__mentionable--active`);
     };
 
-    arrowDownHandler() {
+    arrowDownHandler = () => {
         if (!this.activeMentionable) {
             this.activeMentionable = this.firstMentionable;
             this.activeMentionable?.classList.add(`mentionables-list__mentionable--active`);
@@ -350,7 +356,7 @@ class MentionableObserver {
         this.activeMentionable.classList.add(`mentionables-list__mentionable--active`);
     };
 
-    deleteHandler() {
+    deleteHandler = () => {
         this.closeMentionablesList();
         this.selectionStart = this.activeElement.selectionStart - 1;
 
@@ -383,7 +389,7 @@ class MentionableObserver {
         this.closeMentionablesList();
     };
 
-    selectionHandler() {
+    selectionHandler = () => {
         this.closeMentionablesList();
         this.selectionStart = this.activeElement.selectionStart;
 
@@ -397,7 +403,7 @@ class MentionableObserver {
         };
     };
 
-    buildMentionablesList(html) {
+    buildMentionablesList = (html) => {
         this.openMentionablesList = parseHTML(html);
         tooltipManager.toggleTooltip({
             trigger: this.activeElement,
@@ -418,7 +424,7 @@ class MentionableObserver {
         this.openMentionablesList.addEventListener('mousedown', (event) => this.mouseDownHandler(event));
     };
 
-    mouseOverHandler(event) {
+    mouseOverHandler = (event) =>  {
         let mentionable = event.target.closest('.mentionables-list__mentionable');
         if (!mentionable) {
             this.activeMentionable?.classList.remove('mentionables-list__mentionable--active');
@@ -431,7 +437,7 @@ class MentionableObserver {
         this.activeMentionable = mentionable;
     };
 
-    mouseDownHandler(event) {
+    mouseDownHandler  = (event) => {
         let mentionable = event.target.closest('.mentionables-list__mentionable');
         if (!mentionable) {
             return;
@@ -450,7 +456,7 @@ class MentionableObserver {
         this.closeMentionablesList();
     };
 
-    getMentionables(mention) {
+    getMentionables = (mention) => {
         let referenceSelector = this.activeElement.dataset.reference;
         let reference = this.activeElement.closest(referenceSelector);
         this.tooltipReference = reference;
@@ -465,3 +471,4 @@ class MentionableObserver {
 const mentionableObserver = new MentionableObserver();
 const formSubmitListener = new FormSubmitListener();
 const tooltipManager = new TooltipManager();
+const emoteMenuUtils = new EmoteMenuUtils();

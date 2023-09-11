@@ -83,6 +83,10 @@
   height: 2rem;
   font-size: 2rem;
 }
+.icon--as-avatar img {
+  max-height: 100%;
+  max-width: 100%;
+}
 
 .tooltip {
   position: fixed;
@@ -138,6 +142,13 @@
 .avatar--large {
   width: 6rem;
   height: 6rem;
+}
+.avatar--round {
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.avatar--shaded {
+  background-color: #131313;
 }
 .avatar img {
   max-height: 100%;
@@ -2113,10 +2124,10 @@
 .overlay__title {
   font-size: 1rem;
   font-weight: bold;
+  color: #DBD6CC;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
-  color: #DBD6CC;
 }
 
 .invite {
@@ -2253,6 +2264,165 @@
 }
 .mention:hover {
   background-color: rgba(116, 37, 181, 0.35);
+}
+
+.emote-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
+  height: 275px;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  display: grid;
+  grid-template: auto 1fr auto/auto 1fr;
+}
+.emote-menu__header {
+  display: flex;
+  padding: 0.75rem;
+  gap: 0.75rem;
+  box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
+  background-color: #1D1D1C;
+  align-items: center;
+  z-index: 1;
+  grid-column: 1/-1;
+  grid-row: 1/2;
+}
+.emote-menu__navigation {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  background-color: #181818;
+  border-right: 2px solid #1D1D1C;
+  align-items: center;
+  grid-column: 1/2;
+  grid-row: 2/-1;
+}
+.emote-menu__body {
+  display: flex;
+  padding: 0;
+  gap: 0;
+  background-color: #131313;
+  flex-grow: 1;
+  overflow: hidden;
+  grid-column: 2/-1;
+  grid-row: 2/3;
+}
+.emote-menu__footer {
+  display: flex;
+  padding: 0.5rem;
+  gap: 0.75rem;
+  background-color: #181818;
+  border-top: 2px solid #1D1D1C;
+  grid-column: 2/-1;
+  grid-row: 3/-1;
+}
+.emote-menu__search {
+  display: flex;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  border-radius: 2px;
+  font-size: 0.8125rem;
+  color: #DBD6CC;
+  color-scheme: dark;
+  background-color: #131313;
+  border: 1px solid transparent;
+  flex-grow: 1;
+}
+.emote-menu__control {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  padding: 0.5rem;
+  color: #DBD6CC;
+}
+.emote-menu__control:hover {
+  background-color: #131313;
+}
+.emote-menu__content {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.75rem;
+  overflow: overlay;
+  flex-grow: 1;
+}
+.emote-menu__emote {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+}
+.emote-menu__emote:hover {
+  background-color: #1D1D1C;
+}
+.emote-menu__close {
+  color: #8D8A84;
+}
+.emote-menu__close:hover {
+  color: #DBD6CC;
+}
+.emote-menu__list {
+  display: grid;
+  grid-template-columns: repeat(10, 48px);
+  align-content: flex-start;
+  justify-items: center;
+}
+.emote-menu__label {
+  font-size: 0.8125rem;
+  font-weight: bold;
+  color: #b2aea6;
+  margin: 0 0.5rem;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.emote-menu__category {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.emote-menu__create {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.25rem 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 1px;
+  background-color: #16632F;
+  color: #DBD6CC;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.emote-menu__create:hover {
+  background-color: #154623;
 }
 
 html {
