@@ -11,11 +11,13 @@
         {{ backlog.timestamp }}
     </div>
     <div class="backlog__content" data-role="content">{{ backlog.message.content|convert_mentions }}</div>
-    <div class="backlog__reactions">
-
+    <div class="backlog__reactions" data-role="reactions">
+        {% for reaction in backlog.reactions.all %}
+            {% include "./reaction.html" %}
+        {% endfor %}
     </div>
-    <div class="backlog__actions has-shadow" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog" >
-        <div class="backlog__action">
+    <div class="backlog__actions has-shadow">
+        <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
             <div class="icon icon--small">
                 <i class="material-symbols-outlined">
                     add_reaction

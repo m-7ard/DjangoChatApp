@@ -1,0 +1,16 @@
+{% for category, emoji_list in emojis.items %}
+    <div class="emote-menu__category" data-category="{{ category }}">
+        <div class="emote-menu__label">
+            {{ category }}
+        </div>
+        <div class="emote-menu__list">
+            {% for emoji in emoji_list %}
+                <div class="emote-menu__emote" data-kind="emoji" data-name="{{ emoji.name }}" data-pk="{{ emoji.pk }}">
+                    <div class="avatar avatar--medium">
+                        <img src="{{ emoji.image }}" alt="">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}

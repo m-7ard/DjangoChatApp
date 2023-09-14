@@ -258,13 +258,23 @@ class TooltipManager {
 class EmoteMenuUtils {
     /* TODO: put the handlers for the menu here */
     configureEmoteMenu = ({tooltip, handler, kwargs}) => {
-        tooltip.addEventListener('click', () => {
-            this[handler]({...kwargs});   
+        tooltip.addEventListener('click', (event) => {
+            this[handler]({event: event, ...kwargs});   
         });
     };
 
-    reactBacklog = ({pk}) => {
-        
+    reactBacklog = ({event, pk}) => {
+        let emoticon = event.target.closest('.emote-menu__emote');
+        if (!emoticon) {
+            return;
+        };
+
+        chatSocket.send(JSON.stringify({
+            'action': 'react_backlog',
+            'backlog_pk': pk,
+            'kind': emoticon.dataset.kind,
+            'emoticon_pk': emoticon.dataset.pk,
+        }));
     };
 };
 

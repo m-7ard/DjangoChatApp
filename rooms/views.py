@@ -29,7 +29,8 @@ from .models import (
     PrivateChat,
     PrivateChatMembership,
     BacklogGroupTracker,
-    Emote
+    Emote,
+    Emoji
 )
 from . import forms
 from utils import get_object_or_none
@@ -268,6 +269,9 @@ class InviteDetailView(DetailView):
         else:
             return JsonResponse({'status': 400})
         
+
+
+
         
 class GroupChatMembershipDeleteView(DeleteView):
     model = GroupChatMembership
@@ -409,4 +413,20 @@ class EmoteMenuView(TemplateView):
         context = super().get_context_data(**kwargs)
         group_chat_pk = self.kwargs.get('group_chat_pk')
         context['group_chat'] = get_object_or_none(GroupChat, pk=group_chat_pk)
+        categories = [
+            'Smileys & Emotion', 
+            'People & Body', 
+            'Symbols', 
+            'Objects'
+            'Flags', 
+            'Travel & Places', 
+            'Food & Drink', 
+            'Activities', 
+            'Component', 
+            'Animals & Nature', 
+        ]
+        context['emojis'] = {
+            category: Emoji.objects.filter(category=category)
+            for category in categories
+        }
         return context

@@ -1001,7 +1001,54 @@
   text-decoration: underline;
 }
 .backlog__reactions {
+  display: flex;
+  padding: 0;
+  gap: 0.25rem 0.75rem;
+  grid-column: 2/-1;
   grid-row: 3/4;
+  flex-wrap: wrap;
+}
+.backlog__reactions:has(.backlog__reaction) {
+  margin-top: 0.25rem;
+}
+.backlog__reaction {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  display: flex;
+  padding: 0.25rem 0.5rem;
+  gap: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  align-items: center;
+  border-width: 1px;
+  border-style: solid;
+}
+.backlog__reaction:not(.backlog__reaction--selected) {
+  background-color: #131313;
+  color: #b2aea6;
+  border-color: #1D1D1C;
+}
+.backlog__reaction:not(.backlog__reaction--selected):hover {
+  color: #DBD6CC;
+  border-color: #8D8A84;
+}
+.backlog__reaction--selected {
+  color: #DBD6CC;
+  border-color: #7425B5;
+  background-color: rgba(87, 37, 134, 0.15);
+}
+.backlog__reaction .avatar {
+  height: 1.25rem;
+  width: 1.25rem;
 }
 .backlog__actions {
   display: flex;
@@ -1586,38 +1633,6 @@
   overflow-x: clip;
   font-size: 0.75rem;
   color: #8D8A84;
-}
-
-.reaction {
-  display: flex;
-  padding: 0.25rem;
-  gap: 0.5rem;
-  align-items: center;
-  border-radius: 4px;
-  background-color: #131313;
-  border: 1px solid #131313;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
-  transition: box-shadow 0.25s, background-color 0.25s, border 0.25s;
-  cursor: pointer;
-}
-.reaction--selected {
-  background-color: #403D39;
-  border: 1px solid #403D39;
-}
-.reaction__counter {
-  font-size: 0.9375rem;
-}
-.reaction img {
-  max-width: 1.25rem;
-  max-height: 1.25rem;
-}
-.reaction:not(.reaction--selected):hover {
-  background-color: #1D1D1C;
-}
-.reaction:hover {
-  border: 1px solid #62777e;
 }
 
 .role {
@@ -2272,7 +2287,7 @@
   padding: 0;
   gap: 0;
   box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
-  height: 275px;
+  height: 350px;
   overflow: hidden;
   border-radius: 0.5rem;
   display: grid;
@@ -2389,7 +2404,7 @@
   font-size: 0.8125rem;
   font-weight: bold;
   color: #b2aea6;
-  margin: 0 0.5rem;
+  margin: 0 0.25rem;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;

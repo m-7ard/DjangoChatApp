@@ -262,4 +262,14 @@ const commandHandlers = {
             reference: trigger
         });
     },
+    'react_backlog': ({trigger, event, command}) => {
+        let backlog = trigger.closest('.backlog');
+
+        chatSocket.send(JSON.stringify({
+            'action': 'react_backlog',
+            'emoticon_pk': trigger.dataset.emoticonPk,
+            'kind': trigger.dataset.emoticonKind,
+            'backlog_pk': backlog.dataset.pk
+        }));
+    }
 };

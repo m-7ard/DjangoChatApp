@@ -1,0 +1,8 @@
+<div class="backlog__reaction {% if user in reaction.users.all %} backlog__reaction--selected {% endif %}" data-emoticon-pk="{{ reaction.get_emoticon.pk }}" data-emoticon-kind="{{ reaction.kind }}" id="reaction-{{ reaction.pk }}" data-command="react_backlog">
+    <div class="avatar">
+        <img src="{{ reaction.get_emoticon.image }}" alt="">
+    </div>
+    <div data-role="counter">
+        {{ reaction.users.count }}
+    </div>
+</div>

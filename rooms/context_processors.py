@@ -10,16 +10,10 @@ from DjangoChatApp.settings import STATICFILES_DIRS
 # 	return context
 
 def emoji_iteratable(request):
-    """
-    
-    TODO: turn these into models so we can use them in
-    
-    
-    """
     def get_iteratable():
         emoji_file = os.path.join(STATICFILES_DIRS[0], 'emoji.json')
         with open(emoji_file, 'r', encoding='utf-8') as file:
-            emojis = filter(lambda emoji: emoji['unicode_version'] and float(emoji['unicode_version']) < 13, json.loads(file.read()))
+            emojis = filter(lambda emoji: emoji['support'].get('twitter'), json.loads(file.read())['emojis'])
     
         for emoji in emojis:
             yield emoji

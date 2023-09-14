@@ -1336,7 +1336,44 @@ $red-theme-1: (
     }
 
     &__reactions {
+        @include flex-row(0, $space-small $space-large);
+        grid-column: 2 / -1;
         grid-row: 3 / 4;
+        flex-wrap: wrap;
+        
+        &:has(.backlog__reaction) {
+            margin-top: $space-small;
+        }
+    }
+
+    &__reaction {
+        @include base-button;
+        @include default-color-transition;
+        @include flex-row($space-small $space-medium, $space-medium);
+        border-radius: $radius-medium;
+        font-size: $text-secondary-large;
+        font-weight: bold;
+        align-items: center;
+        border-width: 1px;
+        border-style: solid;
+
+        &:not(.backlog__reaction--selected) {
+            @include color-shortcut($grey-theme-1, $fg: neutral-fg, $bg: dark-bg, $bc: light-bg);
+
+            &:hover {
+                @include color-shortcut($grey-theme-1, $fg: light-fg, $bc: dark-fg);
+            }
+        }
+
+        &--selected {
+            @include color-shortcut($blue-theme-1, $fg: light-fg, $bc: light-bg);
+            background-color: rgba(map-get($blue-theme-1, dark-bg), 0.15);
+        }
+
+        .avatar {
+            height: 1.25rem;
+            width: 1.25rem;
+        }
     }
 
     &__actions {
@@ -1870,39 +1907,6 @@ $red-theme-1: (
         @include ellipsis;
         font-size: $text-secondary-small;
         color: map-get($grey-theme-1, dark-fg);
-    }
-}
-
-.reaction {
-    @include flex-row($space-small, $space-medium);
-    align-items: center;
-    border-radius: 4px;
-    background-color: $charcoal-grey;
-    border: 1px solid $charcoal-grey;
-    user-select: none;
-    transition: box-shadow 0.25s, background-color 0.25s, border 0.25s;;
-    cursor: pointer;
-
-    &--selected {
-        background-color: $black-olive;
-        border: 1px solid $black-olive;
-    }
-
-	&__counter {
-		font-size: $text-primary-small;
-	}
-
-    img {
-        max-width: 1.25rem;
-        max-height: 1.25rem;
-    }
-
-    &:not(.reaction--selected):hover {
-        background-color: $eerie-black;
-    }
-
-    &:hover {
-        border: 1px solid $blue-bayoux;
     }
 }
 
@@ -2476,7 +2480,7 @@ $red-theme-1: (
 .emote-menu {
     @include flex-column(0, 0);
     @include has-shadow;
-    height: 275px;
+    height: 350px;
     overflow: hidden;
     border-radius: $space-medium;
 
@@ -2580,7 +2584,7 @@ $red-theme-1: (
     &__label {
         @include label;
         color: map-get($grey-theme-1, neutral-fg);
-        margin: 0 $space-medium;
+        margin: 0 $space-small;
         user-select: none;
     }
 

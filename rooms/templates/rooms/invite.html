@@ -1,10 +1,9 @@
 {% extends "core/header.html" %}
-{% load static %}
 {% load custom_tags %}
 
 {% block content %}
     {% if invite %}
-        <form class="invite" method="POST" action="{% url 'invite' directory=invite.directory %}" data-submit-command="accept-invite">
+        <form class="invite" method="POST" action="{% url 'invite' directory=invite.directory %}">
             {% csrf_token %}
             <div class="invite__body form has-shadow">
                 <div class="invite__avatar">

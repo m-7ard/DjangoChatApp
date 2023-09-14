@@ -254,7 +254,25 @@ class Emote(models.Model):
         super().save(*args, **kwargs)
 
 
+class Emoji(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    category = models.CharField(max_length=50)
+    image = ImageField()
+    emoji_literal = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f'{self.emoji_literal}: {self.name}'
+
+
 class Reaction(models.Model):
+    kind = models.CharField(max_length=20, choices=(
+        ('emoji', 'emoji'),
+        ('emote', 'emote'),
+    ))
     backlog = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='reactions')
-    emote = models.ForeignKey(Emote, on_delete=models.CASCADE, related_name='+')
     users = models.ManyToManyField(CustomUser)
+    emote = models.ForeignKey(Emote, on_delete=models.CASCADE, related_name='+', null=True)
+    emoji = models.ForeignKey(Emoji, on_delete=models.CASCADE, related_name='+', null=True)
+
+    def get_emoticon(self):
+        return getattr(self, self.kind)

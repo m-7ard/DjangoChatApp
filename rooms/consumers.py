@@ -22,7 +22,10 @@ from .models import (
     Message,
     PrivateChat,
     BacklogGroupTracker,
-    PrivateChatMembership
+    PrivateChatMembership,
+    Emoji,
+    Emote,
+    Reaction
 )
 from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
@@ -58,7 +61,7 @@ def db_async(fn):
 
 
 class AppConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
+    async def connect(self, chat=None):
         self.user = self.scope.get('user')
 
         if not self.user or not self.user.is_authenticated:
@@ -93,9 +96,6 @@ class AppConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
 
     async def create_new_backlog_notification(self, event):
-        """ 
-            Called from group send.
-        """
         @database_sync_to_async
         def allow_notification(sender: int, target_backlog_group: int, backlog: int, **kwargs):
             # backlog was sent by the same user
@@ -388,6 +388,87 @@ class BacklogGroupUtils():
         })
 
         return html
+    
+    @sync_to_async
+    def emote_reaction(self, backlog_pk, emote_pk):
+        emote = Emote.objects.get(pk=emote_pk)
+        backlog = Backlog.objects.get(pk=backlog_pk)
+        if not emote or not backlog:
+            return
+        
+        action = self.process_reaction(reaction_kwargs={'emote': emote, 'backlog': backlog, 'kind': 'emote'})
+        send_data = {
+            'action': action,
+            'emoticon_pk': emote_pk,
+            'backlog_pk': backlog_pk,
+        }
+        if action == 'create_reaction':
+            send_data['image'] = str(emote.image)
+
+        return send_data
+
+    @sync_to_async
+    def validate_react_backlog_input(self, kind, emoticon_pk, backlog_pk):
+        backlog = get_object_or_none(Backlog, pk=backlog_pk)
+        if not backlog or backlog not in self.backlog_group.backlogs.all():
+            return False
+    
+        # TODO: check if user has permission to add reactions
+        
+        if kind == 'emoji':
+            emoticon = get_object_or_none(Emoji, pk=emoticon_pk)
+            if not emoticon:
+                return False
+        elif kind == 'emote':
+            emoticon = self.group_chat.emotes.filter(pk=emoticon_pk).first()
+            if not emoticon:
+                return False
+        
+        return True
+
+    @sync_to_async
+    def process_reaction(self, kind, emoticon_pk, backlog_pk):
+        backlog = Backlog.objects.get(pk=backlog_pk)
+    
+        if kind == 'emoji':
+            emoticon = Emoji.objects.get(pk=emoticon_pk)
+            reaction, created = Reaction.objects.get_or_create(kind=kind, backlog=backlog, emoji=emoticon)
+        elif kind == 'emote':
+            emoticon = Emote.objects.get(pk=emoticon_pk)
+            reaction, created = Reaction.objects.get_or_create(kind=kind, backlog=backlog, emote=emoticon)
+
+        if created:
+            reaction.users.add(self.user)
+            action = 'create_reaction' if reaction.users.count() == 1 else 'add_reaction'
+        else:
+            if self.user in reaction.users.all():
+                reaction.users.remove(self.user)
+                action = 'delete_reaction' if reaction.users.count() == 0 else 'remove_reaction'
+            else:
+                reaction.users.add(self.user)
+                action = 'add_reaction'
+
+        send_data = {
+            'action': action,
+            'reaction_pk': reaction.pk,
+            'sender': self.user.pk,
+        }
+
+        if action == 'create_reaction':
+            send_data['html'] = render_to_string('rooms/elements/reaction.html', context={'reaction': reaction})
+            send_data['backlog_pk'] = backlog_pk
+        elif action == 'delete_reaction':
+            reaction.delete()
+        
+        return send_data
+    
+    async def send_reaction_to_client(self, event):
+        send_data = {**event}
+        sender = send_data.pop('sender')
+        await self.send(text_data=json.dumps({
+            'is_sender': (sender == self.user.pk),
+            **send_data,
+        }))
 
 
 class GroupChatConsumer(AppConsumer, BacklogGroupUtils):    
@@ -503,7 +584,20 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
                 'pk': pk,
             }
         )
+
+    async def react_backlog(self, kind, emoticon_pk, backlog_pk, **kwargs):
+        input_is_valid = await super().validate_react_backlog_input(kind, emoticon_pk, backlog_pk)
+        if not input_is_valid:
+            return
         
+        send_data = await super().process_reaction(kind, emoticon_pk, backlog_pk)
+        await self.channel_layer.group_send(
+            f'group_channel_{self.group_channel.pk}', {
+                'type': 'send_reaction_to_client',
+                **send_data
+            }
+        )
+  
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
     async def connect(self):

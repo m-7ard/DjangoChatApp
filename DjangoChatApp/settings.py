@@ -74,7 +74,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'rooms.context_processors.emoji_iteratable',
                 
 				# 'app.context_processors.function',
             ],
