@@ -50,8 +50,9 @@ class FormSelect(forms.Select):
         return context
     
 
-class FormLabeledSlider(forms.CheckboxInput):
-    template_name = "commons/widgets/form-labeled-slider.html"
+class FormSlider(forms.CheckboxInput):
+    template_name = "commons/widgets/form-slider.html"
+    horizontal = True
     
 
 class FormPasswordInput(forms.PasswordInput):
@@ -90,5 +91,10 @@ class FormEmailInput(forms.EmailInput):
         
         return str(value)
 
+
 class FormImageInput(forms.FileInput):
     template_name = "commons/widgets/form-image-input.html"
+
+
+class FormSelect(forms.Select):
+    template_name = "commons/widgets/form-select.html"

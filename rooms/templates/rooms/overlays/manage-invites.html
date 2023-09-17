@@ -1,0 +1,62 @@
+<div class="overlay">
+    <div class="overlay__header">
+        <div class="overlay__title">
+            Manage Invites
+        </div>
+        <div class="overlay__close" data-command="close_overlay">
+            <div class="icon icon--small icon--hoverable">
+                <i class="material-symbols-outlined">
+                    close
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="overlay__body">
+        <div class="item-manager" id="emote-manager">
+            <div class="item-manager__item">
+                <div class="item-manager__button item-manager__button--add" data-command="get-overlay" data-name="create-invite" data-kwargs='{"group_chat_pk": "{{ group_chat.pk }}"}'>
+                    Create New Invite
+                </div>
+            </div>
+            {% for invite in invites %}
+                <div class="item-manager__item" id="invite-{{ invite.pk }}">
+                    <div class="item-manager__item-body">
+                        <div>
+                            <div class="item-manager__item-label">
+                                Invite Code
+                            </div>
+                            <div class="item-manager__item-value" data-role="name">
+                                {{ invite.directory }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="item-manager__item-label">
+                                One Time
+                            </div>
+                            <div class="item-manager__item-value">
+                                {{ invite.one_time }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="item-manager__item-label">
+                                Expiry Date
+                            </div>
+                            <div class="item-manager__item-value">
+                                {{ invite.expiry_date }}
+                            </div>
+                        </div>
+                        <div class="item-manager__item-actions">
+                            <form action="{% url 'delete-invite' pk=invite.pk %}" data-on-response="deleteInvite" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <button class="item-manager__button item-manager__button--delete">
+                                    Delete Invite
+                                </button>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

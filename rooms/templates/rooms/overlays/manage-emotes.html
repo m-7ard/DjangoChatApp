@@ -12,20 +12,18 @@
         </div>
     </div>
     <div class="overlay__body">
-        <div class="emote-manager" id="emote-manager">
-            <div class="emote-manager__item">
-                <div class="emote-manager__button emote-manager__button--add" data-command="get-overlay" data-name="add-emote" data-kwargs='{"group_chat_pk": "{{ group_chat.pk }}"}'>
+        <div class="item-manager" id="emote-manager">
+            <div class="item-manager__item">
+                <div class="item-manager__button item-manager__button--add" data-command="get-overlay" data-name="add-emote" data-kwargs='{"group_chat_pk": "{{ group_chat.pk }}"}'>
                     Add New Emote
                 </div>
-                <div class="emote-manager__counter right">
+                <div class="item-manager__counter right">
                     <span data-role="counter">{{ group_chat.emotes.count }}</span> / 100
                 </div>
             </div>
             {% for emote in group_chat.emotes.all %}
                 {% include "../elements/emote-manager-item.html" %}
             {% endfor %}
-
         </div>
-
     </div>
 </div>

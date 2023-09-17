@@ -279,6 +279,7 @@ $red-theme-1: (
 
 @mixin input-replacement {
     position: relative;
+    cursor: pointer;
 
     input {
         &::-webkit-file-upload-button {
@@ -286,10 +287,11 @@ $red-theme-1: (
             inset: 0;
             cursor: pointer;
         }
-        
+
         position: absolute;
         inset: 0;
         opacity: 0;
+        cursor: pointer;
     }
 }
 
@@ -421,6 +423,10 @@ $red-theme-1: (
 		align-items: center;
 		justify-content: center;
 		background-color: rgba(0, 0, 0, 0.5);
+
+        &:has(~ .layer--overlay) {
+            display: none;
+        }
 	}
 }
 
@@ -1007,65 +1013,6 @@ $red-theme-1: (
 	}
 }
 
-.switch {
-		@include flex-row(0, 0);
-		position: relative;
-		align-items: center;
-		justify-content: center;
-
-	input {
-		cursor: pointer;
-		position: absolute;
-		z-index: 1000;
-		opacity: 0;
-	}
-
-	&__element {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-
-		div {
-			position: absolute;
-			min-height: 100%;
-			min-width: 100%;
-			transition: background-color 0.2s;
-		}
-	}
-
-	&__slider {
-		position: absolute;
-		border-radius: 50%;
-		transition: left 0.2s;
-	}
-
-	&__edge {
-		&--left {
-			border-radius: 50% 0% 0% 50%;
-
-			div {
-				border-radius: 50% 0% 0% 50%;
-			}
-		}
-
-		&--right {
-			border-radius: 0% 50% 50% 0%;
-
-			div {
-				border-radius: 0% 50% 50% 0%;
-			}
-		}
-	}
-
-	&__body {
-		flex-grow: 1;
-	}
-
-	&__slider {
-		position: absolute;
-	}
-}
 
 .app {
     @include flex-row(0, 0);
@@ -1209,6 +1156,8 @@ $red-theme-1: (
             border-top: 1px dashed map-get($blue-theme-1, dark-bg);
         }
     }
+
+    
 }
 
 .backlog {
@@ -1727,8 +1676,8 @@ $red-theme-1: (
 .menu {
     @include flex-column($space-small, $space-small);
     border-radius: $radius-small;
-    background-color: map-get($grey-theme-1, dark-bg);
-    border: 2px solid map-get($grey-theme-1, neutral-bg);
+    background-color: map-get($grey-theme-1, neutral-bg);
+    border: 2px solid map-get($grey-theme-1, dark-bg);
     z-index: 1;
 
     &--sidebar {
@@ -1756,7 +1705,7 @@ $red-theme-1: (
     &__divider {
         height: 0px;
         margin: 0 $space-medium;
-        border-bottom: 2px solid map-get($grey-theme-1, neutral-bg);
+        border-bottom: 1px solid map-get($grey-theme-1, light-bg);
     }
 }
 
@@ -2056,9 +2005,10 @@ $red-theme-1: (
     }
 }
 
-.emote-manager {
+.item-manager {
     @include flex-column($space-small, 0);
     background-color: map-get($grey-theme-1, neutral-bg);
+    overflow: auto;
 
     &__item {
         @include flex-row($space-medium, $space-large);
@@ -2070,17 +2020,14 @@ $red-theme-1: (
 
     &__item-body {
         display: grid;
-        grid-template: auto auto / auto 1fr auto;
-        align-items: flex-end;
-        gap: $space-small; 
+        grid-template: auto auto / auto auto;
+        justify-content: space-between;
+        align-items: center;
+        gap: $space-small $space-medium; 
         width: 100%;
 
-        > :nth-child(2n - 1) {
-            grid-column: 1 / 2;
-        }
-
         > :nth-child(2n - 2) {
-            grid-column: 3 / 4;
+            flex-shrink: 1;
         }
     }
 
@@ -2137,18 +2084,9 @@ $red-theme-1: (
     }
 
     &__counter {
+        user-select: none;
         font-size: $text-secondary-medium;
         color: map-get($grey-theme-1, light-fg);
-        font-weight: bold;
-    }
-}
-
-.form-container {
-    @include flex-column(0, 0);
-
-    &__submit {
-        @include base-button;
-        @include small-button;
         font-weight: bold;
     }
 }
@@ -2172,6 +2110,11 @@ $red-theme-1: (
                 color: map-get($red-theme-1, light-bg);
             }
         }
+    }
+
+    &__labeled-element {
+        @include flex-row(0, $space-large);
+        align-items: center;
     }
 
     &__field-label {
@@ -2205,36 +2148,6 @@ $red-theme-1: (
         }
     }
 
-    &__submit {
-        @include base-button;
-        @include medium-button;
-        font-weight: bold;
-
-        &--update {
-            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
-
-            &:hover {
-                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
-            }
-        }
-
-        &--delete {
-            @include color-shortcut($red-theme-1, $bg: light-bg, $fg: light-fg);
-
-            &:hover {
-                @include color-shortcut($red-theme-1, $bg: dark-bg, $fg: light-fg);
-            }
-        }
-
-        &--create {
-            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
-
-            &:hover {
-                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
-            }
-        }
-    }
-
     &__responses {
         &:empty {
             display: none;
@@ -2251,6 +2164,115 @@ $red-theme-1: (
 
         &--success {
             color: map-get($green-theme-1, light-bg);
+        }
+    }
+
+    &__slider {
+        $padding: 2px;
+        $height: 1rem;
+        $width: 2.25rem;
+        $self: &;
+        display: flex;
+        align-items: center;
+        transition: all 0.4s $custom-ease-in;
+        position: relative;
+        border-radius: 9999px;
+        height: $height;
+        width: $width;
+        user-select: none;
+    
+        input {
+            @include absolute-boundary(- $padding, - $padding, - $padding, - $padding);
+            opacity: 0;
+            cursor: pointer;
+        }
+    
+        &:has(input:checked) {
+            $bg: map-get($green-theme-1, light-bg);
+            background-color: $bg;
+            border-color: $bg;
+            
+            [data-role="marker"] {
+                left: $width - $height;
+            }
+        }
+    
+        &:not(:has(input:checked)) {
+            $bg: map-get($red-theme-1, light-bg);
+            background-color: $bg;
+            border-color: $bg;
+    
+            [data-role="marker"] {
+                left: 0px;
+            }
+        }
+    
+        [data-role="marker"] {
+            @include default-color-transition;
+            transition: left 0.25s $custom-ease-in;
+            position: absolute;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+
+            &::before {
+                @include absolute-boundary(-$padding, -$padding, -$padding, -$padding);
+                @include has-shadow;
+                content: "null";
+                color: transparent;
+                background-color: map-get($green-theme-1, light-fg);
+                border-radius: 9999px;
+            }
+        }
+    }
+
+    &__select {
+        @include flex-column(0, 0);
+
+        &[data-active] .form__select-option-list {
+            visibility: visible;
+
+            .form__select-option:first-child {
+                border-radius: $space-medium $space-medium 0 0;
+            }
+
+            .form__select-option:not(:first-child),
+            .form__select-option:not(:last-child) {
+                border-radius: 0 0 0 0;
+            }
+
+            .form__select-option:last-child {
+                border-radius: 0 0 $space-medium $space-medium;
+            }
+        }
+    }
+
+    &__select-option-list {
+        @include flex-column(0, 0);
+        @include has-shadow;
+        position: fixed;
+        visibility: hidden;
+        background-color: map-get($grey-theme-1, dark-bg);
+        border-radius: 0 0 $space-medium $space-medium;
+        overflow: auto; 
+        z-index: 2;
+    }
+
+    &__select-option {
+        @include base-button;
+        @include medium-button;
+        @include input-replacement;
+        justify-content: space-between;
+        color: map-get($grey-theme-1, neutral-fg);
+        background-color: map-get($grey-theme-1, dark-bg);
+        
+        &:hover {
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, light-fg);
+        }
+
+        &:has(:checked) {
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, light-fg);
         }
     }
 }
@@ -2316,7 +2338,7 @@ $red-theme-1: (
     }
 
     &__header {
-        @include flex-row($space-large, $space-medium);
+        @include flex-row($space-medium $space-large, $space-medium);
         background-color: map-get($grey-theme-1, dark-bg);
         justify-content: space-between;
 
@@ -2328,11 +2350,11 @@ $red-theme-1: (
     &__body {
         @include flex-column($space-large, $space-medium);
         background-color: map-get($grey-theme-1, light-bg);
-        overflow: auto;
+        overflow: hidden;
     }
 
     &__footer {
-        @include flex-row($space-large, $space-medium);
+        @include flex-row($space-medium $space-large, $space-medium);
         background-color: map-get($grey-theme-1, neutral-bg);
         justify-content: space-between;
         align-items: center;
@@ -2346,6 +2368,51 @@ $red-theme-1: (
         @include title;
         color: map-get($grey-theme-1, light-fg);
         user-select: none; 
+    }
+
+    &__functional-button {
+        @include base-button;
+        @include medium-button;
+        font-weight: bold;
+
+        &--update {
+            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--delete {
+            @include color-shortcut($red-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($red-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--create {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+    }
+
+    &__text-holder {
+        @include flex-row($space-small, $space-small);
+        border-radius: $radius-small;
+        font-size: $text-primary-small;
+        color: map-get($grey-theme-1, light-fg);
+        color-scheme: dark;
+        background-color: map-get($grey-theme-1, dark-bg);
+        border: 1px solid transparent;
+        flex-grow: 1;
+
+        &:focus {
+            border: 1px dashed map-get($grey-theme-1, dark-fg);
+        }
     }
 }
 

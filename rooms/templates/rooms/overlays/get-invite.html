@@ -1,0 +1,22 @@
+<div class="overlay">
+    <div class="overlay__header">
+        <div class="overlay__title">
+            Get Invite
+        </div>
+        <div class="overlay__close" data-command="close_overlay">
+            <div class="icon icon--small icon--hoverable">
+                <i class="material-symbols-outlined">
+                    close
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="overlay__body">
+        <input class="overlay__text-holder" readonly value="{{ invite.directory }}" id="invite-display">
+    </div>
+    <div class="overlay__footer">
+        <div class="overlay__functional-button overlay__functional-button--create" data-command="get-overlay" data-name="create-invite" data-kwargs='{"group_chat_pk": {{ group_chat_pk }}}'>
+            Create New Invite
+        </div>
+    </div>
+</div>

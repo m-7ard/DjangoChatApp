@@ -45,6 +45,7 @@ def convert_reactions(text, room_pk):
 
 @register.filter(name="printInConsole")
 def printInConsole(self):
+    print(self)
     return self
 
 

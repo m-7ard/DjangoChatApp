@@ -162,9 +162,14 @@ class Message(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
+    invites = models.JSONField(default=list)
 
     def get_mentions(self):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)
+    
+    def get_invites(self):
+        """ TODO: add regex to dig out invites """
+        pass
 
     def save(self, *args, **kwargs):
         users = []
@@ -200,10 +205,19 @@ def invite_default_expiry_date():
 
 
 class Invite(models.Model):
+    CHOICES = (
+        ('1 day', '1 Day'),
+        ('7 days', '7 Days'),
+        ('30 days', '30 Days'),
+        ('365 days', '365 Days'),
+        ('forever', 'Forever')
+    )
+
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='invites')
     directory = models.UUIDField(default=uuid4, editable=False)
     one_time = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True)
 
     def is_valid(self):
         return self.expiry_date > datetime.now(timezone.utc)

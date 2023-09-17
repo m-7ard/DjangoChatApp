@@ -420,6 +420,9 @@ class BacklogGroupUtils():
             if not emoticon:
                 return False
         elif kind == 'emote':
+            if not hasattr(self, 'group_chat'):
+                return False
+            
             emoticon = self.group_chat.emotes.filter(pk=emoticon_pk).first()
             if not emoticon:
                 return False
@@ -665,7 +668,26 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             }
         )
 
+    async def get_mentionables(self, mention, **kwargs):
+        username, username_id = await process_mention(mention)
+        html = await super().get_mentionables(self.private_chat, username, username_id)
+        await self.send(text_data=json.dumps({
+            'action': 'get_mentionables',
+            'html': html,
+        }))
 
+    async def react_backlog(self, kind, emoticon_pk, backlog_pk, **kwargs):
+        input_is_valid = await super().validate_react_backlog_input(kind, emoticon_pk, backlog_pk)
+        if not input_is_valid:
+            return
+        
+        send_data = await super().process_reaction(kind, emoticon_pk, backlog_pk)
+        await self.channel_layer.group_send(
+            f'private_chat_{self.private_chat.pk}', {
+                'type': 'send_reaction_to_client',
+                **send_data
+            }
+        )
 
 
 

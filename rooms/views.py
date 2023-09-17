@@ -1,10 +1,11 @@
 from itertools import chain
 from typing import Any, Dict, Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django import http
 from django.db import models
+from django.db.models.query import QuerySet
 from django.forms.models import BaseModelForm
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
@@ -140,17 +141,16 @@ class CategoryCreateView(CreateView):
     form_class = forms.CategoryCreateForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
-    def get(self, *args, **kwargs):
-        self.object = None
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = {
             'title': 'Create Category',
-            'fields': self.form_class,
+            'fields': self.get_form(),
             'url': self.request.path,
             'type': 'create'
         }
 
-        return self.render_to_response(context)
+        return context
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
@@ -222,24 +222,62 @@ class FriendshipFormView(FormView):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
 
-class InviteFormView(FormView):
-    form_class = forms.InviteForm
-    template_name = 'rooms/overlays/create-invite.html'
+class InviteManageView(ListView):
+    model = Invite
+    template_name = 'rooms/overlays/manage-invites.html'
+    context_object_name = 'invites'
 
-    def get(self, *args, **kwargs):
-        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+    def get_queryset(self):
+        group_chat = self.kwargs['group_chat_pk']
+        return self.model.objects.filter(chat=group_chat)
+    
+
+class GetInviteView(TemplateView):
+    template_name = 'rooms/overlays/get-invite.html'
+
+    def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        valid_invite = group_chat.invites.filter(expiry_date__gte=datetime.now()).exclude(one_time=True).first()
-        context['invite'] = valid_invite if valid_invite else Invite.objects.create(chat=group_chat)
+        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        context['invite'] = Invite.objects.create(chat=group_chat, created_by=self.request.user)
         return self.render_to_response(context)
 
+
+class InviteCreateView(CreateView):
+    form_class = forms.InviteForm
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Invite',
+            'fields': self.get_form(),
+            'on_response': 'createInvite',
+            'url': self.request.path,
+            'type': 'create'
+        }
+        
+        return context
+    
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
     def form_valid(self, form):
-        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
-        invite = Invite.objects.create(chat=group_chat, expiry_date=form.cleaned_data['expiry_date'], one_time=form.cleaned_data['one_time'])
-        return JsonResponse({'status': 200, 'invite_link': reverse('invite', kwargs={'directory': invite.directory})})
+        invite = form.save(commit=False)
+        invite.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])        
+        invite.created_by = self.request.user
+        invite.save()
+        return JsonResponse({'status': 200, 'directory': invite.directory})
+
+class InviteDeleteView(DeleteView):
+    model = Invite
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
+    def form_valid(self, form):
+        pk = self.object.pk
+        self.object.delete()
+        return JsonResponse({'status': 200, 'pk': pk})
 
 
 class InviteDetailView(DetailView):
@@ -270,9 +308,6 @@ class InviteDetailView(DetailView):
             return JsonResponse({'status': 400})
         
 
-
-
-        
 class GroupChatMembershipDeleteView(DeleteView):
     model = GroupChatMembership
     template_name = 'rooms/overlays/leave-group-chat.html'
@@ -378,7 +413,7 @@ class EmoteUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         context['form'] = {
             'title': 'Edit Emote',
-            'fields': self.form_class,
+            'fields': self.get_form(),
             'url': self.request.path,
             'on_response': 'editEmote',
             'type': 'update',
@@ -391,7 +426,7 @@ class EmoteUpdateView(UpdateView):
     
     def form_valid(self, form):
         emote = form.save()
-        return JsonResponse({'status': 200, 'id': f'emote-{emote.pk}', 'name': emote.name})
+        return JsonResponse({'status': 200, 'pk': emote.pk, 'name': emote.name})
 
 
 class EmoteDeleteView(DeleteView):
@@ -403,7 +438,7 @@ class EmoteDeleteView(DeleteView):
     def form_valid(self, form):
         pk = self.object.pk
         self.object.delete()
-        return JsonResponse({'status': 200, 'id': f'emote-{pk}'})
+        return JsonResponse({'status': 200, 'pk': pk})
 
 
 class EmoteMenuView(TemplateView):

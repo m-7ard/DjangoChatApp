@@ -34,10 +34,19 @@
                             {{ field }}
                         {% else %}
                             <div class="form__field" data-name="{{ field.name }}">
-                                <div class="form__field-label">
-                                    {{ field.label|title }}
-                                </div>
-                                {{ field }}
+                                {% if field.field.widget.horizontal %}
+                                    <div class="form__labeled-element">
+                                        <div class="form__field-label">
+                                            {{ field.label|title }}
+                                        </div>
+                                        {{ field }}
+                                    </div>
+                                {% else %}
+                                    <div class="form__field-label">
+                                        {{ field.label|title }}
+                                    </div>
+                                    {{ field }}
+                                {% endif %}
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -49,11 +58,10 @@
                         Reset
                     </div>
                 {% endif %}
-                <button class="form__submit form__submit--{{ form.type }}" type="submit">
+                <button class="overlay__functional-button overlay__functional-button--{{ form.type }}" type="submit">
                     {{ form.title }}
                 </button>
             </div>
         </div>
     </form>
-    
 </div>

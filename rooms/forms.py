@@ -2,15 +2,14 @@ from django import forms
 from utils import get_object_or_none
 from datetime import datetime, timedelta, MAXYEAR
 
-from core.widgets import AvatarInput
 from commons import widgets
-from .models import GroupChannel, GroupChat, Category, Emote
+from .models import GroupChannel, GroupChat, Category, Emote, Invite
 from users.models import CustomUser
 
 
 class GroupChatCreateForm(forms.ModelForm):
     name = forms.CharField(widget=widgets.FormInput())
-    public = forms.BooleanField(widget=widgets.FormLabeledSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
+    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
     
     class Meta:
         model = GroupChat
@@ -63,9 +62,13 @@ class VerifyUser(forms.Form):
             self.add_error(None, f'User {username}#{username_id} does not exist.')
 
 
-class InviteForm(forms.Form):
-    one_time = forms.BooleanField(required=False)
-    expiry_date = forms.CharField(max_length=20)
+class InviteForm(forms.ModelForm):
+    expiry_date = forms.ChoiceField(choices=Invite.CHOICES, widget=widgets.FormSelect(attrs={'choices': Invite.CHOICES, 'initial': ('1 day', '1 Day')}))
+    one_time = forms.BooleanField(required=False, widget=widgets.FormSlider())
+
+    class Meta:
+        model = Invite
+        fields = ['expiry_date', 'one_time']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

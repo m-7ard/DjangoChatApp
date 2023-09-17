@@ -99,23 +99,32 @@ class FormSubmitListener {
         emoteManager.appendChild(newItem);
     };
 
-    editEmote = ({status, id, name}) => {
+    editEmote = ({status, pk, name}) => {
         if (!(status === 200)) {
             return;
         };
 
         this.form.closest('.layer').remove();
-        let emote = document.getElementById(id);
+        let emote = document.getElementById(`emote-${pk}`);
         emote.querySelector('[data-role="name"]').innerText = ':' + name + ':';
     };
 
-    deleteEmote = ({id}) => {
+    deleteEmote = ({pk}) => {
         decreaseCounter(document.getElementById('emote-manager'));
-        let emote = document.getElementById(id);
+        let emote = document.getElementById(`emote-${pk}`);
         emote.remove();
     };
 
-
+    deleteInvite = ({pk}) => {
+        let invite = document.getElementById(`invite-${pk}`);
+        invite.remove();
+    };
+    
+    createInvite = ({directory}) => {
+        this.form.closest('.layer').remove();
+        let inviteDisplay = document.getElementById('invite-display');
+        inviteDisplay.value = directory;
+    };
 }
 
 window.addEventListener('submit', function delegateSubmit(event) {
@@ -249,7 +258,7 @@ class TooltipManager {
 
         this.deregisterActiveTooltip();
         this.registerTooltip({trigger: trigger, reference: reference, tooltip: tooltip});
-        return true;    
+        return true;
     };
 
     
@@ -335,8 +344,6 @@ class MentionableObserver {
         this.openMentionablesList = undefined;
         this.activeMentionable = undefined;
     };
-
-
 
     arrowUpHandler = () => {
         if (!this.activeMentionable) {
@@ -478,7 +485,74 @@ class MentionableObserver {
     };
 };
 
+class SelectManager {
+    constructor() {
+        this.init();
+    };
+
+    init() {
+        document.addEventListener('mouseup', (event) => {
+            let ignorableElements = event.target.closest('[data-command="toggle_select"], [data-role="option"]');
+            if (ignorableElements) {
+                return;
+            };
+
+            this.deregisterActiveSelect();
+        });
+    }
+
+    deregisterActiveSelect = () => {
+        if (!this.activeSelect) {
+            return;
+        };
+        
+        this.activeSelect.removeEventListener('click', this.selectOption);
+        this.activeSelect?.removeAttribute('data-active');
+        this.activeSelect = undefined;
+        this.activeRoot = undefined;
+    }
+    
+    registerSelect = ({root: root, select: select, options: options}) => {
+        this.activeSelect = select;
+        this.activeSelect.addEventListener('click', this.selectOption);
+        this.activeRoot = root;
+        this.activeSelect.setAttribute('data-active', '');
+    
+        let positioning = JSON.parse(root.dataset.positioning);
+    
+        positionFixedContainer(options, root, positioning);
+        fitFixedContainer(options);
+    };
+
+    toggleSelect = ({root, select, options}) => {
+        if (!this.activeSelect) {
+            this.registerSelect({root: root, select: select, options: options});
+            return true;
+        };
+
+        if (root == this.activeRoot) {
+            this.deregisterActiveSelect();
+            return false;
+        };
+
+        this.deregisterActiveSelect();
+        this.registerSelect({root: root, select: select, options: options});
+        return true;
+    }
+
+    selectOption = (event) => {
+        let option = event.target.closest('[data-role="option"]');
+        if (!option) {
+            return;
+        };
+
+        this.activeRoot.innerText = option.innerText;
+        this.deregisterActiveSelect();
+    }
+}
+
 const mentionableObserver = new MentionableObserver();
 const formSubmitListener = new FormSubmitListener();
 const tooltipManager = new TooltipManager();
 const emoteMenuUtils = new EmoteMenuUtils();
+const selectManager = new SelectManager();

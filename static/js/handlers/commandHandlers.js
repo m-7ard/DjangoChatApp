@@ -271,5 +271,10 @@ const commandHandlers = {
             'kind': trigger.dataset.emoticonKind,
             'backlog_pk': backlog.dataset.pk
         }));
-    }
+    },
+    'toggle_select': ({trigger, event, command}) => {
+        let select = trigger.closest('[data-role="select"]');
+        let options = select.querySelector('[data-role="option-list"]');
+        selectManager.toggleSelect({root: trigger, select: select, options: options});
+    },
 };

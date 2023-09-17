@@ -27,22 +27,23 @@
             </div>          
         </div>
         <div class="emote-menu__body">
-
             <div class="emote-menu__content">
-                <div class="emote-menu__category">
-                    <div class="emote-menu__label">
-                        {{ group_chat.name }}'s Emotes
-                    </div>
-                    <div class="emote-menu__list">
-                        {% for emote in group_chat.emotes.all %}
-                            <div class="emote-menu__emote" data-kind="emote" data-name="{{ emote.name }}" data-pk="{{ emote.pk }}">
-                                <div class="avatar avatar--medium">
-                                    <img src="{{ emote.image }}" alt="">
+                {% if group_chat %}
+                    <div class="emote-menu__category">
+                        <div class="emote-menu__label">
+                            {{ group_chat.name }}'s Emotes
+                        </div>
+                        <div class="emote-menu__list">
+                            {% for emote in group_chat.emotes.all %}
+                                <div class="emote-menu__emote" data-kind="emote" data-name="{{ emote.name }}" data-pk="{{ emote.pk }}">
+                                    <div class="avatar avatar--medium">
+                                        <img src="{{ emote.image }}" alt="">
+                                    </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
                 {% include "./emotes-menu-global-emojis.html" %}
             </div>                
         </div>
