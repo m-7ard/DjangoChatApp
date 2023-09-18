@@ -1,4 +1,5 @@
 import re
+import json
 from itertools import chain
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -168,8 +169,27 @@ class Message(models.Model):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)
     
     def get_invites(self):
-        """ TODO: add regex to dig out invites """
-        pass
+        return re.findall(r'(?<!\w)DjangoChatApp/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?!\w)', self.content)
+
+    def process_invites(self):
+        invites = []
+
+        for invite_directory in self.invites:
+            invite = get_object_or_none(Invite, directory=invite_directory)
+            if not invite:
+                invites.append({
+                    'directory': invite_directory,
+                    'valid': False
+                })
+            else:
+                invites.append({
+                    'directory': invite_directory,
+                    'valid': True,
+                    'is_expired': invite.is_expired(),
+                    'chat': invite.chat
+                })
+
+        return sorted(invites, key=lambda invite: self.content.find(invite['directory']))[-10:]
 
     def save(self, *args, **kwargs):
         users = []
@@ -180,6 +200,7 @@ class Message(models.Model):
                 users.append(user)
 
         self.backlog.mentions.set(users)
+        self.invites = [invite.split('/')[-1] for invite in set(self.get_invites())]
         super().save(*args, **kwargs)
 
 class Log(models.Model):
@@ -219,11 +240,11 @@ class Invite(models.Model):
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True)
 
-    def is_valid(self):
-        return self.expiry_date > datetime.now(timezone.utc)
+    def is_expired(self):
+        return self.expiry_date < datetime.now(timezone.utc)
     
     def __str__(self):
-        return f'{self.is_valid()} - {str(self.directory)}'
+        return f'Expired: {self.is_expired()} | {str(self.directory)}'
 
 
 class BacklogGroupTracker(models.Model):

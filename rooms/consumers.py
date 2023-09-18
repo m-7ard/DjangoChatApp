@@ -295,9 +295,7 @@ class BacklogGroupUtils():
 
     async def update_message_to_client(self, event):
         await self.send(text_data=json.dumps({
-            'action': event['action'],
-            'content': event['content'],
-            'pk': event['pk'],
+            **event,
             'is_mentioned': await self.is_mentioned(event['pk'])
         }))
 
@@ -326,12 +324,23 @@ class BacklogGroupUtils():
             or backlog.group != self.backlog_group
             or backlog.message.user != self.user
         ):
-            return False
+            return
 
         message = backlog.message
         message.content = content
         message.save()
-        return True
+        send_data = {
+            'type': 'update_message_to_client',
+            'action': 'edit_message',
+            'content': convert_mentions(content),
+            'invites': ''.join([
+                render_to_string('rooms/elements/backlog-invite.html', {'invite': invite}) 
+                for invite in backlog.message.process_invites()
+            ]),
+            'pk': pk,
+        }
+
+        return send_data
     
     @sync_to_async
     def create_common_attributes(self, chat):
@@ -575,18 +584,11 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         if not content:
             return
         
-        edited = await super().edit_message(pk, content)
-        if not edited:
+        send_data = await super().edit_message(pk, content)
+        if not send_data:
             return
 
-        await self.channel_layer.group_send(
-            f'group_channel_{self.group_channel.pk}', {
-                'type': 'update_message_to_client',
-                'action': 'edit_message',
-                'content': await sync_to_async(convert_mentions)(content),
-                'pk': pk,
-            }
-        )
+        await self.channel_layer.group_send(f'group_channel_{self.group_channel.pk}', send_data)
 
     async def react_backlog(self, kind, emoticon_pk, backlog_pk, **kwargs):
         input_is_valid = await super().validate_react_backlog_input(kind, emoticon_pk, backlog_pk)
@@ -689,9 +691,28 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             }
         )
 
+    async def edit_message(self, pk, content, action, **kwargs):
+        if not content:
+            return
+        
+        send_data = await super().edit_message(pk, content)
+        if not send_data:
+            return
 
+        await self.channel_layer.group_send(f'private_chat_{self.private_chat.pk}', send_data)
 
-
+    async def delete_backlog(self, pk, action, **kwargs):
+        deleted = await super().delete_backlog(pk)
+        if not deleted:
+            return
+        
+        await self.channel_layer.group_send(
+            f'private_chat_{self.private_chat.pk}', {
+                'type': 'send_to_client',
+                'action': 'delete_backlog',
+                'pk': pk
+            }
+        )
 
 """
 class AppConsumer(AsyncWebsocketConsumer):

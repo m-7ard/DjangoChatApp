@@ -1181,7 +1181,7 @@ $red-theme-1: (
     }
 
     &--message {
-        grid-template: min-content auto auto / auto auto auto 1fr;
+        grid-template: min-content auto auto auto auto / auto auto auto 1fr;
     }
 
     &:has(.backlog__editor) {
@@ -1287,7 +1287,7 @@ $red-theme-1: (
     &__reactions {
         @include flex-row(0, $space-small $space-large);
         grid-column: 2 / -1;
-        grid-row: 3 / 4;
+        grid-row: -2 / -1;
         flex-wrap: wrap;
         
         &:has(.backlog__reaction) {
@@ -1325,6 +1325,12 @@ $red-theme-1: (
         }
     }
 
+    &__invites {
+        @include flex-column(0, $space-medium);
+        grid-row: 3 / 4;
+        grid-column: 2 / -1;
+    }
+    
     &__actions {
         @include flex-row(0, 0);
         position: absolute;
@@ -1355,6 +1361,83 @@ $red-theme-1: (
     }
 }
 
+.backlog-invite {
+    @include flex-column($space-large, $space-medium);
+    justify-self: stretch;
+    background-color: map-get($grey-theme-1, light-bg);
+    border-radius: $space-small;
+    max-width: 26rem;
+    border: 1px solid map-get($grey-theme-1, dark-bg);
+    user-select: none;
+
+    &__headliner {
+        @include flex-column(0, 0);
+        width: 100%
+    }
+
+    &__label {
+        @include label;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__body {
+        @include flex-row(0, $space-medium);
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    &__chat {
+        @include flex-row(0, $space-medium);
+        align-items: center;
+        flex-grow: 1000; /* this makes the button grow when wrapping */
+        max-width: 100%;
+
+        .avatar {
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, dark-fg);
+            border-radius: $radius-medium;
+            overflow: hidden;
+            width: 3rem; 
+            height: 3rem;
+            border: 1px solid map-get($grey-theme-1, dark-bg);
+        }
+    }
+
+    &__title {
+        @include title;
+        color: map-get($grey-theme-1, light-fg);
+
+        &--error {
+            color: map-get($red-theme-1, light-bg);
+        }
+    }
+
+    &__subtitle {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__button {
+        @include base-button;
+        @include medium-button;
+        font-weight: bold;
+        justify-content: center;
+        flex-grow: 1;
+
+        &--accept {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--go-to {
+
+        }
+    }
+}
 
 .chatbar {
     @include flex-row($space-small $space-large, $space-large);

@@ -108,15 +108,25 @@ const chatSocketReceiveHandlers = {
         let backlog = document.getElementById(`backlog-${pk}`);
         backlog.remove();
     },
-    'edit_message': ({pk, content, is_mentioned}) => {
+    'edit_message': ({pk, content, is_mentioned, invites}) => {
         let backlog = document.getElementById(`backlog-${pk}`);
         if (!backlog) {
             return;
         };
-        console.log(is_mentioned)
         is_mentioned ? backlog.classList.add('backlog--mentioned') : backlog.classList.remove('backlog--mentioned');
         let backlogContent = backlog.querySelector('[data-role="content"]');
         backlogContent.innerHTML = content;
+        let backlogInvites = backlog.querySelector('[data-role="invites"]');
+        if (backlogInvites) {
+            backlogInvites.innerHTML = invites;
+        } 
+        else {
+            quickCreateElement('div', {
+                parent: backlog,
+                classList: ['backlog__invites'],
+                attributes: {'data-role': 'reactions'}
+            });
+        };
     },
     'generate_backlogs': ({html, page}) => {
         backlogs.scrollTo(0, 1);
