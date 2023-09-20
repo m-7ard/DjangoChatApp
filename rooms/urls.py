@@ -20,7 +20,7 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/get-invite/', views.GetInviteView.as_view(), name='get-invite'),
     path('group-chat/<int:group_chat_pk>/create-invite/', views.InviteCreateView.as_view(), name='create-invite'),
     path('invite/<int:pk>/', views.InviteDeleteView.as_view(), name='delete-invite'),
-    path('invite/<uuid:directory>/', views.InviteDetailView.as_view(), name='invite'),
+    path('accept-invite/<uuid:directory>/', views.AcceptInviteView.as_view(), name='accept-invite'),
 
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatMembershipDeleteView.as_view(), name='leave-group-chat'),
     path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),

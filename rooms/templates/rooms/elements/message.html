@@ -11,13 +11,17 @@
         {{ backlog.timestamp }}
     </div>
     <div class="backlog__content" data-role="content">{{ backlog.message.content|convert_mentions }}</div>
-    {% if backlog.message.invites %}
-        <div class="backlog__invites" data-role="invites">
-            {% for invite in backlog.message.process_invites %}
-                {% include "./backlog-invite.html" %}
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div class="backlog__invites" data-role="invites">
+        {% for invite in backlog.message.process_invites %}
+            {% if not invite.valid %}
+                {% include "./backlog-invites/invalid-backlog-invite.html" %}
+            {% elif invite.is_expired %}
+                {% include "./backlog-invites/expired-backlog-invite.html" %}
+            {% else %}
+                {% include "./backlog-invites/valid-backlog-invite.html" %}
+            {% endif %}
+        {% endfor %}
+    </div>
     <div class="backlog__reactions" data-role="reactions">
         {% for reaction in backlog.reactions.all %}
             {% include "./reaction.html" %}

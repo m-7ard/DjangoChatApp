@@ -9,8 +9,6 @@ from django.apps import apps
 from functools import reduce
 
 
-
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
@@ -42,7 +40,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     username_id = models.PositiveIntegerField(null=True)
     username = models.CharField(max_length=30, default='user')
-
     image = models.ImageField(default='blank.png')
     
     bio = models.TextField(max_length=50, blank=True)

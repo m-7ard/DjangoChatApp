@@ -1,0 +1,44 @@
+<div class="backlog-invite">
+    <div class="backlog-invite__label">
+        Invite To Chat
+    </div>
+    <div class="backlog-invite__body">
+        {% if user.pk in invite.chat.memberships %}
+            <div class="backlog-invite__chat">
+                <div class="avatar">
+                    <img src="{{ invite.chat.image.url }}" alt="">
+                </div>
+                <div>
+                    <div class="backlog-invite__title">
+                        {{ invite.chat.name }}
+                    </div>
+                    <div class="backlog-invite__subtitle">
+                        {{ invite.chat.memberships.count }} Members
+                    </div>
+                </div>
+            </div>
+            <a class="backlog-invite__button backlog-invite__button--redirect" href="{% url 'group-chat' pk=invite.chat.pk %}">
+                Go To Chat
+            </a>
+        {% else %}
+            <div class="backlog-invite__chat">
+                <div class="avatar">
+                    <img src="{{ invite.chat.image.url }}" alt="">
+                </div>
+                <div>
+                    <div class="backlog-invite__title">
+                        {{ invite.chat.name }}
+                    </div>
+                    <div class="backlog-invite__subtitle">
+                        {{ invite.chat.memberships.count }} Members
+                    </div>
+                </div>
+            </div>
+            <form class="backlog-invite__button backlog-invite__button--accept" action="{% url 'accept-invite' directory=invite.directory %}" method="POST">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                Accept Invite
+                <button type="submit"></button>
+            </form>
+        {% endif %}
+    </div>
+</div>

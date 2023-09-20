@@ -10,9 +10,8 @@ const chatSocketReceiveHandlers = {
 
     'response': () => { console.log('response exists') },
 
-    'create_message': ({html, is_sender, is_mentioned}) => {
+    'create_message': ({html, is_sender}) => {
         let newMessage = parseHTML(html);
-        is_mentioned ? newMessage.classList.add('backlog--mentioned') : undefined;
         let scrollbarWasAtBottom = scrollbarAtBottom(backlogs);
         backlogs.appendChild(newMessage);
         
@@ -116,17 +115,9 @@ const chatSocketReceiveHandlers = {
         is_mentioned ? backlog.classList.add('backlog--mentioned') : backlog.classList.remove('backlog--mentioned');
         let backlogContent = backlog.querySelector('[data-role="content"]');
         backlogContent.innerHTML = content;
+
         let backlogInvites = backlog.querySelector('[data-role="invites"]');
-        if (backlogInvites) {
-            backlogInvites.innerHTML = invites;
-        } 
-        else {
-            quickCreateElement('div', {
-                parent: backlog,
-                classList: ['backlog__invites'],
-                attributes: {'data-role': 'reactions'}
-            });
-        };
+        backlogInvites.innerHTML = invites;
     },
     'generate_backlogs': ({html, page}) => {
         backlogs.scrollTo(0, 1);

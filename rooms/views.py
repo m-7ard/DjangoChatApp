@@ -18,6 +18,8 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.paginator import Paginator
+from django.views.decorators.csrf import requires_csrf_token
+from django.utils.decorators import method_decorator
 
 from users.models import CustomUser, Friend, Friendship
 from core.models import News
@@ -268,6 +270,7 @@ class InviteCreateView(CreateView):
         invite.save()
         return JsonResponse({'status': 200, 'directory': invite.directory})
 
+
 class InviteDeleteView(DeleteView):
     model = Invite
 
@@ -278,34 +281,6 @@ class InviteDeleteView(DeleteView):
         pk = self.object.pk
         self.object.delete()
         return JsonResponse({'status': 200, 'pk': pk})
-
-
-class InviteDetailView(DetailView):
-    model = Invite
-    template_name = 'rooms/invite.html'
-    context_object_name = 'invite'
-
-    def get_object(self):
-        # Return None if there's no invite
-        return Invite.objects.filter(directory=self.kwargs['directory']).first()
-    
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if self.object:
-            context['already_member'] = self.object.chat.memberships.all().filter(user=self.request.user).exists()
-        
-        return context
-    
-    def post(self, *args, **kwargs):
-        invite = self.get_object()
-        if invite and invite.is_valid():
-            GroupChatMembership.objects.create(chat=invite.chat, user=self.request.user)
-            if invite.one_time == True:
-                invite.delete()
-
-            return JsonResponse({'status': 200, 'redirect': reverse('group-chat', kwargs={'pk': invite.chat.pk})})
-        else:
-            return JsonResponse({'status': 400})
         
 
 class GroupChatMembershipDeleteView(DeleteView):
@@ -465,3 +440,25 @@ class EmoteMenuView(TemplateView):
             for category in categories
         }
         return context
+    
+
+"""
+
+TODO: add functionality for joining and make log be created when joined throught save method or somethimg
+
+"""
+
+@method_decorator(requires_csrf_token, name='dispatch')
+class AcceptInviteView(View):
+    def post(self, *args, **kwargs):
+        invite = get_object_or_none(Invite, directory=self.kwargs['directory'])
+        if not invite:
+            return JsonResponse({'status': 400, 'handler': 'updateInvite', 'html': render_to_string('rooms/elements/backlog-invites/invalid-backlog-invite.html')})
+        
+        if invite.is_expired():
+            return JsonResponse({'status': 400, 'handler': 'updateInvite', 'html': render_to_string('rooms/elements/backlog-invites/expired-backlog-invite.html')})
+        
+        member = GroupChatMembership.objects.get_or_create(user=self.user, chat=invite.chat)
+        return JsonResponse({'status': 200, 'redirect': reverse('group-chat', kwargs={'pk': invite.chat.pk})})
+
+        

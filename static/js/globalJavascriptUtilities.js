@@ -38,7 +38,6 @@ function positionFixedContainer(element, reference, positioning) {
 
 function fitFixedContainer(element) {
 	let elementDimensions = element.getBoundingClientRect();
-    console.log(elementDimensions.bottom, document.body.clientHeight)
 	if (elementDimensions.bottom > document.body.clientHeight) {
 		element.style.bottom = '0px';
 		element.style.top = 'auto';
@@ -159,6 +158,10 @@ function processForm({form, response}) {
     else if (response.status == 400) {
         // Error
 
+        if (!response.errors) {
+            return;
+        };
+        
         Object.entries(response.errors).forEach(([fieldName, errorList]) => {
             let field = form.querySelector(`[data-name="${fieldName}"]`);
             let parent = field ? field : formResponses;
@@ -173,8 +176,6 @@ function processForm({form, response}) {
             });
         });
     };
-
-    return response;
 }
 
 async function getTemplate({templateName, context}) {
@@ -249,9 +250,10 @@ function getMention({i, input}) {
         return;
     };
     
-    if (!(mentionStart === 0) && !(input[mentionStart-1] === ' ')) {
+    if (!(mentionStart === 0) && !(input.charAt(mentionStart-1) === ' ' || input.charAt(mentionStart-1) === '\n')) {
         return;
     };
+ 
     return precedingString.slice(mentionStart, i+1);
 };
 
@@ -259,6 +261,7 @@ function validateMention(mention) {
     if (!mention) {
         return;
     };
+
     /*
     validates format >>[optional a-z/0-9]#[optional 0-9, max chars 2]
     */

@@ -157,17 +157,25 @@ $red-theme-1: (
 	width: $width;
 }
 
-@mixin flex-row($padding, $gap) {
+@mixin flex-row($padding: null, $gap: null) {
+    @if not ($padding == null) {
+        padding: $padding;
+    }
+    @if not ($gap == null) {
+        gap: $gap;
+    }
 	display: flex;
-	padding: $padding;
-	gap: $gap;
 }
 
-@mixin flex-column($padding, $gap) {
+@mixin flex-column($padding: null, $gap: null) {
+    @if not ($padding == null) {
+        padding: $padding;
+    }
+    @if not ($gap == null) {
+        gap: $gap;
+    }
 	display: flex;
 	flex-direction: column;
-	padding: $padding;
-	gap: $gap;
 }
 
 @mixin ellipsis {
@@ -282,6 +290,24 @@ $red-theme-1: (
     cursor: pointer;
 
     input {
+        &::-webkit-file-upload-button {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+        }
+
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+}
+
+@mixin submit-replacement {
+    position: relative;
+    cursor: pointer;
+
+    button {
         &::-webkit-file-upload-button {
             position: absolute;
             inset: 0;
@@ -1163,9 +1189,12 @@ $red-theme-1: (
 .backlog {
     display: grid;
     padding: $space-medium $space-large;
-    gap: $space-small $space-medium;
     align-items: baseline;
     position: relative;
+
+    & > * {
+        padding: calc($space-small / 2) $space-small;
+    }
 
     &:hover {
         background-color: map-get($grey-theme-1, neutral-bg);
@@ -1226,7 +1255,7 @@ $red-theme-1: (
         font-size: $text-primary-small;
         position: relative;
         white-space: pre-line;
-        line-height: 1.5rem;
+        line-height: 1.375rem;
 
         .backlog:has(.backlog__editor) & {
             display: none;
@@ -1285,13 +1314,13 @@ $red-theme-1: (
     }
 
     &__reactions {
-        @include flex-row(0, $space-small $space-large);
+        @include flex-row($gap: $space-small $space-large);
         grid-column: 2 / -1;
         grid-row: -2 / -1;
         flex-wrap: wrap;
-        
-        &:has(.backlog__reaction) {
-            margin-top: $space-small;
+
+        &:not(:has(.backlog__reaction)) {
+            display: none;
         }
     }
 
@@ -1326,9 +1355,13 @@ $red-theme-1: (
     }
 
     &__invites {
-        @include flex-column(0, $space-medium);
+        @include flex-column($gap: $space-medium);
         grid-row: 3 / 4;
         grid-column: 2 / -1;
+
+        &:not(:has(.backlog-invite)) {
+            display: none;
+        }
     }
     
     &__actions {
@@ -1426,6 +1459,7 @@ $red-theme-1: (
         flex-grow: 1;
 
         &--accept {
+            @include submit-replacement;
             @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
 
             &:hover {
@@ -1433,8 +1467,12 @@ $red-theme-1: (
             }
         }
 
-        &--go-to {
+        &--redirect {
+            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
 
+            &:hover {
+                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
         }
     }
 }

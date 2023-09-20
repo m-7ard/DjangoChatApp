@@ -8,9 +8,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.utils import timezone
-from django.template import Template, Context
-from django.http import HttpResponse
-from django.apps import apps
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 
@@ -66,7 +63,8 @@ class AppConsumer(AsyncWebsocketConsumer):
 
         if not self.user or not self.user.is_authenticated:
             return self.close()
-
+        
+        self.csrf_token = self.scope['cookies']['csrftoken']
         self.loop = asyncio.get_event_loop()
         await self.channel_layer.group_add(f'user_{self.user.pk}', self.channel_name)
         await self.create_extra_path()
@@ -288,15 +286,17 @@ class BacklogGroupUtils():
     async def send_message_to_client(self, event):
         await self.send(text_data=json.dumps({
             'action': event['action'],
-            'html': event['html'],
             'is_sender': (event['sender'] == self.user.pk),
-            'is_mentioned': await self.is_mentioned(event['pk']),
+            'html': await self.render_message(event['pk']),
         }))
 
     async def update_message_to_client(self, event):
         await self.send(text_data=json.dumps({
-            **event,
-            'is_mentioned': await self.is_mentioned(event['pk'])
+            'action': event['action'],
+            'pk': event['pk'],
+            'content': event['content'],
+            'is_mentioned': await self.is_mentioned(event['pk']),
+            'invites': await self.render_invites(*event['invites']),
         }))
 
     @sync_to_async
@@ -312,13 +312,31 @@ class BacklogGroupUtils():
     def create_message(self, content):
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
         message = Message.objects.create(user=self.user, content=content, backlog=backlog)
-        html = render_to_string(template_name='rooms/elements/message.html', context={'backlog': backlog})
 
-        return backlog, html
+        return backlog
     
+    @sync_to_async
+    def render_message(self, backlog_pk):
+        backlog = Backlog.objects.get(pk=backlog_pk)
+        return render_to_string('rooms/elements/message.html', {'backlog': backlog, 'user': self.user})
+    
+    @sync_to_async
+    def render_invites(self, *invites):
+        rendered_invites = []
+        for invite in invites:
+            if not invite['valid']:
+                rendered_invites.append(render_to_string('rooms/elements/backlog-invites/invalid-backlog-invite.html'))
+            elif invite['is_expired']:
+                rendered_invites.append(render_to_string('rooms/elements/backlog-invites/expired-backlog-invite.html'))
+            else:
+                rendered_invites.append(render_to_string('rooms/elements/backlog-invites/valid-backlog-invite.html', {'invite': invite, 'user': self.user}))
+            
+        return ''.join(rendered_invites)
+
     @sync_to_async
     def edit_message(self, pk, content):
         backlog = get_object_or_none(Backlog, pk=pk)
+        
         if (
             not backlog 
             or backlog.group != self.backlog_group
@@ -333,10 +351,7 @@ class BacklogGroupUtils():
             'type': 'update_message_to_client',
             'action': 'edit_message',
             'content': convert_mentions(content),
-            'invites': ''.join([
-                render_to_string('rooms/elements/backlog-invite.html', {'invite': invite}) 
-                for invite in backlog.message.process_invites()
-            ]),
+            'invites': backlog.message.process_invites(),
             'pk': pk,
         }
 
@@ -357,7 +372,7 @@ class BacklogGroupUtils():
         backlogs = self.current_page.object_list
         html = await sync_to_async(render_to_string)(
             template_name='rooms/elements/backlogs.html',
-            context={'backlogs': backlogs, 'user': self.user},
+            context={'backlogs': backlogs, 'user': self.user, 'csrf_token': self.csrf_token},
         )
         await self.send(json.dumps({
             'type': 'send_to_client',
@@ -513,13 +528,12 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         if not content:
             return
         
-        backlog, html = await super().create_message(content)
+        backlog = await super().create_message(content)
 
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {
                 'type': 'send_message_to_client',
                 'action': 'create_message',
-                'html': html,
                 'pk': backlog.pk,
                 'sender': self.user.pk,
             }
@@ -647,15 +661,14 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
         if not content:
             return
         
-        backlog, html = await super().create_message(content)
+        backlog = await super().create_message(content)
 
         await self.channel_layer.group_send(
             f'private_chat_{self.private_chat.pk}', {
                 'type': 'send_message_to_client',
-                'html': html,
+                'action': 'create_message',
                 'pk': backlog.pk,
                 'sender': self.user.pk,
-                **kwargs
             }
         )
 

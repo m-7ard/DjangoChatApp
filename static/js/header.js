@@ -85,6 +85,11 @@ class FormSubmitListener {
         if (onResponseHandler) {
             onResponseHandler(response);
         };
+
+        let responseHandler = this[response.handler];
+        if (responseHandler) {
+            responseHandler(response);
+        };
     };
 
     addEmote = ({status, html}) => {
@@ -125,6 +130,11 @@ class FormSubmitListener {
         let inviteDisplay = document.getElementById('invite-display');
         inviteDisplay.value = directory;
     };
+
+    updateInvite = ({html}) => {
+        let invite = this.form.closest('.backlog-invite');
+        invite.replaceWith(parseHTML(html));
+    }
 }
 
 window.addEventListener('submit', function delegateSubmit(event) {
@@ -336,6 +346,15 @@ class MentionableObserver {
             };
 
             this.selectionHandler();
+        });
+        
+        window.addEventListener('mouseup', (event) => {
+            let ignorableElements = event.target.closest('[data-get-mentionables"], [data-role="mentionables-list"]');
+            if (ignorableElements) {
+                return;
+            };
+
+            this.closeMentionablesList();
         });
     };
 

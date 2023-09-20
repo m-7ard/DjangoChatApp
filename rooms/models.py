@@ -186,7 +186,12 @@ class Message(models.Model):
                     'directory': invite_directory,
                     'valid': True,
                     'is_expired': invite.is_expired(),
-                    'chat': invite.chat
+                    'chat': {
+                        'pk': invite.chat.pk,
+                        'name': invite.chat.name,
+                        'image': {'url': invite.chat.image.url},
+                        'memberships': list(invite.chat.memberships.values_list('user', flat=True))
+                    }
                 })
 
         return sorted(invites, key=lambda invite: self.content.find(invite['directory']))[-10:]
