@@ -1,154 +1,44 @@
-<li class="backlog" 
-data-model="{{ log|classname }}" 
-data-app="{{ log|app_name }}" 
-data-pk="{{ log.pk }}" 
-data-context='
-{
-    "objects": {
-        "log": {{ log|object_to_json }},
-        "room": {{ room|object_to_json }}
-    },
-    "variables": {
-        "emoteCommand": "react"
-    }
-}'>
-    <div class="backlog__icon">
-        <div class="icon icon--small">
-            <i class="material-symbols-outlined">
-                {{ log.action.icon }}
-            </i>
+<div class="backlog backlog--log {% if user in backlog.mentions.all %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+    {% if backlog.log.get_action_type == '1 user action' %}
+        <div class="mention">
+            {{ backlog.log.user1 }}
         </div>
+        <div class="backlog__log-action">
+            {{ backlog.log.get_action_string }}
+        </div>
+    {% elif backlog.log.get_action_type == '2 user action' %}
+        <div class="mention">
+            {{ backlog.log.user1 }}
+        </div>
+        <div class="backlog__log-action">
+            {{ backlog.log.get_action_string }}
+        </div>
+        <div class="mention">
+            {{ backlog.log.user2 }}
+        </div>
+    {% endif %}
+    <div class="backlog__timestamp">
+        {{ backlog.timestamp }}
     </div>
-    {% comment %} 
-    
-    
-    *header
-    
-    
-    {% endcomment %}
-    <div class="backlog__header">
-        {% if log.sender %}
-            <span class="backlog__user">
-                {% with membership=log.sender|get_member:room %}
-                    {% if membership %}
-                        {{ membership.display_name }}
-                    {% else %}
-                        {{ log.sender.username }}
-                    {% endif %}
-                {% endwith %}
-            </span>
-            <span class="backlog__action-name">
-                {{ log.action.display_name }}
-            </span>
-            <span class="backlog__user">
-                {% with membership=log.receiver|get_member:room %}
-                    {% if membership %}
-                        {{ membership.display_name }}
-                    {% else %}
-                        {{ log.receiver.username }}
-                    {% endif %}
-                {% endwith %}
-            </span>
-            <span class="backlog__timestamp">
-                {{ log.display_date }}
-            </span>
-        {% else %}
-            <span class="backlog__user">
-                {% with membership=log.receiver|get_member:room %}
-                    {% if membership %}
-                        {{ membership.display_name }}
-                    {% else %}
-                        {{ log.receiver.username }}
-                    {% endif %}
-                {% endwith %}
-            </span>
-            <span class="backlog__action-name">
-                {{ log.action.display_name }}
-            </span>
-            <span class="backlog__timestamp">
-                {{ log.display_date }}
-            </span>
-        {% endif %}
-    </div>
-    {% comment %} 
-    
-    
-    *reactions
-    
-    
-    {% endcomment %}
-    <div class="backlog__reactions">
-        {% for reaction in object.reactions.all %}
-        <span class="reaction {% if user in reaction.users.all %} reaction--selected {% endif %}"
-        data-emote-pk="{{ reaction.emote.pk }}"
-        data-command="react">
-            <img src="{{ reaction.emote.image.url }}" alt="">
-            <span class="reaction__counter">
-                {{ reaction.users.all.count }}
-            </span>
-        </span>
+    <div class="backlog__reactions" data-role="reactions">
+        {% for reaction in backlog.reactions.all %}
+            {% include "./reaction.html" %}
         {% endfor %}
     </div>
-    {% comment %} 
-    
-    
-    *actions
-    
-    
-    {% endcomment %}
     <div class="backlog__actions has-shadow">
-		<span class="backlog__action tooltip__trigger" 
-		data-target="emotes" 
-		data-positioning='{"top": "0px", "right": "-100%"}' 
-        data-kind="backlog"
-		>
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">								
-					add_reaction
-				</i>
-			</div>
-		</span>
-		{% if object.user == user %}
-		<span class="backlog__action" data-command="edit-message">
-			<div class="icon icon--small">
-				<i class="material-symbols-outlined">								
-					edit
-				</i>
-			</div>
-		</span>
-		{% endif %}
-		<span class="dropdown">
-			<div class="backlog__action dropdown__trigger">
-				<div class="icon icon--small">
-					<i class="material-symbols-outlined">								
-						menu
-					</i>
-				</div>
-			</div>
-            <div class="dropdown__content dropdown__content--hidden">
-                <ul class="menu has-shadow">
-                    <li class="menu__item" data-command="delete-message">
-                        <span>
-                            Delete
-                        </span>
-                        <span class="icon icon--small">
-                            <i class="material-symbols-outlined">								
-                                delete
-                            </i>
-                        </span>
-                    </li>
-                    <li class="menu__item" data-command="link-message">
-                        <span>
-                            Message Link
-                        </span>
-                        <span class="icon icon--small">
-                            <i class="material-symbols-outlined">								
-                                link
-                            </i>
-                        </span>
-                    </li>
-                </ul>
+        <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    add_reaction
+                </i>
             </div>
-		</span>
+        </div>
+        <div class="backlog__action">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    more_vert
+                </i>
+            </div>
+        </div>
     </div>
-</li>
+</div>

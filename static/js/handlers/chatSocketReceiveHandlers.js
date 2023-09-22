@@ -151,5 +151,46 @@ const chatSocketReceiveHandlers = {
         is_sender && reaction.classList.remove('backlog__reaction--selected');
         decreaseCounter(reaction);
     },
+    'create_log': ({html, is_sender}) => {
+        let newLog = parseHTML(html);
+        let scrollbarWasAtBottom = scrollbarAtBottom(backlogs);
+        backlogs.appendChild(newLog);
+        
+        if (!document.hidden && (scrollbarWasAtBottom || is_sender)) {
+            backlogs.scrollTop = backlogs.scrollHeight;
+        };
 
+        if (!document.hidden && scrollbarAtBottom(backlogs)) {
+            chatSocket.send(JSON.stringify({
+                'action': 'mark_as_read',
+            }));
+            return;
+        };
+
+        if (!is_sender) {
+            let unreadBacklogsSubheader = document.getElementById('unread-backlogs-subheader');
+            increaseCounter(unreadBacklogsSubheader);
+            let unreadBacklogsDivider = document.getElementById('unread-backlogs-divider');
+            if (unreadBacklogsDivider) {
+                // there are unread backlogs already
+                return
+            };
+            let divider = quickCreateElement('div', {
+                classList: ['app__divider', 'app__divider--unread-backlogs'],
+                id: 'unread-backlogs-divider',
+            });
+            backlogs.insertBefore(divider, newLog);
+        }    
+    },
+    'join_group_chat': ({html}) => {
+        let insertGroupChat = document.getElementById('insert-group-chat');
+        insertGroupChat.parentNode.insertBefore(parseHTML(html), insertGroupChat);
+    },
+    'leave_group_chat': ({pk}) => {
+        let groupChat = document.getElementById(`group-chat-${pk}`);
+        groupChat.remove();
+    },
+    'redirect': ({url}) => {
+        window.location.replace(url);
+    },
 };

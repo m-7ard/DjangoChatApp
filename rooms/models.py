@@ -6,12 +6,16 @@ from uuid import uuid4
 from sorl.thumbnail import ImageField, get_thumbnail
 
 from django.db import models
-from django.db.models import Q, F
-from django.contrib.auth.models import Permission
-from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
+from django.core.validators import RegexValidator
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.template.loader import render_to_string
 
 from users.models import CustomUser
 from utils import get_object_or_none
+
+
+channel_layer = get_channel_layer()
 
 
 class Chat(models.Model):
@@ -80,6 +84,14 @@ class GroupChatMembership(Membership):
                 BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
         else:
             super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        channels = self.chat.channels.all()
+        backlog_group_pks = channels.values_list('backlog_group')
+        trackers = BacklogGroupTracker.objects.filter(user=self.user, backlog_group__pk__in=backlog_group_pks)
+        trackers.delete()
+        super().delete(*args, **kwargs)
+
 
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
@@ -187,10 +199,10 @@ class Message(models.Model):
                     'valid': True,
                     'is_expired': invite.is_expired(),
                     'chat': {
-                        'pk': invite.chat.pk,
-                        'name': invite.chat.name,
-                        'image': {'url': invite.chat.image.url},
-                        'memberships': list(invite.chat.memberships.values_list('user', flat=True))
+                        'pk': invite.get_chat().pk,
+                        'name': invite.get_chat().name,
+                        'image': {'url': invite.get_chat().image.url},
+                        'memberships': list(invite.get_chat().memberships.values_list('user', flat=True))
                     }
                 })
 
@@ -208,16 +220,41 @@ class Message(models.Model):
         self.invites = [invite.split('/')[-1] for invite in set(self.get_invites())]
         super().save(*args, **kwargs)
 
+
 class Log(models.Model):
     ACTIONS = (
-        ('join', 'joined the chat'),
-        ('leave', 'left the chat'),
+        ('join', 'Join Chat'),
+        ('leave', 'Leave Chat'),
     )
+    
+    ACTION_TYPE = {
+        'join': '1 user action',
+        'leave': '1 user action',
+    }
+
+    ACTION_STRING = {
+        'join': 'joined the chat',
+        'leave': 'left the chat',
+    }
 
     action = models.CharField(max_length=20, choices=ACTIONS)
-    receiver = models.ForeignKey(CustomUser, related_name='received_actions', on_delete=models.SET_NULL, null=True)
-    sender = models.ForeignKey(CustomUser, related_name='sent_actions', on_delete=models.SET_NULL, null=True, blank=True)
+    user1 = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user2 = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='log')
+
+    def get_action_type(self):
+        return self.ACTION_TYPE[self.action]
+    
+    def get_action_string(self):
+        return self.ACTION_STRING[self.action]
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            self.backlog.mentions.set([self.user1, self.user2])
+
+        super().save(*args, **kwargs)
 
 
 class Role(models.Model):
@@ -239,7 +276,12 @@ class Invite(models.Model):
         ('forever', 'Forever')
     )
 
-    chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='invites')
+    KINDS = (
+        ('group_chat', 'Group Chat Invite'),
+    )
+
+    kind = models.CharField(max_length=20)
+    group_chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='invites', null=True, blank=True)
     directory = models.UUIDField(default=uuid4, editable=False)
     one_time = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
@@ -250,6 +292,9 @@ class Invite(models.Model):
     
     def __str__(self):
         return f'Expired: {self.is_expired()} | {str(self.directory)}'
+    
+    def get_chat(self):
+        return getattr(self, self.kind)
 
 
 class BacklogGroupTracker(models.Model):

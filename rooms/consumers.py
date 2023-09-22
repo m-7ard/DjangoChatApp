@@ -1,16 +1,13 @@
 import json
 import datetime
 import asyncio
-import threading
-from pathlib import Path
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
-from django.utils import timezone
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
-
+from django.urls import reverse
 
 from .models import (
     Backlog,
@@ -22,7 +19,11 @@ from .models import (
     PrivateChatMembership,
     Emoji,
     Emote,
-    Reaction
+    Reaction,
+    Invite,
+    GroupChatMembership,
+    Log,
+
 )
 from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
@@ -263,6 +264,46 @@ class AppConsumer(AsyncWebsocketConsumer):
             )
 
 
+    @sync_to_async
+    def join_group_chat(self, invite):
+        group_chat = invite.group_chat
+        GroupChatMembership.objects.create(user=self.user, chat=group_chat)
+        channel = group_chat.channels.first()
+        backlog = Backlog.objects.create(kind='log', group=channel.backlog_group)
+        log = Log.objects.create(backlog=backlog, action='join', user1=self.user)
+        if invite.one_time:
+            invite.delete()
+
+        return [
+            self.channel_layer.group_send(
+                f'group_chat_{group_chat.pk}', {
+                    'type': 'send_log_to_client',
+                    'action': 'create_log',
+                    'pk': backlog.pk,
+                }
+            ),
+            self.channel_layer.group_send(
+                f'user_{self.user.pk}', {
+                    'type': 'send_to_client',
+                    'action': 'join_group_chat',
+                    'html': render_to_string('core/elements/group-chat.html', context={'local_group_chat': group_chat, 'user': self.user}),
+                }
+            ),
+            self.send(text_data=json.dumps({
+                'action': 'redirect',
+                'url': reverse('group-channel', kwargs={'group_chat_pk': group_chat.pk, 'group_channel_pk': channel.pk})
+            })),
+        ]
+
+    async def accept_invite(self, directory, **kwargs):
+        invite = await db_async(lambda: Invite.objects.get(directory=directory))
+        if invite.kind == 'group_chat':
+            group_sends = await self.join_group_chat(invite)
+
+        for group_send in group_sends:
+            await group_send
+
+
 class BacklogGroupUtils():
     @sync_to_async
     def mark_as_read(self):
@@ -283,11 +324,17 @@ class BacklogGroupUtils():
         backlog = Backlog.objects.get(pk=pk)
         return self.user in backlog.mentions.all()
     
+    async def send_log_to_client(self, event):
+        await self.send(text_data=json.dumps({
+            'action': event['action'],
+            'html': await self.render_backlog(event['pk']),
+        }))
+    
     async def send_message_to_client(self, event):
         await self.send(text_data=json.dumps({
             'action': event['action'],
             'is_sender': (event['sender'] == self.user.pk),
-            'html': await self.render_message(event['pk']),
+            'html': await self.render_backlog(event['pk']),
         }))
 
     async def update_message_to_client(self, event):
@@ -316,10 +363,13 @@ class BacklogGroupUtils():
         return backlog
     
     @sync_to_async
-    def render_message(self, backlog_pk):
-        backlog = Backlog.objects.get(pk=backlog_pk)
-        return render_to_string('rooms/elements/message.html', {'backlog': backlog, 'user': self.user})
-    
+    def render_backlog(self, pk):
+        backlog = Backlog.objects.get(pk=pk)
+        if backlog.kind == 'message':
+            return render_to_string('rooms/elements/message.html', {'backlog': backlog, 'user': self.user})
+        elif backlog.kind == 'log':
+            return render_to_string('rooms/elements/log.html', {'backlog': backlog, 'user': self.user})
+
     @sync_to_async
     def render_invites(self, *invites):
         rendered_invites = []
@@ -361,7 +411,7 @@ class BacklogGroupUtils():
     def create_common_attributes(self, chat):
         self.backlog_group = chat.backlog_group
         self.tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
-        backlogs = self.backlog_group.backlogs.select_related('message__user', 'log__receiver', 'log__sender').order_by('-pk')
+        backlogs = self.backlog_group.backlogs.select_related('message__user', 'log__user1', 'log__user2').order_by('-pk')
         self.paginator = Paginator(backlogs, 20)
         self.current_page = self.paginator.get_page(1)
 
@@ -372,7 +422,7 @@ class BacklogGroupUtils():
         backlogs = self.current_page.object_list
         html = await sync_to_async(render_to_string)(
             template_name='rooms/elements/backlogs.html',
-            context={'backlogs': backlogs, 'user': self.user, 'csrf_token': self.csrf_token},
+            context={'backlogs': backlogs, 'user': self.user},
         )
         await self.send(json.dumps({
             'type': 'send_to_client',
@@ -616,6 +666,40 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
                 **send_data
             }
         )
+
+    async def leave_group_chat(self, **kwargs):
+        @sync_to_async
+        def leave_group_chat():
+            membership = GroupChatMembership.objects.get(chat=self.group_chat, user=self.user)
+            channel = self.group_chat.channels.first()
+            backlog = Backlog.objects.create(kind='log', group=channel.backlog_group)
+            log = Log.objects.create(backlog=backlog, action='leave', user1=self.user)
+            membership.delete()
+
+            return [
+                self.channel_layer.group_send(
+                    f'group_chat_{self.group_chat.pk}', {
+                        'type': 'send_log_to_client',
+                        'action': 'create_log',
+                        'pk': backlog.pk,
+                    }
+                ),
+                self.channel_layer.group_send(
+                    f'user_{self.user.pk}', {
+                        'type': 'send_to_client',
+                        'action': 'leave_group_chat',
+                        'pk': self.group_chat.pk,
+                    }
+                ),
+                self.send(text_data=json.dumps({
+                    'action': 'redirect',
+                    'url': reverse('dashboard')
+                })),
+            ]
+        
+        for send in await leave_group_chat():
+            await send
+
   
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):

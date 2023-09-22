@@ -1,11 +1,12 @@
-<form class="overlay form has-shadow" method="POST" action="{{ request.path }}">
-    {% csrf_token %}
+<div class="overlay" data-role="prompt">
     <div class="overlay__header">
-        <div class="overlay__title">
-            {{ membership.chat.name }}
+        <div class="form__headliner">
+            <div class="overlay__title">
+                Leave Group Chat « {{ group_chat.name }} »
+            </div>            
         </div>
         <div class="overlay__close" data-command="remove-closest" data-target=".layer">
-            <div class="icon icon--small">
+            <div class="icon icon--small icon--hoverable">
                 <i class="material-symbols-outlined">
                     close
                 </i>
@@ -13,16 +14,27 @@
         </div>
     </div>
     <div class="overlay__body">
-        <div class="overlay__label">
-            Are you sure you want to leave "{{ membership.chat.name }}"?
+        <div class="form__field-group">
+            <div class="form__responses" data-role="form-responses"></div>
+            <div class="form__field" data-name="confirm">
+                <div class="form__labeled-element">
+                    <div class="form__field-label">
+                        Are You Sure You Wish To Leave?
+                    </div>
+                    <div class="form__slider">
+                        <div class="form-slider__marker" data-role="marker"></div>
+                        <input type="checkbox" name="confirm">
+                    </div>
+                </div>                   
+            </div>                   
         </div>
     </div>
     <div class="overlay__footer">
-        <div class="overlay__action right" data-command="remove-closest" data-target=".layer">
-            Cancel
+        <div class="form__reset">
+            Reset
         </div>
-        <button class="form__submit form__submit--delete" type="submit">
-            Leave
-        </button>
+        <div class="overlay__functional-button overlay__functional-button--delete" data-command="leave_group_chat">
+            Leave Group Chat
+        </div>
     </div>
-</form>
+</div>

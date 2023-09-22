@@ -1213,8 +1213,19 @@ $red-theme-1: (
         grid-template: min-content auto auto auto auto / auto auto auto 1fr;
     }
 
+    &--log {
+        grid-template: auto auto / auto auto auto auto 1fr;
+        align-items: center;
+    }
+
     &:has(.backlog__editor) {
         background-color: map-get($grey-theme-1, neutral-bg);
+    }
+
+    &__log-action {
+        user-select: none;
+        font-size: $text-secondary-large;
+        color: map-get($grey-theme-1, light-fg);
     }
 
     &__avatar {
@@ -1803,7 +1814,6 @@ $red-theme-1: (
 
     &--sidebar {
         @include absolute-boundary(100%, 0, auto, 0);
-        margin: $space-small;
     }
 
     &__button {

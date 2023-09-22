@@ -277,4 +277,20 @@ const commandHandlers = {
         let options = select.querySelector('[data-role="option-list"]');
         selectManager.toggleSelect({root: trigger, select: select, options: options});
     },
+    'accept_invite': ({trigger, event, command}) => {
+        chatSocket.send(JSON.stringify({
+            'action': 'accept_invite',
+            'directory': trigger.dataset.directory,
+        }));
+    },
+    'leave_group_chat': ({trigger, event, command}) => {
+        let prompt = trigger.closest('[data-role="prompt"]');
+        console.log('eee')
+        if (!prompt.querySelector('input[name="confirm"]:checked')) {
+            return;
+        };
+        chatSocket.send(JSON.stringify({
+            'action': 'leave_group_chat',
+        }));
+    },
 };

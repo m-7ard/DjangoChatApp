@@ -3,26 +3,17 @@ from typing import Any, Dict, Optional
 from pathlib import Path
 from datetime import datetime, timezone
 
-from django import http
-from django.db import models
-from django.db.models.query import QuerySet
-from django.forms.models import BaseModelForm
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
-from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.http import HttpRequest, HttpResponseBadRequest, HttpResponse, JsonResponse 
-from django.contrib import messages
+from django.http import JsonResponse 
 from django.template.loader import render_to_string
 from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.paginator import Paginator
 from django.views.decorators.csrf import requires_csrf_token
 from django.utils.decorators import method_decorator
 
 from users.models import CustomUser, Friend, Friendship
-from core.models import News
 from .models import (
     GroupChat,
     GroupChatMembership,
@@ -224,14 +215,14 @@ class FriendshipFormView(FormView):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
 
-class InviteManageView(ListView):
+class GroupChatInviteManageView(ListView):
     model = Invite
     template_name = 'rooms/overlays/manage-invites.html'
     context_object_name = 'invites'
 
     def get_queryset(self):
         group_chat = self.kwargs['group_chat_pk']
-        return self.model.objects.filter(chat=group_chat)
+        return self.model.objects.filter(group_chat=group_chat)
     
 
 class GetInviteView(TemplateView):
@@ -239,12 +230,15 @@ class GetInviteView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
-        context['invite'] = Invite.objects.create(chat=group_chat, created_by=self.request.user)
+        kind = self.kwargs.get('kind')
+        if kind == 'group_chat':
+            group_chat = GroupChat.objects.get(pk=self.kwargs['pk'])
+            context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, created_by=self.request.user)
+        
         return self.render_to_response(context)
 
 
-class InviteCreateView(CreateView):
+class InviteCreateView(FormView):
     form_class = forms.InviteForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
@@ -265,8 +259,11 @@ class InviteCreateView(CreateView):
     
     def form_valid(self, form):
         invite = form.save(commit=False)
-        invite.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])        
-        invite.created_by = self.request.user
+        kind = self.kwargs.get('kind')
+        if kind == 'group_chat':
+            invite.chat = GroupChat.objects.get(pk=self.kwargs['pk'])        
+            invite.created_by = self.request.user
+
         invite.save()
         return JsonResponse({'status': 200, 'directory': invite.directory})
 
@@ -283,15 +280,13 @@ class InviteDeleteView(DeleteView):
         return JsonResponse({'status': 200, 'pk': pk})
         
 
-class GroupChatMembershipDeleteView(DeleteView):
-    model = GroupChatMembership
+class GroupChatLeaveView(TemplateView):
     template_name = 'rooms/overlays/leave-group-chat.html'
-    context_object_name = 'membership'
-    success_url = reverse_lazy('dashboard')
 
-    def get_object(self, queryset=None):
-        group_chat_pk = self.kwargs.get('group_chat_pk')
-        return GroupChatMembership.objects.get(Q(chat__pk=group_chat_pk) & Q(user=self.request.user))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_chat'] = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        return context
     
 
 class PrivateChatDetailView(DetailView):
@@ -440,25 +435,3 @@ class EmoteMenuView(TemplateView):
             for category in categories
         }
         return context
-    
-
-"""
-
-TODO: add functionality for joining and make log be created when joined throught save method or somethimg
-
-"""
-
-@method_decorator(requires_csrf_token, name='dispatch')
-class AcceptInviteView(View):
-    def post(self, *args, **kwargs):
-        invite = get_object_or_none(Invite, directory=self.kwargs['directory'])
-        if not invite:
-            return JsonResponse({'status': 400, 'handler': 'updateInvite', 'html': render_to_string('rooms/elements/backlog-invites/invalid-backlog-invite.html')})
-        
-        if invite.is_expired():
-            return JsonResponse({'status': 400, 'handler': 'updateInvite', 'html': render_to_string('rooms/elements/backlog-invites/expired-backlog-invite.html')})
-        
-        member = GroupChatMembership.objects.get_or_create(user=self.user, chat=invite.chat)
-        return JsonResponse({'status': 200, 'redirect': reverse('group-chat', kwargs={'pk': invite.chat.pk})})
-
-        

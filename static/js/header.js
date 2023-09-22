@@ -275,7 +275,6 @@ class TooltipManager {
 };
 
 class EmoteMenuUtils {
-    /* TODO: put the handlers for the menu here */
     configureEmoteMenu = ({tooltip, handler, kwargs}) => {
         tooltip.addEventListener('click', (event) => {
             this[handler]({event: event, ...kwargs});   
@@ -349,7 +348,7 @@ class MentionableObserver {
         });
         
         window.addEventListener('mouseup', (event) => {
-            let ignorableElements = event.target.closest('[data-get-mentionables"], [data-role="mentionables-list"]');
+            let ignorableElements = event.target.closest('[data-get-mentionables], [data-role="mentionables-list"]');
             if (ignorableElements) {
                 return;
             };
@@ -359,6 +358,10 @@ class MentionableObserver {
     };
 
     closeMentionablesList = () => {
+        if (!this.openMentionablesList) {
+            return;
+        };
+        
         tooltipManager.deregisterActiveTooltip();
         this.openMentionablesList = undefined;
         this.activeMentionable = undefined;

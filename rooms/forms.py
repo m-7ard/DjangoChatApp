@@ -103,3 +103,7 @@ class EmoteUpdateForm(forms.ModelForm):
     class Meta:
         model = Emote
         fields = ['name']
+
+
+class GroupChatLeaveForm(forms.Form):
+    confirm = forms.BooleanField(required=True, label='Are you sure you wish to leave?', widget=widgets.FormSlider())

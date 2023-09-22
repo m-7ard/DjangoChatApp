@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="menu menu--sidebar dropdown__content has-shadow">
-        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="get-invite" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="get-invite" data-kwargs='{"pk": {{ group_chat.pk }}, "kind": "group_chat"}'>
             <div>
                 Get Invite
             </div>
@@ -31,7 +31,7 @@
             </div>
         </div>
         {% if user == group_chat.owner %}
-            <div class="menu__button dropdown__close" data-command="get-overlay" data-name="manage-invites" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div class="menu__button dropdown__close" data-command="get-overlay" data-name="manage-group-chat-invites" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                 <div>
                     Manage Invites
                 </div>

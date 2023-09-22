@@ -849,8 +849,19 @@
 .backlog--message {
   grid-template: min-content auto auto auto auto/auto auto auto 1fr;
 }
+.backlog--log {
+  grid-template: auto auto/auto auto auto auto 1fr;
+  align-items: center;
+}
 .backlog:has(.backlog__editor) {
   background-color: #181818;
+}
+.backlog__log-action {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  font-size: 0.875rem;
+  color: #DBD6CC;
 }
 .backlog__avatar {
   grid-row: 1/3;
@@ -1510,7 +1521,6 @@
   left: 0;
   right: 0;
   bottom: auto;
-  margin: 0.25rem;
 }
 .menu__button {
   white-space: nowrap;

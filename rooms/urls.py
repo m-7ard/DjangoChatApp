@@ -16,13 +16,12 @@ urlpatterns = [
 
     path('add-friend/', views.FriendshipFormView.as_view(), name='add-friend'),
 
-    path('group-chat/<int:group_chat_pk>/invite-users/', views.InviteManageView.as_view(), name='manage-invites'),
-    path('group-chat/<int:group_chat_pk>/get-invite/', views.GetInviteView.as_view(), name='get-invite'),
-    path('group-chat/<int:group_chat_pk>/create-invite/', views.InviteCreateView.as_view(), name='create-invite'),
+    path('group-chat/<int:group_chat_pk>/manage-invites/', views.GroupChatInviteManageView.as_view(), name='manage-group-chat-invites'),
+    path('<str:kind>/<int:pk>/get-invite/', views.GetInviteView.as_view(), name='get-invite'),
+    path('<str:kind>/<int:pk>/create-invite/', views.InviteCreateView.as_view(), name='create-invite'),
     path('invite/<int:pk>/', views.InviteDeleteView.as_view(), name='delete-invite'),
-    path('accept-invite/<uuid:directory>/', views.AcceptInviteView.as_view(), name='accept-invite'),
 
-    path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatMembershipDeleteView.as_view(), name='leave-group-chat'),
+    path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatLeaveView.as_view(), name='leave-group-chat'),
     path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),
     path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
     path('emote/<int:pk>/edit/', views.EmoteUpdateView.as_view(), name='edit-emote'),

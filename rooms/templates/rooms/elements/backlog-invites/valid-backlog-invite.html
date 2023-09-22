@@ -34,11 +34,9 @@
                     </div>
                 </div>
             </div>
-            <form class="backlog-invite__button backlog-invite__button--accept" action="{% url 'accept-invite' directory=invite.directory %}" method="POST">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="backlog-invite__button backlog-invite__button--accept" data-command="accept_invite" data-directory="{{ invite.directory }}">
                 Accept Invite
-                <button type="submit"></button>
-            </form>
+            </div>
         {% endif %}
     </div>
 </div>
