@@ -137,6 +137,7 @@ async function submitForm(form) {
 function processForm({form, response}) {
     // Remove old messages
     form.querySelectorAll('.form__response').forEach((message) => message.remove());
+    let formResponses = form.querySelector('[data-role="form-responses"]');
 
     if (response.redirect) {
         window.location.replace(response.redirect);
@@ -267,17 +268,4 @@ function validateMention(mention) {
     */
     const pattern = /^>>[a-zA-Z0-9]*#?\d{0,2}$/g;
     return pattern.test(mention);
-};
-
-function buildTooltip({html, uuid, positioning, reference}) {
-    let tooltip = parseHTML(html);
-    tooltip.setAttribute('data-uuid', uuid);
-    positioning = JSON.parse(positioning);
-    let tooltipLayer = document.querySelector('.layer--tooltips');
-    tooltipLayer.appendChild(tooltip);
-
-    positionFixedContainer(tooltip, reference, positioning);
-    fitFixedContainer(tooltip);
-
-    return tooltip;
 };

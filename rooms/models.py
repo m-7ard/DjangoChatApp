@@ -62,6 +62,9 @@ class PrivateChat(Chat):
         else:
             super().save(*args, **kwargs)
 
+    def user_list(self):
+        return [membership.user for membership in self.memberships.all()]
+
 
 class Membership(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -107,6 +110,13 @@ class PrivateChatMembership(Membership):
         self.save()
         return previous_state == False
     
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            BacklogGroupTracker.objects.create(user=self.user, backlog_group=self.chat.backlog_group)
+
+        super().save(*args, **kwargs)
 
 class Category(models.Model):
     name = models.CharField(max_length=20)

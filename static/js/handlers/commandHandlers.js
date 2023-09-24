@@ -110,22 +110,6 @@ const commandHandlers = {
             emotePk: emoteObject.dataset.emotePk
         }));
     },
-    'emote-to-text': ({trigger, event}) => {
-        let contextObject = event.target.closest('[data-context]');
-        let context = JSON.parse(contextObject.dataset.context);
-        let inputParent = document.querySelector(context.variables.inputParent);
-        let input = inputParent.querySelector('[data-role="input"]');
-        input.value += `:${trigger.dataset.name}:`;
-    },
-    'manage-friendship': ({trigger, event}) => {
-        let contextObject = event.target.closest('[data-context]');
-        
-        chatSocket.send(JSON.stringify({
-            action: 'manage-friendship',
-            context: contextObject.dataset.context,
-            kind: trigger.dataset.kind,
-        }));
-    },
     'get-overlay': async ({trigger, event}) => {
         event.preventDefault();
         let overlayString = await getView({
@@ -138,19 +122,23 @@ const commandHandlers = {
             classList: ['layer', 'layer--overlay'],
             innerHTML: overlayString,
         });
+        layer.querySelector('[data-role="close"]').addEventListener('click', (event) => layer.remove());
     },
     'get_tooltip': async ({trigger, event, command}) => {
-        let tooltip = await getView({
-            name: trigger.dataset.name,
-            kwargs: trigger.dataset.kwargs,
-            query: trigger.dataset.query,
-            format: 'html',
+        let tooltip = quickCreateElement('div', {
+            classList: ['tooltip'],
+            innerHTML: await getView({
+                name: trigger.dataset.name,
+                kwargs: trigger.dataset.kwargs,
+                query: trigger.dataset.query,
+            }),
         });
         tooltipManager.toggleTooltip({
             trigger: trigger, 
             tooltip: tooltip, 
-            reference: reference
+            reference: trigger
         });
+        tooltip.querySelector('[data-role="close"]').addEventListener('click', (event) => tooltipManager.deregisterActiveTooltip());
     },
     'remove-closest': ({trigger, event}) => {
         let targetSelector = trigger.dataset.target;

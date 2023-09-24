@@ -1,12 +1,9 @@
-from pathlib import Path
-
 from django.apps import apps
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.shortcuts import render
 
 channel_layer = get_channel_layer()
-
 
 def get_object_or_none(obj, **kwargs):
     return obj.objects.filter(**kwargs).first()
@@ -55,6 +52,3 @@ def object_to_dict(self):
         "app": self._meta.app_label
     }
     return parsed_object
-
-
-

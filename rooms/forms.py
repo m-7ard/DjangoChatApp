@@ -1,10 +1,13 @@
-from django import forms
-from utils import get_object_or_none
+import re
 from datetime import datetime, timedelta, MAXYEAR
+
+from django import forms
+from django.core.validators import RegexValidator
 
 from commons import widgets
 from .models import GroupChannel, GroupChat, Category, Emote, Invite
 from users.models import CustomUser
+from utils import get_object_or_none
 
 
 class GroupChatCreateForm(forms.ModelForm):
@@ -33,33 +36,25 @@ class CategoryCreateForm(forms.ModelForm):
 
 
 class VerifyUser(forms.Form):
-    username = forms.CharField()
-    username_id = forms.IntegerField()
+    user = forms.CharField(
+        widget=widgets.FormInput,
+        validators=[RegexValidator(r'^[a-zA-Z0-9]+#\d{2}$', 'Please enter a valid user (e.g. user#00)')]
+    )
 
     def get_user(self):
-        username = self.cleaned_data['username']
-        username_id = self.cleaned_data['username_id']
+        username, username_id = self.cleaned_data['user'].split('#')
         return get_object_or_none(CustomUser, username=username, username_id=username_id)
 
     def clean(self):
         cleaned_data = super().clean()
-        username = cleaned_data.get('username')
-        username_id = cleaned_data.get('username_id')
-
-        """
-
-        TODO: make message actions like delete edit reacts
-
-        """
-
-        if not username or not username_id:
+        if not cleaned_data.get('user'):
             return
         
         user = self.get_user()
 
         if not user:
-            username_id = str(username_id).zfill(2)
-            self.add_error(None, f'User {username}#{username_id} does not exist.')
+            user = cleaned_data['user']
+            self.add_error('user', f'User {user} does not exist.')
 
 
 class InviteForm(forms.ModelForm):

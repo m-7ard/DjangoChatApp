@@ -124,6 +124,7 @@ class Friendship(models.Model):
         ('accepted', 'Friends'),
         ('pending', 'Pending Friendship'),
     )
+
     status = models.CharField(max_length=20, choices=CHOICES)
     sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='sent_friendships', null=True)
     receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='received_friendships', null=True)

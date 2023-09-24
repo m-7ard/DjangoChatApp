@@ -193,4 +193,8 @@ const chatSocketReceiveHandlers = {
     'redirect': ({url}) => {
         window.location.replace(url);
     },
+    'activate_private_chat': ({html}) => {
+        let privateChats = document.getElementById('private-chats');
+        privateChats.appendChild(parseHTML(html))
+    },
 };

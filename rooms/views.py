@@ -158,24 +158,35 @@ class CategoryCreateView(CreateView):
 
 class FriendshipFormView(FormView):
     form_class = forms.VerifyUser
-    template_name = 'rooms/tooltips/add-friend.html'
+    template_name = 'commons/forms/compact-dynamic-form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Add Friend',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'create'
+        }
+
+        return context
 
     def form_valid(self, form):
         receiver = form.get_user()
         sender = self.request.user
         
         if receiver == sender:
-            form.add_error(None, f'Cannot send friendship request to yourself.')
+            form.add_error('user', f'Cannot send friendship request to yourself.')
             return self.form_invalid(form)
 
-        friendship = sender.friendships().intersection(receiver.friendships()).first()
+        friendship = Friendship.objects.filter(Q(members__user=sender) & Q(members__user=receiver)).first()
 
         if friendship:
             status = friendship.status
             if status == 'pending':
-                form.add_error(None, f'Already sent Friend Request to {receiver.full_name()}')
+                form.add_error('user', f'Already sent Friend Request to {receiver.full_name()}')
             elif status == 'accepted':
-                form.add_error(None, f'Already Friends with {receiver.full_name()}')
+                form.add_error('user', f'Already Friends with {receiver.full_name()}')
                 
             return self.form_invalid(form)
         
@@ -305,33 +316,35 @@ class PrivateChatDetailView(DetailView):
         return self.render_to_response(context)
 
 
-class CreatePrivateChat(FormView):
+class PrivateChatFormView(FormView):
+    template_name = 'commons/forms/compact-dynamic-form.html'
     form_class = forms.VerifyUser
-    template_name = 'rooms/overlays/create-private-chat.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Private Chat',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'create'
+        }
+
+        return context
     
-    def form_valid(self, form):
-        receiver = form.get_user()
-        sender = self.request.user
-
-        if receiver == sender:
-            form.add_error(None, f'Cannot create private chat with yourself.')
-            return self.form_invalid(form)
-
-        private_chat = sender.private_chats().intersection(receiver.private_chats()).first()
-
-        if private_chat:
-            return JsonResponse({'status': 400, 'redirect': reverse('private-chat', kwargs={'pk': private_chat.pk})})
-        else:
-            private_chat = PrivateChat.objects.create()
-            PrivateChatMembership.objects.create(user=sender, chat=private_chat, active=True)
-            PrivateChatMembership.objects.create(user=receiver, chat=private_chat)
-            # to track unread messages
-            BacklogGroupTracker.objects.create(user=sender, backlog_group=private_chat.backlog_group)
-            BacklogGroupTracker.objects.create(user=receiver, backlog_group=private_chat.backlog_group)
-            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': private_chat.pk})})
-
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
+    def form_valid(self, form):
+        other_party = form.get_user()
+        existing_private_chat = PrivateChat.objects.filter(memberships__user=other_party).filter(memberships__user=self.request.user).first()
+
+        if existing_private_chat:
+            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': existing_private_chat.pk})})
+        else:
+            new_private_chat = PrivateChat.objects.create()
+            PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
+            PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
+            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
 
 
 class EmoteManageView(TemplateView):

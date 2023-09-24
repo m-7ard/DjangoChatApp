@@ -12,11 +12,13 @@
             {{ other_party.user.status }}
         </div>
     </div>
-    {% with unread_backlogs=user|unread_backlogs:local_private_chat.backlog_group  %}
-        {% if unread_backlogs %}
-            <div class="notification notification--private-chat">
-                {{ unread_backlogs.count }}
-            </div>
-        {% endif %}
-    {% endwith %}
+    {% if user %}
+        {% with unread_backlogs=user|unread_backlogs:local_private_chat.backlog_group  %}
+            {% if unread_backlogs %}
+                <div class="notification notification--private-chat">
+                    {{ unread_backlogs.count }}
+                </div>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
 </a>

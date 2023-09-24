@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
 	path('self/dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('self/private-chat/<int:pk>/', views.PrivateChatDetailView.as_view(), name='private-chat'),
-    path('self/create/private-chat/', views.CreatePrivateChat.as_view(), name='create-private-chat'),
+    path('self/create/private-chat/', views.PrivateChatFormView.as_view(), name='create-private-chat'),
     
     path('create/group-chat/', views.GroupChatCreateView.as_view(), name='create-group-chat'),
     path('group-chat/<int:pk>/', views.GroupChatDetailView.as_view(), name='group-chat'),
