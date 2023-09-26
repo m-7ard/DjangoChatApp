@@ -166,7 +166,7 @@ function processForm({form, response}) {
         Object.entries(response.errors).forEach(([fieldName, errorList]) => {
             let field = form.querySelector(`[data-name="${fieldName}"]`);
             let parent = field ? field : formResponses;
-
+            
             errorList.forEach((error) => {
                 let {code, message} = error;
                 quickCreateElement('div', {

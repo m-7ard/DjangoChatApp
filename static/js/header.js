@@ -64,10 +64,6 @@ chatSocket.onopen = function() {
 
 class FormSubmitListener {
     constructor() {
-        this.init();
-    };
-
-    init() {
         document.addEventListener('submit', (event) => this.processSubmit(event));
     };
 
@@ -225,6 +221,12 @@ class TooltipUtils {
     };
 
     checkAndCloseTooltip = (event) => {
+        let closeTrigger = event.target.closest('[data-tooltip-close]');
+        if (closeTrigger) {
+            this.closeTooltip();
+            return;
+        };
+
         let ignorableElements = event.target.closest(this.ignorableElements.join(', '));
         if (ignorableElements) {
             return;

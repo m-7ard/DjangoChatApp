@@ -743,183 +743,6 @@ $red-theme-1: (
     }
 }
 
-.permissions {
-    @include flex-row(0, $space-medium);
-
-    &__navigation {
-		@include flex-column($space-medium, $space-small);
-        background-color: $charcoal-grey;
-        border-radius: 4px;
-        overflow: hidden;
-        width: 10rem;
-    }
-
-    &__header {
-        @include flex-row($space-small $space-medium, $space-medium);
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    &__label {
-        color: $light-dark;
-        font-size: $text-secondary-medium;
-        font-weight: bold;
-    }
-
-    &__add {
-        color: $light-dark;
-
-        &:hover {
-            color: $light-light;
-        }
-    }
-
-    &__role {
-        @include flex-row($space-small $space-medium, $space-medium);
-        align-items: center;
-        font-size: $text-secondary-large;
-        transition: background-color 0.2s, color 0.2s;
-        cursor: pointer;
-        border-radius: 4px;
-
-        &[data-state="inactive"] {
-            background-color: $charcoal-grey;
-            color: $light-dark;
-        }
-
-        &:hover {
-            color: $light-light;
-            background-color: $apollo-grey;
-        }
-
-        &[data-state="active"] {
-            background-color: $eerie-black;
-            color: $light-light;
-        }
-
-        div {
-            @include ellipsis;
-        }
-    }
-
-    &__role-color {
-        padding: $space-small;
-        border-radius: 9999px;
-    }
-
-    &__config {
-		@include flex-column($space-large, $space-medium);
-        background-color: $charcoal-grey;
-        border-radius: 4px;
-        overflow: hidden;
-        flex: 1;
-    }
-
-    &__field {
-        display: grid;
-        column-templates: auto 1fr auto;
-        grid-template-rows: auto auto;
-        gap: $space-small;
-        align-items: center;
-    }
-
-    &__name {
-        grid-column: 1;
-        font-size: $text-secondary-large;
-        color: $light-light;
-    }
-
-    &__choices {
-        @include flex-row(3px, $space-small);
-        grid-column: 3;
-        background-color: $charcoal-grey;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    &__option {
-        transition: background-color 0.2s, color 0.2s;
-        position: relative;
-        padding: $space-small $space-medium;
-
-        input {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        &--false {
-            &:has(:not(:checked)) {
-                background-color: $apollo-grey;
-                color: $light-dark;
-            }
-
-            &:hover {
-                background-color: $apollo-grey;
-                color: $light-light;
-            }
-
-            &:has(:checked) {
-                background-color: map-get($red-theme-1, light-bg);
-                color: map-get($red-theme-1, white--LIGHT);
-            }
-        }
-
-        &--null {
-            &:has(:not(:checked)) {
-                background-color: $apollo-grey;
-                color: $light-dark;
-            }
-
-            &:hover {
-                background-color: $apollo-grey;
-                color: $light-light;
-            }
-
-            &:has(:checked) {
-                background-color: $eerie-black;
-                color: $light-light;
-            }
-        }
-
-        &--true {
-            &:has(:not(:checked)) {
-                background-color: $apollo-grey;
-                color: $light-dark;
-            }
-
-            &:hover {
-                background-color: $apollo-grey;
-                color: $light-light;
-            }
-
-            &:has(:checked) {
-                background-color: map-get($green-theme-1, light-bg);
-                color: map-get($green-theme-1, light-fg);
-            }
-        }
-    }
-
-    &__description {
-        grid-column: 1 / -1;
-        font-size: $text-secondary-medium;
-        color: $light-dark;
-    }
-
-    &__footer {
-        @include flex-row(0, $space-medium);
-        margin-top: $space-medium;
-        align-items: center;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-    }
-}
-
-
 .field {
     @include flex-column(0, $space-small);
 
@@ -2810,10 +2633,15 @@ $red-theme-1: (
     @include has-shadow;
     background-color: map-get($grey-theme-1, neutral-bg);
     border-radius: $space-medium;
+    overflow: hidden;
 
     &--tooltip {
         width: 220px;
         margin: $space-small;
+    }
+
+    &--full {
+        width: 440px;
     }
 
     &__content {
@@ -2824,8 +2652,15 @@ $red-theme-1: (
     }
     
     &__header {
+        @include flex-row($space-medium, $space-medium);
+        justify-content: space-between;
+        align-items: flex-end;
         position: relative;
-        padding: $space-medium;
+    }
+
+    &__actions {
+        @include flex-row(0, $space-medium);
+        align-items: center;
     }
 
     &__banner {
@@ -2844,6 +2679,7 @@ $red-theme-1: (
     }
 
     &__avatar {
+        @include has-shadow;
         background-color: map-get($grey-theme-1, light-bg);
         border: $space-small solid map-get($grey-theme-1, neutral-bg);
         border-radius: 9999px;
@@ -2851,9 +2687,10 @@ $red-theme-1: (
         overflow: hidden;
         z-index: 1;
         width: fit-content;
-        cursor: pointer;
 
-        &:hover {
+        .profile--tooltip &:hover {
+            cursor: pointer;
+
             &::before {
                 @include absolute-boundary(0, 0, 0, 0);
                 content: " ";
@@ -2880,5 +2717,26 @@ $red-theme-1: (
     &__value {
         font-size: $text-secondary-medium;
         color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__functional-button {
+        @include base-button;
+        @include medium-button;
+        @include submit-replacement;
+        font-weight: bold;
+
+        &--generic {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--disabled {
+            @include color-shortcut($green-theme-1, $bg: light-bg, $fg: light-fg);
+            cursor: default;
+            opacity: 50%;
+        }
     }
 }

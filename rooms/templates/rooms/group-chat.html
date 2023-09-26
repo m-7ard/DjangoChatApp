@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="menu menu--sidebar dropdown__content has-shadow">
-        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="get-invite" data-kwargs='{"pk": {{ group_chat.pk }}, "kind": "group_chat"}'>
+        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="get-invite" data-kwargs='{"pk": {{ group_chat.pk }}, "kind": "group_chat"}'>
             <div>
                 Get Invite
             </div>
@@ -31,7 +31,7 @@
             </div>
         </div>
         {% if user == group_chat.owner %}
-            <div class="menu__button dropdown__close" data-command="get-overlay" data-name="manage-group-chat-invites" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-group-chat-invites" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                 <div>
                     Manage Invites
                 </div>
@@ -47,7 +47,7 @@
         <div class="menu__divider">
 
         </div>
-        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
             <div>
                 Create Channel
             </div>
@@ -59,7 +59,7 @@
                 </div>
             </div>
         </div>
-        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
             <div>
                 Create Category
             </div>
@@ -71,7 +71,7 @@
                 </div>
             </div>
         </div>
-        <div class="menu__button dropdown__close" data-command="get-overlay" data-name="manage-emotes" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-emotes" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
             <div>
                 Manage Emote
             </div>
@@ -87,7 +87,7 @@
 
         </div>
         {% if user != group_chat.owner %}
-            <div class="menu__button dropdown__close" data-command="get-overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+            <div class="menu__button dropdown__close" data-command="get_overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                 <div>
                     Leave Group Chat
                 </div>

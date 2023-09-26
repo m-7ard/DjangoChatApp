@@ -31,5 +31,5 @@ urlpatterns = [
     
     path('emote-menu/<int:group_chat_pk>/', views.EmoteMenuView.as_view(), name='emote-menu'),
     path('emote-menu/', views.EmoteMenuView.as_view(), name='emote-menu', kwargs={'group_chat_pk': None}),
-
+    path('get-private-chat/', views.getOrCreatePrivateChat.as_view(), name='get-or-create-private-chat'),
 ]

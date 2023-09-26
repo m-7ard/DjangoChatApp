@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.urls import reverse, reverse_lazy
-from django.http import JsonResponse 
+from django.http import HttpResponse, JsonResponse 
 from django.template.loader import render_to_string
 from django.db.models import Q
 from channels.layers import get_channel_layer
@@ -470,3 +470,23 @@ class GroupChatUserProfileCard(View):
         if membership:
             return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
         
+
+class getOrCreatePrivateChat(FormView):
+    form_class = forms.VerifyUser
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400})
+
+    def form_valid(self, form):
+        other_party = form.get_user()
+        if self.request.user == other_party:
+            return self.form_invalid(form)
+        
+        existing_private_chat = self.request.user.private_chats().intersection(other_party.private_chats()).first()
+        if existing_private_chat:
+            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': existing_private_chat.pk})})
+        else:
+            new_private_chat = PrivateChat.objects.create()
+            PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
+            PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
+            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})

@@ -77,7 +77,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def friends(self):
         return map(lambda obj: obj.other_party(), self.friend_objects.all())
 
-    def joined_site(self):
+    def joined(self):
         return self.date_joined.strftime("%d %B %Y")
     
     def full_name(self):
@@ -117,7 +117,7 @@ class FriendshipQuerySet(models.QuerySet):
     
     def accepted(self):
         return self.filter(status='accepted')
-
+    
 
 class Friendship(models.Model):
     CHOICES = (

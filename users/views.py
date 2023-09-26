@@ -1,10 +1,9 @@
 
 
 from django.urls import reverse, reverse_lazy
-from django.views.generic.edit import CreateView
+from django.views.generic import TemplateView, DetailView, CreateView
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.views import LoginView, LogoutView
-from django.template.loader import render_to_string
 from django.contrib.auth import login
 
 from .forms import SignupForm, CustomisedAuthenticationForm
@@ -73,3 +72,9 @@ class SigninView(LoginView):
     
 class SignoutView(LogoutView):
     success_url = reverse_lazy('core:frontpage')
+
+
+class FullUserProfileView(DetailView):
+    model = CustomUser
+    template_name = 'users/full-user-profile.html'
+    context_object_name = 'profile_user'

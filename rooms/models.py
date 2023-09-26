@@ -124,6 +124,7 @@ class PrivateChatMembership(Membership):
 
         super().save(*args, **kwargs)
 
+
 class Category(models.Model):
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='categories')

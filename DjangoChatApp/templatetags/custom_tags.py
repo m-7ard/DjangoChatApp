@@ -7,6 +7,7 @@ from django.db.models import Q
 
 
 from rooms.models import PrivateChat, BacklogGroupTracker
+from users.models import Friendship
 
 
 from ..settings import MEDIA_URL
@@ -67,3 +68,8 @@ def unread_group_chat_backlogs(user, group_chat):
 @register.filter(name="get_member_or_none")
 def get_member_or_none(user, chat):
     return chat.memberships.filter(user=user).first()
+
+
+@register.filter(name='get_friendship_or_none')
+def get_friendship_or_none(user1, user2):
+    return user1.friendships().intersection(user2.friendships()).first()

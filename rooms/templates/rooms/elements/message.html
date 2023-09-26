@@ -4,7 +4,7 @@
             <img src="{{ backlog.message.user.image.url }}" alt="">
         </div>
     </div>
-    <div class="backlog__username" data-command="get_tooltip" data-name="group-chat-user-profile-card" data-kwargs='{"group_chat_pk": {{ backlog.group.group_channel.chat.pk }}, "user_pk": {{ user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
+    <div class="backlog__username" data-command="get_tooltip" data-name="group-chat-user-profile-card" data-kwargs='{"group_chat_pk": {{ backlog.group.group_channel.chat.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
         {{ backlog.message.user.username }}
     </div>
     <div class="backlog__timestamp">

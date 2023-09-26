@@ -1,0 +1,74 @@
+<div class="profile profile--full">
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar">
+            <div class="avatar avatar--large">
+                <img src="{{ profile_user.image.url }}" alt="">
+            </div>
+        </div>
+        {% if request.user != profile_user %}
+            <div class="profile__actions">
+                {% with friendship=user|get_friendship_or_none:profile_user %}
+                    {% if friendship %}
+                        {% if friendship.status == 'accepted' %}
+                            <form class="profile__functional-button profile__functional-button--generic" action="{% url 'get-or-create-private-chat' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" value="{{ profile_user.full_name }}" name="user">
+                                <button type="submit"></button>
+                                Send Message
+                            </form>
+                        {% elif friendship.status == 'pending' %}
+                            <div class="profile__functional-button profile__functional-button--disabled">
+                                Friend Request Pending
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <form class="profile__functional-button profile__functional-button--generic" data-command="add_friend_from_profile" action="{% url 'add-friend' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ profile_user.full_name }}" name="user">
+                            Add Friend
+                        </form>
+                    {% endif %}
+                {% endwith %}
+                <div class="app__icon app__icon--hoverable">
+                    <div class="icon icon--medium icon--hoverable">
+                        <i class="material-symbols-outlined">
+                            more_vert
+                        </i>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="profile__body">
+        <div class="profile__content">
+            <div>
+                <div class="profile__username">
+                    {{ profile_user.username }}
+                </div>
+                <div class="profile__full-name">
+                    {{ profile_user.full_name }}
+                </div>
+            </div>
+            <div class="profile__divider"></div>
+            <div>
+                <div class="profile__label">
+                    Bio
+                </div>
+                <div class="profile__value">
+                    {{ profile_user.bio }}
+                </div>
+            </div>
+            <div>
+                <div class="profile__label">
+                    Joined Since    
+                </div>
+                <div class="profile__value">
+                    {{ profile_user.joined }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

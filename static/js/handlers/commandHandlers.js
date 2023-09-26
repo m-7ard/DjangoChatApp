@@ -122,7 +122,12 @@ const commandHandlers = {
             classList: ['layer', 'layer--overlay'],
             innerHTML: overlayString,
         });
-        layer.querySelector('[data-role="close"]').addEventListener('click', (event) => layer.remove());
+        
+        layer.addEventListener('mouseup', (event) => {
+            if (event.target.matches('.layer--overlay') || event.target.closest('[data-role="close"]')) {
+                layer.remove();
+            };
+        });
     },
     'get_tooltip': async ({trigger, event, command}) => {
         let tooltip = quickCreateElement('div', {
@@ -138,7 +143,7 @@ const commandHandlers = {
             tooltip: tooltip, 
             reference: trigger
         });
-        tooltip.querySelector('[data-role="close"]').addEventListener('click', (event) => tooltipManager.deregisterActiveTooltip());
+        tooltip.querySelector('[data-role="close"]')?.addEventListener('click', (event) => tooltipManager.deregisterActiveTooltip());
     },
     'remove-closest': ({trigger, event}) => {
         let targetSelector = trigger.dataset.target;
@@ -279,5 +284,12 @@ const commandHandlers = {
         chatSocket.send(JSON.stringify({
             'action': 'leave_group_chat',
         }));
+    },
+    'add_friend_from_profile': async ({trigger, event, command}) => {
+        let response = await submitForm(trigger);
+        if (response.status == 200) {
+            trigger.classList.replace('profile__functional-button--generic', 'profile__functional-button--disabled')
+            trigger.textContent = 'Friend Request Pending';
+        };
     },
 };
