@@ -2,7 +2,7 @@
     <div class="form__select-option" data-role="root" data-command="toggle_select" data-positioning='{"top": "100%", "bottom": "-400%", "left": "0px", "right": "0px"}'>
         {{ widget.attrs.initial.1 }}
     </div>
-    <div class="form__select-option-list" data-role="option-list">
+    <div class="form__select-option-list" data-role="option-list" data-static>
         {% for value, label in widget.attrs.choices %}
             <div class="form__select-option" data-role="option">
                 {{ label }}

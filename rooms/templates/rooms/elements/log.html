@@ -1,20 +1,20 @@
 <div class="backlog backlog--log {% if user in backlog.mentions.all %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
     {% if backlog.log.get_action_type == '1 user action' %}
         <div class="mention">
-            {{ backlog.log.user1 }}
+            >>{{ backlog.log.user1 }}
         </div>
         <div class="backlog__log-action">
             {{ backlog.log.get_action_string }}
         </div>
     {% elif backlog.log.get_action_type == '2 user action' %}
         <div class="mention">
-            {{ backlog.log.user1 }}
+            >>{{ backlog.log.user1 }}
         </div>
         <div class="backlog__log-action">
             {{ backlog.log.get_action_string }}
         </div>
         <div class="mention">
-            {{ backlog.log.user2 }}
+            >>{{ backlog.log.user2 }}
         </div>
     {% endif %}
     <div class="backlog__timestamp">

@@ -1,4 +1,4 @@
-<div class="dropdown sidebar__section sidebar__section--category">
+<div class="dropdown sidebar__section sidebar__section--category" data-role="category">
     <div class="sidebar__lead-in">
         <div class="sidebar__label sidebar__label--hoverable dropdown__trigger">
             <div class="app__icon dropdown__marker">
@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="dropdown__content dropdown__content--open dropdown__content--static">
-        <div class="sidebar__section sidebar__section--channels">
+        <div class="sidebar__section sidebar__section--channels" id="category-{{ category.pk }}">
             {% for channel in category.channels.all %}
                 {% include "./channel.html" %}
             {% endfor %}

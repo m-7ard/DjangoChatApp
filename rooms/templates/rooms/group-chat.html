@@ -118,7 +118,7 @@
 {% endblock %}
 
 {% block app-sidebar-body %}
-    <div class="sidebar__section sidebar__section--channels">
+    <div class="sidebar__section sidebar__section--channels" id="group-channels">
         {% for item in group_chat.channels_and_categories %}
             {% if item|classname == 'GroupChannel' %}
                 {% with channel=item %}

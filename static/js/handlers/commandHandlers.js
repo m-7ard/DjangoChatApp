@@ -110,7 +110,7 @@ const commandHandlers = {
             emotePk: emoteObject.dataset.emotePk
         }));
     },
-    'get-overlay': async ({trigger, event}) => {
+    'get_overlay': async ({trigger, event}) => {
         event.preventDefault();
         let overlayString = await getView({
             name: trigger.dataset.name, 
@@ -273,7 +273,6 @@ const commandHandlers = {
     },
     'leave_group_chat': ({trigger, event, command}) => {
         let prompt = trigger.closest('[data-role="prompt"]');
-        console.log('eee')
         if (!prompt.querySelector('input[name="confirm"]:checked')) {
             return;
         };

@@ -28,7 +28,7 @@ class Chat(models.Model):
 class GroupChat(Chat):
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='groups_owned', null=True)
     name = models.CharField(max_length=50)
-    image = models.ImageField(max_length=500, blank=True)
+    image = models.ImageField(max_length=500, blank=True, default='1213.png')
     public = models.BooleanField(default=False)
     base_role = models.OneToOneField('Role', on_delete=models.RESTRICT, related_name='+', null=True, blank=True)
 
@@ -77,6 +77,12 @@ class GroupChatMembership(Membership):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
     nickname = models.CharField(max_length=20, blank=True)
+
+    def display_name(self):
+        return self.nickname or self.user.username
+    
+    def joined(self):
+        return self.date_created.strftime("%d %B %Y")
 
     def save(self, *args, **kwargs):
         creating = self._state.adding

@@ -216,43 +216,54 @@ window.addEventListener('mouseup', (event) => {
     };
 });
 
-
-class TooltipManager {
-    constructor() {
-        this.init();
+class TooltipUtils {
+    adjustTooltip = (event) => {
+        let {trigger, tooltip, reference} = this.getAttributes();
+        let positioning = JSON.parse(trigger.dataset.positioning);
+        positionFixedContainer(tooltip, reference, positioning);
+        fitFixedContainer(tooltip);
     };
 
-    init() {
+    checkAndCloseTooltip = (event) => {
+        let ignorableElements = event.target.closest(this.ignorableElements.join(', '));
+        if (ignorableElements) {
+            return;
+        };
+        this.closeTooltip();
+    };
+};
+
+class TooltipManager extends TooltipUtils {
+    constructor() {
+        super();
         this.tooltipLayer = document.querySelector('.layer--tooltips');
+        this.closeTooltip = this.deregisterActiveTooltip;
+        this.ignorableElements = ['[data-active-tooltip-trigger]', '[data-command="get-tooltip"]', '.tooltip'];
+    };
 
-        document.addEventListener('mouseup', (event) => {
-            let ignorableElements = event.target.closest('[data-active-tooltip-trigger], [data-command="get-tooltip"], .tooltip');
-            if (ignorableElements) {
-                return;
-            };
-
-            this.deregisterActiveTooltip();
-        });
+    getAttributes = () => {
+        return {trigger: this.activeTrigger, tooltip: this.activeTooltip, reference: this.reference};
     };
 
     registerTooltip = ({trigger, tooltip, reference}) => {
         this.activeTrigger = trigger;
         this.activeTooltip = tooltip;
         this.activeTrigger.setAttribute('data-active-tooltip-trigger', '');
-
-        let positioning = JSON.parse(trigger.dataset.positioning);
+        this.reference = reference;
         this.tooltipLayer.appendChild(tooltip);
-
-        positionFixedContainer(tooltip, reference, positioning);
-        fitFixedContainer(tooltip);
+        this.adjustTooltip();
+        window.addEventListener('resize', this.adjustTooltip);
+        window.addEventListener('mouseup', this.checkAndCloseTooltip);
     }
 
     deregisterActiveTooltip = () => {
-        this.activeTooltip?.remove();
-        this.activeTrigger?.removeAttribute('data-active-tooltip-trigger');
-
+        window.removeEventListener('resize', this.adjustTooltip);
+        window.removeEventListener('mouseup', this.checkAndCloseTooltip);
+        this.activeTooltip.remove();
+        this.activeTrigger.removeAttribute('data-active-tooltip-trigger');
         this.activeTooltip = undefined;
         this.activeTrigger = undefined;
+        this.reference = undefined;
     }
 
     toggleTooltip = ({trigger, tooltip, reference}) => {
@@ -270,8 +281,6 @@ class TooltipManager {
         this.registerTooltip({trigger: trigger, reference: reference, tooltip: tooltip});
         return true;
     };
-
-    
 };
 
 class EmoteMenuUtils {
@@ -282,7 +291,7 @@ class EmoteMenuUtils {
     };
 
     reactBacklog = ({event, pk}) => {
-        let emoticon = event.target.closest('.emote-menu__emote');
+        let emoticon = event.target.closest('[data-role="emoticon"]');
         if (!emoticon) {
             return;
         };
@@ -507,43 +516,15 @@ class MentionableObserver {
     };
 };
 
-class SelectManager {
+class SelectManager extends TooltipUtils {
     constructor() {
-        this.init();
+        super();
+        this.ignorableElements = ['[data-command="toggle_select"]', '[data-role="option"]']
+        this.closeTooltip = this.deregisterActiveSelect;
     };
 
-    init() {
-        document.addEventListener('mouseup', (event) => {
-            let ignorableElements = event.target.closest('[data-command="toggle_select"], [data-role="option"]');
-            if (ignorableElements) {
-                return;
-            };
-
-            this.deregisterActiveSelect();
-        });
-    }
-
-    deregisterActiveSelect = () => {
-        if (!this.activeSelect) {
-            return;
-        };
-        
-        this.activeSelect.removeEventListener('click', this.selectOption);
-        this.activeSelect?.removeAttribute('data-active');
-        this.activeSelect = undefined;
-        this.activeRoot = undefined;
-    }
-    
-    registerSelect = ({root: root, select: select, options: options}) => {
-        this.activeSelect = select;
-        this.activeSelect.addEventListener('click', this.selectOption);
-        this.activeRoot = root;
-        this.activeSelect.setAttribute('data-active', '');
-    
-        let positioning = JSON.parse(root.dataset.positioning);
-    
-        positionFixedContainer(options, root, positioning);
-        fitFixedContainer(options);
+    getAttributes = () => {
+        return {trigger: this.activeRoot, tooltip: this.activeOptionList, reference: this.activeRoot};
     };
 
     toggleSelect = ({root, select, options}) => {
@@ -560,6 +541,27 @@ class SelectManager {
         this.deregisterActiveSelect();
         this.registerSelect({root: root, select: select, options: options});
         return true;
+    }
+
+    registerSelect = ({root, select, options}) => {
+        this.activeSelect = select;
+        this.activeSelect.addEventListener('click', this.selectOption);
+        this.activeRoot = root;
+        this.activeSelect.setAttribute('data-open', '');
+        this.activeOptionList = options;
+        this.adjustTooltip();
+        window.addEventListener('resize', this.adjustTooltip);
+        window.addEventListener('mouseup', this.checkAndCloseTooltip);
+    };
+
+    deregisterActiveSelect = () => {
+        window.removeEventListener('resize', this.adjustTooltip);
+        window.removeEventListener('mouseup', this.checkAndCloseTooltip);
+        this.activeSelect.removeEventListener('click', this.selectOption);
+        this.activeSelect.removeAttribute('data-open');
+        this.activeSelect = undefined;
+        this.activeRoot = undefined;
+        this.activeOptionList = undefined;
     }
 
     selectOption = (event) => {

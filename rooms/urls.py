@@ -24,8 +24,12 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatLeaveView.as_view(), name='leave-group-chat'),
     path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),
     path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
+    path('group-chat/<int:group_chat_pk>/profile-card/<int:user_pk>', views.GroupChatUserProfileCard.as_view(), name='group-chat-user-profile-card'),
+    
     path('emote/<int:pk>/edit/', views.EmoteUpdateView.as_view(), name='edit-emote'),
     path('emote/<int:pk>/delete/', views.EmoteDeleteView.as_view(), name='delete-emote'),
+    
     path('emote-menu/<int:group_chat_pk>/', views.EmoteMenuView.as_view(), name='emote-menu'),
     path('emote-menu/', views.EmoteMenuView.as_view(), name='emote-menu', kwargs={'group_chat_pk': None}),
+
 ]

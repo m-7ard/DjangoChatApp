@@ -12,6 +12,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.views.decorators.csrf import requires_csrf_token
 from django.utils.decorators import method_decorator
+from django.shortcuts import render
 
 from users.models import CustomUser, Friend, Friendship
 from .models import (
@@ -46,35 +47,32 @@ class GroupChatCreateView(CreateView):
     form_class = forms.GroupChatCreateForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
-    def get(self, *args, **kwargs):
-        self.object = None
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = {
             'title': 'Create Group Chat',
-            'fields': self.form_class,
-            'url': reverse('create-group-chat'),
+            'fields': self.get_form(),
+            'url': self.request.path,
             'type': 'create'
         }
 
-        return self.render_to_response(context)
+        return context
 
     def form_invalid(self, form):
-        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
     def form_valid(self, form):
         group_chat = form.save(commit=False)
         group_chat.owner = self.request.user
         group_chat.save()
 
-        success_url = reverse('group-chat', kwargs={'pk': group_chat.pk})
-
         async_to_sync(channel_layer.group_send)(f'user_{self.request.user.pk}', {
             'type': 'send_to_client',
-            'action': 'create-group-chat',
-            'html': render_to_string(request=self.request, template_name='core/elements/groupchat.html', context={'local_groupchat': group_chat})
+            'action': 'create_group_chat',
+            'html': render_to_string(request=self.request, template_name='core/elements/group-chat.html', context={'local_group_chat': group_chat})
         })
 
-        return JsonResponse({'status': 400, 'redirect': success_url})
+        return JsonResponse({'status': 200, 'redirect': reverse('group-chat', kwargs={'pk': group_chat.pk})})
         
 
 class GroupChatDetailView(DetailView):
@@ -109,12 +107,19 @@ class GroupChannelCreateView(CreateView):
 
     def form_valid(self, form):
         channel = form.save(commit=False)
-        channel.chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        channel.chat = group_chat
         channel.category = Category.objects.filter(pk=self.kwargs.get('category_pk')).first()
         channel.save()
 
-        success_url = reverse('group-channel', kwargs={'group_chat_pk': channel.chat.pk, 'group_channel_pk': channel.pk})  
-        return JsonResponse({'status': 400, 'redirect': success_url})
+        async_to_sync(channel_layer.group_send)(f'group_chat_{group_chat.pk}', {
+            'type': 'send_to_client',
+            'action': 'create_group_channel',
+            'html': render_to_string(request=self.request, template_name='rooms/elements/channel.html', context={'channel': channel}),
+            'category': getattr(channel, 'category', None) and channel.category.pk,
+        })
+
+        return JsonResponse({'status': 400, 'redirect': reverse('group-channel', kwargs={'group_chat_pk': channel.chat.pk, 'group_channel_pk': channel.pk})  })
 
 
 class GroupChannelDetailView(DetailView):
@@ -150,8 +155,15 @@ class CategoryCreateView(CreateView):
 
     def form_valid(self, form):
         category = form.save(commit=False)
-        category.chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        group_chat = GroupChat.objects.get(pk=self.kwargs.get('group_chat_pk'))
+        category.chat = group_chat
         category.save()
+
+        async_to_sync(channel_layer.group_send)(f'group_chat_{group_chat.pk}', {
+            'type': 'send_to_client',
+            'action': 'create_group_category',
+            'html': render_to_string(request=self.request, template_name='rooms/elements/category.html', context={'category': category}),
+        })
 
         return JsonResponse({'status': 400, 'redirect': self.request.META.get('HTTP_REFERER')})
 
@@ -448,3 +460,13 @@ class EmoteMenuView(TemplateView):
             for category in categories
         }
         return context
+
+
+class GroupChatUserProfileCard(View):
+    def get(self, request, *args, **kwargs):
+        group_chat = get_object_or_none(GroupChat, pk=self.kwargs['group_chat_pk'])
+        user = CustomUser.objects.get(pk=self.kwargs['user_pk'])
+        membership = group_chat.memberships.filter(user=user).first()
+        if membership:
+            return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
+        

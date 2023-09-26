@@ -1,4 +1,4 @@
-<a class="channel {% if channel == group_channel %} channel--selected {% endif %}" href="{% url 'group-channel' group_chat_pk=channel.chat.pk group_channel_pk=channel.pk %}" id="group-channel-{{ channel.pk }}">
+<a class="channel {% if channel == group_channel %} channel--selected {% endif %}" href="{% url 'group-channel' group_chat_pk=channel.chat.pk group_channel_pk=channel.pk %}" id="group-channel-{{ channel.pk }}" data-role="channel">
     <div class="app__icon">
         <div class="icon icon--small">
             <i class="material-symbols-outlined">

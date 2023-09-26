@@ -12,7 +12,7 @@ from utils import get_object_or_none
 
 class GroupChatCreateForm(forms.ModelForm):
     name = forms.CharField(widget=widgets.FormInput())
-    public = forms.BooleanField(widget=widgets.FormSlider(attrs={'label': 'List group chat as public?'}), label='', required=False)
+    public = forms.BooleanField(widget=widgets.FormSlider(), required=False)
     
     class Meta:
         model = GroupChat

@@ -13,7 +13,7 @@
                         {{ invite.chat.name }}
                     </div>
                     <div class="backlog-invite__subtitle">
-                        {{ invite.chat.memberships.count }} Members
+                        {{ invite.chat.memberships|length }} Members
                     </div>
                 </div>
             </div>
@@ -30,7 +30,7 @@
                         {{ invite.chat.name }}
                     </div>
                     <div class="backlog-invite__subtitle">
-                        {{ invite.chat.memberships.count }} Members
+                        {{ invite.chat.memberships|length }} Members
                     </div>
                 </div>
             </div>

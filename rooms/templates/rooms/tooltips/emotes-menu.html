@@ -35,7 +35,7 @@
                         </div>
                         <div class="emote-menu__list">
                             {% for emote in group_chat.emotes.all %}
-                                <div class="emote-menu__emote" data-kind="emote" data-name="{{ emote.name }}" data-pk="{{ emote.pk }}">
+                                <div class="emote-menu__emote" data-kind="emote" data-name="{{ emote.name }}" data-pk="{{ emote.pk }}" data-role="emoticon">
                                     <div class="avatar avatar--medium">
                                         <img src="{{ emote.image }}" alt="">
                                     </div>

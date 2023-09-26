@@ -1326,7 +1326,7 @@ $red-theme-1: (
 
     &__reactions {
         @include flex-row($gap: $space-small $space-large);
-        grid-column: 2 / -1;
+        grid-column: 1 / -1;
         grid-row: -2 / -1;
         flex-wrap: wrap;
 
@@ -2359,7 +2359,7 @@ $red-theme-1: (
     &__select {
         @include flex-column(0, 0);
 
-        &[data-active] .form__select-option-list {
+        &[data-open] .form__select-option-list {
             visibility: visible;
 
             .form__select-option:first-child {
@@ -2384,8 +2384,8 @@ $red-theme-1: (
         visibility: hidden;
         background-color: map-get($grey-theme-1, dark-bg);
         border-radius: 0 0 $space-medium $space-medium;
-        overflow: auto; 
-        z-index: 2;
+        overflow: auto;
+        z-index: 2; 
     }
 
     &__select-option {
@@ -2801,5 +2801,84 @@ $red-theme-1: (
         &:hover{
             background-color: map-get($green-theme-1, dark-bg);
         }
+    }
+}
+
+
+.profile {
+    @include flex-column(0, 0);
+    @include has-shadow;
+    background-color: map-get($grey-theme-1, neutral-bg);
+    border-radius: $space-medium;
+
+    &--tooltip {
+        width: 220px;
+        margin: $space-small;
+    }
+
+    &__content {
+        @include flex-column($space-medium, $space-medium);
+        background-color: map-get($grey-theme-1, dark-bg);
+        border-radius: $space-small;
+        user-select: none;
+    }
+    
+    &__header {
+        position: relative;
+        padding: $space-medium;
+    }
+
+    &__banner {
+        @include absolute-boundary(0, 0, 50%, 0);
+        background-color: map-get($grey-theme-1, dark-bg);
+    }
+
+    &__body {
+        @include flex-column($space-medium, $space-medium);
+    }
+
+    &__divider {
+        height: 0px;
+        width: 100%;
+        border-bottom: 1px solid map-get($grey-theme-1, light-bg);
+    }
+
+    &__avatar {
+        background-color: map-get($grey-theme-1, light-bg);
+        border: $space-small solid map-get($grey-theme-1, neutral-bg);
+        border-radius: 9999px;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        width: fit-content;
+        cursor: pointer;
+
+        &:hover {
+            &::before {
+                @include absolute-boundary(0, 0, 0, 0);
+                content: " ";
+                background-color: rgba(map-get($grey-theme-1, dark-bg), 0.25)
+            }
+        }
+    }
+
+    &__username {
+        @include title;
+        color: map-get($grey-theme-1, light-fg);
+    }
+
+    &__full-name {
+        @include label;
+        color: map-get($grey-theme-1, neutral-fg);
+    }
+
+    &__label {
+        @include label;
+        color: map-get($grey-theme-1, light-fg);
+    }
+
+    &__value {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, neutral-fg);
     }
 }

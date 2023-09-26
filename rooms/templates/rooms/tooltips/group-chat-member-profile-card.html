@@ -1,0 +1,41 @@
+<div class="profile profile--tooltip">
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar" data-command="get_overlay" data-name="user-profile">
+            <div class="avatar avatar--medium">
+                <img src="{{ membership.user.image.url }}" alt="">
+            </div>
+        </div>
+    </div>
+    <div class="profile__body">
+        <div class="profile__content">
+            <div>
+                <div class="profile__username">
+                    {{ membership.display_name }}
+                </div>
+                <div class="profile__full-name">
+                    {{ membership.user.full_name }}
+                </div>
+            </div>
+            <div class="profile__divider"></div>
+            <div>
+                <div class="profile__label">
+                    Bio
+                </div>
+                <div class="profile__value">
+                    {{ membership.user.bio }}
+                </div>
+            </div>
+            <div>
+                <div class="profile__label">
+                    Member Since    
+                </div>
+                <div class="profile__value">
+                    {{ membership.joined }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

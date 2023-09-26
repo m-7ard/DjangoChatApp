@@ -2,13 +2,43 @@ const chatSocketReceiveHandlers = {
 	'requestServerResponse': function() {
         console.log('response received')
     },
-	'create-group-chat': function({html}) {
+	'create_group_chat': function({html}) {
         let groupChat = parseHTML(html);
         let referenceElement = document.getElementById('insert-group-chat');
         referenceElement.parentNode.insertBefore(groupChat, referenceElement);
-    },	
+    },
+    'create_group_channel': ({html, category}) => {
+        let channel = parseHTML(html);
+        if (category) {
+            let categorySection = document.getElementById(`category-${category}`);
+            categorySection.append(channel);
+        }
+        else {
+            let groupChannels = document.getElementById('group-channels');
+            groupChannels.appendChild(channel);
+        };
+    },
+    'create_group_category': ({html}) => {
+        let groupChannels = document.getElementById('group-channels');
+        let lastCategory = groupChannels.querySelector('[data-role="category"]:last-of-type');
+        let category = parseHTML(html);
 
-    'response': () => { console.log('response exists') },
+        if (lastCategory) {
+            lastCategory.insertAdjacentElement('afterend', category);
+            return;
+        }
+
+        let firstChannel = groupChannels.querySelector('[data-role="channel"]:first-of-type)');
+        if (firstChannel) {
+            lastChannel.insertAdjacentElement('beforebegin', firstChannel);
+            return;
+        };
+
+        groupChannels.append(category);
+    },
+    'response': () => { 
+        console.log('response exists') 
+    },
 
     'create_message': ({html, is_sender}) => {
         let newMessage = parseHTML(html);
@@ -180,7 +210,7 @@ const chatSocketReceiveHandlers = {
                 id: 'unread-backlogs-divider',
             });
             backlogs.insertBefore(divider, newLog);
-        }    
+        };
     },
     'join_group_chat': ({html}) => {
         let insertGroupChat = document.getElementById('insert-group-chat');
