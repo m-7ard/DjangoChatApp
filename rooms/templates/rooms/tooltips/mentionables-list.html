@@ -1,0 +1,45 @@
+<div class="mentionables-list tooltip tooltip--x-adjacent has-shadow" id="mentionables-list">
+    {% if members %}
+        <div class="mentionables-list__label">
+            Members
+        </div>
+        <div class="mentionables-list__divider">
+
+        </div>
+        {% for member in members %}
+            <div class="mentionables-list__mentionable {% if forloop.first %} mentionables-list__mentionable--active {% endif %}" data-kind="user" data-value="{{ member.user.full_name }}">
+                <span class="avatar mentionables-list__avatar">
+                    <img src="{{ member.user.image }}" alt="">
+                </span>
+                <span class="mentionables-list__name">
+                    {% firstof member.nickname member.user.username %}
+                </span>
+                <span class="mentionables-list__id right">
+                    {{ member.user.full_name }}
+                </span>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if roles %}
+        <div class="mentionables-list__label">
+            Roles
+        </div>
+        <div class="mentionables-list__divider">
+
+        </div>
+        {% for role in roles %}
+            <div class="mentionables-list__mentionable" data-kind="role" data-value="{{ role.name }}">
+                <div class="app__icon">
+                    <div class="icon icon--medium">
+                        <i class="material-symbols-outlined">
+                            keyboard_double_arrow_right
+                        </i>
+                    </div>     
+                </div>
+                <div class="mentionables-list__name">
+                    {{ role.name }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

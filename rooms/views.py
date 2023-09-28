@@ -25,10 +25,11 @@ from .models import (
     PrivateChatMembership,
     BacklogGroupTracker,
     Emote,
-    Emoji
+    Emoji,
+    BacklogGroup,
 )
 from . import forms
-from utils import get_object_or_none
+from utils import get_object_or_none, process_mention
 
 channel_layer = get_channel_layer()
 
@@ -462,16 +463,27 @@ class EmoteMenuView(TemplateView):
         return context
 
 
-class GroupChatUserProfileCard(View):
+class UserProfileCardView(View):
     def get(self, request, *args, **kwargs):
-        group_chat = get_object_or_none(GroupChat, pk=self.kwargs['group_chat_pk'])
-        user = CustomUser.objects.get(pk=self.kwargs['user_pk'])
-        membership = group_chat.memberships.filter(user=user).first()
-        if membership:
+        user = get_object_or_none(CustomUser, pk=kwargs.get('user_pk'))
+        
+        if not user:
+            return
+        
+        backlog_group = get_object_or_none(BacklogGroup, pk=kwargs.get('backlog_group_pk'))
+        if not backlog_group:
+            return render(request, 'rooms/tooltips/user-profile-card.html', {'profile_user': user})
+
+        if backlog_group.kind == 'group_channel':
+            membership = GroupChatMembership.objects.get(user=user, chat=backlog_group.group_channel.chat)
             return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
+
+        return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
+
+        
         
 
-class getOrCreatePrivateChat(FormView):
+class GetOrCreatePrivateChat(FormView):
     form_class = forms.VerifyUser
 
     def form_invalid(self, form):
@@ -490,3 +502,31 @@ class getOrCreatePrivateChat(FormView):
             PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
             PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
             return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
+        
+    
+class GetMentionablesView(TemplateView):
+    template_name = 'rooms/tooltips/mentionables-list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        backlog_group = BacklogGroup.objects.get(pk=self.kwargs['backlog_group_pk'])
+        alphanumeric, numeric = process_mention(self.kwargs['mention'])
+        if backlog_group.kind == 'group_channel':
+            chat = backlog_group.group_channel.chat
+            context['members'] = chat.memberships.filter(
+                Q(nickname__icontains=alphanumeric)
+                | Q(user__username__icontains=alphanumeric)
+            )[:10] if alphanumeric else chat.memberships.all()[:10]
+            if numeric:
+                context['members'] = filter(lambda member: numeric in member.user.formatted_username_id(), context['members'])
+            context['roles'] = chat.roles.filter(name__icontains=alphanumeric) if alphanumeric else chat.roles.all()[:10]
+            print(context['members'])
+        elif backlog_group.kind == 'private_chat':
+            chat = backlog_group.private_chat
+            context['members'] = chat.memberships.filter(
+                Q(nickname__icontains=alphanumeric)
+                | Q(user__username__icontains=alphanumeric)
+            )[:10] if alphanumeric else chat.memberships.all()[:10]
+        
+        return context
+        

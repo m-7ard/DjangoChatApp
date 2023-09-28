@@ -8,6 +8,7 @@ from channels.db import database_sync_to_async
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from django.urls import reverse
+from django.db.models import Q
 
 from .models import (
     Backlog,
@@ -324,7 +325,10 @@ class BacklogGroupUtils():
     @sync_to_async
     def is_mentioned(self, pk):
         backlog = Backlog.objects.get(pk=pk)
-        return self.user in backlog.mentions.all()
+        mentioned = self.user in backlog.user_mentions.all() 
+        mentioned = mentioned or self.user.roles.all().intersection(backlog.role_mentions.all()).exists()
+        
+        return mentioned
     
     async def send_log_to_client(self, event):
         await self.send(text_data=json.dumps({
@@ -402,7 +406,7 @@ class BacklogGroupUtils():
         send_data = {
             'type': 'update_message_to_client',
             'action': 'edit_message',
-            'content': convert_mentions(content),
+            'content': message.rendered_content,
             'invites': backlog.message.process_invites(),
             'pk': pk,
         }
@@ -444,24 +448,24 @@ class BacklogGroupUtils():
             self.current_page = None
         
     @sync_to_async
-    def get_mentionables(self, chat, username, username_id):
-        query = chat.memberships.filter(user__username__icontains=username)[:10] if username else chat.memberships.all()[:10]
-        query = query.select_related('user')
+    def get_mentionables(self, chat, alphanumeric, numeric, kind):
+        context = {}
 
-        if username_id:
-            # mention username id is substring of member formatted username id
-            query = filter(lambda member: username_id in member.user.formatted_username_id(), query)
+        if kind == 'group_chat':
+            context['members'] = chat.memberships.filter(
+                Q(nickname__icontains=alphanumeric)
+                | Q(user__username__icontains=alphanumeric)
+            )[:10] if alphanumeric else chat.memberships.all()[:10]
+            if numeric:
+                context['members'] = filter(lambda member: numeric in member.user.formatted_username_id(), context['members'])
+            context['roles'] = chat.roles.filter(name__icontains=alphanumeric) if alphanumeric else chat.roles.all()[:10]
+        elif kind == 'private_chat':
+            context['members'] = chat.memberships.filter(
+                Q(nickname__icontains=alphanumeric)
+                | Q(user__username__icontains=alphanumeric)
+            )[:10] if alphanumeric else chat.memberships.all()[:10]
 
-        html = render_to_string(template_name='commons/tooltips/mentionables-list.html', context={
-            'members': [{
-                'username': member.user.username, 
-                'username_id': member.user.formatted_username_id(),
-                'image': member.user.image.url,
-            } for member in query],
-            'roles': [{
-
-            }]
-        })
+        html = render_to_string(template_name='rooms/tooltips/mentionables-list.html', context=context)
 
         return html
     
@@ -569,8 +573,8 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.generate_backlogs()
 
     async def get_mentionables(self, mention, **kwargs):
-        username, username_id = await process_mention(mention)
-        html = await super().get_mentionables(self.group_chat, username, username_id)
+        alphanumeric, numeric = await process_mention(mention)
+        html = await super().get_mentionables(self.group_chat, alphanumeric, numeric, kind='group_chat')
         await self.send(text_data=json.dumps({
             'action': 'get_mentionables',
             'html': html,

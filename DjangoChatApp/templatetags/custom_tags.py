@@ -73,3 +73,11 @@ def get_member_or_none(user, chat):
 @register.filter(name='get_friendship_or_none')
 def get_friendship_or_none(user1, user2):
     return user1.friendships().intersection(user2.friendships()).first()
+
+
+@register.filter('backlog_mentions_user')
+def backlog_mentions_user(backlog, user):
+    mentioned = user in backlog.user_mentions.all() 
+    mentioned = mentioned or user.roles.all().intersection(backlog.role_mentions.all()).exists()
+    
+    return mentioned

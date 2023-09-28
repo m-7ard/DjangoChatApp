@@ -307,16 +307,19 @@ class EmoteMenuUtils {
     };
 };
 
-class MentionableObserver {
+class MentionableObserver extends TooltipUtils {
     constructor() {
+        super();
+        this.tooltipLayer = document.querySelector('.layer--tooltips');
+        this.ignorableElements = ['.mentionables-list', '[data-get-mentionables]'];
+        this.closeTooltip = this.closeMentionablesList;
         this.init();
     };
 
     init() {
         document.addEventListener('keydown', (event) => {
-            this.activeElement = document.activeElement;
-
-            if (this.activeElement.hasAttribute('data-get-mentionables')) {
+            if (document.activeElement.hasAttribute('data-get-mentionables')) {
+                this.activeElement = document.activeElement;
                 if ((event.code === 'Delete' || event.code === 'Backspace')) {
                     this.deleteHandler();
                 }
@@ -339,32 +342,21 @@ class MentionableObserver {
 
         document.addEventListener('focusin', (event) => {
             // certain browsers won't fire selectionchange on focus
-            this.activeElement = document.activeElement;
-
-            if (!this.activeElement.hasAttribute('data-get-mentionables')) {
+            if (!document.activeElement.hasAttribute('data-get-mentionables')) {
                 return;
             };
 
+            this.activeElement = document.activeElement;
             this.selectionHandler();
         })
     
-        document.addEventListener('selectionchange', () => {
+        document.addEventListener('selectionchange', (event) => {
+            if (!document.activeElement.hasAttribute('data-get-mentionables')) {
+                return;
+            };
+
             this.activeElement = document.activeElement;
-
-            if (!this.activeElement.hasAttribute('data-get-mentionables')) {
-                return;
-            };
-
             this.selectionHandler();
-        });
-        
-        window.addEventListener('mouseup', (event) => {
-            let ignorableElements = event.target.closest('[data-get-mentionables], [data-role="mentionables-list"]');
-            if (ignorableElements) {
-                return;
-            };
-
-            this.closeMentionablesList();
         });
     };
 
@@ -372,10 +364,13 @@ class MentionableObserver {
         if (!this.openMentionablesList) {
             return;
         };
-        
-        tooltipManager.deregisterActiveTooltip();
+
+        this.openMentionablesList.remove();
         this.openMentionablesList = undefined;
         this.activeMentionable = undefined;
+
+        window.removeEventListener('resize', this.adjustTooltip);
+        window.removeEventListener('mouseup', this.checkAndCloseTooltip);
     };
 
     arrowUpHandler = () => {
@@ -439,41 +434,7 @@ class MentionableObserver {
         this.closeMentionablesList();
     };
 
-    selectionHandler = () => {
-        this.closeMentionablesList();
-        this.selectionStart = this.activeElement.selectionStart;
-
-        let mention = getMention({
-            i: this.selectionStart,
-            input: this.activeElement.value
-        });
-
-        if (validateMention(mention)) {
-            this.getMentionables(mention);
-        };
-    };
-
-    buildMentionablesList = (html) => {
-        this.openMentionablesList = parseHTML(html);
-        tooltipManager.toggleTooltip({
-            trigger: this.activeElement,
-            tooltip: this.openMentionablesList,
-            reference: this.tooltipReference
-        });
-        console.log(this.openMentionablesList)
-
-        // to enable arrow navigation. Easier to handle enumerating them on frontend.
-        this.mentionablesNodes = this.openMentionablesList.querySelectorAll('.mentionables-list__mentionable');
-        this.mentionablesNodes?.forEach((mentionable, i) => mentionable.setAttribute('data-index', i));
-
-        this.activeMentionable = this.openMentionablesList.querySelector('.mentionables-list__mentionable--active');        
-        this.firstMentionable = this.mentionablesNodes[0];
-        this.lastMentionable = this.mentionablesNodes[this.mentionablesNodes.length - 1];
     
-        this.openMentionablesList.addEventListener('mouseover', (event) => this.mouseOverHandler(event));
-        this.openMentionablesList.addEventListener('mousedown', (event) => this.mouseDownHandler(event));
-    };
-
     mouseOverHandler = (event) =>  {
         let mentionable = event.target.closest('.mentionables-list__mentionable');
         if (!mentionable) {
@@ -487,7 +448,7 @@ class MentionableObserver {
         this.activeMentionable = mentionable;
     };
 
-    mouseDownHandler  = (event) => {
+    mouseDownHandler = (event) => {
         let mentionable = event.target.closest('.mentionables-list__mentionable');
         if (!mentionable) {
             return;
@@ -506,6 +467,40 @@ class MentionableObserver {
         this.closeMentionablesList();
     };
 
+    selectionHandler = () => {
+        this.closeMentionablesList();
+        this.selectionStart = this.activeElement.selectionStart;
+
+        let mention = getMention({
+            i: this.selectionStart,
+            input: this.activeElement.value
+        });
+
+        if (validateMention(mention)) {
+            this.getMentionables(mention);
+        };
+    };
+
+    buildMentionablesList = (html) => {
+        this.openMentionablesList = parseHTML(html);
+
+        // to enable arrow navigation. Easier to handle enumerating them on frontend.
+        this.mentionablesNodes = this.openMentionablesList.querySelectorAll('.mentionables-list__mentionable');
+        this.mentionablesNodes?.forEach((mentionable, i) => mentionable.setAttribute('data-index', i));
+
+        this.activeMentionable = this.openMentionablesList.querySelector('.mentionables-list__mentionable--active');        
+        this.firstMentionable = this.mentionablesNodes[0];
+        this.lastMentionable = this.mentionablesNodes[this.mentionablesNodes.length - 1];
+    
+        this.openMentionablesList.addEventListener('mouseover', (event) => this.mouseOverHandler(event));
+        this.openMentionablesList.addEventListener('mousedown', (event) => this.mouseDownHandler(event));
+        
+        this.tooltipLayer.append(this.openMentionablesList);
+        this.adjustTooltip();
+        window.addEventListener('resize', this.adjustTooltip);
+        window.addEventListener('mouseup', this.checkAndCloseTooltip);
+    };
+
     getMentionables = (mention) => {
         let referenceSelector = this.activeElement.dataset.reference;
         let reference = this.activeElement.closest(referenceSelector);
@@ -515,6 +510,11 @@ class MentionableObserver {
             'action': 'get_mentionables',
             'mention': mention,
         }));
+    };
+
+    
+    getAttributes = () => {
+        return {trigger: this.activeElement, tooltip: this.openMentionablesList, reference: this.tooltipReference};
     };
 };
 

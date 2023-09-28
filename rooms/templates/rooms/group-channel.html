@@ -4,6 +4,7 @@
 {% block extrahead %}
     {{ block.super }}
     {{ group_channel.pk|json_script:"group-channel-pk" }}
+    {{ group_channel.backlog_group.pk|json_script:"backlog-group-pk" }}
 {% endblock %}
 
 

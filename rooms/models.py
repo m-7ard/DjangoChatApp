@@ -1,5 +1,4 @@
 import re
-import json
 from itertools import chain
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -8,12 +7,11 @@ from sorl.thumbnail import ImageField, get_thumbnail
 from django.db import models
 from django.core.validators import RegexValidator
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from django.template.loader import render_to_string
+from django.template import Template, Context
 
 from users.models import CustomUser
 from utils import get_object_or_none
-
 
 channel_layer = get_channel_layer()
 
@@ -164,7 +162,7 @@ class BacklogGroup(models.Model):
     private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
     def belongs_to(self):
-        return getattr(self, self.kind)
+        return getattr(self, self.kind)        
 
 
 class Backlog(models.Model):
@@ -178,27 +176,51 @@ class Backlog(models.Model):
     kind = models.CharField(max_length=20, choices=KINDS)
     date_created = models.DateTimeField(auto_now_add=True)
     group = models.ForeignKey(BacklogGroup, on_delete=models.CASCADE, related_name='backlogs', null=True)
-    mentions = models.ManyToManyField(CustomUser, related_name='mentioned_in')
+    user_mentions = models.ManyToManyField(CustomUser, related_name='mentioned_in')
+    role_mentions = models.ManyToManyField('Role', related_name='mentioned_in')
 
     def timestamp(self):
         return self.date_created.strftime("%H:%M:%S")
     
     def __str__(self):
         return f'({self.pk}) | {self.kind}'
-
     
 
 class Message(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
+    rendered_content = models.CharField(max_length=5000)
     invites = models.JSONField(default=list)
 
-    def get_mentions(self):
+    def get_user_mentions(self):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)
     
+    def get_role_mentions(self):
+        return re.findall(r'(?<!\w)>>(\w+)(?!\w)', self.content)
+
     def get_invites(self):
         return re.findall(r'(?<!\w)DjangoChatApp/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?!\w)', self.content)
+
+    def process_content(self, users, roles):
+        processed_content = self.content
+
+        for user in users:
+            processed_content = re.sub(
+                rf'(?<!\w)>>{user.full_name()}(?!\w)', 
+                lambda match: render_to_string('rooms/elements/mentions/user-mention.html', {'backlog': self.backlog, 'user': user}), 
+                processed_content
+            )
+
+        for role in roles:
+            processed_content = re.sub(
+                rf'(?<!\w)>>{role.name}(?!\w)', 
+                lambda match: render_to_string('rooms/elements/mentions/role-mention.html', {'role': role}), 
+                self.content
+            )
+        
+        return processed_content
+
 
     def process_invites(self):
         invites = []
@@ -226,14 +248,25 @@ class Message(models.Model):
         return sorted(invites, key=lambda invite: self.content.find(invite['directory']))[-10:]
 
     def save(self, *args, **kwargs):
-        users = []
-        for full_name in self.get_mentions():
+        users = set()
+        for full_name in self.get_user_mentions():
             username, username_id = full_name.split('#')
             user = get_object_or_none(CustomUser, username=username, username_id=username_id)
             if user:
-                users.append(user)
-
-        self.backlog.mentions.set(users)
+                users.add(user)
+        
+        roles = set()
+        if self.backlog.group.kind == 'group_channel':
+            chat = self.backlog.group.group_channel.chat
+            for role_name in self.get_role_mentions():
+                role = chat.roles.filter(name=role_name).first()
+                if role:
+                    roles.add(role)
+        
+        
+        self.backlog.user_mentions.set(users)
+        self.backlog.role_mentions.set(roles)
+        self.rendered_content = self.process_content(users, roles)
         self.invites = [invite.split('/')[-1] for invite in set(self.get_invites())]
         super().save(*args, **kwargs)
 
@@ -275,9 +308,21 @@ class Log(models.Model):
 
 
 class Role(models.Model):
+    kind = (
+        ('member', 'Member'),
+        ('mod', 'Moderator'),
+        ('admin', 'Administrator')
+    )
+
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
-    memberships = models.ManyToManyField(GroupChatMembership, related_name='roles')
+    users = models.ManyToManyField(CustomUser, related_name='roles')
+    kind = models.CharField(max_length=20, choices=kind)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'chat'], name='unique_role_name')
+        ]
 
 
 def invite_default_expiry_date():

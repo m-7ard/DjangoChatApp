@@ -2,7 +2,6 @@ import json
 from urllib.parse import urlencode
 from pathlib import Path
 
-
 from django.shortcuts import render, redirect
 from django.apps import apps
 from django.http import JsonResponse, HttpResponse
@@ -10,14 +9,9 @@ from django.views.generic import TemplateView, View
 from django.urls import reverse
 from django.utils.html import escape
 
-
-from django.template import Template, RequestContext, Context
 from django.http import HttpResponse
-from django.forms import ModelForm
 from django.template.loader import render_to_string
 
-from users.models import Friendship, CustomUser
-from utils import get_object_or_none, dict_to_object
 
 class FrontpageView(TemplateView):
     template_name = 'core/frontpage.html'

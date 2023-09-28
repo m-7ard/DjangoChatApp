@@ -1,16 +1,16 @@
-<div class="backlog backlog--message {% if user in backlog.mentions.all %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+<div class="backlog backlog--message {% if backlog|backlog_mentions_user:user %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
     <div class="backlog__avatar">
         <div class="avatar avatar--small">
             <img src="{{ backlog.message.user.image.url }}" alt="">
         </div>
     </div>
-    <div class="backlog__username" data-command="get_tooltip" data-name="group-chat-user-profile-card" data-kwargs='{"group_chat_pk": {{ backlog.group.group_channel.chat.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
+    <div class="backlog__username" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"backlog_group_pk": {{ backlog.group.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
         {{ backlog.message.user.username }}
     </div>
     <div class="backlog__timestamp">
         {{ backlog.timestamp }}
     </div>
-    <div class="backlog__content" data-role="content">{{ backlog.message.content|convert_mentions }}</div>
+    <div class="backlog__content" data-role="content">{{ backlog.message.rendered_content|safe }}</div>
     <div class="backlog__invites" data-role="invites">
         {% for invite in backlog.message.process_invites %}
             {% if not invite.valid %}

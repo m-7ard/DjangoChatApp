@@ -4,6 +4,7 @@
 
 {% block extrahead %}
     {{ private_chat.pk|json_script:"private-chat-pk" }}
+    {{ backlog_group.pk|json_script:"backlog-group-pk" }}
 {% endblock %}
 
 {% block main-content %}
