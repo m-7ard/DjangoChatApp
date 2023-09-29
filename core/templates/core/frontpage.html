@@ -15,7 +15,7 @@
                 Contact
             </div>
             {% if not user.is_authenticated %}
-                <div class="frontpage__button frontpage__button--small" data-command="get-overlay" data-name="signin">
+                <div class="frontpage__button frontpage__button--small" data-command="get_overlay" data-name="signin">
                     Sign In
                 </div>
             {% else %}
@@ -56,10 +56,10 @@
         </div>
         <div class="frontpage__footer">
             {% if not user.is_authenticated %}
-                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get-overlay" data-name="signup">
+                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get_overlay" data-name="signup">
                     Signup
                 </div>
-                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get-overlay" data-name="signin">
+                <div class="frontpage__button frontpage__button--footer frontpage__button--large" data-command="get_overlay" data-name="signin">
                     Signin            
                 </div>
             {% else %}

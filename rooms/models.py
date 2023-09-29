@@ -1,4 +1,5 @@
 import re
+import html
 from itertools import chain
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -37,7 +38,6 @@ class GroupChat(Chat):
             super().save(*args, **kwargs)
             self.base_role = Role.objects.create(name='all', chat=self)
             owner_membership = GroupChatMembership.objects.create(user=self.owner, chat=self)
-            self.base_role.memberships.add(owner_membership)
             
             default_category = Category.objects.create(name='Text Channels', chat=self)
             default_channel = GroupChannel.objects.create(name='General', chat=self, category=default_category)
@@ -89,6 +89,7 @@ class GroupChatMembership(Membership):
             super().save(*args, **kwargs)
             for channel in self.chat.channels.all():
                 BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
+                self.chat.base_role.users.add(self.user)
         else:
             super().save(*args, **kwargs)
 
@@ -98,6 +99,9 @@ class GroupChatMembership(Membership):
         trackers = BacklogGroupTracker.objects.filter(user=self.user, backlog_group__pk__in=backlog_group_pks)
         trackers.delete()
         super().delete(*args, **kwargs)
+
+    def roles(self):
+        return self.user.roles.all().intersection(self.chat.roles.all())
 
 
 class PrivateChatMembership(Membership):
@@ -203,18 +207,18 @@ class Message(models.Model):
         return re.findall(r'(?<!\w)DjangoChatApp/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?!\w)', self.content)
 
     def process_content(self, users, roles):
-        processed_content = self.content
+        processed_content = html.escape(self.content)
 
         for user in users:
             processed_content = re.sub(
-                rf'(?<!\w)>>{user.full_name()}(?!\w)', 
+                rf'(?<!\w){html.escape(">>" + user.full_name())}(?!\w)', 
                 lambda match: render_to_string('rooms/elements/mentions/user-mention.html', {'backlog': self.backlog, 'user': user}), 
                 processed_content
             )
 
         for role in roles:
             processed_content = re.sub(
-                rf'(?<!\w)>>{role.name}(?!\w)', 
+                rf'(?<!\w){html.escape(">>" + role.name)}(?!\w)', 
                 lambda match: render_to_string('rooms/elements/mentions/role-mention.html', {'role': role}), 
                 self.content
             )
@@ -302,22 +306,35 @@ class Log(models.Model):
         creating = self._state.adding
 
         if creating:
-            self.backlog.mentions.set([self.user1, self.user2])
+            self.backlog.user_mentions.set([self.user1, self.user2])
 
         super().save(*args, **kwargs)
 
 
 class Role(models.Model):
-    kind = (
-        ('member', 'Member'),
-        ('mod', 'Moderator'),
-        ('admin', 'Administrator')
-    )
-
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
     users = models.ManyToManyField(CustomUser, related_name='roles')
-    kind = models.CharField(max_length=20, choices=kind)
+    color = models.CharField(max_length=7)
+
+    can_see_channels = models.ManyToManyField(GroupChannel, related_name='can_see_channel')
+    can_use_channels = models.ManyToManyField(GroupChannel, related_name='can_use_channel')
+    can_create_messages = models.BooleanField(default=True)
+    can_manage_messages = models.BooleanField(default=False)
+    can_react = models.BooleanField(default=True)
+    can_manage_channels = models.BooleanField(default=False)
+    can_manage_chat = models.BooleanField(default=False)
+    can_mention_all = models.BooleanField(default=True)
+    can_kick_members = models.BooleanField(default=False)
+    can_ban_members = models.BooleanField(default=False)
+    can_create_invites = models.BooleanField(default=True)
+    can_get_invites = models.BooleanField(default=True)
+    can_manage_invites = models.BooleanField(default=False)
+    can_manage_emotes = models.BooleanField(default=False)
+    can_manage_roles = models.BooleanField(default=False)
+
+    # gives user all permissions
+    admin = models.BooleanField(default=True)
 
     class Meta:
         constraints = [

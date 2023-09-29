@@ -36,6 +36,23 @@
                     {{ membership.joined }}
                 </div>
             </div>
+            <div>
+                <div class="profile__label">
+                    Roles
+                </div>
+                <div class="profile__roles">
+                    {% for role in membership.roles %}
+                        <div class="profile__role">
+                            <div class="profile__role-color" style="background-color: {{ role.color }};">
+
+                            </div>
+                            <div class="profile__role-name">
+                                {{ role.name }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

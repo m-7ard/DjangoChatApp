@@ -24,7 +24,9 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatLeaveView.as_view(), name='leave-group-chat'),
     path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),
     path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
+    path('group-chat/<int:group_chat_pk>/manage-roles', views.RoleManageView.as_view(), name='manage-roles'),
     
+    path('role/<int:pk>/delete/', views.RoleDeleteView.as_view(), name='delete-role'),
     path('backlog-group/<int:backlog_group_pk>/profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
     path('profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
     

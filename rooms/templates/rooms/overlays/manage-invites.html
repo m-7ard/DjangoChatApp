@@ -13,11 +13,6 @@
     </div>
     <div class="overlay__body">
         <div class="item-manager" id="emote-manager">
-            <div class="item-manager__item">
-                <div class="item-manager__button item-manager__button--add" data-command="get_overlay" data-name="create-invite" data-kwargs='{"group_chat_pk": "{{ group_chat.pk }}"}'>
-                    Create New Invite
-                </div>
-            </div>
             {% for invite in invites %}
                 <div class="item-manager__item" id="invite-{{ invite.pk }}">
                     <div class="item-manager__item-body">

@@ -17,7 +17,8 @@ from .models import (
     BacklogGroupTracker,
     Emote,
     Reaction,
-    Emoji
+    Emoji,
+    Log,
 )
 
 admin.site.register(GroupChat)
@@ -30,6 +31,7 @@ admin.site.register(Category)
 admin.site.register(Backlog)
 admin.site.register(BacklogGroup)
 admin.site.register(Message)
+admin.site.register(Log)
 admin.site.register(Invite)
 admin.site.register(BacklogGroupTracker)
 admin.site.register(Emote)

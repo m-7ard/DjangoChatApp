@@ -3,9 +3,9 @@
         <div class="profile__banner">
 
         </div>
-        <div class="profile__avatar" data-tooltip-close data-command="get_overlay" data-name="full-user-profile" data-kwargs='{"pk": {{ user.pk }}}'>
+        <div class="profile__avatar" data-tooltip-close data-command="get_overlay" data-name="full-user-profile" data-kwargs='{"pk": {{ profile_user.pk }}}'>
             <div class="avatar avatar--medium">
-                <img src="{{ user.image.url }}" alt="">
+                <img src="{{ profile_user.image.url }}" alt="">
             </div>
         </div>
     </div>
@@ -13,10 +13,10 @@
         <div class="profile__content">
             <div>
                 <div class="profile__username">
-                    {{ user.username }}
+                    {{ profile_user.username }}
                 </div>
                 <div class="profile__full-name">
-                    {{ user.full_name }}
+                    {{ profile_user.full_name }}
                 </div>
             </div>
             <div class="profile__divider"></div>
@@ -25,7 +25,7 @@
                     Bio
                 </div>
                 <div class="profile__value">
-                    {{ user.bio }}
+                    {{ profile_user.bio }}
                 </div>
             </div>
             <div>

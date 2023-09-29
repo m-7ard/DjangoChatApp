@@ -1,0 +1,64 @@
+<div class="overlay">
+    <div class="overlay__header">
+        <div class="overlay__title">
+            Manage Roles
+        </div>
+        <div class="overlay__close" data-command="close_overlay">
+            <div class="icon icon--small icon--hoverable">
+                <i class="material-symbols-outlined">
+                    close
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="overlay__body">
+        <div class="item-manager" id="role-manager">
+            <div class="item-manager__item">
+                <div class="item-manager__button item-manager__button--add" data-command="get_overlay" data-name="create-role" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                    Create New Role
+                </div>
+            </div>
+            {% for role in group_chat.roles.all %}
+                <div class="item-manager__item" id="role-{{ role.pk }}">
+                    <div class="item-manager__item-body">
+                        <div>
+                            <div class="item-manager__item-label">
+                                Role Name
+                            </div>
+                            <div class="item-manager__item-value" data-role="name">
+                                {{ role.name }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="item-manager__item-label">
+                                Member Count
+                            </div>
+                            <div class="item-manager__item-value">
+                                {{ role.users.count }} Members
+                            </div>
+                        </div>
+                        <div>
+                            <div class="item-manager__item-label">
+                                Color
+                            </div>
+                            <div class="item-manager__item-value" style="color: {{ role.color }};">
+                                {{ role.color }}
+                            </div>
+                        </div>
+                        <div class="item-manager__item-actions">
+                            <div class="item-manager__button item-manager__button--edit" data-command="get-overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
+                                Edit Role
+                            </div>
+                            <form action="{% url 'delete-role' pk=role.pk %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <button class="item-manager__button item-manager__button--delete">
+                                    Delete Role
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

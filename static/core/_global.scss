@@ -1976,7 +1976,7 @@ $red-theme-1: (
         display: grid;
         grid-template: auto auto / auto auto;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-end;
         gap: $space-small $space-medium; 
         width: 100%;
 
@@ -2295,10 +2295,6 @@ $red-theme-1: (
         @include flex-row($space-medium $space-large, $space-medium);
         background-color: map-get($grey-theme-1, dark-bg);
         justify-content: space-between;
-
-        box-shadow: $shadow-dimensions map-get($grey-theme-1, dark-bg);
-        z-index: 1;
-        position: relative;
     }
 
     &__body {
@@ -2312,10 +2308,6 @@ $red-theme-1: (
         background-color: map-get($grey-theme-1, neutral-bg);
         justify-content: space-between;
         align-items: center;
-
-        box-shadow: $shadow-dimensions map-get($grey-theme-1, dark-bg);
-        z-index: 1;
-        position: relative;
     }
 
     &__title {
@@ -2466,8 +2458,8 @@ $red-theme-1: (
         position: absolute;
         bottom: - $space-medium;
         left: - $space-small;
-        border-radius: $radius-medium;
-        border: 3px solid map-get($grey-theme-1, dark-bg);
+        border-radius: $radius-small;
+        border: 2px solid map-get($grey-theme-1, neutral-bg);
         overflow: hidden;
 
         [data-role="counter"] {
@@ -2479,7 +2471,7 @@ $red-theme-1: (
             font-size: $text-secondary-small;
             height: $text-secondary-small;
             min-width: $text-secondary-small;
-            padding: 1px 2px;
+            padding: 1px 1px;
             font-weight: bold;
         }
     }
@@ -2738,5 +2730,26 @@ $red-theme-1: (
             cursor: default;
             opacity: 50%;
         }
+    }
+
+    &__roles {
+        @include flex-row(0, $space-medium);
+        flex-wrap: wrap;
+    }
+
+    &__role {
+        @include flex-row($space-small, $space-small);
+        align-items: baseline;
+    }
+
+    &__role-color {
+        border-radius: 9999px;
+        height: $space-medium;
+        width: $space-medium;
+    }
+
+    &__role-name {
+        font-size: $text-secondary-medium;
+        color: map-get($grey-theme-1, light-fg);
     }
 }

@@ -27,6 +27,7 @@ from .models import (
     Emote,
     Emoji,
     BacklogGroup,
+    Role,
 )
 from . import forms
 from utils import get_object_or_none, process_mention
@@ -247,7 +248,7 @@ class GroupChatInviteManageView(ListView):
     def get_queryset(self):
         group_chat = self.kwargs['group_chat_pk']
         return self.model.objects.filter(group_chat=group_chat)
-    
+
 
 class GetInviteView(TemplateView):
     template_name = 'rooms/overlays/get-invite.html'
@@ -475,12 +476,11 @@ class UserProfileCardView(View):
             return render(request, 'rooms/tooltips/user-profile-card.html', {'profile_user': user})
 
         if backlog_group.kind == 'group_channel':
-            membership = GroupChatMembership.objects.get(user=user, chat=backlog_group.group_channel.chat)
-            return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
+            membership = get_object_or_none(GroupChatMembership, user=user, chat=backlog_group.group_channel.chat)
+            if membership:
+                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
 
         return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
-
-        
         
 
 class GetOrCreatePrivateChat(FormView):
@@ -520,7 +520,6 @@ class GetMentionablesView(TemplateView):
             if numeric:
                 context['members'] = filter(lambda member: numeric in member.user.formatted_username_id(), context['members'])
             context['roles'] = chat.roles.filter(name__icontains=alphanumeric) if alphanumeric else chat.roles.all()[:10]
-            print(context['members'])
         elif backlog_group.kind == 'private_chat':
             chat = backlog_group.private_chat
             context['members'] = chat.memberships.filter(
@@ -529,4 +528,16 @@ class GetMentionablesView(TemplateView):
             )[:10] if alphanumeric else chat.memberships.all()[:10]
         
         return context
-        
+
+
+class RoleManageView(TemplateView):
+    template_name = 'rooms/overlays/manage-roles.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_chat'] = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        return context
+
+
+class RoleDeleteView(DeleteView):
+    model = Role
