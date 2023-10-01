@@ -141,6 +141,16 @@ $green-theme-1: (
     "dark-fg": $light-dark,
 );
 
+$metal-theme-1: (
+    "dark-bg": #1D404E,
+    "neutral-bg": #1A4355,
+    "light-bg": #1E5168,
+
+    "light-fg": $light-light,
+    "neutral-fg": $light-neutral,
+    "dark-fg": $light-dark,
+);
+
 $red-theme-1: (
     "dark-bg": #8F3327,
     "neutral-bg": #A63623,
@@ -739,70 +749,6 @@ $red-theme-1: (
                 color: map-get($grey-theme-1, light-fg);
                 border-color: map-get($grey-theme-1, light-fg);
             }
-        }
-    }
-}
-
-.field {
-    @include flex-column(0, $space-small);
-
-    &:has(.field__error) .field__name  {
-        color: $vermillion;
-    }
-
-    &__row {
-        @include flex-row(0, $space-small);
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    &__error {
-        font-size: $text-secondary-small;
-        color: $vermillion;
-    }
-
-	&__name {
-		font-weight: bold;
-		font-size: $text-secondary-medium;
-	}
-
-    &__label {
-		font-size: $text-primary-small;
-        font-weight: bold;
-	}
-
-    &__checkbox {
-        position: relative;
-        width: fit-content;
-        border-radius: 4px;
-        transition: background-color 0.2s, color 0.2s;
-        overflow: hidden;
-
-        &:has(:not(:checked)) {
-            background-color: transparent;
-            color: transparent;
-            border: 2px solid map-get($green-theme-1, dark-bg);
-        }
-
-        &:hover {
-            border: 2px solid map-get($green-theme-1, neutral-bg);
-            color: map-get($green-theme-1, white--NEUTRAL);
-        }
-
-        &:has(:checked) {
-            background-color: map-get($green-theme-1, light-bg);
-            color: map-get($green-theme-1, light-fg);
-            border: 2px solid map-get($green-theme-1, light-bg);
-        }
-
-        input {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            opacity: 0;
-            cursor: pointer;
         }
     }
 }
@@ -1975,8 +1921,8 @@ $red-theme-1: (
     &__item-body {
         display: grid;
         grid-template: auto auto / auto auto;
+        align-items: flex-start;
         justify-content: space-between;
-        align-items: flex-end;
         gap: $space-small $space-medium; 
         width: 100%;
 
@@ -1997,8 +1943,11 @@ $red-theme-1: (
     }
 
     &__item-actions {
-        @include flex-row(0, $space-medium);
+        @include flex-row(0, $space-small);
         flex-wrap: wrap;
+        align-self: flex-end;
+        align-content: flex-start;
+        flex-shrink: 1;
     }
 
     &__button {
@@ -2121,6 +2070,56 @@ $red-theme-1: (
         }
     }
 
+    &__tri-switch {
+        @include flex-row($space-small, $space-small);
+        background-color: map-get($grey-theme-1, dark-bg);
+        border-radius: $radius-medium;
+    }
+
+    &__tri-switch-tile {
+        @include input-replacement;
+        @include base-button;
+        @include default-color-transition;
+        border-radius: $radius-medium;
+        padding: 0 $space-small;
+
+        &--true {
+            @include color-shortcut($green-theme-1, $fg: dark-fg);
+
+            &:hover {
+                @include color-shortcut($green-theme-1, $bg: neutral-bg, $fg: light-fg);
+            }
+
+            &:has(:checked) {
+                @include color-shortcut($green-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+        
+        &--false {
+            @include color-shortcut($red-theme-1, $fg: dark-fg);
+
+            &:hover {
+                @include color-shortcut($red-theme-1, $bg: neutral-bg, $fg: light-fg);
+            }
+
+            &:has(:checked) {
+                @include color-shortcut($red-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &--neutral {
+            @include color-shortcut($metal-theme-1, $fg: dark-fg);
+
+            &:hover {
+                @include color-shortcut($metal-theme-1, $bg: neutral-bg, $fg: light-fg);
+            }
+
+            &:has(:checked) {
+                @include color-shortcut($metal-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+    }
+
     &__slider {
         $padding: 2px;
         $height: 1rem;
@@ -2229,6 +2228,64 @@ $red-theme-1: (
             color: map-get($grey-theme-1, light-fg);
         }
     }
+
+    &__multiselect {
+        @include flex-row($space-medium, $space-medium);
+        justify-content: space-between;
+        background-color: map-get($grey-theme-1, dark-bg);
+        flex-wrap: wrap;
+        max-height: 4.25rem;
+        overflow: auto;
+        border-radius: $space-small;
+    }
+
+    &__multiselect-option {
+        @include base-button;
+        @include small-button;
+        @include input-replacement;
+        border-radius: 9999px;
+
+        &:not(:has(:checked)) {
+            color: map-get($grey-theme-1, dark-fg);
+            background-color: map-get($grey-theme-1, light-bg);
+            
+            .form__multiselect-checkbox {
+                background-color: map-get($grey-theme-1, dark-fg);
+            }
+        }
+
+        &:hover {
+            color: map-get($green-theme-1, light-fg);
+            background-color: map-get($green-theme-1, dark-bg); 
+
+            .form__multiselect-checkbox {
+                background-color: map-get($grey-theme-1, neutral-fg);
+            }
+        }
+        
+        &:has(:checked) {
+            color: map-get($green-theme-1, light-fg);
+            background-color: map-get($green-theme-1, light-bg);
+
+            .form__multiselect-checkbox {
+                background-color: map-get($grey-theme-1, light-fg);
+            }
+        }
+    }
+
+    &__multiselect-checkbox {
+        padding: $space-small;
+        border-radius: 9999px;
+    }
+
+    &__color-picker {
+        @include flex-row(0, $space-medium);
+        
+        [data-role="color"] {
+            max-width: $space-medium * 2;
+            flex-grow: 1;
+        }
+    }
 }
 
 .image-input {
@@ -2300,7 +2357,7 @@ $red-theme-1: (
     &__body {
         @include flex-column($space-large, $space-medium);
         background-color: map-get($grey-theme-1, light-bg);
-        overflow: hidden;
+        overflow: auto;
     }
 
     &__footer {

@@ -37,14 +37,6 @@
                                 {{ role.users.count }} Members
                             </div>
                         </div>
-                        <div>
-                            <div class="item-manager__item-label">
-                                Color
-                            </div>
-                            <div class="item-manager__item-value" style="color: {{ role.color }};">
-                                {{ role.color }}
-                            </div>
-                        </div>
                         <div class="item-manager__item-actions">
                             <div class="item-manager__button item-manager__button--edit" data-command="get-overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
                                 Edit Role

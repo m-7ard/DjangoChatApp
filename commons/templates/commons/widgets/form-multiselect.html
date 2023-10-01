@@ -1,0 +1,9 @@
+<div class="form__multiselect">
+    {% for value, label in widget.attrs.choices %}
+        <div class="form__multiselect-option">
+            <div class="form__multiselect-checkbox"></div>
+            {{ label }}
+            <input type="checkbox" name="{{ widget.name }}" value="{{ value }}" {% if value in widget.attrs.initial %} checked {% endif %}>
+        </div>
+    {% endfor %}
+</div>

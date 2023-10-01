@@ -1,0 +1,27 @@
+<div class="form__tri-switch right">
+    <div class="form__tri-switch-tile form__tri-switch-tile--true">
+        <div class="icon icon--tiny">
+            <i class="material-symbols-outlined">
+                check
+            </i>
+        </div>
+        <input type="radio" name="{{ widget.name }}" {% if widget.value == "1" %} checked {% endif %}>
+    </div>
+    <div class="form__tri-switch-tile form__tri-switch-tile--false">
+        <div class="icon icon--tiny">
+            <i class="material-symbols-outlined">
+                close
+            </i>
+        </div>
+        <input type="radio" name="{{ widget.name }}" {% if widget.value == "-1" %} checked {% endif %}>
+    </div>
+    <div class="form__tri-switch-tile form__tri-switch-tile--neutral">
+        <div class="icon icon--tiny">
+            <i class="material-symbols-outlined">
+                remove
+            </i>
+        </div>
+        <input type="radio" name="{{ widget.name }}" {% if widget.value == "0" %} checked {% endif %}>
+    </div>
+
+</div>

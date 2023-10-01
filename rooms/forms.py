@@ -5,7 +5,7 @@ from django import forms
 from django.core.validators import RegexValidator
 
 from commons import widgets
-from .models import GroupChannel, GroupChat, Category, Emote, Invite
+from .models import GroupChannel, GroupChat, Category, Emote, Invite, Role
 from users.models import CustomUser
 from utils import get_object_or_none
 
@@ -102,3 +102,45 @@ class EmoteUpdateForm(forms.ModelForm):
 
 class GroupChatLeaveForm(forms.Form):
     confirm = forms.BooleanField(required=True, label='Are you sure you wish to leave?', widget=widgets.FormSlider())
+
+
+class RoleCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormInput())
+    color = forms.CharField(widget=widgets.FormInput())
+    can_create_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_react = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_channels = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_chat = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_mention_all = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_kick_members = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_ban_members = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_create_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_get_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_emotes = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_see_channels = forms.MultipleChoiceField(widget=widgets.FormMutliselect())
+    can_use_channels = forms.MultipleChoiceField(widget=widgets.FormMutliselect())
+
+    class Meta:
+        fields = [
+            "name",
+            "color",
+            "can_see_channels",
+            "can_use_channels",
+            "can_create_messages",
+            "can_manage_messages",
+            "can_react",
+            "can_manage_channels",
+            "can_manage_chat",
+            "can_mention_all",
+            "can_kick_members",
+            "can_ban_members",
+            "can_create_invites",
+            "can_get_invites",
+            "can_manage_invites",
+            "can_manage_emotes",
+            "can_manage_roles"
+        ]
+        model = Role

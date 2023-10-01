@@ -54,9 +54,9 @@
             </div>
             <div class="overlay__footer">
                 {% if form.fields %}
-                    <div class="form__reset">
+                    <button class="form__reset" type="reset">
                         Reset
-                    </div>
+                    </button>
                 {% endif %}
                 <button class="overlay__functional-button overlay__functional-button--{{ form.type }}" type="submit">
                     {{ form.title }}

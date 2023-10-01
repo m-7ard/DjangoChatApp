@@ -1,0 +1,15 @@
+<div class="user" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "user_pk": {{ membership.user.pk }}}' data-positioning='{"top": "0px", "right": "100%"}'>
+    <div class="user__avatar">
+        <div class="avatar avatar--small">
+            <img src="" alt="">
+        </div>
+    </div>
+    <div class="user__body">
+        <div class="user__title">
+            {% firstof membership.nickname membership.user.username %}
+        </div>
+        <div class="user__subtitle">
+            {{ membership.user.status }}
+        </div>
+    </div>
+</div>

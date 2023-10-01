@@ -38,16 +38,6 @@ class FormNumberInput(forms.NumberInput):
             return formats.localize_input(value)
         
         return str(value)
-
-
-class FormSelect(forms.Select):
-    template_name = "commons/widgets/form-select.html"
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context["field"] = self.field
-        
-        return context
     
 
 class FormSlider(forms.CheckboxInput):
@@ -98,3 +88,12 @@ class FormImageInput(forms.FileInput):
 
 class FormSelect(forms.Select):
     template_name = "commons/widgets/form-select.html"
+
+
+class FormTriStateSwitch(forms.NumberInput):
+    template_name = "commons/widgets/form-tri-state-switch.html"
+    horizontal = True
+
+
+class FormMutliselect(forms.SelectMultiple):
+    template_name = 'commons/widgets/form-multiselect.html'

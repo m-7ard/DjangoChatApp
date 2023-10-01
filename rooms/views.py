@@ -471,18 +471,26 @@ class UserProfileCardView(View):
         if not user:
             return
         
-        backlog_group = get_object_or_none(BacklogGroup, pk=kwargs.get('backlog_group_pk'))
-        if not backlog_group:
-            return render(request, 'rooms/tooltips/user-profile-card.html', {'profile_user': user})
+        if kwargs.get('backlog_group_pk'):
+            backlog_group = get_object_or_none(BacklogGroup, pk=kwargs.get('backlog_group_pk'))
+            if backlog_group:
+                return self.get_profile_from_backlog_group(request, backlog_group, user)
+        
+        if kwargs.get('group_chat_pk'):
+            group_chat = get_object_or_none(GroupChat, pk=kwargs.get('group_chat_pk'))
+            membership = group_chat.memberships.filter(user=user).first()
+            if group_chat and membership:
+                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
 
+        return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
+
+    def get_profile_from_backlog_group(self, request, backlog_group, user):
         if backlog_group.kind == 'group_channel':
             membership = get_object_or_none(GroupChatMembership, user=user, chat=backlog_group.group_channel.chat)
             if membership:
                 return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
 
-        return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
         
-
 class GetOrCreatePrivateChat(FormView):
     form_class = forms.VerifyUser
 
@@ -541,3 +549,49 @@ class RoleManageView(TemplateView):
 
 class RoleDeleteView(DeleteView):
     model = Role
+
+
+class RoleCreateView(CreateView):
+    template_name = 'commons/forms/compact-dynamic-form.html'
+    form_class = forms.RoleCreateForm
+    model = Role
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=self.form_class)
+        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        
+        form.fields['can_see_channels'].widget.attrs['choices'] = (
+            (channel.pk, channel.name) for channel in group_chat.channels.all()
+        )
+        form.fields['can_see_channels'].widget.attrs['initial'] = group_chat.channels.values_list('pk', flat=True)
+
+        form.fields['can_use_channels'].widget.attrs['choices'] = (
+            (channel.pk, channel.name) for channel in group_chat.channels.all()
+        )
+        form.fields['can_use_channels'].widget.attrs['initial'] = group_chat.channels.values_list('pk', flat=True)
+        
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Role',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'on_response': 'createRole',
+            'type': 'create',
+        }
+        return context
+    
+    def form_valid(self, form):
+        pass
+
+
+    """
+    Mess around with item manager colors(?)
+    finish role create view
+    implement permission checking
+    check out a js package for color picking(?)
+    
+    
+    """

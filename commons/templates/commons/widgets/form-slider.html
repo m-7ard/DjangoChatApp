@@ -1,4 +1,4 @@
 <div class="form__slider">
-    <div class="form-slider__marker" data-role="marker"></div>
-    <input type="checkbox" name="{{ widget.name }}">
+    <div data-role="marker"></div>
+    <input type="checkbox" name="{{ widget.name }}" {% if widget.attrs.checked %} checked {% endif %}>
 </div>

@@ -312,6 +312,11 @@ class Log(models.Model):
 
 
 class Role(models.Model):
+    CHOICES = (
+        (1, True),
+        (0, None),
+        (-1, False),
+    )
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
     users = models.ManyToManyField(CustomUser, related_name='roles')
@@ -319,22 +324,22 @@ class Role(models.Model):
 
     can_see_channels = models.ManyToManyField(GroupChannel, related_name='can_see_channel')
     can_use_channels = models.ManyToManyField(GroupChannel, related_name='can_use_channel')
-    can_create_messages = models.BooleanField(default=True)
-    can_manage_messages = models.BooleanField(default=False)
-    can_react = models.BooleanField(default=True)
-    can_manage_channels = models.BooleanField(default=False)
-    can_manage_chat = models.BooleanField(default=False)
-    can_mention_all = models.BooleanField(default=True)
-    can_kick_members = models.BooleanField(default=False)
-    can_ban_members = models.BooleanField(default=False)
-    can_create_invites = models.BooleanField(default=True)
-    can_get_invites = models.BooleanField(default=True)
-    can_manage_invites = models.BooleanField(default=False)
-    can_manage_emotes = models.BooleanField(default=False)
-    can_manage_roles = models.BooleanField(default=False)
+    can_create_messages = models.IntegerField(default=1, choices=CHOICES)
+    can_manage_messages = models.IntegerField(default=-1, choices=CHOICES)
+    can_react = models.IntegerField(default=1, choices=CHOICES)
+    can_manage_channels = models.IntegerField(default=-1, choices=CHOICES)
+    can_manage_chat = models.IntegerField(default=-1, choices=CHOICES)
+    can_mention_all = models.IntegerField(default=1, choices=CHOICES)
+    can_kick_members = models.IntegerField(default=-1, choices=CHOICES)
+    can_ban_members = models.IntegerField(default=-1, choices=CHOICES)
+    can_create_invites = models.IntegerField(default=1, choices=CHOICES)
+    can_get_invites = models.IntegerField(default=1, choices=CHOICES)
+    can_manage_invites = models.IntegerField(default=-1, choices=CHOICES)
+    can_manage_emotes = models.IntegerField(default=-1, choices=CHOICES)
+    can_manage_roles = models.IntegerField(default=-1, choices=CHOICES)
 
     # gives user all permissions
-    admin = models.BooleanField(default=True)
+    admin = models.IntegerField(default=-1, choices=CHOICES)
 
     class Meta:
         constraints = [
