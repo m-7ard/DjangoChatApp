@@ -433,7 +433,6 @@ class MentionableObserver extends TooltipUtils {
         ); 
         this.closeMentionablesList();
     };
-
     
     mouseOverHandler = (event) =>  {
         let mentionable = event.target.closest('.mentionables-list__mentionable');
@@ -576,6 +575,7 @@ class SelectManager extends TooltipUtils {
         this.deregisterActiveSelect();
     }
 }
+
 
 const mentionableObserver = new MentionableObserver();
 const formSubmitListener = new FormSubmitListener();

@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Any, Dict, Optional
 from pathlib import Path
 from datetime import datetime, timezone
+from django.forms.models import BaseModelForm
 
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, FormView, DeleteView, View, ListView
 from django.urls import reverse, reverse_lazy
@@ -560,14 +561,12 @@ class RoleCreateView(CreateView):
         form = super().get_form(form_class=self.form_class)
         group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
         
-        form.fields['can_see_channels'].widget.attrs['choices'] = (
-            (channel.pk, channel.name) for channel in group_chat.channels.all()
-        )
+        form.fields['can_see_channels'].queryset = group_chat.channels.all()
+        form.fields['can_see_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
         form.fields['can_see_channels'].widget.attrs['initial'] = group_chat.channels.values_list('pk', flat=True)
 
-        form.fields['can_use_channels'].widget.attrs['choices'] = (
-            (channel.pk, channel.name) for channel in group_chat.channels.all()
-        )
+        form.fields['can_use_channels'].queryset = group_chat.channels.all()
+        form.fields['can_use_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
         form.fields['can_use_channels'].widget.attrs['initial'] = group_chat.channels.values_list('pk', flat=True)
         
         return form
@@ -582,16 +581,23 @@ class RoleCreateView(CreateView):
             'type': 'create',
         }
         return context
+
+    def post(self, request, *args, **kwargs):
+        pass
     
     def form_valid(self, form):
-        pass
+        role = form.save(commit=False)
+        role.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        form.save()
 
+        return JsonResponse({'status': 200, 'handler': 'createRole'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
     """
-    Mess around with item manager colors(?)
     finish role create view
     implement permission checking
-    check out a js package for color picking(?)
     
     
     """

@@ -106,7 +106,7 @@ class GroupChatLeaveForm(forms.Form):
 
 class RoleCreateForm(forms.ModelForm):
     name = forms.CharField(widget=widgets.FormInput())
-    color = forms.CharField(widget=widgets.FormInput())
+    color = forms.CharField(widget=widgets.FormColorPicker())
     can_create_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_react = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
@@ -120,8 +120,8 @@ class RoleCreateForm(forms.ModelForm):
     can_manage_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_emotes = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
-    can_see_channels = forms.MultipleChoiceField(widget=widgets.FormMutliselect())
-    can_use_channels = forms.MultipleChoiceField(widget=widgets.FormMutliselect())
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [

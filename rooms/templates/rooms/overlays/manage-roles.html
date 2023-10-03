@@ -19,37 +19,7 @@
                 </div>
             </div>
             {% for role in group_chat.roles.all %}
-                <div class="item-manager__item" id="role-{{ role.pk }}">
-                    <div class="item-manager__item-body">
-                        <div>
-                            <div class="item-manager__item-label">
-                                Role Name
-                            </div>
-                            <div class="item-manager__item-value" data-role="name">
-                                {{ role.name }}
-                            </div>
-                        </div>
-                        <div>
-                            <div class="item-manager__item-label">
-                                Member Count
-                            </div>
-                            <div class="item-manager__item-value">
-                                {{ role.users.count }} Members
-                            </div>
-                        </div>
-                        <div class="item-manager__item-actions">
-                            <div class="item-manager__button item-manager__button--edit" data-command="get-overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
-                                Edit Role
-                            </div>
-                            <form action="{% url 'delete-role' pk=role.pk %}" method="POST" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <button class="item-manager__button item-manager__button--delete">
-                                    Delete Role
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                {% include "../elements/manager-items/role-manager-item.html" %}
             {% endfor %}
         </div>
     </div>

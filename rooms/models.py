@@ -30,6 +30,7 @@ class GroupChat(Chat):
     image = models.ImageField(max_length=500, blank=True, default='1213.png')
     public = models.BooleanField(default=False)
     base_role = models.OneToOneField('Role', on_delete=models.RESTRICT, related_name='+', null=True, blank=True)
+    role_order = models.JSONField(default=list)
 
     def save(self, *args, **kwargs):
         creating = self._state.adding
@@ -320,8 +321,12 @@ class Role(models.Model):
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
     users = models.ManyToManyField(CustomUser, related_name='roles')
-    color = models.CharField(max_length=7)
-
+    color = models.CharField(max_length=7, validators=[RegexValidator(
+            regex=r'#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$',
+            message='Please enter a valid hex color code.',
+            code='invalid_chars'
+        ),
+    ])
     can_see_channels = models.ManyToManyField(GroupChannel, related_name='can_see_channel')
     can_use_channels = models.ManyToManyField(GroupChannel, related_name='can_use_channel')
     can_create_messages = models.IntegerField(default=1, choices=CHOICES)
