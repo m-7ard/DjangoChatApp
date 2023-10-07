@@ -383,6 +383,7 @@ $red-theme-1: (
 	display: flex;
 	align-items: center;
 	justify-content: center;
+    overflow: hidden;
 
 	box-sizing: border-box;
 	user-select: none;
@@ -1900,7 +1901,7 @@ $red-theme-1: (
 
     &__item-body {
         display: grid;
-        grid-template: auto auto / auto auto;
+        grid-template: auto / minmax(auto, 1fr) auto;
         align-items: flex-start;
         justify-content: space-between;
         gap: $space-medium $space-medium; 
@@ -1919,7 +1920,6 @@ $red-theme-1: (
 
     &__item-value {
         font-size: $text-secondary-medium;
-        font-weight: bold;
         color: map-get($grey-theme-1, light-fg);
     }
 
@@ -1929,7 +1929,7 @@ $red-theme-1: (
         align-self: flex-end;
         align-content: flex-start;
         flex-shrink: 1;
-        grid-column: 2 / 3;
+        grid-column: 1 / -1;
     }
 
     &__button {
@@ -2052,18 +2052,18 @@ $red-theme-1: (
         }
     }
 
-    &__tri-switch {
+    &__switch {
         @include flex-row($space-small, $space-small);
         background-color: map-get($grey-theme-1, dark-bg);
         border-radius: $radius-medium;
     }
 
-    &__tri-switch-tile {
+    &__switch-tile {
         @include input-replacement;
         @include base-button;
         @include default-color-transition;
         border-radius: $radius-medium;
-        padding: 0 $space-small;
+        padding: $space-small;
 
         &--true {
             @include color-shortcut($green-theme-1, $fg: dark-fg);
@@ -2213,7 +2213,6 @@ $red-theme-1: (
 
     &__multiselect {
         @include flex-row($space-medium, $space-medium);
-        justify-content: space-between;
         background-color: map-get($grey-theme-1, dark-bg);
         flex-wrap: wrap;
         max-height: 4.25rem;

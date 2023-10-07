@@ -42,6 +42,8 @@ class GroupChat(Chat):
             
             default_category = Category.objects.create(name='Text Channels', chat=self)
             default_channel = GroupChannel.objects.create(name='General', chat=self, category=default_category)
+            self.base_role.can_see_channels.add(default_channel)
+            self.base_role.can_use_channels.add(default_channel)
 
         super().save(*args, **kwargs)
 
@@ -77,12 +79,6 @@ class GroupChatMembership(Membership):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
     nickname = models.CharField(max_length=20, blank=True)
 
-    def display_name(self):
-        return self.nickname or self.user.username
-    
-    def joined(self):
-        return self.date_created.strftime("%d %B %Y")
-
     def save(self, *args, **kwargs):
         creating = self._state.adding
 
@@ -90,9 +86,51 @@ class GroupChatMembership(Membership):
             super().save(*args, **kwargs)
             for channel in self.chat.channels.all():
                 BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
-                self.chat.base_role.users.add(self.user)
+            
+            self.chat.base_role.members.add(self)
         else:
             super().save(*args, **kwargs)
+
+    def display_color(self):
+        roles_by_importance = sorted(
+            self.roles.all(), 
+            key=lambda role: role.pk in self.chat.role_order and self.chat.role_order.index(role.pk)
+        )
+
+        return roles_by_importance[0].color
+    
+    def is_owner(self):
+        return self.user == self.chat.owner
+
+    def visible_channels(self):
+        if self.is_owner():
+            return self.chat.channels.values_list('pk', flat=True)
+        
+        return self.roles.values_list('can_see_channels', flat=True)
+
+    def has_perm(self, perm_name):
+        roles_by_importance = sorted(
+            self.roles.all(), 
+            key=lambda role: role.pk in self.chat.role_order and self.chat.role_order.index(role.pk)
+        )
+
+        if self.is_owner():
+            return True
+        
+        for role in roles_by_importance:
+            if role.admin:
+                return True
+
+        for role in roles_by_importance:
+            perm_value = role.get_perm_value(perm_name)
+            if perm_value is not None:
+                return perm_value
+
+    def display_name(self):
+        return self.nickname or self.user.username
+    
+    def joined(self):
+        return self.date_created.strftime("%d %B %Y")
 
     def delete(self, *args, **kwargs):
         channels = self.chat.channels.all()
@@ -101,17 +139,27 @@ class GroupChatMembership(Membership):
         trackers.delete()
         super().delete(*args, **kwargs)
 
-    def roles(self):
-        return self.user.roles.all().intersection(self.chat.roles.all())
-
 
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
     active = models.BooleanField(default=False)
 
+    def display_color(self):
+        return None
+    
+    def display_name(self):
+        return self.user.username
+
     def other_party(self):
         return self.chat.memberships.all().exclude(user=self.user).first()
+    
+    @classmethod
+    def has_perm(cls, perm_name):
+        return perm_name in [
+            'can_create_messages',
+            'can_react',
+        ]
     
     def activate(self):
         previous_state = self.active
@@ -149,6 +197,9 @@ class GroupChannel(models.Model):
             BacklogGroup.objects.create(kind='group_channel', group_channel=self)
             for membership in self.chat.memberships.all():
                 BacklogGroupTracker.objects.create(user=membership.user, backlog_group=self.backlog_group)
+            
+            self.chat.base_role.can_see_channels.add(self)
+            self.chat.base_role.can_use_channels.add(self)
         else:
             super().save(*args, **kwargs)
     
@@ -167,7 +218,7 @@ class BacklogGroup(models.Model):
     private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
     def belongs_to(self):
-        return getattr(self, self.kind)        
+        return getattr(self, self.kind)                
 
 
 class Backlog(models.Model):
@@ -318,10 +369,11 @@ class Role(models.Model):
         (0, None),
         (-1, False),
     )
+
     name = models.CharField(max_length=20)
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='roles')
-    users = models.ManyToManyField(CustomUser, related_name='roles')
-    color = models.CharField(max_length=7, validators=[RegexValidator(
+    members = models.ManyToManyField(GroupChatMembership, related_name='roles')
+    color = models.CharField(max_length=7, default='#DBD6CC', validators=[RegexValidator(
             regex=r'#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$',
             message='Please enter a valid hex color code.',
             code='invalid_chars'
@@ -329,6 +381,8 @@ class Role(models.Model):
     ])
     can_see_channels = models.ManyToManyField(GroupChannel, related_name='can_see_channel')
     can_use_channels = models.ManyToManyField(GroupChannel, related_name='can_use_channel')
+    # can_see_category ...
+    # can_use_category ...
     can_create_messages = models.IntegerField(default=1, choices=CHOICES)
     can_manage_messages = models.IntegerField(default=-1, choices=CHOICES)
     can_react = models.IntegerField(default=1, choices=CHOICES)
@@ -344,7 +398,30 @@ class Role(models.Model):
     can_manage_roles = models.IntegerField(default=-1, choices=CHOICES)
 
     # gives user all permissions
-    admin = models.IntegerField(default=-1, choices=CHOICES)
+    admin = models.BooleanField(default=False)
+
+    def get_perm_value(self, perm_name):
+        raw_value = getattr(self, perm_name)
+        if raw_value == -1:
+            return False
+        elif raw_value == 0:
+            return None
+        elif raw_value == 1:
+            return True
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        
+        if creating:
+            super().save(*args, **kwargs)
+            self.chat.role_order.append(self.pk)
+            self.chat.save()
+        else:
+            super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self in self.chat.role_order and self.chat.role_order.remove(self.pk)
+        super().delete(*args, **kwargs)
 
     class Meta:
         constraints = [
@@ -375,6 +452,9 @@ class Invite(models.Model):
     one_time = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True)
+
+    def full_link(self):
+        return f'DjangoChatApp/{self.directory}'
 
     def is_expired(self):
         return self.expiry_date < datetime.now(timezone.utc)
@@ -426,6 +506,12 @@ class Emote(models.Model):
             self.image = get_thumbnail(self.image, '128x128', quality=99, format='PNG').url
 
         super().save(*args, **kwargs)
+
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'chat'], name='unique_emote_name')
+        ]
 
 
 class Emoji(models.Model):

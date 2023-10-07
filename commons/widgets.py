@@ -94,6 +94,9 @@ class FormTriStateSwitch(forms.NumberInput):
     template_name = "commons/widgets/form-tri-state-switch.html"
     horizontal = True
 
+class FormBiStateSwitch(forms.NumberInput):
+    template_name = "commons/widgets/form-bi-state-switch.html"
+    horizontal = True
 
 class FormMutliselect(forms.SelectMultiple):
     template_name = 'commons/widgets/form-multiselect.html'

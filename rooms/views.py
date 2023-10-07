@@ -85,7 +85,11 @@ class GroupChatDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['memberships'] = self.object.memberships.all().select_related('user')
+        memberships = self.object.memberships.all().select_related('user')
+        context['memberships'] = memberships
+        user_membership = memberships.get(user=self.request.user)
+        context['context_member'] = user_membership
+        context['visible_channels'] = user_membership.visible_channels()
         return context
 
 
@@ -134,7 +138,11 @@ class GroupChannelDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group_chat'] = self.object.chat
-        context['memberships'] = self.object.chat.memberships.all().select_related('user')
+        memberships = self.object.chat.memberships.all().select_related('user')
+        context['memberships'] = memberships
+        user_membership = memberships.get(user=self.request.user)
+        context['context_member'] = user_membership
+        context['visible_channels'] = user_membership.visible_channels()
         return context
 
 
@@ -264,7 +272,7 @@ class GetInviteView(TemplateView):
         return self.render_to_response(context)
 
 
-class InviteCreateView(FormView):
+class InviteCreateView(CreateView):
     form_class = forms.InviteForm
     template_name = 'commons/forms/compact-dynamic-form.html'
 
@@ -286,12 +294,14 @@ class InviteCreateView(FormView):
     def form_valid(self, form):
         invite = form.save(commit=False)
         kind = self.kwargs.get('kind')
+        invite.kind = kind
+        
         if kind == 'group_chat':
-            invite.chat = GroupChat.objects.get(pk=self.kwargs['pk'])        
+            invite.group_chat = GroupChat.objects.get(pk=self.kwargs['pk'])        
             invite.created_by = self.request.user
-
+        
         invite.save()
-        return JsonResponse({'status': 200, 'directory': invite.directory})
+        return JsonResponse({'status': 200, 'directory': invite.full_link()})
 
 
 class InviteDeleteView(DeleteView):
@@ -364,7 +374,6 @@ class PrivateChatFormView(FormView):
 
 class EmoteManageView(TemplateView):
     template_name = 'rooms/overlays/manage-emotes.html'
-    form_class = forms.EmoteCreateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -375,8 +384,8 @@ class EmoteManageView(TemplateView):
 
 class EmoteCreateView(CreateView):
     template_name = 'commons/forms/compact-dynamic-form.html'
-    model = Emote
     form_class = forms.EmoteCreateForm
+    model = Emote
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -395,10 +404,21 @@ class EmoteCreateView(CreateView):
     
     def form_valid(self, form):
         emote = form.save(commit=False)
+        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        group_chat_membership = group_chat.memberships.get(user=self.request.user)
+
+        if not group_chat_membership.has_perm('can_manage_emotes'):
+            form.add_error(None, f'User lacks permission to manage emotes.')
+            return self.form_invalid(form)
+
+        if emote.name in group_chat.emotes.values_list('name', flat=True):
+            form.add_error('name', f'Emote with name "{emote.name}" already exists.')
+            return self.form_invalid(form)
+        
         emote.added_by = self.request.user
-        emote.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        emote.chat = group_chat
         emote.save()
-        html = render_to_string('rooms/elements/emote-manager-item.html', {'emote': emote})
+        html = render_to_string('rooms/elements/manager-items/emote-manager-item.html', {'emote': emote})
         return JsonResponse({'status': 200, 'html': html})
 
 
@@ -424,6 +444,17 @@ class EmoteUpdateView(UpdateView):
     
     def form_valid(self, form):
         emote = form.save()
+        group_chat = emote.chat
+        group_chat_membership = group_chat.memberships.get(user=self.request.user)
+
+        if not group_chat_membership.has_perm('can_manage_emotes'):
+            form.add_error(None, f'User lacks permission to manage emotes.')
+            return self.form_invalid(form)
+
+        if emote.name in group_chat.emotes.values_list('name', flat=True):
+            form.add_error('name', f'Emote with name "{emote.name}" already exists.')
+            return self.form_invalid(form)
+
         return JsonResponse({'status': 200, 'pk': emote.pk, 'name': emote.name})
 
 
@@ -481,7 +512,7 @@ class UserProfileCardView(View):
             group_chat = get_object_or_none(GroupChat, pk=kwargs.get('group_chat_pk'))
             membership = group_chat.memberships.filter(user=user).first()
             if group_chat and membership:
-                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
+                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'profile_member': membership})
 
         return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
 
@@ -489,7 +520,9 @@ class UserProfileCardView(View):
         if backlog_group.kind == 'group_channel':
             membership = get_object_or_none(GroupChatMembership, user=user, chat=backlog_group.group_channel.chat)
             if membership:
-                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'membership': membership})
+                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'profile_member': membership})
+
+        return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
 
         
 class GetOrCreatePrivateChat(FormView):
@@ -511,32 +544,6 @@ class GetOrCreatePrivateChat(FormView):
             PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
             PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
             return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
-        
-    
-class GetMentionablesView(TemplateView):
-    template_name = 'rooms/tooltips/mentionables-list.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        backlog_group = BacklogGroup.objects.get(pk=self.kwargs['backlog_group_pk'])
-        alphanumeric, numeric = process_mention(self.kwargs['mention'])
-        if backlog_group.kind == 'group_channel':
-            chat = backlog_group.group_channel.chat
-            context['members'] = chat.memberships.filter(
-                Q(nickname__icontains=alphanumeric)
-                | Q(user__username__icontains=alphanumeric)
-            )[:10] if alphanumeric else chat.memberships.all()[:10]
-            if numeric:
-                context['members'] = filter(lambda member: numeric in member.user.formatted_username_id(), context['members'])
-            context['roles'] = chat.roles.filter(name__icontains=alphanumeric) if alphanumeric else chat.roles.all()[:10]
-        elif backlog_group.kind == 'private_chat':
-            chat = backlog_group.private_chat
-            context['members'] = chat.memberships.filter(
-                Q(nickname__icontains=alphanumeric)
-                | Q(user__username__icontains=alphanumeric)
-            )[:10] if alphanumeric else chat.memberships.all()[:10]
-        
-        return context
 
 
 class RoleManageView(TemplateView):
@@ -551,6 +558,22 @@ class RoleManageView(TemplateView):
 class RoleDeleteView(DeleteView):
     model = Role
 
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
+    def form_valid(self, form):
+        role = self.object
+        pk = role.pk
+        group_chat = role.chat
+        group_chat_membership = group_chat.memberships.get(user=self.request.user)
+        
+        if not group_chat_membership.has_perm('can_manage_roles'):
+            form.add_error(None, f'User lacks permission to manage roles.')
+            return self.form_invalid(form)
+        
+        role.delete()
+        return JsonResponse({'status': 200, 'pk': pk, 'handler': 'deleteRole'})
+    
 
 class RoleCreateView(CreateView):
     template_name = 'commons/forms/compact-dynamic-form.html'
@@ -577,27 +600,82 @@ class RoleCreateView(CreateView):
             'title': 'Create Role',
             'fields': self.get_form(),
             'url': self.request.path,
-            'on_response': 'createRole',
             'type': 'create',
         }
         return context
-
-    def post(self, request, *args, **kwargs):
-        pass
     
     def form_valid(self, form):
         role = form.save(commit=False)
-        role.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
-        form.save()
+        group_chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        group_chat_membership = group_chat.memberships.get(user=self.request.user)
+        
+        if not group_chat_membership.has_perm('can_manage_roles'):
+            form.add_error(None, f'User lacks permission to manage roles.')
+            return self.form_invalid(form)
 
-        return JsonResponse({'status': 200, 'handler': 'createRole'})
+        if role.name in group_chat.roles.values_list('name', flat=True):
+            form.add_error('name', f'Role with name "{role.name}" already exists.')
+            return self.form_invalid(form)
+
+        role.chat = GroupChat.objects.get(pk=self.kwargs['group_chat_pk'])
+        role.save()
+        form.save_m2m()
+
+        return JsonResponse({'status': 200, 'handler': 'createRole', 'html': render_to_string('rooms/elements/manager-items/role-manager-item.html', {'role': role})})
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
 
-    """
-    finish role create view
-    implement permission checking
+class RoleUpdateView(UpdateView):
+    template_name = 'commons/forms/compact-dynamic-form.html'
+    model = Role
+
+    def get_form(self, form_class=None):
+        group_chat = self.object.chat
+
+        if self.object == group_chat.base_role:
+            form = super().get_form(form_class=forms.BaseRoleUpdateForm)
+        else:
+            form = super().get_form(form_class=forms.RoleUpdateForm)
+        
+        form.fields['can_see_channels'].queryset = group_chat.channels.all()
+        form.fields['can_see_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
+        form.fields['can_see_channels'].widget.attrs['initial'] = self.object.can_see_channels.values_list('pk', flat=True)
+
+        form.fields['can_use_channels'].queryset = group_chat.channels.all()
+        form.fields['can_use_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
+        form.fields['can_use_channels'].widget.attrs['initial'] = self.object.can_use_channels.values_list('pk', flat=True)
+        
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Edit Role',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'update',
+        }
+        return context
     
+    def form_valid(self, form):
+        role = form.save(commit=False)
+        group_chat = role.chat
+        group_chat_membership = group_chat.memberships.get(user=self.request.user)
+                
+        if not group_chat_membership.has_perm('can_manage_roles'):
+            form.add_error(None, f'User lacks permission to manage roles.')
+            return self.form_invalid(form)
+
+        role.save()
+        form.save_m2m()
+
+        return JsonResponse({'status': 200, 'handler': 'editRole', 'pk': role.pk, 'html': render_to_string('rooms/elements/manager-items/role-manager-item.html', {'role': role})})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
     
-    """
+
+class RoleManageMembersView(UpdateView):
+    template_name = ''

@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta, MAXYEAR
 
 from django import forms
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, BaseValidator
 
 from commons import widgets
 from .models import GroupChannel, GroupChat, Category, Emote, Invite, Role
@@ -123,9 +123,102 @@ class RoleCreateForm(forms.ModelForm):
     can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
     can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
 
+
     class Meta:
         fields = [
             "name",
+            "color",
+            "can_see_channels",
+            "can_use_channels",
+            "can_create_messages",
+            "can_manage_messages",
+            "can_react",
+            "can_manage_channels",
+            "can_manage_chat",
+            "can_mention_all",
+            "can_kick_members",
+            "can_ban_members",
+            "can_create_invites",
+            "can_get_invites",
+            "can_manage_invites",
+            "can_manage_emotes",
+            "can_manage_roles"
+        ]
+        model = Role
+
+
+class RoleUpdateForm(forms.ModelForm):
+    name = forms.CharField(widget=widgets.FormInput())
+    color = forms.CharField(widget=widgets.FormColorPicker())
+    can_create_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_messages = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_react = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_channels = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_chat = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_mention_all = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_kick_members = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_ban_members = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_create_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_get_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_emotes = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+
+    class Meta:
+        fields = [
+            "name",
+            "color",
+            "can_see_channels",
+            "can_use_channels",
+            "can_create_messages",
+            "can_manage_messages",
+            "can_react",
+            "can_manage_channels",
+            "can_manage_chat",
+            "can_mention_all",
+            "can_kick_members",
+            "can_ban_members",
+            "can_create_invites",
+            "can_get_invites",
+            "can_manage_invites",
+            "can_manage_emotes",
+            "can_manage_roles"
+        ]
+        model = Role
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if name == self.instance.name:
+            return name
+        
+        if name in self.instance.chat.roles.values_list('name', flat=True):
+            raise forms.ValidationError(f'Role with name "{name}" already exists.')
+
+        return name
+
+
+class BaseRoleUpdateForm(forms.ModelForm):
+    color = forms.CharField(widget=widgets.FormColorPicker())
+    can_create_messages = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_messages = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_react = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_channels = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_chat = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_mention_all = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_kick_members = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_ban_members = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_create_invites = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_get_invites = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_invites = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_emotes = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_manage_roles = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+
+    class Meta:
+        fields = [
             "color",
             "can_see_channels",
             "can_use_channels",

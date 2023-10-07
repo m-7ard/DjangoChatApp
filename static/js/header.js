@@ -122,7 +122,7 @@ class FormSubmitListener {
     };
     
     createInvite = ({directory}) => {
-        this.form.closest('.layer').remove();
+        this.form.closest('.layer--overlay').remove();
         let inviteDisplay = document.getElementById('invite-display');
         inviteDisplay.value = directory;
     };
@@ -130,17 +130,25 @@ class FormSubmitListener {
     updateInvite = ({html}) => {
         let invite = this.form.closest('.backlog-invite');
         invite.replaceWith(parseHTML(html));
-    }
-}
-
-window.addEventListener('submit', function delegateSubmit(event) {
-    let form = event.target.closest('form');
-    let command = form.dataset.submitCommand;
-    if (Object.keys(submitHandlers).includes(command)) {
-        event.preventDefault();
-        submitHandlers[command](event);
     };
-});
+
+    createRole = ({html}) => {
+        this.form.closest('.layer--overlay').remove();
+        let manager = document.getElementById('role-manager');
+        manager.appendChild(parseHTML(html));
+    };
+
+    editRole = ({pk, html}) => {
+        this.form.closest('.layer--overlay').remove();
+        let role = document.getElementById(`role-${pk}`);
+        role.outerHTML = html;
+    };
+
+    deleteRole = ({pk}) => {
+        let role = document.getElementById(`role-${pk}`);
+        role.remove();
+    };
+}
 
 window.addEventListener('change', (event) => {
     let imageInput = event.target.closest('.image-input');
@@ -152,12 +160,6 @@ window.addEventListener('change', (event) => {
     let fileName = imageInput.querySelector('[data-role="filename"]');
     avatar.src=URL.createObjectURL(event.target.files[0]);
     fileName.innerText = event.target.files[0].name;
-});
-
-window.addEventListener('click', function preventRedirect(event) {
-    if (event.target.closest('[data-prevent-redirect]')) {
-        event.preventDefault();
-    };
 });
 
 window.addEventListener('mouseup', function delegateClick(event) {
@@ -502,8 +504,7 @@ class MentionableObserver extends TooltipUtils {
 
     getMentionables = (mention) => {
         let referenceSelector = this.activeElement.dataset.reference;
-        let reference = this.activeElement.closest(referenceSelector);
-        this.tooltipReference = reference;
+        this.tooltipReference = this.activeElement.closest(referenceSelector);
         
         chatSocket.send(JSON.stringify({
             'action': 'get_mentionables',
@@ -511,7 +512,6 @@ class MentionableObserver extends TooltipUtils {
         }));
     };
 
-    
     getAttributes = () => {
         return {trigger: this.activeElement, tooltip: this.openMentionablesList, reference: this.tooltipReference};
     };

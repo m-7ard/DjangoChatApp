@@ -18,19 +18,21 @@
         </div>
     </div>
     <div class="menu menu--sidebar dropdown__content has-shadow">
-        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="get-invite" data-kwargs='{"pk": {{ group_chat.pk }}, "kind": "group_chat"}'>
-            <div>
-                Get Invite
-            </div>
-            <div class="app__icon">
-                <div class="icon icon--small">
-                    <i class="material-symbols-outlined">
-                        person_add
-                    </i>
+        {% if context_member|member_has_perm:'can_get_invites' %}
+            <div class="menu__button dropdown__close" data-command="get_overlay" data-name="get-invite" data-kwargs='{"pk": {{ group_chat.pk }}, "kind": "group_chat"}'>
+                <div>
+                    Get Invite
+                </div>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            person_add
+                        </i>
+                    </div>
                 </div>
             </div>
-        </div>
-        {% if user == group_chat.owner %}
+        {% endif %}
+        {% if context_member|member_has_perm:'can_manage_invites' %}
             <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-group-chat-invites" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                 <div>
                     Manage Invites
@@ -43,6 +45,8 @@
                     </div>
                 </div>
             </div>
+        {% endif %}
+        {% if context_member|member_has_perm:'can_manage_roles' %}
             <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-roles" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                 <div>
                     Manage Roles
@@ -85,7 +89,7 @@
         </div>
         <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-emotes" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
             <div>
-                Manage Emote
+                Manage Emotes
             </div>
             <div class="app__icon">
                 <div class="icon icon--small">

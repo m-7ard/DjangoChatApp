@@ -78,6 +78,18 @@ def get_friendship_or_none(user1, user2):
 @register.filter('backlog_mentions_user')
 def backlog_mentions_user(backlog, user):
     mentioned = user in backlog.user_mentions.all() 
-    mentioned = mentioned or user.roles.all().intersection(backlog.role_mentions.all()).exists()
     
     return mentioned
+
+
+@register.filter('backlog_mentions_member_role')
+def backlog_mentions_member_role(backlog, member):
+    if not backlog.role_mentions.exists():
+        return None
+        
+    return backlog.role_mentions.all().intersection(member.roles.all())
+
+
+@register.filter('member_has_perm')
+def member_has_perm(member, perm_name):
+    return member.has_perm(perm_name)

@@ -1,5 +1,5 @@
-<div class="form__tri-switch right">
-    <div class="form__tri-switch-tile form__tri-switch-tile--true">
+<div class="form__switch right">
+    <div class="form__switch-tile form__switch-tile--true">
         <div class="icon icon--tiny">
             <i class="material-symbols-outlined">
                 check
@@ -7,7 +7,7 @@
         </div>
         <input type="radio" name="{{ widget.name }}" {% if widget.value == "1" %} checked {% endif %} value="1">
     </div>
-    <div class="form__tri-switch-tile form__tri-switch-tile--false">
+    <div class="form__switch-tile form__switch-tile--false">
         <div class="icon icon--tiny">
             <i class="material-symbols-outlined">
                 close
@@ -15,7 +15,7 @@
         </div>
         <input type="radio" name="{{ widget.name }}" {% if widget.value == "-1" %} checked {% endif %} value="-1">
     </div>
-    <div class="form__tri-switch-tile form__tri-switch-tile--neutral">
+    <div class="form__switch-tile form__switch-tile--neutral">
         <div class="icon icon--tiny">
             <i class="material-symbols-outlined">
                 remove
@@ -23,5 +23,4 @@
         </div>
         <input type="radio" name="{{ widget.name }}" {% if widget.value == "0" %} checked {% endif %} value="0">
     </div>
-
 </div>

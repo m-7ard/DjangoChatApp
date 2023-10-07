@@ -17,15 +17,20 @@
             </div>
         </div>
         <div class="item-manager__item-actions">
-            <div class="item-manager__button item-manager__button--edit" data-command="get-overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
+            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
+                Manage Members
+            </div>
+            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
                 Edit Role
             </div>
-            <form action="{% url 'delete-role' pk=role.pk %}" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <button class="item-manager__button item-manager__button--delete">
-                    Delete Role
-                </button>
-            </form>
+            {% if role != group_chat.base_role %}
+                <form action="{% url 'delete-role' pk=role.pk %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <button class="item-manager__button item-manager__button--delete">
+                        Delete Role
+                    </button>
+                </form>
+            {% endif %}
         </div>
     </div>
 </div>

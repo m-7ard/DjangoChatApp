@@ -3,9 +3,9 @@
         <div class="profile__banner">
 
         </div>
-        <div class="profile__avatar" data-tooltip-close data-command="get_overlay" data-name="full-user-profile" data-kwargs='{"pk": {{ membership.user.pk }}}'>
+        <div class="profile__avatar" data-tooltip-close data-command="get_overlay" data-name="full-user-profile" data-kwargs='{"pk": {{ profile_member.user.pk }}}'>
             <div class="avatar avatar--medium">
-                <img src="{{ membership.user.image.url }}" alt="">
+                <img src="{{ profile_member.user.image.url }}" alt="">
             </div>
         </div>
     </div>
@@ -13,10 +13,10 @@
         <div class="profile__content">
             <div>
                 <div class="profile__username">
-                    {{ membership.display_name }}
+                    {{ profile_member.display_name }}
                 </div>
                 <div class="profile__full-name">
-                    {{ membership.user.full_name }}
+                    {{ profile_member.user.full_name }}
                 </div>
             </div>
             <div class="profile__divider"></div>
@@ -25,7 +25,7 @@
                     Bio
                 </div>
                 <div class="profile__value">
-                    {{ membership.user.bio }}
+                    {{ profile_member.user.bio }}
                 </div>
             </div>
             <div>
@@ -33,7 +33,7 @@
                     Member Since    
                 </div>
                 <div class="profile__value">
-                    {{ membership.joined }}
+                    {{ profile_member.joined }}
                 </div>
             </div>
             <div>
@@ -41,7 +41,7 @@
                     Roles
                 </div>
                 <div class="profile__roles">
-                    {% for role in membership.roles %}
+                    {% for role in profile_member.roles.all %}
                         <div class="profile__role">
                             <div class="profile__role-color" style="background-color: {{ role.color }};">
 

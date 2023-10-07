@@ -28,7 +28,7 @@ from .models import (
 )
 from users.models import Friendship, CustomUser, Friend
 from utils import get_object_or_none
-from DjangoChatApp.templatetags.custom_tags import convert_mentions
+from DjangoChatApp.templatetags.custom_tags import get_member_or_none
 
 @sync_to_async
 def process_mention(mention):
@@ -125,9 +125,9 @@ class AppConsumer(AsyncWebsocketConsumer):
                 for send in channels_sends:
                     await send
             elif notification_type == 'group_chat_notification':
-                channels_sends = await self.send_group_chat_notification(group_chat=kwargs['group_chat'], group_channel=kwargs['group_channel'])
+                channels_sends = await self.create_group_chat_notification(group_chat=kwargs['group_chat'], group_channel=kwargs['group_channel'])
                 for send in channels_sends:
-                            await send
+                    await send
 
         self.loop.create_task(delegate_notification_creation(**event))
         
@@ -153,7 +153,7 @@ class AppConsumer(AsyncWebsocketConsumer):
         return channels_sends
     
     @sync_to_async
-    def send_group_chat_notification(self, group_chat, group_channel):
+    def create_group_chat_notification(self, group_chat, group_channel):
         channels_sends = []
 
         if hasattr(self, 'group_chat'):
@@ -168,6 +168,8 @@ class AppConsumer(AsyncWebsocketConsumer):
             'id': f'group-chat-{group_chat}',
             'modifier': 'hidden'
         }))
+
+        return channels_sends
 
     async def connect_user_to_chats(self):
         """ 
@@ -358,8 +360,15 @@ class BacklogGroupUtils():
         if not backlog or backlog.group != self.backlog_group:
             return False
         
-        backlog.delete()
-        return True
+        member = get_member_or_none(self.user, self.get_chat())
+        if backlog.kind == 'log':
+            can_delete = member.has_perm('can_manage_backlogs')   
+        elif backlog.kind == 'message':
+            can_delete = (self.user == backlog.message.user) or  member.has_perm('can_manage_backlogs')
+
+        if can_delete:
+            backlog.delete()
+            return True
 
     @sync_to_async
     def create_message(self, content):
@@ -372,7 +381,7 @@ class BacklogGroupUtils():
     def render_backlog(self, pk):
         backlog = Backlog.objects.get(pk=pk)
         if backlog.kind == 'message':
-            return render_to_string('rooms/elements/message.html', {'backlog': backlog, 'user': self.user})
+            return render_to_string('rooms/elements/message.html', {'backlog': backlog, 'user': self.user, 'chat': self.get_chat()})
         elif backlog.kind == 'log':
             return render_to_string('rooms/elements/log.html', {'backlog': backlog, 'user': self.user})
 
@@ -428,7 +437,11 @@ class BacklogGroupUtils():
         backlogs = self.current_page.object_list
         html = await sync_to_async(render_to_string)(
             template_name='rooms/elements/backlogs.html',
-            context={'backlogs': backlogs, 'user': self.user},
+            context={
+                'backlogs': backlogs, 
+                'user': self.user, 
+                'chat': await sync_to_async(self.get_chat)()
+            },
         )
         await self.send(json.dumps({
             'type': 'send_to_client',
@@ -570,6 +583,9 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}', self.channel_name)
         await self.channel_layer.group_add(f'group_channel_{self.group_channel.pk}_user_{self.user.pk}', self.channel_name)
         await self.generate_backlogs()
+
+    def get_chat(self):
+        return self.group_chat
 
     async def get_mentionables(self, mention, **kwargs):
         alphanumeric, numeric = await process_mention(mention)
@@ -717,6 +733,9 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.channel_layer.group_add(f'private_chat_{self.private_chat.pk}_user_{self.user.pk}', self.channel_name)
         await self.generate_backlogs()
 
+    def get_chat(self):
+        return self.private_chat
+    
     async def mark_as_read(self, **kwargs):
         reduce_notifications_by = await super().mark_as_read()
         if not reduce_notifications_by:

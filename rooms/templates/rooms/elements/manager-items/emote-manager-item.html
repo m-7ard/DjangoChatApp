@@ -1,0 +1,42 @@
+<div class="item-manager__item" id="emote-{{ emote.pk }}">
+    <div class="avatar avatar--small">
+        <img src="{{ emote.image }}" alt="">
+    </div>
+    <div class="item-manager__item-body">
+        <div>
+            <div class="item-manager__item-label">
+                Emote Name
+            </div>
+            <div class="item-manager__item-value" data-role="name">
+                :{{ emote.name }}:
+            </div>
+        </div>
+        <div>
+            <div class="item-manager__item-label">
+                Added By
+            </div>
+            <div class="item-manager__item-value">
+                {{ emote.added_by }}
+            </div>
+        </div>
+        <div>
+            <div class="item-manager__item-label">
+                Added on
+            </div>
+            <div class="item-manager__item-value">
+                {{ emote.date_created }}
+            </div>
+        </div>
+        <div class="item-manager__item-actions">
+            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-emote" data-kwargs='{"pk": {{ emote.pk }}}'>
+                Edit Emote
+            </div>
+            <form action="{% url 'delete-emote' pk=emote.pk %}" method="POST" enctype="multipart/form-data" data-on-response="deleteEmote">
+                {% csrf_token %}
+                <button class="item-manager__button item-manager__button--delete">
+                    Delete Emote
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

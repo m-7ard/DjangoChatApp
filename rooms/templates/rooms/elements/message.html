@@ -1,60 +1,79 @@
-<div class="backlog backlog--message {% if backlog|backlog_mentions_user:user %}backlog--mentioned{% endif %}" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
-    <div class="backlog__avatar">
-        <div class="avatar avatar--small">
-            <img src="{{ backlog.message.user.image.url }}" alt="">
-        </div>
-    </div>
-    <div class="backlog__username" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"backlog_group_pk": {{ backlog.group.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
-        {{ backlog.message.user.username }}
-    </div>
-    <div class="backlog__timestamp">
-        {{ backlog.timestamp }}
-    </div>
-    <div class="backlog__content" data-role="content">{{ backlog.message.rendered_content|safe }}</div>
-    <div class="backlog__invites" data-role="invites">
-        {% for invite in backlog.message.process_invites %}
-            {% if not invite.valid %}
-                {% include "./backlog-invites/invalid-backlog-invite.html" %}
-            {% elif invite.is_expired %}
-                {% include "./backlog-invites/expired-backlog-invite.html" %}
-            {% else %}
-                {% include "./backlog-invites/valid-backlog-invite.html" %}
-            {% endif %}
-        {% endfor %}
-    </div>
-    <div class="backlog__reactions" data-role="reactions">
-        {% for reaction in backlog.reactions.all %}
-            {% include "./reaction.html" %}
-        {% endfor %}
-    </div>
-    <div class="backlog__actions has-shadow">
-        <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
-            <div class="icon icon--small">
-                <i class="material-symbols-outlined">
-                    add_reaction
-                </i>
+{% with message_member=backlog.message.user|get_member_or_none:chat %}
+    <div class="backlog backlog--message 
+    {% if backlog|backlog_mentions_user:user %} backlog--mentioned {% endif %}
+    {% if backlog|backlog_mentions_member_role:message_member %} backlog--mentioned {% endif %}
+    " id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+        <div class="backlog__avatar">
+            <div class="avatar avatar--small">
+                <img src="{{ backlog.message.user.image.url }}" alt="">
             </div>
         </div>
-        <div class="backlog__action" data-command="edit_message">
-            <div class="icon icon--small">
-                <i class="material-symbols-outlined">
-                    edit
-                </i>
+        {% if message_member %}
+            <div class="backlog__username" style="color: {{ message_member.display_color }};" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"backlog_group_pk": {{ backlog.group.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
+                    {{ message_member.display_name }}
             </div>
+        {% else %}
+            <div class="backlog__username" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
+                {{ backlog.message.user.username }}
+            </div>
+        {% endif %} 
+        <div class="backlog__timestamp">
+            {{ backlog.timestamp }}
         </div>
-        <div class="backlog__action" data-command="delete_backlog">
-            <div class="icon icon--small">
-                <i class="material-symbols-outlined">
-                    delete
-                </i>
-            </div>
+        <div class="backlog__content" data-role="content">{{ backlog.message.rendered_content|safe }}</div>
+        <div class="backlog__invites" data-role="invites">
+            {% for invite in backlog.message.process_invites %}
+                {% if not invite.valid %}
+                    {% include "./backlog-invites/invalid-backlog-invite.html" %}
+                {% elif invite.is_expired %}
+                    {% include "./backlog-invites/expired-backlog-invite.html" %}
+                {% else %}
+                    {% include "./backlog-invites/valid-backlog-invite.html" %}
+                {% endif %}
+            {% endfor %}
         </div>
-        <div class="backlog__action">
-            <div class="icon icon--small">
-                <i class="material-symbols-outlined">
-                    more_vert
-                </i>
-            </div>
+        <div class="backlog__reactions" data-role="reactions">
+            {% for reaction in backlog.reactions.all %}
+                {% include "./reaction.html" %}
+            {% endfor %}
+        </div>
+        <div class="backlog__actions has-shadow">
+            {% with context_member=user|get_member_or_none:chat %}
+                {% if context_member|member_has_perm:'can_react' %}
+                    <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                add_reaction
+                            </i>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user == backlog.message.user %}
+                    <div class="backlog__action" data-command="edit_message">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                edit
+                            </i>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if user == backlog.message.user or context_member|member_has_perm:'can_manage_backlogs' %}
+                    <div class="backlog__action" data-command="delete_backlog">
+                        <div class="icon icon--small">
+                            <i class="material-symbols-outlined">
+                                delete
+                            </i>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="backlog__action">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            more_vert
+                        </i>
+                    </div>
+                </div>
+            {% endwith %}
         </div>
     </div>
-</div>
+{% endwith %}
