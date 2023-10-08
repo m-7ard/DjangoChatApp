@@ -148,6 +148,13 @@ class FormSubmitListener {
         let role = document.getElementById(`role-${pk}`);
         role.remove();
     };
+
+    editRoleMemberCount = ({pk, count}) => {
+        this.form.closest('.layer--overlay').remove();
+        let role = document.getElementById(`role-${pk}`);
+        let memberCount = role.querySelector('[data-role="member-count"]');
+        memberCount.textContent = count;
+    }
 }
 
 window.addEventListener('change', (event) => {

@@ -1,0 +1,25 @@
+<div class="form__checkbox-multiselect">
+    <div data-role="options">
+        {% for value, label in widget.attrs.choices %}
+            <div class="form__checkbox-multiselect-option">
+                <div data-role="checkbox">
+                    <div class="icon icon--tiny">
+                        <i class="material-symbols-outlined">
+                            check
+                        </i>
+                    </div>
+                </div>
+                {{ label }}
+                <input type="checkbox" name="{{ widget.name }}" value="{{ value }}" {% if value in widget.attrs.initial %} checked {% endif %}>
+            </div>
+        {% endfor %}
+    </div>
+    <div data-role="actions">
+        <div class="form__checkbox-multiselect-action form__checkbox-multiselect-action--check">
+            Check All
+        </div>
+        <div class="form__checkbox-multiselect-action form__checkbox-multiselect-action--uncheck">
+            Uncheck All
+        </div>
+    </div>
+</div>

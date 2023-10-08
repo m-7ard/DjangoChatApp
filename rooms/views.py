@@ -295,7 +295,7 @@ class InviteCreateView(CreateView):
         invite = form.save(commit=False)
         kind = self.kwargs.get('kind')
         invite.kind = kind
-        
+
         if kind == 'group_chat':
             invite.group_chat = GroupChat.objects.get(pk=self.kwargs['pk'])        
             invite.created_by = self.request.user
@@ -678,4 +678,42 @@ class RoleUpdateView(UpdateView):
     
 
 class RoleManageMembersView(UpdateView):
-    template_name = ''
+    template_name = 'commons/forms/compact-dynamic-form.html'
+    form_class = forms.RoleManageMembersForm
+    model = Role
+
+    def get(self, request, *args, **kwargs):
+        role = self.get_object()
+        if role == role.chat.base_role:
+            return render(request, 'commons/overlays/error.html', context={'message': 'Cannot edit base role members'})
+
+        return super().get(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=self.form_class)
+        group_chat = self.object.chat
+        memberships = group_chat.memberships.all().select_related('user')
+        
+        form.fields['members'].queryset = memberships
+        form.fields['members'].widget.attrs['choices'] = ((member.pk, member.user.full_name()) for member in memberships.order_by('user__username', 'user__username_id'))
+        form.fields['members'].widget.attrs['initial'] = self.object.members.values_list('pk', flat=True)
+
+        return form
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Manage Role Members',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'update',
+        }
+        return context
+    
+    def form_valid(self, form):
+        role = form.save()
+
+        return JsonResponse({'status': 200, 'handler': 'editRoleMemberCount', 'pk': role.pk, 'count': role.members.count()})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})

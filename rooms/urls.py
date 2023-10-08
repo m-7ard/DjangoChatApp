@@ -28,6 +28,7 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/create-role/', views.RoleCreateView.as_view(), name='create-role'),
     path('role/<int:pk>', views.RoleUpdateView.as_view(), name='edit-role'),
     path('role/<int:pk>/delete/', views.RoleDeleteView.as_view(), name='delete-role'),
+    path('role/<int:pk>/members/manage/', views.RoleManageMembersView.as_view(), name='manage-role-members'),
 
     path('backlog-group/<int:backlog_group_pk>/profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
     path('group-chat/<int:group_chat_pk>/profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),

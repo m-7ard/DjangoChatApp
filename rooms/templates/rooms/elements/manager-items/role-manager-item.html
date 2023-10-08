@@ -12,12 +12,12 @@
             <div class="item-manager__item-label">
                 Member Count
             </div>
-            <div class="item-manager__item-value">
+            <div class="item-manager__item-value" data-role="member-count">
                 {{ role.users.count }} Members
             </div>
         </div>
         <div class="item-manager__item-actions">
-            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
+            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="manage-role-members" data-kwargs='{"pk": {{ role.pk }}}'>
                 Manage Members
             </div>
             <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>

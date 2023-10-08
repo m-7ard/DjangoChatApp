@@ -764,6 +764,7 @@ $red-theme-1: (
     color: map-get($grey-theme-1, dark-fg);
 
     &__title {
+        @include ellipsis;
         font-size: $text-secondary-large;
     }
 
@@ -2211,8 +2212,8 @@ $red-theme-1: (
         }
     }
 
-    &__multiselect {
-        @include flex-row($space-medium, $space-medium);
+    &__pill-multiselect {
+        @include flex-row($space-small, $space-medium);
         background-color: map-get($grey-theme-1, dark-bg);
         flex-wrap: wrap;
         max-height: 4.25rem;
@@ -2220,73 +2221,93 @@ $red-theme-1: (
         border-radius: $space-small;
     }
 
-    &__multiselect-option {
+    &__pill-multiselect-option {
         @include base-button;
         @include small-button;
         @include input-replacement;
-        border-radius: 9999px;
+        border-radius: $radius-medium;
 
         &:not(:has(:checked)) {
             color: map-get($grey-theme-1, dark-fg);
             background-color: map-get($grey-theme-1, light-bg);
-            
-            .form__multiselect-checkbox {
-                background-color: map-get($grey-theme-1, dark-fg);
-            }
         }
 
         &:hover {
             color: map-get($green-theme-1, light-fg);
             background-color: map-get($green-theme-1, dark-bg); 
-
-            .form__multiselect-checkbox {
-                background-color: map-get($grey-theme-1, neutral-fg);
-            }
         }
         
         &:has(:checked) {
             color: map-get($green-theme-1, light-fg);
             background-color: map-get($green-theme-1, light-bg);
-
-            .form__multiselect-checkbox {
-                background-color: map-get($grey-theme-1, light-fg);
-            }
         }
     }
 
-    &__multiselect-checkbox {
-        padding: $space-small;
-        border-radius: 9999px;
-    }
+    &__checkbox-multiselect {
+        @include flex-column(0, $space-small);
+        max-height: 8.5rem;
+        overflow: hidden;
 
-    &__color-picker {
-        position: relative;
-        width: fit-content;
-    }
+        [data-role="actions"] {
+            @include flex-row(0, $space-small);
+        }
 
-    &__color-picker-selected {
-        padding: $space-large;
-        border-radius: $radius-medium;
-        background-color: #ffffff;
-        width: 2.5rem;
-    }
+        [data-role="options"] {
+            @include flex-column($space-small, $space-small);
+            background-color: map-get($grey-theme-1, dark-bg);
+            overflow: auto;
+        }
 
-    &__color-picker-menu {
-        @include has-shadow;
-        @include absolute-boundary(0, auto, auto, 100%);
-        @include flex-column($space-large, 0);
-        background-color: map-get($grey-theme-1, neutral-bg);
-        z-index: 2;
-        border-radius: $radius-medium;
-    }
+        &-action {
+            @include base-button;
+            @include small-button;
+            @include color-shortcut($metal-theme-1, $bg: light-bg, $fg: light-fg);
 
-    &__color-picker-canvas {
-        @include has-shadow;
-        width: 10rem;
-        height: 7.5rem;
-        border-radius: $radius-medium;
-        background: linear-gradient(to bottom right, white, red, orange, yellow, green, blue, indigo, violet, black);
-        border: 1px solid map-get($grey-theme-1, dark-bg);
+            &:hover {
+                @include color-shortcut($metal-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+
+        &-option {
+            @include base-button;
+            @include input-replacement;
+            @include flex-row(0, $space-medium);
+            align-items: center;
+            font-size: $text-secondary-medium;
+            width: fit-content;
+
+            [data-role="checkbox"] {
+                @include default-color-transition;
+                border-radius: $radius-small;
+            }
+
+            &:not(:has(:checked)) {
+                color: map-get($light, dark);
+                
+                [data-role="checkbox"] {
+                    background-color: map-get($grey-theme-1, light-bg);
+                    color: map-get($grey-theme-1, dark-fg);
+                }
+            }
+
+            &:hover {
+                color: map-get($light, neutral);
+
+                [data-role="checkbox"] {
+                    background-color: map-get($green-theme-1, dark-bg);
+                    color: map-get($green-theme-1, dark-fg);
+                }
+            }
+
+            &:has(:checked) {
+                color: map-get($light, light);
+
+                [data-role="checkbox"] {
+                    background-color: map-get($green-theme-1, light-bg);
+                    color: map-get($green-theme-1, light-fg);
+                }
+            }
+        }
     }
 }
 

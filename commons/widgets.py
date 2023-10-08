@@ -98,8 +98,8 @@ class FormBiStateSwitch(forms.NumberInput):
     template_name = "commons/widgets/form-bi-state-switch.html"
     horizontal = True
 
-class FormMutliselect(forms.SelectMultiple):
-    template_name = 'commons/widgets/form-multiselect.html'
+class FormPillMutliselect(forms.SelectMultiple):
+    template_name = 'commons/widgets/form-pill-multiselect.html'
 
 
 class FormColorPicker(forms.TextInput):
@@ -117,3 +117,7 @@ class FormColorPicker(forms.TextInput):
             return formats.localize_input(value)
         
         return str(value)
+    
+
+class FormCheckboxMutliselect(forms.SelectMultiple):
+    template_name = 'commons/widgets/form-checkbox-multiselect.html'

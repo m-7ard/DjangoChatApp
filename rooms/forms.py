@@ -120,8 +120,8 @@ class RoleCreateForm(forms.ModelForm):
     can_manage_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_emotes = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
-    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
-    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
 
     class Meta:
@@ -163,8 +163,8 @@ class RoleUpdateForm(forms.ModelForm):
     can_manage_invites = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_emotes = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
-    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
-    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [
@@ -214,8 +214,8 @@ class BaseRoleUpdateForm(forms.ModelForm):
     can_manage_invites = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
     can_manage_emotes = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
     can_manage_roles = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
-    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
-    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormMutliselect(), queryset=None, required=False)
+    can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [
@@ -236,4 +236,12 @@ class BaseRoleUpdateForm(forms.ModelForm):
             "can_manage_emotes",
             "can_manage_roles"
         ]
+        model = Role
+
+
+class RoleManageMembersForm(forms.ModelForm):
+    members = forms.ModelMultipleChoiceField(widget=widgets.FormCheckboxMutliselect(), queryset=None, required=False)
+
+    class Meta:
+        fields = ['members']
         model = Role
