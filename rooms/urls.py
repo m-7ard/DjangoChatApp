@@ -24,8 +24,9 @@ urlpatterns = [
     path('group-chat/<int:group_chat_pk>/leave/', views.GroupChatLeaveView.as_view(), name='leave-group-chat'),
     path('group-chat/<int:group_chat_pk>/manage-emotes/', views.EmoteManageView.as_view(), name='manage-emotes'),
     path('group-chat/<int:group_chat_pk>/add-emote/', views.EmoteCreateView.as_view(), name='add-emote'),
-    path('group-chat/<int:group_chat_pk>/manage-roles', views.RoleManageView.as_view(), name='manage-roles'),
-    path('group-chat/<int:group_chat_pk>/create-role/', views.RoleCreateView.as_view(), name='create-role'),
+    path('group-chat/<int:group_chat_pk>/roles/manage/', views.RoleManageView.as_view(), name='manage-roles'),
+    path('group-chat/<int:group_chat_pk>/roles/create/', views.RoleCreateView.as_view(), name='create-role'),
+    path('group-chat/<int:group_chat_pk>/roles/order/', views.RoleOrderUpdateView.as_view(), name='update-role-order'),
     path('role/<int:pk>', views.RoleUpdateView.as_view(), name='edit-role'),
     path('role/<int:pk>/delete/', views.RoleDeleteView.as_view(), name='delete-role'),
     path('role/<int:pk>/members/manage/', views.RoleManageMembersView.as_view(), name='manage-role-members'),
@@ -40,5 +41,4 @@ urlpatterns = [
     path('emote-menu/<int:group_chat_pk>/', views.EmoteMenuView.as_view(), name='emote-menu'),
     path('emote-menu/', views.EmoteMenuView.as_view(), name='emote-menu', kwargs={'group_chat_pk': None}),
     path('get-private-chat/', views.GetOrCreatePrivateChat.as_view(), name='get-or-create-private-chat'),
-
 ]

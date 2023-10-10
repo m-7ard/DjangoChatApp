@@ -262,15 +262,20 @@ class GroupChatInviteManageView(ListView):
 class GetInviteView(TemplateView):
     template_name = 'rooms/overlays/get-invite.html'
 
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
         kind = self.kwargs.get('kind')
+
         if kind == 'group_chat':
             group_chat = GroupChat.objects.get(pk=self.kwargs['pk'])
-            context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, created_by=self.request.user)
-        
-        return self.render_to_response(context)
+            membership = group_chat.memberships.get(user=self.request.user)
+            context['context_member'] = membership
+            if membership.has_perm('can_create_invites'):
+                context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, created_by=self.request.user)
+            elif membership.has_perm('can_get_invites'):
+                context['invite'] = group_chat.invites.filter(expiry_date__gt=datetime.now(timezone.utc)).first()
 
+        return context
 
 class InviteCreateView(CreateView):
     form_class = forms.InviteForm
@@ -717,3 +722,37 @@ class RoleManageMembersView(UpdateView):
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    
+
+class RoleOrderUpdateView(UpdateView):
+    template_name = 'commons/forms/compact-dynamic-form.html'
+    form_class = forms.RoleOrderUpdateForm
+    pk_url_kwarg = 'group_chat_pk'
+    model = GroupChat
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=self.form_class)
+        group_chat = self.object
+        base_role = group_chat.base_role
+        roles = sorted(group_chat.roles.exclude(pk=base_role.pk), key=lambda role: role.get_order())
+        form.fields['role_order'].widget.value = roles
+        form.fields['role_order'].widget.attrs['choices'] = ((role.pk, role.name) for role in roles)
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Update Role Order',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'update',
+        }
+        return context
+    
+    def form_valid(self, form):
+        form.save()
+        return JsonResponse({'status': 200, 'confirmation': 'Successfully update role order'})
+
+    def form_invalid(self, form):
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+    

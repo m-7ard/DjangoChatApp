@@ -54,39 +54,40 @@
                 <div class="app__icon">
                     <div class="icon icon--small">
                         <i class="material-symbols-outlined">
-                            list
+                            badge
                         </i>
                     </div>
                 </div>
             </div>
         {% endif %}
-        <div class="menu__divider">
-
-        </div>
-        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-            <div>
-                Create Channel
-            </div>
-            <div class="app__icon">
-                <div class="icon icon--small">
-                    <i class="material-symbols-outlined">
-                        add_circle
-                    </i>
+        {% if context_member|member_has_perm:'can_manage_channels' %}
+            <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Create Channel
+                </div>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            add_circle
+                        </i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
-            <div>
-                Create Category
-            </div>
-            <div class="app__icon">
-                <div class="icon icon--small">
-                    <i class="material-symbols-outlined">
-                        create_new_folder
-                    </i>
+        {% endif %}
+        {% if context_member|member_has_perm:'can_manage_channels' %}
+            <div class="menu__button dropdown__close" data-command="get_overlay" data-name="create-category" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                <div>
+                    Create Category
+                </div>
+                <div class="app__icon">
+                    <div class="icon icon--small">
+                        <i class="material-symbols-outlined">
+                            create_new_folder
+                        </i>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
         <div class="menu__button dropdown__close" data-command="get_overlay" data-name="manage-emotes" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
             <div>
                 Manage Emotes
@@ -98,9 +99,6 @@
                     </i>
                 </div>
             </div>
-        </div>
-        <div class="menu__divider">
-
         </div>
         {% if user != group_chat.owner %}
             <div class="menu__button dropdown__close" data-command="get_overlay" data-name="leave-group-chat" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>

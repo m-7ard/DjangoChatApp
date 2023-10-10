@@ -1657,6 +1657,9 @@
   gap: 0.75rem;
   display: flex;
 }
+.item-manager__item--header {
+  justify-content: space-between;
+}
 .item-manager__item:not(.item-manager__item:last-of-type) {
   border-bottom: 2px solid #1D1D1C;
 }
@@ -1712,12 +1715,20 @@
   width: -moz-fit-content;
   width: fit-content;
 }
-.item-manager__button--edit {
+.item-manager__button--manage {
   background-color: #3B5777;
   color: #DBD6CC;
 }
-.item-manager__button--edit:hover {
+.item-manager__button--manage:hover {
   background-color: #344F67;
+  color: #DBD6CC;
+}
+.item-manager__button--edit {
+  background-color: #7425B5;
+  color: #DBD6CC;
+}
+.item-manager__button--edit:hover {
+  background-color: #572586;
   color: #DBD6CC;
 }
 .item-manager__button--delete {
@@ -2168,6 +2179,40 @@
 }
 .form__checkbox-multiselect-option:has(:checked) [data-role=checkbox] {
   background-color: #16632F;
+  color: #DBD6CC;
+}
+.form__sorter {
+  padding: 0.25rem;
+  gap: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 8.5rem;
+  overflow: auto;
+  background-color: #131313;
+}
+.form__sorter-element {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: clip;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  padding: 0.25rem 0.75rem;
+  gap: 0.5rem;
+  display: flex;
+  font-size: 0.75rem;
+  border-radius: 1px;
+  background-color: #181818;
+  color: #DBD6CC;
+}
+.form__sorter [data-role=control] {
+  color: #8D8A84;
+}
+.form__sorter [data-role=control]:hover {
   color: #DBD6CC;
 }
 
@@ -2788,7 +2833,7 @@
 }
 .profile__roles {
   padding: 0;
-  gap: 0.5rem;
+  gap: 0 0.5rem;
   display: flex;
   flex-wrap: wrap;
 }

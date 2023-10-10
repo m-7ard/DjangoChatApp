@@ -91,12 +91,14 @@ class GroupChatMembership(Membership):
         else:
             super().save(*args, **kwargs)
 
-    def display_color(self):
-        roles_by_importance = sorted(
+    def roles_by_importance(self):
+        return sorted(
             self.roles.all(), 
-            key=lambda role: role.pk in self.chat.role_order and self.chat.role_order.index(role.pk)
+            key=lambda role: role.get_order()
         )
 
+    def display_color(self):
+        roles_by_importance = self.roles_by_importance()
         return roles_by_importance[0].color
     
     def is_owner(self):
@@ -109,10 +111,7 @@ class GroupChatMembership(Membership):
         return self.roles.values_list('can_see_channels', flat=True)
 
     def has_perm(self, perm_name):
-        roles_by_importance = sorted(
-            self.roles.all(), 
-            key=lambda role: role.pk in self.chat.role_order and self.chat.role_order.index(role.pk)
-        )
+        roles_by_importance = self.roles_by_importance()
 
         if self.is_owner():
             return True
@@ -400,6 +399,12 @@ class Role(models.Model):
     # gives user all permissions
     admin = models.BooleanField(default=False)
 
+    def delete(self, *args, **kwargs):
+        if self.pk in self.chat.role_order:
+            self.chat.role_order.remove(self.pk)
+
+        super().delete(*args, **kwargs)
+
     def get_perm_value(self, perm_name):
         raw_value = getattr(self, perm_name)
         if raw_value == -1:
@@ -408,20 +413,15 @@ class Role(models.Model):
             return None
         elif raw_value == 1:
             return True
-
-    def save(self, *args, **kwargs):
-        creating = self._state.adding
         
-        if creating:
-            super().save(*args, **kwargs)
-            self.chat.role_order.append(self.pk)
-            self.chat.save()
-        else:
-            super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        self in self.chat.role_order and self.chat.role_order.remove(self.pk)
-        super().delete(*args, **kwargs)
+    def get_order(self):
+        if self == self.chat.base_role:
+            return float('inf')
+        
+        if self.pk in self.chat.role_order:
+            return self.chat.role_order.index(self.pk)
+        
+        return self.pk + 10000
 
     class Meta:
         constraints = [

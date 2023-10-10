@@ -1895,6 +1895,10 @@ $red-theme-1: (
     &__item {
         @include flex-row($space-medium, $space-large);
 
+        &--header {
+            justify-content: space-between;
+        }
+
         &:not(&:last-of-type) {
             border-bottom: 2px solid map-get($grey-theme-1, light-bg);
         }
@@ -1939,12 +1943,20 @@ $red-theme-1: (
         font-weight: bold;
         height: fit-content;
         width: fit-content;
-        
-        &--edit {
+
+        &--manage {
             @include color-shortcut($metal-theme-1, $bg: light-bg, $fg: light-fg);
 
             &:hover {
                 @include color-shortcut($metal-theme-1, $bg: dark-bg, $fg: light-fg);
+            }
+        }
+        
+        &--edit {
+            @include color-shortcut($blue-theme-1, $bg: light-bg, $fg: light-fg);
+
+            &:hover {
+                @include color-shortcut($blue-theme-1, $bg: dark-bg, $fg: light-fg);
             }
         }
 
@@ -2306,6 +2318,28 @@ $red-theme-1: (
                     background-color: map-get($green-theme-1, light-bg);
                     color: map-get($green-theme-1, light-fg);
                 }
+            }
+        }
+    }
+
+    &__sorter {
+        @include flex-column($space-small, $space-small);
+        max-height: 8.5rem;
+        overflow: auto;
+        background-color: map-get($grey-theme-1, dark-bg);
+
+        &-element {
+            @include base-button;
+            @include small-button;
+            background-color: map-get($grey-theme-1, neutral-bg);
+            color: map-get($grey-theme-1, light-fg);
+        }
+
+        [data-role="control"] {
+            color: map-get($grey-theme-1, dark-fg);
+
+            &:hover {
+                color: map-get($grey-theme-1, light-fg);
             }
         }
     }
@@ -2813,7 +2847,7 @@ $red-theme-1: (
     }
 
     &__roles {
-        @include flex-row(0, $space-medium);
+        @include flex-row(0, 0 $space-medium);
         flex-wrap: wrap;
     }
 

@@ -177,7 +177,7 @@ function processForm({form, response}) {
             });
         });
     };
-}
+};
 
 async function getTemplate({templateName, context}) {
     let url = new URL(window.location.origin + '/GetTemplate/');

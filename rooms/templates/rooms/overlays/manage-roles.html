@@ -13,9 +13,12 @@
     </div>
     <div class="overlay__body">
         <div class="item-manager" id="role-manager">
-            <div class="item-manager__item">
+            <div class="item-manager__item item-manager__item--header">
                 <div class="item-manager__button item-manager__button--add" data-command="get_overlay" data-name="create-role" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
                     Create New Role
+                </div>
+                <div class="item-manager__button item-manager__button--manage" data-command="get_overlay" data-name="update-role-order" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}}'>
+                    Change Role Order
                 </div>
             </div>
             {% for role in group_chat.roles.all %}

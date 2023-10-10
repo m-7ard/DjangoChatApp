@@ -245,3 +245,26 @@ class RoleManageMembersForm(forms.ModelForm):
     class Meta:
         fields = ['members']
         model = Role
+
+
+class RoleOrderUpdateForm(forms.ModelForm):
+    role_order = forms.JSONField(widget=widgets.FormSorter())
+
+    def clean_role_order(self):
+        role_order = self.cleaned_data['role_order']
+        cleaned_role_order = []
+        for pk in role_order:
+            # we need the pk's to be integers for the jsonfield to not put quotes around them
+            try:
+                pk = int(pk)
+                cleaned_role_order.append(pk)
+            except ValueError:
+                raise forms.ValidationError('Received invalid data')
+
+        return cleaned_role_order
+
+    class Meta:
+        fields = ['role_order']
+        model = GroupChat
+
+        

@@ -583,9 +583,41 @@ class SelectManager extends TooltipUtils {
     }
 }
 
+class FormSorterControls {
+    updateInput(element) {
+        let sorter = element.closest('[data-role="sorter"]');
+        let input = sorter.querySelector('input');
+
+        let sorterElements = Array.from(sorter.querySelectorAll('[data-role="sorter-element"]'));
+        input.value = JSON.stringify([...sorterElements.map((element) => {
+            return parseInt(element.dataset.value);
+        })]);
+    };
+
+    raiseElement(currentElement) {
+        let precedingElement = currentElement.previousElementSibling;
+        if (!precedingElement || precedingElement.tagName.toLowerCase() == 'input') {
+            return;
+        };
+
+        precedingElement.insertAdjacentElement('beforebegin', currentElement);
+        this.updateInput(currentElement);
+    };
+
+    lowerElement(currentElement) {
+        let nextElement = currentElement.nextElementSibling;
+        if (!nextElement || nextElement.tagName.toLowerCase() == 'input') {
+            return;
+        };
+
+        nextElement.insertAdjacentElement('afterend', currentElement);
+        this.updateInput(currentElement);
+    };
+}
 
 const mentionableObserver = new MentionableObserver();
 const formSubmitListener = new FormSubmitListener();
 const tooltipManager = new TooltipManager();
 const emoteMenuUtils = new EmoteMenuUtils();
 const selectManager = new SelectManager();
+const formSorterControls = new FormSorterControls();

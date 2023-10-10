@@ -121,3 +121,7 @@ class FormColorPicker(forms.TextInput):
 
 class FormCheckboxMutliselect(forms.SelectMultiple):
     template_name = 'commons/widgets/form-checkbox-multiselect.html'
+
+
+class FormSorter(forms.TextInput):
+    template_name = 'commons/widgets/form-sorter.html'

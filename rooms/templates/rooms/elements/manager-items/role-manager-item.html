@@ -17,9 +17,11 @@
             </div>
         </div>
         <div class="item-manager__item-actions">
-            <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="manage-role-members" data-kwargs='{"pk": {{ role.pk }}}'>
-                Manage Members
-            </div>
+            {% if role != group_chat.base_role %}
+                <div class="item-manager__button item-manager__button--manage" data-command="get_overlay" data-name="manage-role-members" data-kwargs='{"pk": {{ role.pk }}}'>
+                    Manage Members
+                </div>
+            {% endif %}
             <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
                 Edit Role
             </div>

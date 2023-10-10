@@ -12,13 +12,15 @@
                 {{ category.name }}
             </div>
         </div>
-        <div class="app__icon app__icon--hoverable" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "category_pk": {{ category.pk }}}'>
-            <div class="icon icon--tiny icon--hoverable">
-                <i class="material-symbols-outlined">
-                    add
-                </i>
+        {% if context_member|member_has_perm:'can_manage_channels' %}
+            <div class="app__icon app__icon--hoverable" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "category_pk": {{ category.pk }}}'>
+                <div class="icon icon--tiny icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        add
+                    </i>
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
     <div class="dropdown__content dropdown__content--open dropdown__content--static">
         <div class="sidebar__section sidebar__section--channels" id="category-{{ category.pk }}">

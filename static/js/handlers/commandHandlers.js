@@ -292,4 +292,12 @@ const commandHandlers = {
             trigger.textContent = 'Friend Request Pending';
         };
     },
+    'raise_element': ({trigger, event, commnad}) => {
+        let currentElement = trigger.closest('[data-role="sorter-element"]');
+        formSorterControls.raiseElement(currentElement);
+    },
+    'lower_element': ({trigger, event, commnad}) => {
+        let currentElement = trigger.closest('[data-role="sorter-element"]');
+        formSorterControls.lowerElement(currentElement);
+    },
 };
