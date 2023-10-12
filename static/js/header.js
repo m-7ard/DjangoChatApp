@@ -294,12 +294,85 @@ class TooltipManager extends TooltipUtils {
     };
 };
 
-class EmoteMenuUtils {
-    configureEmoteMenu = ({tooltip, handler, kwargs}) => {
-        tooltip.addEventListener('click', (event) => {
-            this[handler]({event: event, ...kwargs});   
-        });
+class EmoteMenuManager extends TooltipUtils {
+    constructor() {
+        super();
+        this.tooltipLayer = document.querySelector('.layer--tooltips');
+        this.ignorableElements = ['.emote-menu', '[data-active-tooltip-trigger]'];
+        this.closeTooltip = this.closeEmoteMenu;
     };
+
+    closeEmoteMenu = () => {
+        if (!this.activeEmoteMenu) {
+            return;
+        };
+
+        this.activeEmoteMenu.remove();
+        this.activeEmoteMenu = undefined;
+        this.activeTrigger = undefined;
+
+        window.removeEventListener('resize', this.adjustTooltip);
+        window.removeEventListener('mouseup', this.checkAndCloseTooltip);
+    };
+
+    getAttributes = () => {
+        return {trigger: this.activeTrigger, tooltip: this.activeEmoteMenu, reference: this.activeTrigger};
+    };
+
+    getEmoteMenu = ({trigger}) => {
+        this.waitingTrigger = trigger;
+        console.log(this.waitingTrigger)
+        chatSocket.send(JSON.stringify({
+            'action': 'get_emote_menu'
+        }));
+    };
+
+    buildEmoteMenu = ({tooltip, emoji_categories}) => {
+        this.activeTrigger = this.waitingTrigger;
+        this.waitingTrigger = undefined;
+
+        let handler = this[this.activeTrigger.dataset.handler];
+        let kwargs = JSON.parse(this.activeTrigger.dataset.kwargs);
+
+        
+        this.activeEmoteMenu = quickCreateElement('div', {
+            innerHTML: tooltip
+        }).firstChild;
+        this.activeEmoteMenu.addEventListener('click', (event) => handler({event: event, ...kwargs}));
+        this.activeTrigger.setAttribute('data-active-tooltip-trigger', '');
+        
+        this.tooltipLayer.append(this.activeEmoteMenu);
+        this.adjustTooltip();
+        window.addEventListener('resize', this.adjustTooltip);
+        window.addEventListener('mouseup', this.checkAndCloseTooltip);
+        window.setTimeout(() => {
+            let content = this.activeEmoteMenu.querySelector('[data-role="content"]');
+            emoji_categories.forEach((category) => {
+                let html = parseHTML(category);
+                content.appendChild(html);
+            });
+        }, 50);
+    };
+
+    toggleEmoteMenu = ({trigger}) => {
+        if (this.waitingTrigger) {
+            return;
+        };
+
+        if (!this.activeEmoteMenu) {
+            this.getEmoteMenu({trigger});
+            return true;
+        };
+
+        if (trigger == this.activeTrigger) {
+            this.closeEmoteMenu();
+            return false;
+        };
+
+        this.closeEmoteMenu();
+        this.getEmoteMenu({trigger});
+        return true;
+    }
 
     reactBacklog = ({event, pk}) => {
         let emoticon = event.target.closest('[data-role="emoticon"]');
@@ -313,6 +386,16 @@ class EmoteMenuUtils {
             'kind': emoticon.dataset.kind,
             'emoticon_pk': emoticon.dataset.pk,
         }));
+    };
+
+    emoteToText = ({event, target}) => {
+        let emoticon = event.target.closest('[data-role="emoticon"]');
+        if (!emoticon) {
+            return;
+        };
+        
+        let input = document.getElementById(target);
+        input.value += ':' + emoticon.dataset.name + ':';
     };
 };
 
@@ -618,6 +701,6 @@ class FormSorterControls {
 const mentionableObserver = new MentionableObserver();
 const formSubmitListener = new FormSubmitListener();
 const tooltipManager = new TooltipManager();
-const emoteMenuUtils = new EmoteMenuUtils();
+const emoteMenuManager = new EmoteMenuManager();
 const selectManager = new SelectManager();
 const formSorterControls = new FormSorterControls();

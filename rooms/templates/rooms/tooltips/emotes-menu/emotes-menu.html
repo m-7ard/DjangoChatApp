@@ -1,0 +1,55 @@
+<div class="tooltip">
+    <div class="emote-menu">
+        <div class="emote-menu__header">
+            <input class="emote-menu__search"> 
+            <div class="emote-menu__close right">
+                <div class="icon icon--small icon--hoverable">
+                    <i class="material-symbols-outlined">
+                        close
+                    </i>
+                </div>
+            </div>     
+        </div>
+        <div class="emote-menu__navigation">
+            <div class="emote-menu__control">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        group
+                    </i>
+                </div>
+            </div>    
+            <div class="emote-menu__control">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        public
+                    </i>
+                </div>
+            </div>          
+        </div>
+        <div class="emote-menu__body">
+            <div class="emote-menu__content" data-role="content">
+                {% if chat.emotes %}
+                    <div class="emote-menu__category">
+                        <div class="emote-menu__label">
+                            {{ chat.name }}'s Emotes
+                        </div>
+                        <div class="emote-menu__list">
+                            {% for emote in chat.emotes.all %}
+                                <div class="emote-menu__emote" data-kind="emote" data-name="{{ emote.name }}" data-pk="{{ emote.pk }}" data-role="emoticon">
+                                    <div class="avatar avatar--medium">
+                                        <img src="{{ emote.image }}" alt="">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>                
+        </div>
+        <div class="emote-menu__footer">
+            <div class="emote-menu__create" data-="">
+                Add New Emote
+            </div>
+        </div>
+    </div>
+</div>

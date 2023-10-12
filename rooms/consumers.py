@@ -557,6 +557,38 @@ class BacklogGroupUtils():
         
         return send_data
     
+    
+    async def get_emote_menu(self, **kwargs):
+        @sync_to_async
+        def get_emote_menu():
+            categories = [
+                'Smileys & Emotion',
+                'People & Body',
+                'Symbols',
+                'Objects',
+                'Flags',
+                'Travel & Places',
+                'Food & Drink',
+                'Activities',
+                'Component',
+                'Animals & Nature',
+            ]
+
+            chat = self.get_chat()
+            tooltip = render_to_string('rooms/tooltips/emotes-menu/emotes-menu.html', {'chat': chat})
+            emoji_categories = [
+                render_to_string('rooms/tooltips/emotes-menu/emoji-category.html', {'emoji_list': Emoji.objects.filter(category=category), 'category': category})
+                for category in categories
+            ]
+            return tooltip, emoji_categories
+        
+        tooltip, emoji_categories = await get_emote_menu()
+        await self.send(json.dumps({
+            'action': 'build_emote_menu',
+            'tooltip': tooltip,
+            'emoji_categories': emoji_categories,
+        }))
+
     async def send_reaction_to_client(self, event):
         send_data = {**event}
         sender = send_data.pop('sender')
@@ -721,7 +753,6 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         for send in await leave_group_chat():
             await send
 
-  
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
     async def connect(self):

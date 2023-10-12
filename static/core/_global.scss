@@ -2605,7 +2605,6 @@ $red-theme-1: (
 }
 
 .emote-menu {
-    @include flex-column(0, 0);
     @include has-shadow;
     height: 350px;
     overflow: hidden;
@@ -2615,7 +2614,7 @@ $red-theme-1: (
     grid-template: auto 1fr auto / auto 1fr;
 
     &__header {
-        @include flex-row($space-large, $space-large);
+        @include flex-row($space-medium, $space-medium);
         @include has-shadow;
         background-color: map-get($grey-theme-1, light-bg);
         align-items: center;
@@ -2638,7 +2637,6 @@ $red-theme-1: (
     &__body {
         @include flex-row(0, 0);
         background-color: map-get($grey-theme-1, dark-bg);
-        flex-grow: 1;
         overflow: hidden;
 
         grid-column: 2 / -1;
@@ -2678,7 +2676,7 @@ $red-theme-1: (
 
     &__content {
         @include flex-column($space-medium, $space-large);
-        overflow: overlay;
+        overflow-y: scroll;
         flex-grow: 1;
     }
 

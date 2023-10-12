@@ -238,22 +238,8 @@ const commandHandlers = {
     'close_overlay': ({trigger, event, command}) => {
         trigger.closest('.layer')?.remove();
     },
-    'get_emote_menu': async ({trigger, event, command}) => {
-        let tooltip = await getView({
-            name: 'emote-menu',
-            kwargs: `{"group_chat_pk": ${groupChatPK}}`,
-            format: 'html',
-        });
-        emoteMenuUtils.configureEmoteMenu({
-            tooltip: tooltip, 
-            handler: trigger.dataset.handler,
-            kwargs: JSON.parse(trigger.dataset.kwargs),
-        });
-        tooltipManager.toggleTooltip({
-            trigger: trigger,
-            tooltip: tooltip,
-            reference: trigger
-        });
+    'get_emote_menu': ({trigger, event, command}) => {
+        emoteMenuManager.toggleEmoteMenu({trigger: trigger});
     },
     'react_backlog': ({trigger, event, command}) => {
         let backlog = trigger.closest('.backlog');

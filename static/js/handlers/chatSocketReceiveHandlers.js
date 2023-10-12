@@ -227,4 +227,7 @@ const chatSocketReceiveHandlers = {
         let privateChats = document.getElementById('private-chats');
         privateChats.appendChild(parseHTML(html))
     },
+    'build_emote_menu': (response) => {
+        emoteMenuManager.buildEmoteMenu(response);
+    },
 };

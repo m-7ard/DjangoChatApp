@@ -483,19 +483,20 @@ class EmoteMenuView(TemplateView):
         group_chat_pk = self.kwargs.get('group_chat_pk')
         context['group_chat'] = get_object_or_none(GroupChat, pk=group_chat_pk)
         categories = [
-            'Smileys & Emotion', 
-            'People & Body', 
-            'Symbols', 
-            'Objects'
-            'Flags', 
-            'Travel & Places', 
-            'Food & Drink', 
-            'Activities', 
-            'Component', 
-            'Animals & Nature', 
+            'Smileys & Emotion',
+            'People & Body',
+            'Symbols',
+            'Objects',
+            'Flags',
+            'Travel & Places',
+            'Food & Drink',
+            'Activities',
+            'Component',
+            'Animals & Nature',
         ]
+
         context['emojis'] = {
-            category: Emoji.objects.filter(category=category)
+            category: Emoji.objects.filter(category=category) 
             for category in categories
         }
         return context
