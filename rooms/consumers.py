@@ -627,9 +627,11 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
             'html': html,
         }))
 
-    async def create_message(self, content, **kwargs):
+    async def create_message(self, content, file=None, **kwargs):
         if not content:
             return
+
+        print(kwargs)
         
         backlog = await super().create_message(content)
 
@@ -796,7 +798,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             }
         )
 
-    async def create_message(self, content, **kwargs):
+    async def create_message(self, content, file=None, **kwargs):
         @sync_to_async
         def users_to_activate():
             return [(membership.user, membership) for membership in self.private_chat.memberships.all() if membership.activate()]

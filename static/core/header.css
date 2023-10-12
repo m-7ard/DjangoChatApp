@@ -942,12 +942,27 @@
   border: 1px solid #181818;
   overflow: hidden;
 }
+.chatbar__file-input {
+  position: relative;
+  cursor: pointer;
+}
+.chatbar__file-input input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.chatbar__file-input input::-webkit-file-upload-button {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
 .chatbar__divider {
   width: 2px;
   align-self: stretch;
   background-color: #1D1D1C;
 }
-.chatbar__input {
+.chatbar__text-input {
   padding: 0.25rem;
   gap: 0;
   display: flex;

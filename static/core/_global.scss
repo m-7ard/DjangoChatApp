@@ -1248,13 +1248,17 @@ $red-theme-1: (
     border: 1px solid map-get($grey-theme-1, neutral-bg);
     overflow: hidden;
 
+    &__file-input {
+        @include input-replacement;
+    }
+
     &__divider {
         width: 2px;
         align-self: stretch;
         background-color: map-get($grey-theme-1, light-bg);
     }
 
-    &__input {
+    &__text-input {
         @include flex-row($space-small, 0);
         flex: 1;
         border: none;
@@ -1264,7 +1268,7 @@ $red-theme-1: (
         font-size: $text-primary-large;
         color: map-get($grey-theme-1, light-fg);
         font-family: inherit;
-        caret-color:map-get($grey-theme-1, light-fg);
+        caret-color: map-get($grey-theme-1, light-fg);
     }
 }
 
