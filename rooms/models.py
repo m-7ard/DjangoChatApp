@@ -247,6 +247,7 @@ class Message(models.Model):
     content = models.CharField(max_length=1024)
     rendered_content = models.CharField(max_length=5000)
     invites = models.JSONField(default=list)
+    attachment = models.ImageField(blank=True)
 
     def get_user_mentions(self):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)

@@ -1075,6 +1075,17 @@ $red-theme-1: (
         }
     }
 
+    &__attachment {
+        display: flex;
+        flex-shrink: 0;
+        grid-column: 2 / -1;
+
+        img {
+            max-height: 360px;
+            max-width: 100%;
+        }
+    }
+
     &__reactions {
         @include flex-row($gap: $space-small $space-large);
         grid-column: 1 / -1;

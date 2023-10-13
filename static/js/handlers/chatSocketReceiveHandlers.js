@@ -158,7 +158,7 @@ const chatSocketReceiveHandlers = {
         };
     },
     'get_mentionables': ({html}) => {
-        mentionableObserver.buildMentionablesList(html)
+        mentionableObserver.buildMentionablesList(html);
     },
     'create_reaction': ({html, backlog_pk, is_sender}) => {
         let backlog = document.getElementById(`backlog-${backlog_pk}`);

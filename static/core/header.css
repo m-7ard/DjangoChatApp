@@ -732,6 +732,15 @@
 .backlog__editor [data-role=cancel]:hover {
   text-decoration: underline;
 }
+.backlog__attachment {
+  display: flex;
+  flex-shrink: 0;
+  grid-column: 2/-1;
+}
+.backlog__attachment img {
+  max-height: 360px;
+  max-width: 100%;
+}
 .backlog__reactions {
   gap: 0.25rem 0.75rem;
   display: flex;

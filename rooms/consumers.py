@@ -27,7 +27,7 @@ from .models import (
 
 )
 from users.models import Friendship, CustomUser, Friend
-from utils import get_object_or_none
+from utils import get_object_or_none, base64_file
 from DjangoChatApp.templatetags.custom_tags import get_member_or_none
 
 @sync_to_async
@@ -327,8 +327,13 @@ class BacklogGroupUtils():
     @sync_to_async
     def is_mentioned(self, pk):
         backlog = Backlog.objects.get(pk=pk)
-        mentioned = self.user in backlog.user_mentions.all() 
-        mentioned = mentioned or self.user.roles.all().intersection(backlog.role_mentions.all()).exists()
+        user_mentioned = self.user in backlog.user_mentions.all() 
+        if user_mentioned:
+            return True
+
+        chat = self.get_chat()
+        member = chat.memberships.filter(user=self.user).first()
+        mentioned = member.roles.all().intersection(backlog.role_mentions.all()).exists()
         
         return mentioned
     
@@ -371,10 +376,13 @@ class BacklogGroupUtils():
             return True
 
     @sync_to_async
-    def create_message(self, content):
+    def create_message(self, content=None, file=None):
+        if file:
+            file = base64_file(file['data'], file['name'])
+        
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
-        message = Message.objects.create(user=self.user, content=content, backlog=backlog)
-
+        message = Message.objects.create(user=self.user, content=content, backlog=backlog, attachment=file)
+        
         return backlog
     
     @sync_to_async
@@ -627,13 +635,11 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
             'html': html,
         }))
 
-    async def create_message(self, content, file=None, **kwargs):
-        if not content:
+    async def create_message(self, content=None, file=None, **kwargs):
+        if not content and not file:
             return
 
-        print(kwargs)
-        
-        backlog = await super().create_message(content)
+        backlog = await super().create_message(content=content, file=file)
 
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {

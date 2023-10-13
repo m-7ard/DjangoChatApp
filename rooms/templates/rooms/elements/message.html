@@ -32,6 +32,11 @@
                 {% endif %}
             {% endfor %}
         </div>
+        {% if backlog.message.attachment %}
+            <div class="backlog__attachment">
+                <img src="{{ backlog.message.attachment.url }}" height="{{ backlog.message.attachment.height }}" alt="">
+            </div>
+        {% endif %}
         <div class="backlog__reactions" data-role="reactions">
             {% for reaction in backlog.reactions.all %}
                 {% include "./reaction.html" %}

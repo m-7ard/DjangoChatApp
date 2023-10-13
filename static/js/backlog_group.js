@@ -13,6 +13,16 @@ window.onload = (event) => {
 const chatbar = document.getElementById('chatbar');
 const chatbarTextInput = document.getElementById('chatbar-text-input');
 const chatbarFileInput = document.getElementById('chatbar-file-input');
+const sendMessage = (sendData) => {
+    chatbarTextInput.value = '';
+    chatbarFileInput.value = '';
+
+    chatSocket.send(JSON.stringify({
+        'action': 'create_message',
+        ...sendData
+    }));
+};
+
 chatbar.addEventListener('keydown', async (event) => {
     if (mentionableObserver.activeMentionable) {
         return;
@@ -22,10 +32,9 @@ chatbar.addEventListener('keydown', async (event) => {
         event.preventDefault();
         content = chatbarTextInput.value.trim();
         file = chatbarFileInput.files[0];
-        if (!content || !file) {
+        if (!content && !file) {
             return;
         };
-
 
         const sendData = {
             'content': content
@@ -34,22 +43,20 @@ chatbar.addEventListener('keydown', async (event) => {
         const fileReader = new FileReader();
         fileReader.onload = (event) => {
             const dataUrl = event.target.result;
-            const [_, base64] = dataUrl.split(','); 
 
             sendData.file = {
-                'base64': base64,
+                'data': dataUrl,
                 'name': file.name,
             }
-            
-            chatbarTextInput.value = '';
-            chatbarFileInput.value = '';
 
-            chatSocket.send(JSON.stringify({
-                'action': 'create_message',
-                ...sendData
-            }));
+            sendMessage(sendData);
         };
-    
-        fileReader.readAsDataURL(file);
+        
+        if (file) {
+            fileReader.readAsDataURL(file);
+        }
+        else {
+            sendMessage(sendData);
+        };
     };
 });
