@@ -1,11 +1,8 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.utils.text import capfirst
-
 
 from .models import CustomUser
 from commons import widgets

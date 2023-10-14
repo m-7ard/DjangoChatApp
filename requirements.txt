@@ -1,9 +1,9 @@
-asgiref==3.5.2
-channels==4.0.0
+channels[daphne]
 channels-redis==3.4.1
-daphne==4.0.0
-Django==4.0.4
-django-crispy-forms==1.14.0
-Jinja2==3.1.2
-jinja2-time==0.2.0
-redis==4.4.2
+Django
+redis
+sorl-thumbnail
+django-debug-toolbar
+python-dateutil
+Pillow
+tzdata

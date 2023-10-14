@@ -1,4 +1,18 @@
-.envmedia /
-media/
-node_modules/
+.envmedia
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
 db.sqlite3
+media
+node_modules
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/ 
