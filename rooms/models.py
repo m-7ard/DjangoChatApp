@@ -518,7 +518,7 @@ class Emote(models.Model):
 class Emoji(models.Model):
     name = models.CharField(max_length=50, unique=True)
     category = models.CharField(max_length=50)
-    image = ImageField()
+    image = models.ImageField()
     emoji_literal = models.CharField(max_length=20)
 
     def __str__(self):

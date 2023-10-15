@@ -6,7 +6,7 @@
         {% for emoji in emoji_list %}
             <span class="emote-menu__emote" data-kind="emoji" data-name="{{ emoji.name }}" data-pk="{{ emoji.pk }}" data-role="emoticon">
                 <div class="avatar avatar--medium">
-                    <img src="{{ emoji.image }}" alt="">
+                    <img src="{{ emoji.image.url }}" alt="" loading="lazy">
                 </div>
             </span>
         {% endfor %}

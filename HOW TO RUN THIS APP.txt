@@ -2,3 +2,9 @@
 
 we use --no-dependencies because we'll be using channels==4.0.0 and channels-redis==3.4.1 due to a bug  related to channels-redis's group_send and asgiref's sync_to_async clashing when used outside the consumer. (see https://github.com/django/channels_redis/issues/332)
 
+2) Run python manage.py migrate
+
+3) (Optional) run python manage.py create_emojis "choice"
+
+replace "choice" with any of the following: ["apple", "google", "facebook", "windows", "twitter", "joypixels", "samsung", "gmail", "softbank", "docomo", "kddi"]
+NOTE: this will always delete all previous emojis rather than override them, you can change this behaviour if you want in rooms/management/commands/create_emojis.py

@@ -19,7 +19,7 @@ class SignupForm(UserCreationForm):
     )
     password1 = forms.CharField(
         label="Password",
-        widget=widgets.FormInput()
+        widget=widgets.FormInput(attrs={'type': 'password'})
     )
     password2 = forms.CharField(
         label="Repeat password", 
@@ -27,7 +27,7 @@ class SignupForm(UserCreationForm):
     )
     username = forms.CharField(
         max_length=30,
-        widget=widgets.FormInput(attrs={'type': 'password'})
+        widget=widgets.FormInput()
     )
 
     class Meta:
