@@ -1,0 +1,4 @@
+1) Install the requirements.txt by running >> pip install --no-dependencies -r requirements.txt
+
+we use --no-dependencies because we'll be using channels==4.0.0 and channels-redis==3.4.1 due to a bug  related to channels-redis's group_send and asgiref's sync_to_async clashing when used outside the consumer. (see https://github.com/django/channels_redis/issues/332)
+
