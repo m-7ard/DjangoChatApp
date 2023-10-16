@@ -57,7 +57,7 @@
                 </div>
             </div>
         {% endif %}
-        {% if user == backlog.message.user or context_member|member_has_perm:'can_manage_backlogs' %}
+        {% if user.pk == backlog.message.user.pk or context_member|member_has_perm:'can_manage_backlogs' %}
             <div class="backlog__action" data-command="delete_backlog">
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">

@@ -97,7 +97,7 @@ def member_has_perm(member, perm_name):
 
 @register.filter('backlog_mentions')
 def backlog_mentions(backlog, user):
-    if user in backlog.user_mentions:
+    if user in backlog.user_mentions.all():
         return True
     
     chat = backlog.get_chat()

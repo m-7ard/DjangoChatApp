@@ -54,10 +54,12 @@ class GroupChat(Chat):
     def channels_and_categories(self):
         return chain(self.categories.all(), self.channels.all().filter(category=None))
 
+    def get_roles(self):
+        return self.roles.all()
 
 class BacklogGroupWrapper(models.Model):
     def get_chat(self):
-        return getattr(self.chat, self)
+        return getattr(self, 'chat', self)
     
     class Meta:
         abstract = True
@@ -88,7 +90,7 @@ class Membership(models.Model):
 
 class GroupChatMembership(Membership):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
-    user = models.ForeignKey(UserWrapper, on_delete=models.CASCADE, related_name='group_chat_memberships')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
     nickname = models.CharField(max_length=20, blank=True)
 
     def save(self, *args, **kwargs):
@@ -152,6 +154,9 @@ class GroupChatMembership(Membership):
         trackers = BacklogGroupTracker.objects.filter(user=self.user, backlog_group__pk__in=backlog_group_pks)
         trackers.delete()
         super().delete(*args, **kwargs)
+
+    def get_roles(self):
+        return self.roles.all()
 
 
 class PrivateChatMembership(Membership):
@@ -239,7 +244,7 @@ class Backlog(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def get_chat(self):
-        return self.backlog_group.belongs_to().get_chat()
+        return self.group.belongs_to().get_chat()
 
     KINDS = (
         ('message', 'Message'),
@@ -376,8 +381,8 @@ class Log(models.Model):
     }
 
     action = models.CharField(max_length=20, choices=ACTIONS)
-    user1 = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
-    user2 = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user1 = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user2 = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='log')
 
     def get_action_type(self):
@@ -528,7 +533,7 @@ class Emote(models.Model):
         ),
     ])
     image = ImageField()
-    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    added_by = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
@@ -563,7 +568,7 @@ class Reaction(models.Model):
         ('emote', 'emote'),
     ))
     backlog = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='reactions')
-    users = models.ManyToManyField(CustomUser)
+    users = models.ManyToManyField(UserWrapper)
     emote = models.ForeignKey(Emote, on_delete=models.CASCADE, related_name='+', null=True)
     emoji = models.ForeignKey(Emoji, on_delete=models.CASCADE, related_name='+', null=True)
 

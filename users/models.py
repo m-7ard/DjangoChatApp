@@ -1,12 +1,11 @@
+from datetime import datetime, timezone
+
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from django.db.models import Q
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.apps import apps
-from functools import reduce
 
 
 class CustomUserManager(BaseUserManager):
@@ -24,6 +23,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
+        extra_fields.setdefault("birthday", datetime.now(timezone.utc))
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError(_("Superuser must have is_staff=True."))
@@ -69,15 +69,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def save(self, *args, **kwargs):
         creating = self._state.adding
-        self.save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
         if creating:
-            Archive.objects.create(data={
+            archive = Archive.objects.create(data={
                 'model': 'CustomUser',
                 'pk': self.pk,
                 'username': self.username,
                 'username_id': self.username_id,
                 'birthday': self.birthday.isoformat(),
+                'date_joined': self.date_joined.isoformat(),
             })
+                        
+            UserWrapper.objects.create(user=self, archive=archive)
+
     
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
@@ -128,9 +133,15 @@ class Archive(models.Model):
 
 
 class UserWrapper(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, related_name='wrapper')
     archive = models.OneToOneField(Archive, on_delete=models.PROTECT)
 
+
+    """
+    
+    TODO: come up with method to get user directly or something for the message get_member method
+    
+    """
     def __getattr__(self, attr):
         if self.user and hasattr(self.user, attr):
             return getattr(self.user, attr)

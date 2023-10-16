@@ -62,6 +62,7 @@ def db_async(fn):
 class AppConsumer(AsyncWebsocketConsumer):
     async def connect(self, chat=None):
         self.user = self.scope.get('user')
+        self.user_wrapper = await get_foreign_key('wrapper', self.user)
 
         if not self.user or not self.user.is_authenticated:
             return self.close()
@@ -381,7 +382,7 @@ class BacklogGroupUtils():
             file = base64_file(file['data'], file['name'])
         
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
-        message = Message.objects.create(user=self.user, content=content, backlog=backlog, attachment=file)
+        message = Message.objects.create(user=self.user_wrapper, content=content, backlog=backlog, attachment=file)
         
         return backlog
     
