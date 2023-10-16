@@ -93,3 +93,16 @@ def backlog_mentions_member_role(backlog, member):
 @register.filter('member_has_perm')
 def member_has_perm(member, perm_name):
     return member.has_perm(perm_name)
+
+
+@register.filter('backlog_mentions')
+def backlog_mentions(backlog, user):
+    if user in backlog.user_mentions:
+        return True
+    
+    chat = backlog.get_chat()
+    membership = chat.get_member(user)
+    if not membership:
+        return False
+    
+    return membership.get_roles().intersection(chat.get_roles())

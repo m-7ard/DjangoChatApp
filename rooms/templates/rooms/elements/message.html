@@ -1,22 +1,14 @@
-{% with message_member=backlog.message.user|get_member_or_none:chat %}
-    <div class="backlog backlog--message 
-    {% if backlog|backlog_mentions_user:user %} backlog--mentioned {% endif %}
-    {% if backlog|backlog_mentions_member_role:message_member %} backlog--mentioned {% endif %}
-    " id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+{% extends "rooms/elements/backlog.html" %}
+{% block backlog-main %}
+    {% with attributes=backlog.message.get_attributes %}
         <div class="backlog__avatar">
             <div class="avatar avatar--small">
-                <img src="{{ backlog.message.user.image.url }}" alt="">
+                <img src="{{ attributes.image.url }}" alt="">
             </div>
         </div>
-        {% if message_member %}
-            <div class="backlog__username" style="color: {{ message_member.display_color }};" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"backlog_group_pk": {{ backlog.group.pk }}, "user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
-                    {{ message_member.display_name }}
-            </div>
-        {% else %}
-            <div class="backlog__username" data-command="get_tooltip" data-name="user-profile-card" data-kwargs='{"user_pk": {{ backlog.message.user.pk }}}' data-positioning='{"top": "0px", "left": "100%"}'>
-                {{ backlog.message.user.username }}
-            </div>
-        {% endif %} 
+        <div class="backlog__username" style="color: {{ attributes.display_color }};" data-command="get_tooltip" data-name="user-profile-card" data-kwargs={{ attributes.profile_kwargs|safe }} data-positioning='{"top": "0px", "left": "100%"}'>
+            {{ attributes.display_name }}
+        </div>
         <div class="backlog__timestamp">
             {{ backlog.timestamp }}
         </div>
@@ -42,43 +34,44 @@
                 {% include "./reaction.html" %}
             {% endfor %}
         </div>
-        <div class="backlog__actions has-shadow">
-            {% with context_member=user|get_member_or_none:chat %}
-                {% if context_member|member_has_perm:'can_react' %}
-                    <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
-                        <div class="icon icon--small">
-                            <i class="material-symbols-outlined">
-                                add_reaction
-                            </i>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if user == backlog.message.user %}
-                    <div class="backlog__action" data-command="edit_message">
-                        <div class="icon icon--small">
-                            <i class="material-symbols-outlined">
-                                edit
-                            </i>
-                        </div>
-                    </div>
-                {% endif %}
-                {% if user == backlog.message.user or context_member|member_has_perm:'can_manage_backlogs' %}
-                    <div class="backlog__action" data-command="delete_backlog">
-                        <div class="icon icon--small">
-                            <i class="material-symbols-outlined">
-                                delete
-                            </i>
-                        </div>
-                    </div>
-                {% endif %}
-                <div class="backlog__action">
-                    <div class="icon icon--small">
-                        <i class="material-symbols-outlined">
-                            more_vert
-                        </i>
-                    </div>
+    {% endwith %}
+{% endblock %}
+
+{% block backlog-actions %}
+    {% with context_member=user|get_member_or_none:chat %}
+        {% if context_member|member_has_perm:'can_react' %}
+            <div class="backlog__action" data-command="get_emote_menu" data-positioning='{"top": "0px", "right": "100%"}' data-kwargs='{"pk": "{{ backlog.pk }}"}' data-handler="reactBacklog">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        add_reaction
+                    </i>
                 </div>
-            {% endwith %}
+            </div>
+        {% endif %}
+        {% if user.pk == backlog.message.user.pk %}
+            <div class="backlog__action" data-command="edit_message">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        edit
+                    </i>
+                </div>
+            </div>
+        {% endif %}
+        {% if user == backlog.message.user or context_member|member_has_perm:'can_manage_backlogs' %}
+            <div class="backlog__action" data-command="delete_backlog">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        delete
+                    </i>
+                </div>
+            </div>
+        {% endif %}
+        <div class="backlog__action">
+            <div class="icon icon--small">
+                <i class="material-symbols-outlined">
+                    more_vert
+                </i>
+            </div>
         </div>
-    </div>
-{% endwith %}
+    {% endwith %}
+{% endblock %}

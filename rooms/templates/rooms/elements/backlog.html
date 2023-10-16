@@ -1,0 +1,14 @@
+<div class="backlog backlog--{{ backlog.kind }} 
+{% if backlog|backlog_mentions:user %}
+    backlog--mentioned
+{% endif %}
+" id="backlog-{{ backlog.pk }}" data-pk="{{ backlog.pk }}">
+    {% block backlog-main %}
+
+    {% endblock %}
+    <div class="backlog__actions has-shadow">
+        {% block backlog-actions %}
+    
+        {% endblock %}
+    </div>
+</div>

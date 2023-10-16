@@ -1,5 +1,6 @@
 import re
 import html
+import json
 from itertools import chain
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
@@ -11,7 +12,7 @@ from channels.layers import get_channel_layer
 from django.template.loader import render_to_string
 from django.template import Template, Context
 
-from users.models import CustomUser
+from users.models import CustomUser, UserWrapper
 from utils import get_object_or_none
 
 channel_layer = get_channel_layer()
@@ -19,6 +20,9 @@ channel_layer = get_channel_layer()
 
 class Chat(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
+
+    def get_member(self, user):
+        return self.memberships.filter(user=user).first()
 
     class Meta:
         abstract = True
@@ -51,7 +55,15 @@ class GroupChat(Chat):
         return chain(self.categories.all(), self.channels.all().filter(category=None))
 
 
-class PrivateChat(Chat):
+class BacklogGroupWrapper(models.Model):
+    def get_chat(self):
+        return getattr(self.chat, self)
+    
+    class Meta:
+        abstract = True
+
+
+class PrivateChat(Chat, BacklogGroupWrapper):
     pinned_messages = models.ManyToManyField('Message', blank=True)
 
     def save(self, *args, **kwargs):
@@ -76,7 +88,7 @@ class Membership(models.Model):
 
 class GroupChatMembership(Membership):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='memberships')
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
+    user = models.ForeignKey(UserWrapper, on_delete=models.CASCADE, related_name='group_chat_memberships')
     nickname = models.CharField(max_length=20, blank=True)
 
     def save(self, *args, **kwargs):
@@ -126,6 +138,9 @@ class GroupChatMembership(Membership):
                 return perm_value
 
     def display_name(self):
+        if self.user.is_null():
+            return self.user.username
+
         return self.nickname or self.user.username
     
     def joined(self):
@@ -180,7 +195,7 @@ class Category(models.Model):
     chat = models.ForeignKey(GroupChat, on_delete=models.CASCADE, related_name='categories')
 
 
-class GroupChannel(models.Model):
+class GroupChannel(BacklogGroupWrapper):
     date_created = models.DateTimeField(auto_now_add=True)
     pinned_messages = models.ManyToManyField('Message', blank=True)
     name = models.CharField(max_length=30)
@@ -217,12 +232,15 @@ class BacklogGroup(models.Model):
     private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
     def belongs_to(self):
-        return getattr(self, self.kind)                
+        return getattr(self, self.kind)       
 
 
 class Backlog(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    
+
+    def get_chat(self):
+        return self.backlog_group.belongs_to().get_chat()
+
     KINDS = (
         ('message', 'Message'),
         ('log', 'Log')
@@ -242,13 +260,27 @@ class Backlog(models.Model):
     
 
 class Message(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
+    user = models.ForeignKey(UserWrapper, on_delete=models.PROTECT, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
     rendered_content = models.CharField(max_length=5000)
     invites = models.JSONField(default=list)
     attachment = models.ImageField(blank=True)
 
+    def get_member(self):
+        chat = self.backlog.get_chat()
+        return chat.get_member(self.user)
+
+    def get_attributes(self):
+        member = self.get_member()
+        if member:
+            return {
+                'display_name': member.display_name(),
+                'display_color': member.display_color(),
+                'image': member.user.image,
+                'profile_kwargs': json.dumps({'group_chat_membership_pk': self.pk})
+            }
+        
     def get_user_mentions(self):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)
     

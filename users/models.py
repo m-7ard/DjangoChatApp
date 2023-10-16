@@ -66,6 +66,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager()
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        self.save(*args, **kwargs)
+        if creating:
+            Archive.objects.create(data={
+                'model': 'CustomUser',
+                'pk': self.pk,
+                'username': self.username,
+                'username_id': self.username_id,
+                'birthday': self.birthday.isoformat(),
+            })
     
     def friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
@@ -110,6 +122,25 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             )
         ]
 
+
+class Archive(models.Model):
+    data = models.JSONField(default=dict)
+
+
+class UserWrapper(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True)
+    archive = models.OneToOneField(Archive, on_delete=models.PROTECT)
+
+    def __getattr__(self, attr):
+        if self.user and hasattr(self.user, attr):
+            return getattr(self.user, attr)
+        elif self.archive.data.get(attr):
+            return self.archive.data.get(attr)
+        else:
+            raise AttributeError(f"'UserWrapper' object has no attribute '{attr}'")
+
+    def is_null(self):
+        return self.user is None
 
 class FriendshipQuerySet(models.QuerySet):
     def pending(self):

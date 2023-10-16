@@ -1,9 +1,5 @@
 <div>
     {% for backlog in backlogs %}
-        {% if backlog.kind == 'message' %}
-            {% include "./message.html" %}
-        {% elif backlog.kind == 'log' %}
-            {% include "./log.html" %}
-        {% endif %}
+        {{ backlog }}
     {% endfor %}
 </div>
