@@ -200,7 +200,7 @@ function increaseCounter(element) {
 }
 
 function decreaseCounter(element, times) {
-    decreaseBy = times ? times : 1;
+    let decreaseBy = times ? times : 1;
     let counter = element.querySelector('[data-role="counter"]');
     let newCount = parseInt(counter.innerText) - decreaseBy;
     counter.innerText = newCount;

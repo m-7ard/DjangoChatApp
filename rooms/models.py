@@ -139,9 +139,6 @@ class GroupChatMembership(Membership):
                 return perm_value
 
     def display_name(self):
-        if self.user.is_null():
-            return self.user.username
-
         return self.nickname or self.user.username
     
     def joined(self):
@@ -264,7 +261,7 @@ class Backlog(models.Model):
     
 
 class Message(models.Model):
-    user_archive = models.ForeignKey(UserArchive, on_delete=models.PROTECT, related_name='messages', null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
     rendered_content = models.CharField(max_length=5000)
@@ -273,7 +270,7 @@ class Message(models.Model):
 
     def get_member(self):
         chat = self.backlog.get_chat()
-        return chat.get_member(self.user.pk)
+        return chat.get_member(self.user_archive.pk)
 
     def get_attributes(self):
         member = self.get_member()
@@ -282,7 +279,7 @@ class Message(models.Model):
                 'display_name': member.display_name(),
                 'display_color': member.display_color(),
                 'image': member.user.image,
-                'profile_kwargs': json.dumps({'group_chat_membership_pk': self.pk})
+                'profile_kwargs': json.dumps({'user_pk': self.user_archive.pk, 'backlog_group_pk': self.backlog.group.pk})
             }
         
     def get_user_mentions(self):
@@ -312,7 +309,6 @@ class Message(models.Model):
             )
         
         return processed_content
-
 
     def process_invites(self):
         invites = []
@@ -488,7 +484,7 @@ class Invite(models.Model):
     directory = models.UUIDField(default=uuid4, editable=False)
     one_time = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, related_name='+')
 
     def full_link(self):
         return f'DjangoChatApp/{self.directory}'
@@ -532,7 +528,7 @@ class Emote(models.Model):
         ),
     ])
     image = ImageField()
-    user_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

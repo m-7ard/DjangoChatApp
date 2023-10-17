@@ -1,17 +1,26 @@
-<div class="user" id="friend-{{ friend.pk }}">
-    <div class="user__avatar">
-        <div class="avatar avatar--small">
-            <img src="" alt="">
-        </div>
-    </div>
-    <div class="user__body">
-        <div class="user__title">
-            {% firstof friend.user.username '[Deleted User]' %}
-        </div>
-        <div class="user__subtitle">
-            {{ friend.user.status }}
-        </div>
-    </div>
+{% extends "rooms/elements/sidebar-users/user.html" %}
+
+{% block kwargs %}
+    data-command="get_tooltip" 
+    data-name="user-profile-card" 
+    data-kwargs='{"user_pk": {{ friend.user.pk }}}' 
+    data-positioning='{"top": "0px", "right": "100%"}'
+    id="{{ friend.pk }}"
+{% endblock %}
+
+{% block avatar %}
+    <img src="{{ friend.user.image.url }}" alt="">
+{% endblock %}
+
+{% block title %}
+    {{ friend.user.username }}
+{% endblock %}
+
+{% block subtitle %}
+    {{ friend.user.status }}
+{% endblock %}
+
+{% block misc %}
     {% if friendship.status == 'pending' and friend == friendship.receiver_profile %}
         <div class="user__icons" data-command="delete_friendship">
             <div class="app__icon app__icon--hoverable">
@@ -40,4 +49,4 @@
             </div>
         </div>
     {% endif %}
-</div>
+{% endblock %}

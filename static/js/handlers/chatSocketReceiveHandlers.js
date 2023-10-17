@@ -100,13 +100,9 @@ const chatSocketReceiveHandlers = {
             removeNotification(dashboardButton);
         };
     },
-    'delete_friendship': ({pk, was_receiver}) => {
+    'delete_friendship': ({pk}) => {
         let friend = document.getElementById(`friend-${pk}`);
         decreaseCounter(friend.closest('.sidebar__section'));
-        if (was_receiver) {
-            let dashboardButton = document.getElementById('dashboard-button');
-            removeNotification(dashboardButton);
-        };
         friend.remove();
     },
     'create_notification': ({id, modifier}) => {

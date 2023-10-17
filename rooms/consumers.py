@@ -245,18 +245,16 @@ class AppConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             f'user_{sender_user.pk}_dashboard', {
                 'type': 'send_to_client',
+                'action': 'delete_friendship',
                 'pk': receiver_profile.pk,
-                'was_receiver': False,
-                **kwargs
             }
         )
 
         await self.channel_layer.group_send(
             f'user_{receiver_user.pk}_dashboard', {
                 'type': 'send_to_client',
+                'action': 'delete_friendship',
                 'pk': sender_profile.pk,
-                'was_receiver': True,
-                **kwargs
             }
         )
 
@@ -321,7 +319,7 @@ class BacklogGroupUtils():
             self.tracker.save()
             # messages of the very same user do not (and should not)
             # produce notifications
-            return new_backlogs.exclude(message__user_archive__user=self.user).count()
+            return new_backlogs.exclude(message__user_archive=self.user_archive).count()
 
         return 0
     
@@ -370,7 +368,7 @@ class BacklogGroupUtils():
         if backlog.kind == 'log':
             can_delete = member.has_perm('can_manage_backlogs')   
         elif backlog.kind == 'message':
-            can_delete = (self.user == backlog.message.user) or  member.has_perm('can_manage_backlogs')
+            can_delete = (self.user_archive == backlog.message.user_archive) or  member.has_perm('can_manage_backlogs')
 
         if can_delete:
             backlog.delete()
@@ -382,7 +380,7 @@ class BacklogGroupUtils():
             file = base64_file(file['data'], file['name'])
         
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
-        message = Message.objects.create(user=self.user_archive, content=content, backlog=backlog, attachment=file)
+        message = Message.objects.create(user_archive=self.user_archive, content=content, backlog=backlog, attachment=file)
         
         return backlog
     
@@ -435,7 +433,7 @@ class BacklogGroupUtils():
     def create_common_attributes(self, chat):
         self.backlog_group = chat.backlog_group
         self.tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=self.backlog_group)
-        backlogs = self.backlog_group.backlogs.select_related('message__user', 'log__user1', 'log__user2').order_by('-pk')
+        backlogs = self.backlog_group.backlogs.select_related('message__user_archive', 'log__user1_archive', 'log__user2_archive').order_by('-pk')
         self.paginator = Paginator(backlogs, 20)
         self.current_page = self.paginator.get_page(1)
 

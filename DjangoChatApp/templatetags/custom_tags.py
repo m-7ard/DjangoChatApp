@@ -105,4 +105,4 @@ def backlog_mentions(backlog, user):
     if not membership:
         return False
     
-    return membership.get_roles().intersection(chat.get_roles())
+    return membership.get_roles().intersection(backlog.role_mentions.all()).exists()

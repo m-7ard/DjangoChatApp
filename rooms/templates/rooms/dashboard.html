@@ -51,7 +51,7 @@
             </div>
             {% for friendship in incoming_friendship_requests %}
                 {% with friend=friendship.sender_profile %}
-                    {% include "./elements/friend.html" %}
+                    {% include "./elements/sidebar-users/friend.html" %}
                 {% endwith %}
             {% endfor %}
         </div>
@@ -74,11 +74,11 @@
             {% for friendship in accepted_friendship_requests %}
                 {% if user == friendship.sender %}
                     {% with friend=friendship.receiver_profile %}
-                        {% include "./elements/friend.html" %}
+                        {% include "./elements/sidebar-users/friend.html" %}
                     {% endwith %}
                 {% else %}
                     {% with friend=friendship.sender_profile %}
-                        {% include "./elements/friend.html" %}
+                        {% include "./elements/sidebar-users/friend.html" %}
                     {% endwith %}
                 {% endif %}
             {% endfor %}
@@ -101,7 +101,7 @@
             </div>
             {% for friendship in outgoing_friendship_requests %}
                 {% with friend=friendship.receiver_profile %}
-                    {% include "./elements/friend.html" %}
+                    {% include "./elements/sidebar-users/friend.html" %}
                 {% endwith %}
             {% endfor %}
         </div>

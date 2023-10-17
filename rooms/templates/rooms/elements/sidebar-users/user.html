@@ -1,15 +1,18 @@
-<div class="user">
+<div class="user" {% block kwargs %}{% endblock %}>
     <div class="user__avatar">
         <div class="avatar avatar--small">
-            <img src="" alt="">
+            {% block avatar %}{% endblock %}
         </div>
     </div>
     <div class="user__body">
         <div class="user__title">
-            {{ local_user.username }}
+            {% block title %}{% endblock %}
         </div>
         <div class="user__subtitle">
-            {{ local_user.status }}
+            {% block subtitle %}{% endblock %}
         </div>
     </div>
+    {% block misc %}
+
+    {% endblock %}
 </div>

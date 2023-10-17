@@ -152,8 +152,13 @@ class UserArchive(models.Model):
         else:
             raise AttributeError(f"'UserArchive' object has no attribute '{attr}'")
 
-    def is_null(self):
-        return self.user is None
+
+    def __str__(self):
+        if self.user:
+            return self.user.__str__()
+        else:
+            return f'user-{self.pk}'
+
 
 class FriendshipQuerySet(models.QuerySet):
     def pending(self):
@@ -170,8 +175,8 @@ class Friendship(models.Model):
     )
 
     status = models.CharField(max_length=20, choices=CHOICES)
-    sender = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='sent_friendships', null=True)
-    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='received_friendships', null=True)
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_friendships')
+    receiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_friendships')
     objects = FriendshipQuerySet.as_manager()
 
     def sender_profile(self):

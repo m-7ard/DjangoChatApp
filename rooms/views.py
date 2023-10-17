@@ -240,6 +240,7 @@ class FriendshipFormView(FormView):
                 'type': 'send_to_client',
                 'action': 'create_notification',
                 'id': 'dashboard-button',
+                'modifier': 'dashboard'
             }
         )
 
@@ -271,7 +272,7 @@ class GetInviteView(TemplateView):
             membership = group_chat.memberships.get(user=self.request.user)
             context['context_member'] = membership
             if membership.has_perm('can_create_invites'):
-                context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, created_by=self.request.user)
+                context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, user_archive=self.request.user.archive_wrapper)
             elif membership.has_perm('can_get_invites'):
                 context['invite'] = group_chat.invites.filter(expiry_date__gt=datetime.now(timezone.utc)).first()
 
@@ -303,7 +304,7 @@ class InviteCreateView(CreateView):
 
         if kind == 'group_chat':
             invite.group_chat = GroupChat.objects.get(pk=self.kwargs['pk'])        
-            invite.created_by = self.request.user
+            invite.user_archive = self.request.user.archive_wrapper
         
         invite.save()
         return JsonResponse({'status': 200, 'directory': invite.full_link()})
@@ -420,7 +421,7 @@ class EmoteCreateView(CreateView):
             form.add_error('name', f'Emote with name "{emote.name}" already exists.')
             return self.form_invalid(form)
         
-        emote.added_by = self.request.user
+        emote.user_archive = self.request.user.archive_wrapper
         emote.chat = group_chat
         emote.save()
         html = render_to_string('rooms/elements/manager-items/emote-manager-item.html', {'emote': emote})
