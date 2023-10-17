@@ -10,9 +10,8 @@ from django.db import models
 from django.core.validators import RegexValidator
 from channels.layers import get_channel_layer
 from django.template.loader import render_to_string
-from django.template import Template, Context
 
-from users.models import CustomUser, UserWrapper
+from users.models import CustomUser, UserArchive
 from utils import get_object_or_none
 
 channel_layer = get_channel_layer()
@@ -21,8 +20,8 @@ channel_layer = get_channel_layer()
 class Chat(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
-    def get_member(self, user):
-        return self.memberships.filter(user=user).first()
+    def get_member(self, pk):
+        return self.memberships.filter(user__pk=pk).first()
 
     class Meta:
         abstract = True
@@ -265,7 +264,7 @@ class Backlog(models.Model):
     
 
 class Message(models.Model):
-    user = models.ForeignKey(UserWrapper, on_delete=models.PROTECT, related_name='messages', null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.PROTECT, related_name='messages', null=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
     rendered_content = models.CharField(max_length=5000)
@@ -274,7 +273,7 @@ class Message(models.Model):
 
     def get_member(self):
         chat = self.backlog.get_chat()
-        return chat.get_member(self.user)
+        return chat.get_member(self.user.pk)
 
     def get_attributes(self):
         member = self.get_member()
@@ -381,8 +380,8 @@ class Log(models.Model):
     }
 
     action = models.CharField(max_length=20, choices=ACTIONS)
-    user1 = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
-    user2 = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user1_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user2_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='log')
 
     def get_action_type(self):
@@ -533,7 +532,7 @@ class Emote(models.Model):
         ),
     ])
     image = ImageField()
-    added_by = models.ForeignKey(UserWrapper, on_delete=models.SET_NULL, null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
@@ -568,7 +567,7 @@ class Reaction(models.Model):
         ('emote', 'emote'),
     ))
     backlog = models.ForeignKey(Backlog, on_delete=models.CASCADE, related_name='reactions')
-    users = models.ManyToManyField(UserWrapper)
+    user_archives = models.ManyToManyField(UserArchive)
     emote = models.ForeignKey(Emote, on_delete=models.CASCADE, related_name='+', null=True)
     emoji = models.ForeignKey(Emoji, on_delete=models.CASCADE, related_name='+', null=True)
 

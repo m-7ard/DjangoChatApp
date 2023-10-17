@@ -101,7 +101,7 @@ def backlog_mentions(backlog, user):
         return True
     
     chat = backlog.get_chat()
-    membership = chat.get_member(user)
+    membership = chat.get_member(user.pk)
     if not membership:
         return False
     

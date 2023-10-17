@@ -16,6 +16,14 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+
+        existing_username_ids = CustomUser.objects.filter(
+            username=user.username
+        ).values_list('username_id', flat=True)
+        free_ids = [value for value in range(0, 100) if value not in existing_username_ids]
+        if not free_ids:
+            raise ValueError(_("All ID's for this username are already taken"))
+        user.username_id = free_ids.pop(0)
         user.save()
         return user
 
@@ -81,7 +89,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 'date_joined': self.date_joined.isoformat(),
             })
                         
-            UserWrapper.objects.create(user=self, archive=archive)
+            UserArchive.objects.create(user=self, archive=archive)
 
     
     def friendships(self):
@@ -132,23 +140,17 @@ class Archive(models.Model):
     data = models.JSONField(default=dict)
 
 
-class UserWrapper(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, related_name='wrapper')
+class UserArchive(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, related_name='archive_wrapper')
     archive = models.OneToOneField(Archive, on_delete=models.PROTECT)
 
-
-    """
-    
-    TODO: come up with method to get user directly or something for the message get_member method
-    
-    """
     def __getattr__(self, attr):
         if self.user and hasattr(self.user, attr):
             return getattr(self.user, attr)
         elif self.archive.data.get(attr):
             return self.archive.data.get(attr)
         else:
-            raise AttributeError(f"'UserWrapper' object has no attribute '{attr}'")
+            raise AttributeError(f"'UserArchive' object has no attribute '{attr}'")
 
     def is_null(self):
         return self.user is None

@@ -26,7 +26,7 @@ from .models import (
     Log,
 
 )
-from users.models import Friendship, CustomUser, Friend
+from users.models import Friend
 from utils import get_object_or_none, base64_file
 from DjangoChatApp.templatetags.custom_tags import get_member_or_none
 
@@ -62,7 +62,7 @@ def db_async(fn):
 class AppConsumer(AsyncWebsocketConsumer):
     async def connect(self, chat=None):
         self.user = self.scope.get('user')
-        self.user_wrapper = await get_foreign_key('wrapper', self.user)
+        self.user_archive = await get_foreign_key('archive_wrapper', self.user)
 
         if not self.user or not self.user.is_authenticated:
             return self.close()
@@ -321,7 +321,7 @@ class BacklogGroupUtils():
             self.tracker.save()
             # messages of the very same user do not (and should not)
             # produce notifications
-            return new_backlogs.exclude(message__user=self.user).count()
+            return new_backlogs.exclude(message__user_archive__user=self.user).count()
 
         return 0
     
@@ -382,7 +382,7 @@ class BacklogGroupUtils():
             file = base64_file(file['data'], file['name'])
         
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
-        message = Message.objects.create(user=self.user_wrapper, content=content, backlog=backlog, attachment=file)
+        message = Message.objects.create(user=self.user_archive, content=content, backlog=backlog, attachment=file)
         
         return backlog
     
