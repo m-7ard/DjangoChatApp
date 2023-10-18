@@ -43,7 +43,7 @@
                 <div class="sidebar__label sidebar__label--hoverable">
                     Private Chats
                 </div>
-                <div class="app__icon app__icon--hoverable" data-command="get-overlay" data-name="create-private-chat">
+                <div class="app__icon app__icon--hoverable" data-command="get_overlay" data-name="create-private-chat">
                     <div class="icon icon--tiny icon--hoverable">
                         <i class="material-symbols-outlined">
                             add
@@ -54,7 +54,7 @@
             {% for private_chat_membership in user.private_chat_memberships.all %}
                 {% if private_chat_membership.active %}
                     {% with other_party=private_chat_membership.other_party local_private_chat=private_chat_membership.chat %}
-                        {% include "./elements/private-chat.html" %}
+                        {% include "./elements/sidebar-users/private-chat.html" %}
                     {% endwith %}
                 {% endif %}
             {% endfor %}

@@ -32,7 +32,6 @@ urlpatterns = [
     path('role/<int:pk>/members/manage/', views.RoleManageMembersView.as_view(), name='manage-role-members'),
 
     path('backlog-group/<int:backlog_group_pk>/profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
-    path('group-chat/<int:group_chat_pk>/profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
     path('profile-card/<int:user_pk>', views.UserProfileCardView.as_view(), name='user-profile-card'),
     
     path('emote/<int:pk>/edit/', views.EmoteUpdateView.as_view(), name='edit-emote'),
@@ -40,5 +39,5 @@ urlpatterns = [
     
     path('emote-menu/<int:group_chat_pk>/', views.EmoteMenuView.as_view(), name='emote-menu'),
     path('emote-menu/', views.EmoteMenuView.as_view(), name='emote-menu', kwargs={'group_chat_pk': None}),
-    path('get-private-chat/', views.GetOrCreatePrivateChat.as_view(), name='get-or-create-private-chat'),
+    path('get-private-chat/', views.PrivateChatGetOrCreateView.as_view(), name='get-or-create-private-chat'),
 ]

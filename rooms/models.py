@@ -56,6 +56,7 @@ class GroupChat(Chat):
     def get_roles(self):
         return self.roles.all()
 
+
 class BacklogGroupWrapper(models.Model):
     def get_chat(self):
         return getattr(self, 'chat', self)
@@ -78,6 +79,10 @@ class PrivateChat(Chat, BacklogGroupWrapper):
 
     def user_list(self):
         return [membership.user for membership in self.memberships.all()]
+    
+    @classmethod    
+    def get_roles(cls):
+        return set(('all')) 
 
 
 class Membership(models.Model):
@@ -157,7 +162,7 @@ class GroupChatMembership(Membership):
 
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='private_chat_memberships')
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='private_chat_memberships')
     active = models.BooleanField(default=False)
 
     def display_color(self):
@@ -186,9 +191,13 @@ class PrivateChatMembership(Membership):
         creating = self._state.adding
 
         if creating:
-            BacklogGroupTracker.objects.create(user=self.user, backlog_group=self.chat.backlog_group)
+            BacklogGroupTracker.objects.create(user=self.archive_user.user, backlog_group=self.chat.backlog_group)
 
         super().save(*args, **kwargs)
+
+    @classmethod    
+    def get_roles(cls):
+        return set(('all')) 
 
 
 class Category(models.Model):
@@ -233,7 +242,10 @@ class BacklogGroup(models.Model):
     private_chat = models.OneToOneField(PrivateChat, on_delete=models.CASCADE, related_name='backlog_group', null=True)
 
     def belongs_to(self):
-        return getattr(self, self.kind)       
+        return getattr(self, self.kind)
+    
+    def get_chat(self):
+        return self.belongs_to().get_chat()
 
 
 class Backlog(models.Model):

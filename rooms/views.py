@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import render
 
 from users.models import CustomUser, Friend, Friendship
+from core.models import Archive
 from .models import (
     GroupChat,
     GroupChatMembership,
@@ -41,7 +42,7 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['incoming_friendship_requests'] = self.request.user.received_friendships.pending().select_related('sender')
-        context['accepted_friendship_requests'] = self.request.user.friendships().accepted().select_related('sender', 'receiver')
+        context['accepted_friendship_requests'] = self.request.user.get_friendships().accepted().select_related('sender', 'receiver')
         context['outgoing_friendship_requests'] = self.request.user.sent_friendships.pending().select_related('receiver')
         return context
     
@@ -202,7 +203,7 @@ class FriendshipFormView(FormView):
             form.add_error('user', f'Cannot send friendship request to yourself.')
             return self.form_invalid(form)
 
-        friendship = Friendship.objects.filter(Q(members__user=sender) & Q(members__user=receiver)).first()
+        friendship = receiver.get_friendships().intersection(sender.get_friendships()).first()
 
         if friendship:
             status = friendship.status
@@ -222,7 +223,7 @@ class FriendshipFormView(FormView):
                 'type': 'send_to_client',
                 'action': 'create_friendship',
                 'is_receiver': False,
-                'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': receiver_profile, 'friendship': new_friendship})
+                'html': render_to_string(template_name='rooms/elements/sidebar-users/friend.html', context={'friend': receiver_profile, 'friendship': new_friendship})
             }
         )
 
@@ -231,7 +232,7 @@ class FriendshipFormView(FormView):
                 'type': 'send_to_client',
                 'action': 'create_friendship',
                 'is_receiver': True,
-                'html': render_to_string(template_name='rooms/elements/friend.html', context={'friend': sender_profile, 'friendship': new_friendship})
+                'html': render_to_string(template_name='rooms/elements/sidebar-users/friend.html', context={'friend': sender_profile, 'friendship': new_friendship})
             }
         )
 
@@ -508,31 +509,22 @@ class UserProfileCardView(View):
         user = get_object_or_none(CustomUser, pk=kwargs.get('user_pk'))
         
         if not user:
-            return
+            archive = get_object_or_none(Archive, data__pk=kwargs.get('user_pk'), data__model='CustomUser')
+            if not archive:
+                return None
+            
+            return render(request, 'commons/tooltips/archived-user-profile-card.html', {'archive': archive})
         
-        if kwargs.get('backlog_group_pk'):
-            backlog_group = get_object_or_none(BacklogGroup, pk=kwargs.get('backlog_group_pk'))
-            if backlog_group:
-                return self.get_profile_from_backlog_group(request, backlog_group, user)
-        
-        if kwargs.get('group_chat_pk'):
-            group_chat = get_object_or_none(GroupChat, pk=kwargs.get('group_chat_pk'))
-            membership = group_chat.memberships.filter(user=user).first()
-            if group_chat and membership:
-                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'profile_member': membership})
-
+        backlog_group = get_object_or_none(BacklogGroup, pk=kwargs.get('backlog_group_pk'))
+        if backlog_group and backlog_group.kind == 'group_channel':
+            group_chat = backlog_group.get_chat()
+            member = group_chat.get_member(user=user)
+            return render(request, 'commons/tooltips/group-chat-member-profile-card.html', {'member': member})
+            
         return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
 
-    def get_profile_from_backlog_group(self, request, backlog_group, user):
-        if backlog_group.kind == 'group_channel':
-            membership = get_object_or_none(GroupChatMembership, user=user, chat=backlog_group.group_channel.chat)
-            if membership:
-                return render(request, 'rooms/tooltips/group-chat-member-profile-card.html', {'profile_member': membership})
 
-        return render(request, 'commons/tooltips/user-profile-card.html', {'profile_user': user})
-
-        
-class GetOrCreatePrivateChat(FormView):
+class PrivateChatGetOrCreateView(FormView):
     form_class = forms.VerifyUser
 
     def form_invalid(self, form):
@@ -543,13 +535,13 @@ class GetOrCreatePrivateChat(FormView):
         if self.request.user == other_party:
             return self.form_invalid(form)
         
-        existing_private_chat = self.request.user.private_chats().intersection(other_party.private_chats()).first()
+        existing_private_chat = self.request.user.get_private_chats().intersection(other_party.get_private_chats()).first()
         if existing_private_chat:
             return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': existing_private_chat.pk})})
         else:
             new_private_chat = PrivateChat.objects.create()
-            PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
-            PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
+            PrivateChatMembership.objects.create(chat=new_private_chat, archive_user=other_party.archive_wrapper)
+            PrivateChatMembership.objects.create(chat=new_private_chat, archive_user=self.request.user.archive_wrapper)
             return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
 
 

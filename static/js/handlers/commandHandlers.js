@@ -159,7 +159,7 @@ const commandHandlers = {
     },
     'accept_friendship': ({trigger, event, command}) => {
         let friend = trigger.closest('.user');
-        let [_, pk] = friend.id.split('-');
+        let pk = friend.dataset.pk;
         chatSocket.send(JSON.stringify({
             'action': command,
             'pk': pk,
@@ -167,7 +167,7 @@ const commandHandlers = {
     },
     'delete_friendship': ({trigger, event, command}) => {
         let friend = trigger.closest('.user');
-        let [_, pk] = friend.id.split('-');
+        let pk = friend.dataset.pk;
         chatSocket.send(JSON.stringify({
             'action': command,
             'pk': pk,

@@ -7,6 +7,8 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.apps import apps
 
+from core.models import Archive
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -91,13 +93,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                         
             UserArchive.objects.create(user=self, archive=archive)
 
-    
-    def friendships(self):
+    def get_friendships(self):
         return Friendship.objects.filter(Q(sender=self) | Q(receiver=self))
     
-    def private_chats(self):
+    def get_private_chats(self):
         PrivateChat = apps.get_model('rooms', 'PrivateChat')
-        return PrivateChat.objects.filter(memberships__user=self)
+        return PrivateChat.objects.filter(user_archive__user=self)
        
     def friends(self):
         return map(lambda obj: obj.other_party(), self.friend_objects.all())
@@ -134,10 +135,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 name='Verify unique username ID'
             )
         ]
-
-
-class Archive(models.Model):
-    data = models.JSONField(default=dict)
 
 
 class UserArchive(models.Model):

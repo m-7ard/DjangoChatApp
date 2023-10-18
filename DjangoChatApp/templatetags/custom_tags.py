@@ -72,7 +72,7 @@ def get_member_or_none(user, chat):
 
 @register.filter(name='get_friendship_or_none')
 def get_friendship_or_none(user1, user2):
-    return user1.friendships().intersection(user2.friendships()).first()
+    return user1.get_friendships().intersection(user2.get_friendships()).first()
 
 
 @register.filter('backlog_mentions_user')
@@ -97,6 +97,13 @@ def member_has_perm(member, perm_name):
 
 @register.filter('backlog_mentions')
 def backlog_mentions(backlog, user):
+    """
+    
+    IDEA: instead of doing .get_roles which is just there
+    to avoid a getattr error from PrivateChatMembership,
+    we could just implement a regex check for >>all
+    
+    """
     if user in backlog.user_mentions.all():
         return True
     
@@ -105,4 +112,4 @@ def backlog_mentions(backlog, user):
     if not membership:
         return False
     
-    return membership.get_roles().intersection(backlog.role_mentions.all()).exists()
+    return membership.get_roles().intersection(backlog.role_mentions.all())

@@ -1,0 +1,32 @@
+<div class="profile profile--tooltip">
+    <div class="profile__header">
+        <div class="profile__banner">
+
+        </div>
+        <div class="profile__avatar" data-tooltip-close data-command="get_overlay" data-name="full-user-profile" data-kwargs='{"pk": {{ profile_user.pk }}}'>
+            <div class="avatar avatar--medium">
+                <img src="" alt="">
+            </div>
+        </div>
+    </div>
+    <div class="profile__body">
+        <div class="profile__content">
+            <div>
+                <div class="profile__username">
+                    {{ archive }}
+                </div>
+                <div class="profile__full-name">
+                    {{ archive }}
+                </div>
+            </div>
+            <div>
+                <div class="profile__label">
+                    Joined Since    
+                </div>
+                <div class="profile__value">
+                    {{ profile_user.joined }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

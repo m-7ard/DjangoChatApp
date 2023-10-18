@@ -5,7 +5,8 @@
     data-name="user-profile-card" 
     data-kwargs='{"user_pk": {{ friend.user.pk }}}' 
     data-positioning='{"top": "0px", "right": "100%"}'
-    id="{{ friend.pk }}"
+    id="friend-{{ friend.pk }}"
+    data-pk="{{ friend.pk }}"
 {% endblock %}
 
 {% block avatar %}

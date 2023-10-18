@@ -827,7 +827,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
                 f'user_{user.pk}_self', {
                     'type': 'send_to_client',
                     'action': 'activate_private_chat',
-                    'html': await sync_to_async(render_to_string)('rooms/elements/private-chat.html', {'local_private_chat': self.private_chat, 'other_party': {'user': self.user}})
+                    'html': await sync_to_async(render_to_string)('rooms/elements/sidebar-users/private-chat.html', {'local_private_chat': self.private_chat, 'other_party': {'user': self.user}})
                 }
             )
 

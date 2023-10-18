@@ -294,6 +294,80 @@ class TooltipManager extends TooltipUtils {
     };
 };
 
+class WebsocketGenericTooltipManager extends TooltipUtils {
+    /* 
+    not hooked up yet 
+    */
+
+    constructor() {
+        super();
+        this.tooltipLayer = document.querySelector('.layer--tooltips');
+        this.ignorableElements = ['.tooltip', '[data-active-tooltip-trigger]'];
+        this.closeTooltip = this.closeOpenTooltip;
+    };
+
+    closeOpenTooltip = () => {
+        if (!this.activeTooltip) {
+            return;
+        };
+
+        this.activeTooltip.remove();
+        this.activeTooltip = undefined;
+        this.activeTrigger = undefined;
+
+        window.removeEventListener('resize', this.adjustTooltip);
+        window.removeEventListener('mouseup', this.checkAndCloseTooltip);
+    };
+
+    getAttributes = () => {
+        return {trigger: this.activeTrigger, tooltip: this.activeTooltip, reference: this.activeTrigger};
+    };
+
+    getTooltip = ({trigger}) => {
+        this.waitingTrigger = trigger;
+        chatSocket.send(JSON.stringify({
+            'action': trigger.dataset.action
+        }));
+    };
+
+    buildTooltip = ({tooltip}) => {
+        this.activeTrigger = this.waitingTrigger;
+        this.waitingTrigger = undefined;
+
+        
+        this.activeTooltip = quickCreateElement('div', {
+            innerHTML: tooltip
+        }).firstChild;
+        this.activeTrigger.setAttribute('data-active-tooltip-trigger', '');
+        
+        this.tooltipLayer.append(this.activeEmoteMenu);
+        this.adjustTooltip();
+        window.addEventListener('resize', this.adjustTooltip);
+        window.addEventListener('mouseup', this.checkAndCloseTooltip);
+    };
+
+    toggleTooltip = ({trigger}) => {
+        if (this.waitingTrigger) {
+            return;
+        };
+
+        if (!this.activeEmoteMenu) {
+            this.getEmoteMenu({trigger});
+            return true;
+        };
+
+        if (trigger == this.activeTrigger) {
+            this.closeEmoteMenu();
+            return false;
+        };
+
+        this.closeEmoteMenu();
+        this.getEmoteMenu({trigger});
+        return true;
+    }
+};
+
+
 class EmoteMenuManager extends TooltipUtils {
     constructor() {
         super();
@@ -346,6 +420,7 @@ class EmoteMenuManager extends TooltipUtils {
         window.addEventListener('resize', this.adjustTooltip);
         window.addEventListener('mouseup', this.checkAndCloseTooltip);
         window.setTimeout(() => {
+            /* avoids the lag of using a single big html element */
             let content = this.activeEmoteMenu.querySelector('[data-role="content"]');
             emoji_categories.forEach((category) => {
                 let html = parseHTML(category);

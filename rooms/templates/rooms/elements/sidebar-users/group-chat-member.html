@@ -1,9 +1,9 @@
-{% extends rooms/elements/sidebar-users/user.html %}
+{% extends "rooms/elements/sidebar-users/user.html" %}
 
 {% block kwargs %}
     data-command="get_tooltip" 
     data-name="user-profile-card" 
-    data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "user_pk": {{ membership.user.pk }}}' 
+    data-kwargs='{"backlog_group_pk": {{ group_chat.backlog_group.pk }}, "user_pk": {{ member.user.pk }}}' 
     data-positioning='{"top": "0px", "right": "100%"}'
 {% endblock %}
 
@@ -16,5 +16,5 @@
 {% endblock %}
 
 {% block subtitle %}
-    {{ membership.user.status }}
+    {{ member.user.status }}
 {% endblock %}
