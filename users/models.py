@@ -98,8 +98,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     def get_private_chats(self):
         PrivateChat = apps.get_model('rooms', 'PrivateChat')
-        return PrivateChat.objects.filter(user_archive__user=self)
-       
+        return PrivateChat.objects.filter(memberships__user=self)
+
     def friends(self):
         return map(lambda obj: obj.other_party(), self.friend_objects.all())
 
@@ -138,7 +138,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class UserArchive(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, related_name='archive_wrapper')
+    user = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, related_name='user_archive')
     archive = models.OneToOneField(Archive, on_delete=models.PROTECT)
 
     def __getattr__(self, attr):
@@ -148,7 +148,6 @@ class UserArchive(models.Model):
             return self.archive.data.get(attr)
         else:
             raise AttributeError(f"'UserArchive' object has no attribute '{attr}'")
-
 
     def __str__(self):
         if self.user:

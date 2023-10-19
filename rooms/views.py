@@ -339,44 +339,14 @@ class PrivateChatDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        private_chat = self.object
         context = super().get_context_data(*args, **kwargs)
-        context['other_party'] = self.object.memberships.all().exclude(user=request.user).first()
-        private_chat_membership = PrivateChatMembership.objects.get(user=request.user, chat=self.object)
+        private_chat_membership = PrivateChatMembership.objects.get(user_archive__user=request.user, chat=private_chat)
+        context['other_party'] = private_chat_membership.other_party()
         private_chat_membership.active = True
         private_chat_membership.save()
 
         return self.render_to_response(context)
-
-
-class PrivateChatFormView(FormView):
-    template_name = 'commons/forms/compact-dynamic-form.html'
-    form_class = forms.VerifyUser
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = {
-            'title': 'Create Private Chat',
-            'fields': self.get_form(),
-            'url': self.request.path,
-            'type': 'create'
-        }
-
-        return context
-    
-    def form_invalid(self, form):
-        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
-    
-    def form_valid(self, form):
-        other_party = form.get_user()
-        existing_private_chat = PrivateChat.objects.filter(memberships__user=other_party).filter(memberships__user=self.request.user).first()
-
-        if existing_private_chat:
-            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': existing_private_chat.pk})})
-        else:
-            new_private_chat = PrivateChat.objects.create()
-            PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
-            PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
-            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
 
 
 class EmoteManageView(TemplateView):
@@ -525,7 +495,19 @@ class UserProfileCardView(View):
 
 
 class PrivateChatGetOrCreateView(FormView):
+    template_name = 'commons/forms/compact-dynamic-form.html'
     form_class = forms.VerifyUser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = {
+            'title': 'Create Private Chat',
+            'fields': self.get_form(),
+            'url': self.request.path,
+            'type': 'create'
+        }
+
+        return context
 
     def form_invalid(self, form):
         return JsonResponse({'status': 400})
@@ -536,13 +518,14 @@ class PrivateChatGetOrCreateView(FormView):
             return self.form_invalid(form)
         
         existing_private_chat = self.request.user.get_private_chats().intersection(other_party.get_private_chats()).first()
+        
         if existing_private_chat:
             return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': existing_private_chat.pk})})
-        else:
-            new_private_chat = PrivateChat.objects.create()
-            PrivateChatMembership.objects.create(chat=new_private_chat, archive_user=other_party.archive_wrapper)
-            PrivateChatMembership.objects.create(chat=new_private_chat, archive_user=self.request.user.archive_wrapper)
-            return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
+
+        new_private_chat = PrivateChat.objects.create()
+        PrivateChatMembership.objects.create(chat=new_private_chat, user=other_party)
+        PrivateChatMembership.objects.create(chat=new_private_chat, user=self.request.user)
+        return JsonResponse({'status': 200, 'redirect': reverse('private-chat', kwargs={'pk': new_private_chat.pk})})
 
 
 class RoleManageView(TemplateView):

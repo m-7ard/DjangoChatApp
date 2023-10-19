@@ -11,7 +11,6 @@ from users.models import Friendship
 
 
 from ..settings import MEDIA_URL
-import utils
 
 
 @register.filter(name='classname')

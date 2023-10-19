@@ -163,6 +163,7 @@ class GroupChatMembership(Membership):
 class PrivateChatMembership(Membership):
     chat = models.ForeignKey(PrivateChat, on_delete=models.CASCADE, related_name='memberships')
     user_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='private_chat_memberships')
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='private_chat_memberships')
     active = models.BooleanField(default=False)
 
     def display_color(self):
@@ -172,14 +173,7 @@ class PrivateChatMembership(Membership):
         return self.user.username
 
     def other_party(self):
-        return self.chat.memberships.all().exclude(user=self.user).first()
-    
-    @classmethod
-    def has_perm(cls, perm_name):
-        return perm_name in [
-            'can_create_messages',
-            'can_react',
-        ]
+        return self.chat.memberships.exclude(user=self.user).first()
     
     def activate(self):
         previous_state = self.active
@@ -191,9 +185,17 @@ class PrivateChatMembership(Membership):
         creating = self._state.adding
 
         if creating:
-            BacklogGroupTracker.objects.create(user=self.archive_user.user, backlog_group=self.chat.backlog_group)
+            self.user_archive = self.user.user_archive
+            BacklogGroupTracker.objects.create(user=self.user, backlog_group=self.chat.backlog_group)
 
         super().save(*args, **kwargs)
+
+    @classmethod
+    def has_perm(cls, perm_name):
+        return perm_name in [
+            'can_create_messages',
+            'can_react',
+        ]
 
     @classmethod    
     def get_roles(cls):
@@ -273,7 +275,9 @@ class Backlog(models.Model):
     
 
 class Message(models.Model):
-    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, related_name='messages', null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='messages', null=True)
+    
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='message')
     content = models.CharField(max_length=1024)
     rendered_content = models.CharField(max_length=5000)
@@ -281,18 +285,35 @@ class Message(models.Model):
     attachment = models.ImageField(blank=True)
 
     def get_member(self):
-        chat = self.backlog.get_chat()
-        return chat.get_member(self.user_archive.pk)
+        if not self.user:
+            return None
+ 
+        return self.chat.get_member(self.user)
 
     def get_attributes(self):
+        if not self.user:
+            return {
+                'display_name': str(self.user_archive),
+                'display_color': '',
+                'image': '',
+                'profile_kwargs': json.dumps({'user_pk': self.user_archive.data.pk})
+            }
+        
         member = self.get_member()
         if member:
             return {
                 'display_name': member.display_name(),
                 'display_color': member.display_color(),
                 'image': member.user.image,
-                'profile_kwargs': json.dumps({'user_pk': self.user_archive.pk, 'backlog_group_pk': self.backlog.group.pk})
+                'profile_kwargs': json.dumps({'user_pk': self.user.pk, 'backlog_group_pk': self.backlog.group.pk})
             }
+
+        return {
+            'display_name': member.display_name(),
+            'display_color': member.display_color(),
+            'image': member.user.image,
+            'profile_kwargs': json.dumps({'user_pk': self.user.pk})
+        }
         
     def get_user_mentions(self):
         return re.findall(r'(?<!\w)>>(\w+#\d{2})(?!\w)', self.content)
@@ -348,6 +369,10 @@ class Message(models.Model):
         return sorted(invites, key=lambda invite: self.content.find(invite['directory']))[-10:]
 
     def save(self, *args, **kwargs):
+        creating = self._state.adding
+        if creating:
+            self.user_archive = self.user.user_archive
+
         users = set()
         for full_name in self.get_user_mentions():
             username, username_id = full_name.split('#')
@@ -388,9 +413,12 @@ class Log(models.Model):
     }
 
     action = models.CharField(max_length=20, choices=ACTIONS)
-    user1_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
-    user2_archive = models.ForeignKey(UserArchive, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
     backlog = models.OneToOneField(Backlog, on_delete=models.CASCADE, related_name='log')
+    
+    user1_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
+    user1 = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user2_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
+    user1 = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
 
     def get_action_type(self):
         return self.ACTION_TYPE[self.action]
@@ -402,6 +430,11 @@ class Log(models.Model):
         creating = self._state.adding
 
         if creating:
+            if self.user1:
+                self.user1_archive = self.user1.user_archive
+            if self.user2:
+                self.user2_archive = self.user2.user_archive
+
             self.backlog.user_mentions.set([self.user1, self.user2])
 
         super().save(*args, **kwargs)
@@ -496,7 +529,16 @@ class Invite(models.Model):
     directory = models.UUIDField(default=uuid4, editable=False)
     one_time = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(default=invite_default_expiry_date)
-    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, related_name='+')
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='+')
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            self.user_archive = self.user.user_archive
+
+        super().save(*args, **kwargs)
 
     def full_link(self):
         return f'DjangoChatApp/{self.directory}'
@@ -540,11 +582,15 @@ class Emote(models.Model):
         ),
     ])
     image = ImageField()
-    user_archive = models.ForeignKey(UserArchive, on_delete=models.RESTRICT, null=True)
+    user_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         creating = self._state.adding
+
+        if creating:
+            self.user_archive = self.user.user_archive
         
         if self.image and creating:
             super().save(*args, **kwargs)

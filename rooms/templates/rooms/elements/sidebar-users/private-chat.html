@@ -6,11 +6,13 @@
     </div>
     <div class="user__body">
         <div class="user__title">
-            {{ other_party.user }}
+            {{ other_party.user_archive }}
         </div>
-        <div class="user__subtitle">
-            {{ other_party.user.status }}
-        </div>
+        {% if other_party.user_archive.user %}
+            <div class="user__subtitle">
+                {{ other_party.user_archive.status }}
+            </div>
+        {% endif %}
     </div>
     {% if user %}
         {% with unread_backlogs=user|unread_backlogs:local_private_chat.backlog_group  %}
