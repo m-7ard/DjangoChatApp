@@ -774,7 +774,7 @@ $red-theme-1: (
     }
 
     /*00000*/
-    &:has(.notification) {
+    &:has([data-role="counter"]:not([data-count="0"])) {
         color: map-get($red-theme-1, light-bg);
     }
 }
@@ -1660,7 +1660,7 @@ $red-theme-1: (
         font-size: $text-secondary-large;
     }
 
-    &:has(.notification) {
+    &:has(.notification [data-role="counter"]:not([data-count="0"])) {
         .avatar {
             box-shadow: 0px 0px 3px 1px map-get($blue-theme-1, light-bg);
         }
@@ -2581,15 +2581,31 @@ $red-theme-1: (
         border-radius: 9999px;
         background-color: map-get($yellow-theme-1, light-bg);
         box-shadow: 0px 0px 8px 1px rgba(map-get($yellow-theme-1, light-bg), 0.404);
+    
+        &:has([data-role="counter"][data-count="0"]) {
+            display: none;
+        }
+    }
+
+    &--dashboard {
+        bottom: -6px;
+        left: -6px;
+    }
+
+    &--mention {
+        right: 0;
     }
 
     &--dashboard, &--mention {
+        box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
         position: absolute;
-        bottom: - $space-medium;
-        left: - $space-small;
-        border-radius: $radius-small;
-        border: 2px solid map-get($grey-theme-1, neutral-bg);
+        border-radius: 9999px;
+        border: $space-small solid map-get($grey-theme-1, dark-bg);
         overflow: hidden;
+
+        &:has([data-role="counter"][data-count="0"]) {
+            display: none;
+        }
 
         [data-role="counter"] {
             display: flex;
@@ -2678,6 +2694,10 @@ $red-theme-1: (
         flex-grow: 1;
     }
 
+    &__category {
+        @include flex-column(0, 0);
+    }
+
     &__control {
         @include base-button;
         @include default-color-transition;
@@ -2719,6 +2739,16 @@ $red-theme-1: (
         grid-template-columns: repeat(10, 48px);
         align-content: flex-start;
         justify-items: center;
+
+        &--filler {
+            height: 0px;
+        }
+
+        .emote-menu__body:has(&:not(&--filler)) {
+            .emote-menu__list--filler {
+                position: absolute;
+            }
+        }
     }
 
     &__label {

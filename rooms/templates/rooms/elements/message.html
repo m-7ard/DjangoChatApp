@@ -1,13 +1,13 @@
 {% extends "rooms/elements/backlog.html" %}
 {% block backlog-main %}
-    {% with attributes=backlog.message.get_attributes %}
+    {% with user_attributes=backlog.message.get_user_attributes %}
         <div class="backlog__avatar">
             <div class="avatar avatar--small">
-                <img src="{{ attributes.image.url }}" alt="">
+                <img src="{{ user_attributes.image.url }}" alt="">
             </div>
         </div>
-        <div class="backlog__username" style="color: {{ attributes.display_color }};" data-command="get_tooltip" data-name="user-profile-card" data-kwargs={{ attributes.profile_kwargs|safe }} data-positioning='{"top": "0px", "left": "100%"}'>
-            {{ attributes.display_name }}
+        <div class="backlog__username" style="color: {{ user_attributes.display_color }};" data-command="get_tooltip" data-name="user-profile-card" data-kwargs={{ user_attributes.profile_kwargs|safe }} data-positioning='{"top": "0px", "left": "100%"}'>
+            {{ user_attributes.display_name }}
         </div>
         <div class="backlog__timestamp">
             {{ backlog.timestamp }}
@@ -48,7 +48,7 @@
                 </div>
             </div>
         {% endif %}
-        {% if user.pk == backlog.message.user.pk %}
+        {% if user == backlog.message.user %}
             <div class="backlog__action" data-command="edit_message">
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">
@@ -57,7 +57,7 @@
                 </div>
             </div>
         {% endif %}
-        {% if user.pk == backlog.message.user.pk or context_member|member_has_perm:'can_manage_backlogs' %}
+        {% if user == backlog.message.user or context_member|member_has_perm:'can_manage_backlogs' %}
             <div class="backlog__action" data-command="delete_backlog">
                 <div class="icon icon--small">
                     <i class="material-symbols-outlined">

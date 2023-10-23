@@ -1,26 +1,26 @@
-<a class="user user--private-chat {% if private_chat == local_private_chat %} user--selected {% endif %}" href="{% url 'private-chat' pk=local_private_chat.pk %}" id="private-chat-{{ local_private_chat.pk }}">
-    <div class="user__avatar">
-        <div class="avatar avatar--small">
-            <img src="" alt="">
-        </div>
-    </div>
-    <div class="user__body">
-        <div class="user__title">
-            {{ other_party.user_archive }}
-        </div>
-        {% if other_party.user_archive.user %}
-            <div class="user__subtitle">
-                {{ other_party.user_archive.status }}
+{% with notifications=private_chat_membership.generate_notifications %}
+    <a class="user user--private-chat {% if private_chat == local_private_chat %} user--selected {% endif %}" href="{% url 'private-chat' pk=local_private_chat.pk %}"
+    id="private-chat-{{ local_private_chat.pk }}"
+    data-notifications="{{ notifications|to_json }}">
+        <div class="user__avatar">
+            <div class="avatar avatar--small">
+                <img src="" alt="">
             </div>
-        {% endif %}
-    </div>
-    {% if user %}
-        {% with unread_backlogs=user|unread_backlogs:local_private_chat.backlog_group  %}
-            {% if unread_backlogs %}
-                <div class="notification notification--private-chat">
-                    {{ unread_backlogs.count }}
+        </div>
+        <div class="user__body">
+            <div class="user__title">
+                {{ other_party.user_archive }}
+            </div>
+            {% if other_party.user_archive.user %}
+                <div class="user__subtitle">
+                    {{ other_party.user_archive.status }}
                 </div>
             {% endif %}
-        {% endwith %}
-    {% endif %}
-</a>
+        </div>
+        <div class="notification notification--private-chat" data-notification-kind="visible">
+            <div data-role="counter" data-count="{{ notifications.initial.unread_backlogs }}">
+                {{ notifications.initial.unread_backlogs }}
+            </div>
+        </div>
+    </a>
+{% endwith %}

@@ -112,14 +112,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def formatted_username_id(self):
         return str(self.username_id).zfill(2)
     
-    def notification_count(self):
-        Backlog = apps.get_model('rooms', 'Backlog')
-        unread_private_chat_backlogs = Backlog.objects.none()
+    def get_group_chat_memberships(self):
+        return self.group_chat_memberships.all().select_related('chat')
+    
+    def generate_notifications(self):
+        notifications_by_id = {'initial': {'unread_backlogs': 0}}
         private_chat_trackers = self.backlog_trackers.filter(backlog_group__kind='private_chat')
-        for unread_backlogs in map(lambda obj: obj.unread_backlogs(), private_chat_trackers):
-            unread_private_chat_backlogs = unread_private_chat_backlogs.union(unread_backlogs)
 
-        return self.received_friendships.pending().count() + unread_private_chat_backlogs.count()
+        for tracker in private_chat_trackers:
+            unread_backlog_count = tracker.get_unread_backlogs().count()
+            notifications_by_id[f'backlog-group-{tracker.backlog_group.pk}-unreads'] = unread_backlog_count
+            notifications_by_id['initial']['unread_backlogs'] += unread_backlog_count
+       
+        for friendship in self.get_friendships().pending():
+            notifications_by_id[f'friendship-{friendship.pk}'] = 1
+            notifications_by_id['initial']['unread_backlogs'] += 1
+
+        return notifications_by_id
 
     def __str__(self):
         return f'{self.username}#{self.formatted_username_id()}'

@@ -214,29 +214,24 @@ function setCounter(element, newCount) {
     counter.dataset.count = newCount;
 }
 
-function addNotification(element, modifier) {
-    let notification = element.querySelector('.notification');
-    if (notification) {
-        increaseCounter(notification);
-    }
-    else {
-        let classList = ['notification'];
-        modifier && classList.push(`notification--${modifier}`);
-        notification = quickCreateElement('div', {
-            classList: classList,
-            parent: element,
-            innerHTML: '<div data-role="counter">1</div>'
-        });
-    };
+function addNotification(element, notification_id, kind) {
+    let notification = element.querySelector(`.notification[data-notification-kind="${kind}"]`);
+    let elementNotifications = JSON.parse(element.dataset.notifications);
+    elementNotifications[notification_id] = elementNotifications[notification_id] ? elementNotifications[notification_id] + 1 : 1;
+    element.setAttribute('data-notifications', JSON.stringify(elementNotifications));
+    increaseCounter(notification);
 }
 
-function removeNotification(element, times, modifier) {
-    let selector = modifier ? `.notification--${modifier}` : '.notification';
-    let notification = element.querySelector(selector);
-    let newCount = decreaseCounter(notification, times);
-    if (newCount == 0) {
-        notification.remove();
+function removeNotification(element, notification_id, kind) {
+    let notification = element.querySelector(`.notification[data-notification-kind="${kind}"]`);
+    let elementNotifications = JSON.parse(element.dataset.notifications);
+    let decreaseBy =  elementNotifications[notification_id]
+    if (!decreaseBy) {
+        return;
     };
+    decreaseCounter(notification, decreaseBy);
+    elementNotifications[notification_id] = 0;
+    element.setAttribute('data-notifications', JSON.stringify(elementNotifications));
 };
 
 function scrollbarAtBottom(element) {

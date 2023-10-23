@@ -45,25 +45,6 @@ def get_shared_private_chat(user1, user2):
     return (PrivateChat.objects.filter(memberships__user=user1) & PrivateChat.objects.filter(memberships__user=user2)).first()
 
 
-@register.filter(name="unread_backlogs")
-def unread_backlogs(user, backlog_group):
-    tracker = BacklogGroupTracker.objects.filter(user=user, backlog_group=backlog_group).first()
-    if not tracker.last_backlog_seen:
-        return backlog_group.backlogs.filter(date_created__gt=tracker.last_updated)
-        
-    return backlog_group.backlogs.filter(date_created__gt=tracker.last_backlog_seen.date_created)
-
-
-@register.filter(name="unread_group_channels")
-def unread_group_chat_backlogs(user, group_chat):
-    count = 0
-    trackers = BacklogGroupTracker.objects.filter(user=user, backlog_group__in=group_chat.channels.values_list('backlog_group', flat=True))
-    for tracker in trackers:
-        count += tracker.unread_backlogs().count()
-
-    return count
-
-
 @register.filter(name="get_member_or_none")
 def get_member_or_none(user, chat):
     return chat.memberships.filter(user=user).first()
@@ -112,3 +93,29 @@ def backlog_mentions(backlog, user):
         return False
     
     return membership.get_roles().intersection(backlog.role_mentions.all())
+
+
+@register.filter('to_json')
+def to_json(value):
+    return json.dumps(value)
+
+
+@register.filter('get_group_channel_notifications')
+def get_group_channel_notifications(user, channel):
+    member = channel.chat.get_member(user)
+    tracker = BacklogGroupTracker.objects.get(user=user, backlog_group=channel.backlog_group)
+    notifications_by_id = {"initial": {'unread_backlogs': 0, 'mentions': 0}}
+
+    unread_backlogs = tracker.get_unread_backlogs()
+
+    unread_backlog_count = unread_backlogs.count()
+    mention_count = unread_backlogs.filter(Q(user_mentions=user) | Q(role_mentions__in=member.roles.all())).count()
+    
+    notifications_by_id[f"backlog-group-{tracker.backlog_group.pk}-unreads"] = unread_backlog_count
+    notifications_by_id[f"backlog-group-{tracker.backlog_group.pk}-mentions"] = mention_count
+    
+    notifications_by_id["initial"]['unread_backlogs'] += unread_backlog_count
+    notifications_by_id["initial"]['mentions'] += mention_count
+
+    print(notifications_by_id)
+    return notifications_by_id

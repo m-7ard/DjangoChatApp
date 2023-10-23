@@ -10,6 +10,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from channels.layers import get_channel_layer
 from django.template.loader import render_to_string
+from django.db.models import Q
 
 from users.models import CustomUser, UserArchive
 from utils import get_object_or_none
@@ -20,8 +21,8 @@ channel_layer = get_channel_layer()
 class Chat(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
-    def get_member(self, pk):
-        return self.memberships.filter(user__pk=pk).first()
+    def get_member(self, user):
+        return self.memberships.filter(user=user).first()
 
     class Meta:
         abstract = True
@@ -97,18 +98,24 @@ class GroupChatMembership(Membership):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='group_chat_memberships')
     nickname = models.CharField(max_length=20, blank=True)
 
-    def save(self, *args, **kwargs):
-        creating = self._state.adding
+    def generate_notifications(self):
+        notifications_by_id = {"initial": {'unread_backlogs': 0, 'mentions': 0}}
+        trackers = BacklogGroupTracker.objects.filter(user=self.user, backlog_group__group_channel__in=self.chat.channels.all())
 
-        if creating:
-            super().save(*args, **kwargs)
-            for channel in self.chat.channels.all():
-                BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
+        for tracker in trackers:
+            unread_backlogs = tracker.get_unread_backlogs()
+
+            unread_backlog_count = unread_backlogs.count()
+            mention_count = unread_backlogs.filter(Q(user_mentions=self.user) | Q(role_mentions__in=self.roles.all())).count()
             
-            self.chat.base_role.members.add(self)
-        else:
-            super().save(*args, **kwargs)
+            notifications_by_id[f"backlog-group-{tracker.backlog_group.pk}-unreads"] = unread_backlog_count
+            notifications_by_id[f"backlog-group-{tracker.backlog_group.pk}-mentions"] = mention_count
+            
+            notifications_by_id["initial"]['unread_backlogs'] += unread_backlog_count
+            notifications_by_id["initial"]['mentions'] += mention_count
 
+        return notifications_by_id
+    
     def roles_by_importance(self):
         return sorted(
             self.roles.all(), 
@@ -127,6 +134,14 @@ class GroupChatMembership(Membership):
             return self.chat.channels.values_list('pk', flat=True)
         
         return self.roles.values_list('can_see_channels', flat=True)
+    
+    def channels_and_categories(self):
+        """
+        
+        TODO: make visible_categories to simplify the group-chat.html logic
+        
+        """
+        pass
 
     def has_perm(self, perm_name):
         roles_by_importance = self.roles_by_importance()
@@ -148,6 +163,19 @@ class GroupChatMembership(Membership):
     
     def joined(self):
         return self.date_created.strftime("%d %B %Y")
+    
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+
+        if creating:
+            super().save(*args, **kwargs)
+            for channel in self.chat.channels.all():
+                BacklogGroupTracker.objects.create(user=self.user, backlog_group=channel.backlog_group)
+            
+            self.chat.base_role.members.add(self)
+        else:
+            super().save(*args, **kwargs)
+
 
     def delete(self, *args, **kwargs):
         channels = self.chat.channels.all()
@@ -166,6 +194,16 @@ class PrivateChatMembership(Membership):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='private_chat_memberships')
     active = models.BooleanField(default=False)
 
+    def generate_notifications(self):
+        notifications_by_id = {"initial": {'unread_backlogs': 0}}
+        tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group__private_chat=self.chat)
+
+        unread_backlog_count = tracker.get_unread_backlogs().count()
+        notifications_by_id[f"backlog-group-{tracker.backlog_group.pk}-unreads"] = unread_backlog_count
+        notifications_by_id["initial"]['unread_backlogs'] += unread_backlog_count
+
+        return notifications_by_id
+    
     def display_color(self):
         return None
     
@@ -287,10 +325,11 @@ class Message(models.Model):
     def get_member(self):
         if not self.user:
             return None
- 
-        return self.chat.get_member(self.user)
+        
+        chat = self.backlog.get_chat()
+        return chat.get_member(self.user)
 
-    def get_attributes(self):
+    def get_user_attributes(self):
         if not self.user:
             return {
                 'display_name': str(self.user_archive),
@@ -418,7 +457,7 @@ class Log(models.Model):
     user1_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
     user1 = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
     user2_archive = models.ForeignKey(UserArchive, on_delete=models.CASCADE, related_name='+', null=True, blank=True)
-    user1 = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    user2 = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
 
     def get_action_type(self):
         return self.ACTION_TYPE[self.action]
@@ -559,14 +598,8 @@ class BacklogGroupTracker(models.Model):
     last_backlog_seen = models.ForeignKey(Backlog, on_delete=models.SET_NULL, related_name='+', null=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-    def unread_backlogs(self):
-        last_backlog_seen = self.last_backlog_seen
-
-        if last_backlog_seen:
-            new_backlogs = self.backlog_group.backlogs.filter(date_created__gt=last_backlog_seen.date_created)
-        else:
-            new_backlogs = self.backlog_group.backlogs.all()
-        
+    def get_unread_backlogs(self):
+        new_backlogs = self.backlog_group.backlogs.filter(date_created__gt=self.last_updated)
         return new_backlogs
 
     def __str__(self):

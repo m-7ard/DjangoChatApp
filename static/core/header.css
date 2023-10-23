@@ -429,7 +429,7 @@
   background-color: #1D1D1C;
   color: #DBD6CC;
 }
-.channel:has(.notification) {
+.channel:has([data-role=counter]:not([data-count="0"])) {
   color: #B91717;
 }
 
@@ -1400,7 +1400,7 @@
   overflow-x: clip;
   font-size: 0.875rem;
 }
-.group-chat:has(.notification) .avatar {
+.group-chat:has(.notification [data-role=counter]:not([data-count="0"])) .avatar {
   box-shadow: 0px 0px 3px 1px #7425B5;
 }
 
@@ -2515,13 +2515,25 @@
   background-color: #D6E019;
   box-shadow: 0px 0px 8px 1px rgba(214, 224, 25, 0.404);
 }
+.notification--private-chat:has([data-role=counter][data-count="0"]) {
+  display: none;
+}
+.notification--dashboard {
+  bottom: -6px;
+  left: -6px;
+}
+.notification--mention {
+  right: 0;
+}
 .notification--dashboard, .notification--mention {
+  box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.4);
   position: absolute;
-  bottom: -0.5rem;
-  left: -0.25rem;
-  border-radius: 2px;
-  border: 2px solid #181818;
+  border-radius: 9999px;
+  border: 0.25rem solid #131313;
   overflow: hidden;
+}
+.notification--dashboard:has([data-role=counter][data-count="0"]), .notification--mention:has([data-role=counter][data-count="0"]) {
+  display: none;
 }
 .notification--dashboard [data-role=counter], .notification--mention [data-role=counter] {
   display: flex;
@@ -2608,6 +2620,12 @@
   border: 1px solid transparent;
   flex-grow: 1;
 }
+.emote-menu__category {
+  padding: 0;
+  gap: 0;
+  display: flex;
+  flex-direction: column;
+}
 .emote-menu__control {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -2661,6 +2679,12 @@
   grid-template-columns: repeat(10, 48px);
   align-content: flex-start;
   justify-items: center;
+}
+.emote-menu__list--filler {
+  height: 0px;
+}
+.emote-menu__body:has(.emote-menu__list:not(.emote-menu__list--filler)) .emote-menu__list--filler {
+  position: absolute;
 }
 .emote-menu__label {
   font-size: 0.8125rem;

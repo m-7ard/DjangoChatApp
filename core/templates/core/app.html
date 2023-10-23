@@ -7,32 +7,34 @@
         <div class="sidebar sidebar--group-chats" data-state="closed" id="group-chats">
             <div class="sidebar__body">
                 <div class="sidebar__section sidebar__section--medium">
-                    <a class="group-chat {% if '/self/' in request.get_full_path %} group-chat--selected {% endif %}" href="{% url 'dashboard' %}" id="dashboard-button">
-                        <div class="group-chat__avatar">
-                            <div class="avatar avatar--medium">
-                                <i class="material-symbols-outlined">
-                                    supervisor_account
-                                </i>
-                            </div>
-                        </div>
-                        <div class="group-chat__body">
-                            <div class="group-chat__title">
-                                Dashboard
-                            </div>
-                        </div>
-                        {% if user.notification_count %}
-                            <div class="notification notification--dashboard">
-                                <div data-role="counter">
-                                    {{ user.notification_count }}
+                    {% with notifications=user.generate_notifications %}
+                        <a class="group-chat {% if '/self/' in request.get_full_path %} group-chat--selected {% endif %}" 
+                        href="{% url 'dashboard' %}" id="dashboard-button"
+                        data-notifications="{{ notifications|to_json }}">
+                            <div class="group-chat__avatar">
+                                <div class="avatar avatar--medium">
+                                    <i class="material-symbols-outlined">
+                                        supervisor_account
+                                    </i>
                                 </div>
                             </div>
-                        {% endif %}
-                    </a>
+                            <div class="group-chat__body">
+                                <div class="group-chat__title">
+                                    Dashboard
+                                </div>
+                            </div>
+                            <div class="notification notification--dashboard" data-notification-kind="visible">
+                                <div data-role="counter" data-count="{{ notifications.initial.unread_backlogs }}">
+                                    {{ notifications.initial.unread_backlogs }}
+                                </div>
+                            </div>
+                        </a>
+                    {% endwith %}
                     <div class="sidebar__divider">
                 
                     </div>
-                    {% for group_chat_membership in user.group_chat_memberships.all %}
-                        {% with local_group_chat=group_chat_membership.chat %}
+                    {% for membership in user.group_chat_memberships.all %}
+                        {% with local_group_chat=membership.chat %}
                             {% include './elements/group-chat.html' %}
                         {% endwith %}
                     {% endfor %}

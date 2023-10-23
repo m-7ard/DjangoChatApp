@@ -273,11 +273,12 @@ class GetInviteView(TemplateView):
             membership = group_chat.memberships.get(user=self.request.user)
             context['context_member'] = membership
             if membership.has_perm('can_create_invites'):
-                context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, user_archive=self.request.user.archive_wrapper)
+                context['invite'] = Invite.objects.create(kind='group_chat', group_chat=group_chat, user=self.request.user)
             elif membership.has_perm('can_get_invites'):
                 context['invite'] = group_chat.invites.filter(expiry_date__gt=datetime.now(timezone.utc)).first()
 
         return context
+    
 
 class InviteCreateView(CreateView):
     form_class = forms.InviteForm

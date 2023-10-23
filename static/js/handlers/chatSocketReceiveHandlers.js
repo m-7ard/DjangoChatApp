@@ -105,23 +105,24 @@ const chatSocketReceiveHandlers = {
         decreaseCounter(friend.closest('.sidebar__section'));
         friend.remove();
     },
-    'create_notification': ({id, modifier}) => {
+    'create_notification': ({id, notification_id, kind}) => {
         let element = document.getElementById(id);
-        addNotification(element, modifier);
+        addNotification(element, notification_id, kind);
     },
-    'remove_notification': ({id, times, modifier}) => {
+    'remove_notification': ({id, notification_id, kind}) => {
         let element = document.getElementById(id);
-        console.log(element)
-        removeNotification(element, times, modifier);
+        removeNotification(element, notification_id, kind);
     },
     'create_private_chat': ({html}) => {
         let privateChats = document.getElementById('private-chats');
         privateChats.appendChild(parseHTML(html));
     },
-    'remove_all_notifications': ({id, modifier}) => {
+    'remove_all_notifications': ({id}) => {
         let element = document.getElementById(id);
-        let selector = modifier ? `.notification--${modifier}` : '.notification';
-        element.querySelectorAll(selector).forEach((element) => element.remove());
+        let notifications = element.querySelector('.notification');
+        notifications.forEach((notification) => {
+            setCounter(notification, 0);
+        });
     },
     'mark_as_read': ({}) => {
         let unreadBacklogsDivider = document.getElementById('unread-backlogs-divider');

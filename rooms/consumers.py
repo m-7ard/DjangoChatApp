@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 import asyncio
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -98,7 +98,7 @@ class AppConsumer(AsyncWebsocketConsumer):
 
     async def create_new_backlog_notification(self, event):
         @database_sync_to_async
-        def allow_notification(sender: int, target_backlog_group: int, backlog: int, **kwargs):
+        def allow_notification(sender: int, target_backlog_group: int, backlog_iso_date: str, **kwargs):
             # backlog was sent by the same user
             is_sender = (sender == self.user.pk)
             if is_sender:
@@ -106,9 +106,9 @@ class AppConsumer(AsyncWebsocketConsumer):
             
             # the user already saw the message
             target_backlog_group_tracker = BacklogGroupTracker.objects.get(user=self.user, backlog_group=target_backlog_group)
-            last_backlog = target_backlog_group_tracker.last_backlog_seen
-            last_backlog_pk = last_backlog.pk if last_backlog else None
-            already_seen_backlog = last_backlog_pk and (last_backlog_pk >= backlog)
+            last_updated = target_backlog_group_tracker.last_updated
+            backlog_date = datetime.fromisoformat(backlog_iso_date)
+            already_seen_backlog = (last_updated >= backlog_date)
             if already_seen_backlog:
                 return False, 'already saw backlog'
 
@@ -118,6 +118,7 @@ class AppConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(2)
             # print reason for debug purposes
             send_notification, reason = await allow_notification(**event)
+            print(send_notification, reason)
             if not send_notification:
                 return
             
@@ -126,48 +127,76 @@ class AppConsumer(AsyncWebsocketConsumer):
                 for send in channels_sends:
                     await send
             elif notification_type == 'group_chat_notification':
-                channels_sends = await self.create_group_chat_notification(group_chat=kwargs['group_chat'], group_channel=kwargs['group_channel'])
+                channels_sends = await self.create_group_chat_notification(
+                    backlog_group=target_backlog_group, 
+                    group_chat=kwargs['group_chat'], 
+                    group_channel=kwargs['group_channel'],
+                    user_mentions=kwargs['user_mentions'],
+                    role_mentions=kwargs['role_mentions'],
+                )
                 for send in channels_sends:
                     await send
 
         self.loop.create_task(delegate_notification_creation(**event))
         
     @sync_to_async
-    def create_private_chat_notification(self, backlog_group, private_chat):
-        receiver = PrivateChatMembership.objects.get(chat__pk=private_chat, user=self.user)
-        # The private chat will now appear on the clients /self/... left side sidebar
+    def create_private_chat_notification(self, private_chat, backlog_group):
         channels_sends = []
         
         if 'self' in self.extra_path:
             channels_sends.append(self.send_to_client({
                 'action': 'create_notification',
                 'id': f'private-chat-{private_chat}',
-                'modifier': 'private-chat'
+                'notification_id': f'backlog-group-{backlog_group}-unreads',
+                'kind': 'visible',
             }))
 
         channels_sends.append(self.send_to_client({
             'action': 'create_notification',
             'id': f'dashboard-button',
-            'modifier': 'dashboard'
+            'notification_id': f'backlog-group-{backlog_group}-unreads',
+            'kind': 'visible',
         }))
 
         return channels_sends
     
     @sync_to_async
-    def create_group_chat_notification(self, group_chat, group_channel):
+    def create_group_chat_notification(self, role_mentions, user_mentions, backlog_group, group_chat, group_channel):
         channels_sends = []
+        membership = self.user.group_chat_memberships.get(chat__pk=group_chat)
+        role_mentioned = any([role.pk in role_mentions for role in membership.roles.all()])
+        user_mentioned = self.user.pk in user_mentions
 
+        mentioned = role_mentioned or user_mentioned
+
+        # if the user is inside a group chat on the frontend
         if hasattr(self, 'group_chat'):
             channels_sends.append(self.send_to_client({
                 'action': 'create_notification',
                 'id': f'group-channel-{group_channel}',
-                'modifier': 'hidden'
+                'notification_id': f'backlog-group-{backlog_group}-unreads',
+                'kind': 'hidden',
+            }))
+
+            mentioned and channels_sends.append(self.send_to_client({
+                'action': 'create_notification',
+                'id': f'group-channel-{group_channel}',
+                'notification_id': f'backlog-group-{backlog_group}-mentions',
+                'kind': 'visible',
             }))
 
         channels_sends.append(self.send_to_client({
             'action': 'create_notification',
             'id': f'group-chat-{group_chat}',
-            'modifier': 'hidden'
+            'notification_id': f'backlog-group-{backlog_group}-unreads',
+            'kind': 'hidden',
+        }))
+
+        mentioned and channels_sends.append(self.send_to_client({
+            'action': 'create_notification',
+            'id': f'group-chat-{group_chat}',
+            'notification_id': f'backlog-group-{backlog_group}-mentions',
+            'kind': 'visible',
         }))
 
         return channels_sends
@@ -311,17 +340,8 @@ class AppConsumer(AsyncWebsocketConsumer):
 class BacklogGroupUtils():
     @sync_to_async
     def mark_as_read(self):
-        new_backlogs = self.tracker.unread_backlogs()
-        new_backlogs_count = new_backlogs.count()
-
-        if new_backlogs_count:
-            self.tracker.last_backlog_seen = self.backlog_group.backlogs.last()
-            self.tracker.save()
-            # messages of the very same user do not (and should not)
-            # produce notifications
-            return new_backlogs.exclude(message__user=self.user).count()
-
-        return 0
+        self.tracker.last_backlog_seen = self.backlog_group.backlogs.last()
+        self.tracker.save()
     
     @sync_to_async
     def is_mentioned(self, pk):
@@ -381,8 +401,11 @@ class BacklogGroupUtils():
         
         backlog = Backlog.objects.create(kind='message', group=self.backlog_group)
         message = Message.objects.create(user=self.user, content=content, backlog=backlog, attachment=file)
-        
-        return backlog
+
+        return (backlog, {
+            'role_mentions': list(*backlog.role_mentions.values_list('pk')),
+            'user_mentions': list(*backlog.user_mentions.values_list('pk')),
+        })
     
     @sync_to_async
     def render_backlog(self, pk):
@@ -638,7 +661,7 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         if not content and not file:
             return
 
-        backlog = await super().create_message(content=content, file=file)
+        backlog, mentions = await super().create_message(content=content, file=file)
 
         await self.channel_layer.group_send(
             f'group_channel_{self.group_channel.pk}', {
@@ -652,34 +675,36 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         await self.channel_layer.group_send(
             f'backlog_group_{self.backlog_group.pk}', {
                 'type': 'create_new_backlog_notification',
-                'backlog': backlog.pk,
+                'backlog_iso_date': backlog.date_created.isoformat(),
                 'target_backlog_group': self.backlog_group.pk,
                 'sender': self.user.pk,
                 'notification_type': 'group_chat_notification',
                 'group_channel': self.group_channel.pk,
                 'group_chat': self.group_chat.pk,
+                **mentions,
             }
         )
 
     async def mark_as_read(self, **kwargs):
-        reduce_notifications_by = await super().mark_as_read()
-        if not reduce_notifications_by:
-            return
-        
+        await super().mark_as_read()
+
         await self.channel_layer.group_send(
             f'user_{self.user.pk}', {
                 'type': 'send_to_client',
                 'action': 'remove_notification',
-                'modifier': 'hidden',
-                'times': reduce_notifications_by,
-                'id': f'group-chat-{self.group_chat.pk}'
+                'id': f'group-chat-{self.group_chat.pk}',
+                'notification_id': f'backlog-group-{self.backlog_group.pk}-unreads',
+                'kind': 'hidden',
             }
         )
-        
+
         await self.channel_layer.group_send(
-            f'group_channel_{self.group_channel.pk}_user_{self.user.pk}', {
+            f'user_{self.user.pk}', {
                 'type': 'send_to_client',
-                'action': 'mark_as_read',
+                'action': 'remove_notification',
+                'id': f'group-chat-{self.group_chat.pk}',
+                'notification_id': f'backlog-group-{self.backlog_group.pk}-mentions',
+                'kind': 'visible',
             }
         )
 
@@ -688,6 +713,13 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
                 'type': 'send_to_client',
                 'action': 'remove_all_notifications',
                 'id': f'group-channel-{self.group_channel.pk}'
+            }
+        )
+
+        await self.channel_layer.group_send(
+            f'group_channel_{self.group_channel.pk}_user_{self.user.pk}', {
+                'type': 'send_to_client',
+                'action': 'mark_as_read',
             }
         )
 
@@ -775,15 +807,15 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
         return self.private_chat
     
     async def mark_as_read(self, **kwargs):
-        reduce_notifications_by = await super().mark_as_read()
-        if not reduce_notifications_by:
-            return
-        
+        await super().mark_as_read()
+
         await self.channel_layer.group_send(
             f'user_{self.user.pk}_self', {
                 'type': 'send_to_client',
-                'action': 'remove_all_notifications',
-                'id': f'private-chat-{self.private_chat.pk}'
+                'action': 'remove_notification',
+                'id': f'private-chat-{self.private_chat.pk}',
+                'notification_id': f'backlog-group-{self.backlog_group}',
+                'kind': 'hidden',
             }
         )
 
@@ -793,13 +825,14 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
                 'action': 'mark_as_read',
             }
         )
-        
+
         await self.channel_layer.group_send(
             f'user_{self.user.pk}', {
                 'type': 'send_to_client',
                 'action': 'remove_notification',
-                'times': reduce_notifications_by,
-                'id': f'dashboard-button'
+                'id': f'dashboard-button',
+                'notification_id': f'backlog-group-{self.backlog_group.pk}-unreads',
+                'kind': 'visible',
             }
         )
 
@@ -835,7 +868,7 @@ class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):
             await self.channel_layer.group_send(
                 f'user_{user.pk}', {
                     'type': 'create_new_backlog_notification',
-                    'backlog': backlog.pk,
+                    'backlog_iso_date': backlog.date_created.isoformat(),
                     'target_backlog_group': self.backlog_group.pk,
                     'sender': self.user.pk,
                     'notification_type': 'private_chat_notification',
