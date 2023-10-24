@@ -17,7 +17,7 @@
             </div>
         </div>
         <div class="item-manager__item-actions">
-            {% if role != group_chat.base_role %}
+            {% if role != role.chat.base_role %}
                 <div class="item-manager__button item-manager__button--manage" data-command="get_overlay" data-name="manage-role-members" data-kwargs='{"pk": {{ role.pk }}}'>
                     Manage Members
                 </div>
@@ -25,7 +25,7 @@
             <div class="item-manager__button item-manager__button--edit" data-command="get_overlay" data-name="edit-role" data-kwargs='{"pk": {{ role.pk }}}'>
                 Edit Role
             </div>
-            {% if role != group_chat.base_role %}
+            {% if role != role.group_chat.base_role %}
                 <form action="{% url 'delete-role' pk=role.pk %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <button class="item-manager__button item-manager__button--delete">

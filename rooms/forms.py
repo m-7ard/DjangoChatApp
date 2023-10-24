@@ -122,14 +122,14 @@ class RoleCreateForm(forms.ModelForm):
     can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
     can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
-
+    can_see_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [
             "name",
             "color",
-            "can_see_channels",
-            "can_use_channels",
+
             "can_create_messages",
             "can_manage_messages",
             "can_react",
@@ -142,7 +142,12 @@ class RoleCreateForm(forms.ModelForm):
             "can_get_invites",
             "can_manage_invites",
             "can_manage_emotes",
-            "can_manage_roles"
+            "can_manage_roles",
+
+            "can_see_channels",
+            "can_use_channels",
+            "can_see_categories",
+            "can_use_categories",
         ]
         model = Role
 
@@ -165,13 +170,14 @@ class RoleUpdateForm(forms.ModelForm):
     can_manage_roles = forms.IntegerField(widget=widgets.FormTriStateSwitch(), initial=0)
     can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
     can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_see_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [
             "name",
             "color",
-            "can_see_channels",
-            "can_use_channels",
+
             "can_create_messages",
             "can_manage_messages",
             "can_react",
@@ -184,7 +190,12 @@ class RoleUpdateForm(forms.ModelForm):
             "can_get_invites",
             "can_manage_invites",
             "can_manage_emotes",
-            "can_manage_roles"
+            "can_manage_roles",
+
+            "can_see_channels",
+            "can_use_channels",
+            "can_see_categories",
+            "can_use_categories",
         ]
         model = Role
 
@@ -216,12 +227,13 @@ class BaseRoleUpdateForm(forms.ModelForm):
     can_manage_roles = forms.ChoiceField(widget=widgets.FormBiStateSwitch(), choices=((1, True), (-1, False)))
     can_see_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
     can_use_channels = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_see_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
+    can_use_categories = forms.ModelMultipleChoiceField(widget=widgets.FormPillMutliselect(), queryset=None, required=False)
 
     class Meta:
         fields = [
             "color",
-            "can_see_channels",
-            "can_use_channels",
+
             "can_create_messages",
             "can_manage_messages",
             "can_react",
@@ -234,7 +246,12 @@ class BaseRoleUpdateForm(forms.ModelForm):
             "can_get_invites",
             "can_manage_invites",
             "can_manage_emotes",
-            "can_manage_roles"
+            "can_manage_roles",
+
+            "can_see_channels",
+            "can_use_channels",
+            "can_see_categories",
+            "can_use_categories",
         ]
         model = Role
 

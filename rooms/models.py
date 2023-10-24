@@ -128,20 +128,21 @@ class GroupChatMembership(Membership):
     
     def is_owner(self):
         return self.user == self.chat.owner
-
-    def visible_channels(self):
-        if self.is_owner():
-            return self.chat.channels.values_list('pk', flat=True)
-        
-        return self.roles.values_list('can_see_channels', flat=True)
     
-    def channels_and_categories(self):
-        """
-        
-        TODO: make visible_categories to simplify the group-chat.html logic
-        
-        """
-        pass
+    def is_admin(self):
+        return any(self.roles.values_list('admin', flat=True))
+
+    def get_visible_channel_pks(self):
+        if self.is_owner() or self.is_admin():
+            return self.chat.channels.values_list('pk', flat=True)
+
+        return self.roles.values_list('can_see_channels', flat=True)
+
+    def get_visible_category_pks(self):
+        if self.is_owner() or self.is_admin():
+            return self.chat.categories.values_list('pk', flat=True)
+
+        return self.roles.values_list('can_see_categories', flat=True)
 
     def has_perm(self, perm_name):
         roles_by_importance = self.roles_by_importance()
@@ -497,8 +498,8 @@ class Role(models.Model):
     ])
     can_see_channels = models.ManyToManyField(GroupChannel, related_name='can_see_channel')
     can_use_channels = models.ManyToManyField(GroupChannel, related_name='can_use_channel')
-    # can_see_category ...
-    # can_use_category ...
+    can_see_categories = models.ManyToManyField(Category, related_name='can_see_category') 
+    can_use_categories = models.ManyToManyField(Category, related_name='can_use_category') 
     can_create_messages = models.IntegerField(default=1, choices=CHOICES)
     can_manage_messages = models.IntegerField(default=-1, choices=CHOICES)
     can_react = models.IntegerField(default=1, choices=CHOICES)

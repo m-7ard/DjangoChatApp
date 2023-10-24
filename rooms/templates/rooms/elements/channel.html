@@ -1,27 +1,29 @@
-{% with notifications=user|get_group_channel_notifications:channel %}
-    <a class="channel {% if channel == group_channel %} channel--selected {% endif %}"
-    href="{% url 'group-channel' group_chat_pk=channel.chat.pk group_channel_pk=channel.pk %}" 
-    id="group-channel-{{ channel.pk }}" data-role="channel"
-    data-notifications="{{ notifications|to_json }}">
-        <div class="app__icon">
-            <div class="icon icon--small">
-                <i class="material-symbols-outlined">
-                    tag
-                </i>
+{% if channel.pk in visible_channel_pks or created %}
+    {% with notifications=user|get_group_channel_notifications:channel %}
+        <a class="channel {% if channel == group_channel %} channel--selected {% endif %}"
+        href="{% url 'group-channel' group_chat_pk=channel.chat.pk group_channel_pk=channel.pk %}" 
+        id="group-channel-{{ channel.pk }}" data-role="channel"
+        data-notifications="{{ notifications|to_json }}">
+            <div class="app__icon">
+                <div class="icon icon--small">
+                    <i class="material-symbols-outlined">
+                        tag
+                    </i>
+                </div>
             </div>
-        </div>
-        <div class="channel__title">
-            {{ channel.name }}
-        </div>
-        <div class="notification notification--hidden" data-notification-kind="hidden">
-            <div data-role="counter" data-count="{{ notifications.initial.unread_backlogs }}">
-                {{ notifications.initial.unread_backlogs }}
+            <div class="channel__title">
+                {{ channel.name }}
             </div>
-        </div>
-        <div class="notification notification--mention" data-notification-kind="visible">
-            <div data-role="counter" data-count="{{ notifications.initial.mentions }}">
-                {{ notifications.initial.mentions }}
+            <div class="notification notification--hidden" data-notification-kind="hidden">
+                <div data-role="counter" data-count="{{ notifications.initial.unread_backlogs }}">
+                    {{ notifications.initial.unread_backlogs }}
+                </div>
             </div>
-        </div>
-    </a>
-{% endwith %}
+            <div class="notification notification--mention" data-notification-kind="visible">
+                <div data-role="counter" data-count="{{ notifications.initial.mentions }}">
+                    {{ notifications.initial.mentions }}
+                </div>
+            </div>
+        </a>
+    {% endwith %}
+{% endif %}

@@ -133,17 +133,19 @@
 
 {% block app-sidebar-body %}
     <div class="sidebar__section sidebar__section--channels" id="group-channels">
-        {% for item in group_chat.channels_and_categories %}
-            {% if item|classname == 'GroupChannel' %}
-                {% with channel=item %}
-                    {% include "./elements/channel.html" %}
-                {% endwith %}
-            {% elif item|classname == 'Category' %}
-                {% with category=item %}
-                    {% include "./elements/category.html" %}
-                {% endwith %}
-            {% endif %}
-        {% endfor %}
+        {% with visible_channel_pks=context_member.get_visible_channel_pks visible_category_pks=context_member.get_visible_category_pks %}
+            {% for item in group_chat.channels_and_categories %}
+                {% if item|classname == 'GroupChannel' %}
+                    {% with channel=item %}
+                        {% include "./elements/channel.html" %}
+                    {% endwith %}
+                {% elif item|classname == 'Category' %}
+                    {% with category=item %}
+                        {% include "./elements/category.html" %}
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
     </div>
 {% endblock %}
 

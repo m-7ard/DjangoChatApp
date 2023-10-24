@@ -90,7 +90,6 @@ class GroupChatDetailView(DetailView):
         context['memberships'] = memberships
         user_membership = memberships.get(user=self.request.user)
         context['context_member'] = user_membership
-        context['visible_channels'] = user_membership.visible_channels()
         return context
 
 
@@ -111,7 +110,7 @@ class GroupChannelCreateView(CreateView):
         return self.render_to_response(context)
 
     def form_invalid(self, form):
-        return  JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
+        return JsonResponse({'status': 400, 'errors': form.errors.get_json_data()})
 
     def form_valid(self, form):
         channel = form.save(commit=False)
@@ -120,10 +119,14 @@ class GroupChannelCreateView(CreateView):
         channel.category = Category.objects.filter(pk=self.kwargs.get('category_pk')).first()
         channel.save()
 
+        for role in group_chat.roles.all():
+            role.can_see_channels.add(channel)
+            role.can_use_channels.add(channel)
+
         async_to_sync(channel_layer.group_send)(f'group_chat_{group_chat.pk}', {
             'type': 'send_to_client',
             'action': 'create_group_channel',
-            'html': render_to_string(request=self.request, template_name='rooms/elements/channel.html', context={'channel': channel}),
+            'html': render_to_string(request=self.request, template_name='rooms/elements/channel.html', context={'channel': channel, 'created': True}),
             'category': getattr(channel, 'category', None) and channel.category.pk,
         })
 
@@ -143,7 +146,6 @@ class GroupChannelDetailView(DetailView):
         context['memberships'] = memberships
         user_membership = memberships.get(user=self.request.user)
         context['context_member'] = user_membership
-        context['visible_channels'] = user_membership.visible_channels()
         return context
 
 
@@ -171,10 +173,16 @@ class CategoryCreateView(CreateView):
         category.chat = group_chat
         category.save()
 
+        for role in group_chat.roles.all():
+            role.can_see_categories.add(category)
+            role.can_use_categories.add(category)
+
         async_to_sync(channel_layer.group_send)(f'group_chat_{group_chat.pk}', {
-            'type': 'send_to_client',
-            'action': 'create_group_category',
-            'html': render_to_string(request=self.request, template_name='rooms/elements/category.html', context={'category': category}),
+            'type': 'send_category_to_client',
+            'category': {
+                'name': category.name,
+                'pk': category.pk,
+            },
         })
 
         return JsonResponse({'status': 400, 'redirect': self.request.META.get('HTTP_REFERER')})
@@ -575,6 +583,14 @@ class RoleCreateView(CreateView):
         form.fields['can_use_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
         form.fields['can_use_channels'].widget.attrs['initial'] = group_chat.channels.values_list('pk', flat=True)
         
+        form.fields['can_see_categories'].queryset = group_chat.categories.all()
+        form.fields['can_see_categories'].widget.attrs['choices'] = ((category.pk, category.name) for category in group_chat.categories.all())
+        form.fields['can_see_categories'].widget.attrs['initial'] = self.object.can_see_categories.values_list('pk', flat=True)
+
+        form.fields['can_use_categories'].queryset = group_chat.categories.all()
+        form.fields['can_use_categories'].widget.attrs['choices'] = ((category.pk, category.name) for category in group_chat.categories.all())
+        form.fields['can_use_categories'].widget.attrs['initial'] = self.object.can_use_categories.values_list('pk', flat=True)
+
         return form
 
     def get_context_data(self, **kwargs):
@@ -630,6 +646,14 @@ class RoleUpdateView(UpdateView):
         form.fields['can_use_channels'].widget.attrs['choices'] = ((channel.pk, channel.name) for channel in group_chat.channels.all())
         form.fields['can_use_channels'].widget.attrs['initial'] = self.object.can_use_channels.values_list('pk', flat=True)
         
+        form.fields['can_see_categories'].queryset = group_chat.categories.all()
+        form.fields['can_see_categories'].widget.attrs['choices'] = ((category.pk, category.name) for category in group_chat.categories.all())
+        form.fields['can_see_categories'].widget.attrs['initial'] = self.object.can_see_categories.values_list('pk', flat=True)
+
+        form.fields['can_use_categories'].queryset = group_chat.categories.all()
+        form.fields['can_use_categories'].widget.attrs['choices'] = ((category.pk, category.name) for category in group_chat.categories.all())
+        form.fields['can_use_categories'].widget.attrs['initial'] = self.object.can_use_categories.values_list('pk', flat=True)
+
         return form
 
     def get_context_data(self, **kwargs):

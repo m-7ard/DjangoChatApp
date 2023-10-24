@@ -24,7 +24,7 @@ from .models import (
     Invite,
     GroupChatMembership,
     Log,
-
+    Category
 )
 from users.models import Friend
 from utils import get_object_or_none, base64_file
@@ -634,6 +634,7 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         group_chat_pk = self.scope["url_route"]['kwargs'].get('group_chat_pk')
         group_channel_pk = self.scope["url_route"]['kwargs'].get('group_channel_pk')
         self.group_chat = await db_async(lambda: GroupChat.objects.get(pk=group_chat_pk))
+        self.membership = await db_async(lambda: self.group_chat.get_member(self.user))
         await self.channel_layer.group_add(f'group_chat_{self.group_chat.pk}', self.channel_name)
         await self.channel_layer.group_add(f'group_chat_{self.group_chat.pk}_user_{self.user.pk}', self.channel_name)
 
@@ -791,6 +792,16 @@ class GroupChatConsumer(AppConsumer, BacklogGroupUtils):
         
         for send in await leave_group_chat():
             await send
+
+    async def send_category_to_client(self, event):
+        await self.send(json.dumps({
+            'action': 'create_group_category',
+            'html': await sync_to_async(render_to_string)(template_name='rooms/elements/category.html', context={
+                'category': event['category'], 
+                'created': True,
+                'context_member': self.membership
+            }),
+        }))
 
 
 class PrivateChatConsumer(AppConsumer, BacklogGroupUtils):

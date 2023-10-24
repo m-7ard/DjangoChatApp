@@ -1,32 +1,34 @@
-<div class="dropdown sidebar__section sidebar__section--category" data-role="category">
-    <div class="sidebar__lead-in">
-        <div class="sidebar__label sidebar__label--hoverable dropdown__trigger">
-            <div class="app__icon dropdown__marker">
-                <div class="icon icon--tiny">
-                    <i class="material-symbols-outlined">
-                        arrow_right
-                    </i>
+{% if category.pk in visible_category_pks or created %}
+    <div class="dropdown sidebar__section sidebar__section--category" data-role="category">
+        <div class="sidebar__lead-in">
+            <div class="sidebar__label sidebar__label--hoverable dropdown__trigger">
+                <div class="app__icon dropdown__marker">
+                    <div class="icon icon--tiny">
+                        <i class="material-symbols-outlined">
+                            arrow_right
+                        </i>
+                    </div>
+                </div>
+                <div>
+                    {{ category.name }}
                 </div>
             </div>
-            <div>
-                {{ category.name }}
-            </div>
-        </div>
-        {% if context_member|member_has_perm:'can_manage_channels' %}
-            <div class="app__icon app__icon--hoverable" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "category_pk": {{ category.pk }}}'>
-                <div class="icon icon--tiny icon--hoverable">
-                    <i class="material-symbols-outlined">
-                        add
-                    </i>
+            {% if context_member|member_has_perm:'can_manage_channels' %}
+                <div class="app__icon app__icon--hoverable" data-command="get_overlay" data-name="create-group-channel" data-kwargs='{"group_chat_pk": {{ group_chat.pk }}, "category_pk": {{ category.pk }}}'>
+                    <div class="icon icon--tiny icon--hoverable">
+                        <i class="material-symbols-outlined">
+                            add
+                        </i>
+                    </div>
                 </div>
+            {% endif %}
+        </div>
+        <div class="dropdown__content dropdown__content--open dropdown__content--static">
+            <div class="sidebar__section sidebar__section--channels" id="category-{{ category.pk }}">
+                {% for channel in category.channels.all %}
+                    {% include "./channel.html" %}
+                {% endfor %}
             </div>
-        {% endif %}
-    </div>
-    <div class="dropdown__content dropdown__content--open dropdown__content--static">
-        <div class="sidebar__section sidebar__section--channels" id="category-{{ category.pk }}">
-            {% for channel in category.channels.all %}
-                {% include "./channel.html" %}
-            {% endfor %}
         </div>
     </div>
-</div>
+{% endif %}

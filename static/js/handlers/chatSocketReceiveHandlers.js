@@ -9,8 +9,9 @@ const chatSocketReceiveHandlers = {
     },
     'create_group_channel': ({html, category}) => {
         let channel = parseHTML(html);
-        if (category) {
-            let categorySection = document.getElementById(`category-${category}`);
+        let categorySection = document.getElementById(`category-${category}`);
+
+        if (categorySection) {
             categorySection.append(channel);
         }
         else {
